@@ -1,0 +1,28 @@
+#hp-four88 .hp-settings { width:min(550px,100%); }
+#hp-four88 .hp-settings-title { z-index:8; border-bottom:1px solid #e5dce7; }
+#hp-four88 .hp-fx-panel { margin:10px 0 16px; }
+#hp-four88 .hp-fx-panel h2 { font-size:18px; margin:14px 0 12px; font-weight:600; }
+#hp-four88 .hp-fx-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+#hp-four88 .hp-fx-count { color:#725638; font-size:14px; white-space:nowrap; }
+#hp-four88 .hp-fx-preset-label { display:block; font-size:14px; }
+#hp-four88 .hp-fx-presets { display:flex; gap:6px; flex-wrap:wrap; margin:12px 0; }
+#hp-four88 .hp-fx-group { border-top:1px solid #ddd0df; margin-top:10px; }
+#hp-four88 .hp-fx-group > summary { font-weight:600; font-size:16px; min-height:48px; }
+#hp-four88 .hp-fx-card { border:1px solid #d7cbd9; border-radius:14px; padding:12px; margin:0 0 10px; background:#f7f2f8; }
+#hp-four88 .hp-fx-card[data-on="true"] { border-color:#b18a4d; background:#fffaeb; box-shadow:inset 3px 0 #d0a95a; }
+#hp-four88 .hp-fx-card-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+#hp-four88 .hp-fx-card h3 { font-size:16px; font-weight:600; margin:0; }
+#hp-four88 .hp-fx-card .hp-setting-help { margin:6px 0; line-height:1.6; }
+#hp-four88 .hp-fx-toggle { flex:none; width:66px; min-height:44px; border-radius:24px; border:1px solid #9b8ea1; color:#645769; background:#fff; font-weight:600; font-size:14px; }
+#hp-four88 .hp-fx-toggle[aria-checked="true"] { background:#795d30; border-color:#795d30; color:#fff; box-shadow:0 0 0 3px #ebd7a555; }
+#hp-four88 .hp-fx-details > summary { padding:9px 0; font-size:14px; color:#68566f; }
+#hp-four88 .hp-fx-parameter { display:block; padding-top:7px; font-size:14px; }
+#hp-four88 .hp-fx-parameter .hp-setting-heading { align-items:flex-start; font-weight:400; }
+#hp-four88 .hp-fx-parameter output { color:#725329; white-space:nowrap; font-variant-numeric:tabular-nums; }
+#hp-four88 .hp-fx-parameter input { accent-color:#947037; }
+#hp-four88 .hp-fx-parameter select { font-size:14px; }
+#hp-four88 .hp-fx-chain { margin:12px 0; padding:0 10px; border-radius:10px; background:#eee7f0; font-size:14px; }
+#hp-four88 .hp-fx-chain p { margin:0; padding-bottom:12px; line-height:1.7; }
+#hp-four88 .hp-fx-audition { position:sticky; bottom:8px; z-index:6; background:#685474; border-color:#685474; color:#fff; box-shadow:0 3px 12px #30243c44; }
+#hp-four88 .hp-fx-status { font-size:14px; line-height:1.6; color:#6c5c74; margin:8px 0 14px; }
+#hp-four88 :is(button,select,summary,input):focus-visible { outline:3px solid #976831; outline-offset:3px; }

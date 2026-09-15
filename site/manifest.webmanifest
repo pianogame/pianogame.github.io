@@ -1,0 +1,30 @@
+{
+  "name": "Piano Palette",
+  "short_name": "Piano Palette",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#665670",
+  "background_color": "#eee5ed",
+  "id": "/",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/icons/piano-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/piano-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

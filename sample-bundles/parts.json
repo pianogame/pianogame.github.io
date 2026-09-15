@@ -1,0 +1,198 @@
+[
+  {
+    "name": "bass.zip",
+    "size": 4272987,
+    "sha256": "22f1fd6f164356f65f22728b2df438e8b4f18bb2eb76205a99bcb9bb5327f50b",
+    "parts": [
+      {
+        "name": "bass.zip.part000",
+        "size": 393216,
+        "sha": "685f0b764cd3b1b83137aa340809ac127fb2aaf2"
+      },
+      {
+        "name": "bass.zip.part001",
+        "size": 393216,
+        "sha": "af0526c6481e9618cddb45c001340d15e69f63b4"
+      },
+      {
+        "name": "bass.zip.part002",
+        "size": 393216,
+        "sha": "09ac327dd0b34a81f45aeb2e180fd7dd50fa38c7"
+      },
+      {
+        "name": "bass.zip.part003",
+        "size": 393216,
+        "sha": "a8b6731a16ed2b0852361a7ad5804457ba7c543f"
+      },
+      {
+        "name": "bass.zip.part004",
+        "size": 393216,
+        "sha": "e47928ef45e36dea622b9c8f4a11074ba75c4e56"
+      },
+      {
+        "name": "bass.zip.part005",
+        "size": 393216,
+        "sha": "8a84b2b7c915dbd126375d66a8d9add19f79d3c7"
+      },
+      {
+        "name": "bass.zip.part006",
+        "size": 393216,
+        "sha": "b40e3c2d94b3dda8701736af63f08815e95ee039"
+      },
+      {
+        "name": "bass.zip.part007",
+        "size": 393216,
+        "sha": "c29d4f5ea3068e06fbddf4ec2865ef9a1cb50cc1"
+      },
+      {
+        "name": "bass.zip.part008",
+        "size": 393216,
+        "sha": "24eb9e1345e71a3c1eec0438f137ee631c6eda9b"
+      },
+      {
+        "name": "bass.zip.part009",
+        "size": 393216,
+        "sha": "7e7f7901c90825c1696fe1e89eff68cc4ba0ebcb"
+      },
+      {
+        "name": "bass.zip.part010",
+        "size": 340827,
+        "sha": "1e67d8ee602a9b7732adc5c60580b8f4a38556a3"
+      }
+    ]
+  },
+  {
+    "name": "guitar.zip",
+    "size": 2944716,
+    "sha256": "b978c06475f4ec0af252fa86f8c2365d08a2cea08b84f01a0a7370bce1a43766",
+    "parts": [
+      {
+        "name": "guitar.zip.part000",
+        "size": 393216,
+        "sha": "e510c714df9f4906ecc4e588d13f6c63bfed8668"
+      },
+      {
+        "name": "guitar.zip.part001",
+        "size": 393216,
+        "sha": "93e430fbfe6524b33af870a3bb652bfd241c1240"
+      },
+      {
+        "name": "guitar.zip.part002",
+        "size": 393216,
+        "sha": "5557d7c73c4cbbc5bcf72ae9e61a16f7ffbbf063"
+      },
+      {
+        "name": "guitar.zip.part003",
+        "size": 393216,
+        "sha": "3224577a83f42f684da5cb348b82e4c28a20b582"
+      },
+      {
+        "name": "guitar.zip.part004",
+        "size": 393216,
+        "sha": "32701fcd0bce220c0db3895aaa273bfea27ccac3"
+      },
+      {
+        "name": "guitar.zip.part005",
+        "size": 393216,
+        "sha": "5d4dc068cfb632611ee9df916201fbe8d0e118b1"
+      },
+      {
+        "name": "guitar.zip.part006",
+        "size": 393216,
+        "sha": "a88d28480b2c606a7f18e1c0481ed5d63d7fbb7e"
+      },
+      {
+        "name": "guitar.zip.part007",
+        "size": 192204,
+        "sha": "0f04b7bc4ea75565bc0830e60a1185bb54a21761"
+      }
+    ]
+  },
+  {
+    "name": "piano.zip",
+    "size": 6198924,
+    "sha256": "8d7d2ef7c318fe53ae87a9e1c9d175b6331b8ee2c55c933939e031683ee75580",
+    "parts": [
+      {
+        "name": "piano.zip.part000",
+        "size": 393216,
+        "sha": "a2806101ebf1e80ee4fed452e10a2a75e1735121"
+      },
+      {
+        "name": "piano.zip.part001",
+        "size": 393216,
+        "sha": "6e4cd4bf8eabfb21192c397531174cc93bc227d0"
+      },
+      {
+        "name": "piano.zip.part002",
+        "size": 393216,
+        "sha": "ebda725ced404bf608ce9857472c99a07a44c1ab"
+      },
+      {
+        "name": "piano.zip.part003",
+        "size": 393216,
+        "sha": "c8be035a49cbebb1ef2d42ebe93cf5b6fcf7d7f5"
+      },
+      {
+        "name": "piano.zip.part004",
+        "size": 393216,
+        "sha": "0db24871bab5de9a98cfa52510f3e8c6366da71d"
+      },
+      {
+        "name": "piano.zip.part005",
+        "size": 393216,
+        "sha": "c10d95ad20d7ecc41ea3a5715680fd0e9924f155"
+      },
+      {
+        "name": "piano.zip.part006",
+        "size": 393216,
+        "sha": "21f28ef0e30834ff204ac1c8bf0a563cf46473e6"
+      },
+      {
+        "name": "piano.zip.part007",
+        "size": 393216,
+        "sha": "0f1e412cb670e6e7c1717bc27422339c0b010257"
+      },
+      {
+        "name": "piano.zip.part008",
+        "size": 393216,
+        "sha": "1e57088a8a5ed2d5ada6950571fab0f9cb20b3d5"
+      },
+      {
+        "name": "piano.zip.part009",
+        "size": 393216,
+        "sha": "895885e6f90ea2354580d5ad3f0a60569b143eee"
+      },
+      {
+        "name": "piano.zip.part010",
+        "size": 393216,
+        "sha": "8226f172a215616f04e7cff620dc4bed22029a67"
+      },
+      {
+        "name": "piano.zip.part011",
+        "size": 393216,
+        "sha": "96528ba3bf51c025d47b82aa898feea2d744a91a"
+      },
+      {
+        "name": "piano.zip.part012",
+        "size": 393216,
+        "sha": "aad3fc6801f41b7be66685604774375cd8ff61b7"
+      },
+      {
+        "name": "piano.zip.part013",
+        "size": 393216,
+        "sha": "bdae95d82d4fa6a58625299df10c9b4e20997e9c"
+      },
+      {
+        "name": "piano.zip.part014",
+        "size": 393216,
+        "sha": "b3ec200268f66e8ce3d49eaf22a53a8d4b4121e3"
+      },
+      {
+        "name": "piano.zip.part015",
+        "size": 300684,
+        "sha": "3b0b18fcba0126bb3d0837e2088cdacf37f4d0ba"
+      }
+    ]
+  }
+]

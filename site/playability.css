@@ -1,0 +1,37 @@
+html[data-hp-wide="true"] #hp-viewport { padding:0; }
+html[data-hp-wide="true"] #hp-four88 .hp-header { padding-left:max(10px,env(safe-area-inset-left)); padding-right:max(10px,env(safe-area-inset-right)); }
+html[data-hp-wide="true"][data-hp-rotated="true"] #hp-four88 .hp-header { padding-left:max(10px,env(safe-area-inset-bottom)); padding-right:max(10px,env(safe-area-inset-top)); }
+#hp-four88 .hp-surface { background:var(--hp-wallpaper),linear-gradient(155deg,#d4bdcf,#e4d3df 47%,#bbaec8); background-size:cover; background-position:center; }
+#hp-four88[data-wallpaper="night"] .hp-surface { background:linear-gradient(145deg,#252b51,#584066); }
+#hp-four88[data-wallpaper="blue"] .hp-surface { background:linear-gradient(145deg,#43859c,#bddade); }
+#hp-four88 .hp-stage,#hp-four88 .hp-scroll-window { background:transparent; }
+#hp-four88 .hp-scroll-window { scrollbar-gutter:auto; scrollbar-width:none; }
+#hp-four88 .hp-scroll-window::-webkit-scrollbar { display:none; }
+#hp-four88 .hp-keyboard,#hp-four88 .hp-scroll-window { touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+#hp-four88 .hp-stage .hp-keyboard { height:min(100%,clamp(190px,84%,330px)); }
+#hp-four88 .hp-header,#hp-four88 .hp-footer,#hp-four88 .hp-scroll-tools { background:#f4edf3eb; }
+#hp-four88[data-wallpaper="night"] .hp-octave-title { color:#fff; }
+#hp-four88[data-wallpaper="photo"] .hp-octave-title { color:#fff; text-shadow:0 1px 3px #000; }
+#hp-four88 .hp-settings { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding-bottom:max(22px,env(safe-area-inset-bottom)); }
+#hp-four88 .hp-range-row { display:flex; align-items:center; gap:12px; width:100%; margin:8px 0; }
+#hp-four88 .hp-range-step { width:44px; height:44px; flex:none; border:1px solid #bcacc5; border-radius:12px; background:#eee5f2; color:#513e60; font-size:24px; touch-action:manipulation; }
+#hp-four88 input[type="range"] { flex:1; width:0; min-width:40px; height:48px; min-height:48px; margin:0; padding:0; appearance:none; -webkit-appearance:none; background:transparent; touch-action:none; cursor:ew-resize; }
+#hp-four88 input[type="range"]::-webkit-slider-runnable-track { height:10px; border-radius:8px; background:linear-gradient(to right,#80618f var(--range-progress,50%),#ded3e4 var(--range-progress,50%)); }
+#hp-four88 input[type="range"]::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; height:32px; width:32px; border:3px solid #fff; border-radius:50%; background:#80618f; box-shadow:0 2px 5px #48364d55; margin-top:-11px; }
+#hp-four88 input[type="range"]::-moz-range-track { height:10px; border-radius:8px; background:#ded3e4; }
+#hp-four88 input[type="range"]::-moz-range-thumb { height:26px; width:26px; border:3px solid #fff; border-radius:50%; background:#80618f; }
+#hp-four88 input[type="range"]:focus-visible { outline:2px solid #80618f; outline-offset:3px; border-radius:8px; }
+#hp-four88 .hp-wallpaper-panel { border-bottom:1px solid #d8cbdf; padding-bottom:16px; }
+#hp-four88 .hp-wallpaper-panel h2 { font-size:18px; }
+#hp-four88 .hp-wide-label { display:flex; align-items:center; gap:12px; min-height:48px; font-size:16px; }
+#hp-four88 .hp-wide-label input { width:24px; height:24px; accent-color:#80618f; }
+#hp-four88 .hp-photo-label { display:block; font-size:16px; margin:12px 0; }
+#hp-four88 .hp-photo-label input { display:block; max-width:100%; min-height:44px; margin-top:8px; font-size:14px; }
+
+/* Reserve only the keyboard's interaction area for OS-owned screen edges. */
+#hp-four88 .hp-keyboard,#hp-four88 .hp-scroll-window { padding-left:calc(var(--hp-key-edge,8px) + env(safe-area-inset-left)); padding-right:calc(var(--hp-key-edge,8px) + env(safe-area-inset-right)); }
+html[data-hp-rotated="true"] #hp-four88 .hp-keyboard,html[data-hp-rotated="true"] #hp-four88 .hp-scroll-window { padding-left:calc(var(--hp-key-edge,8px) + env(safe-area-inset-top)); padding-right:calc(var(--hp-key-edge,8px) + env(safe-area-inset-bottom)); }
+#hp-four88 .hp-size-panel { border-bottom:1px solid #d8cbdf; padding-bottom:16px; }
+#hp-four88 .hp-size-panel h2 { font-size:18px; }
+
+html[data-hp-wide="false"] #hp-four88 .hp-keyboard,html[data-hp-wide="false"] #hp-four88 .hp-scroll-window { padding-left:var(--hp-key-edge,8px); padding-right:var(--hp-key-edge,8px); }
