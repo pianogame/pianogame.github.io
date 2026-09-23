@@ -109,6 +109,11 @@
   const isAudible=track=>!track.muted&&!groupMutes[track.instrument];
   const audibleTracks=()=>tracks.filter(track=>track.notes.length&&isAudible(track));
   function updatePlayButton(){
+    if(recording){
+      playButton.disabled=true;
+      playButton.textContent=playing?'♪ 伴奏再生中':'▶ 全再生';
+      return;
+    }
     if(playing){
       if(playButton.disabled)playButton.disabled=false;
       if(playButton.textContent!=='■ 停止')playButton.textContent='■ 停止';
@@ -122,7 +127,7 @@
   function renderPanel(){
     panel.replaceChildren();
     const heading=document.createElement('h2');heading.textContent='楽器別の多重録音';panel.append(heading);
-    const help=document.createElement('p');help.textContent='楽器を選んで録音するたびに新しいトラックを追加します。ミュート中のトラックは再生・音声保存に含まれません。';panel.append(help);
+    const help=document.createElement('p');help.textContent='楽器を選んで録音するたびに新しいトラックを追加します。すでに録音がある場合は、ミュートされていない既存トラックを先頭から再生しながら同期録音します。ミュート中のトラックは伴奏・再生・音声保存に含まれません。';panel.append(help);
     for(const id of Object.keys(instruments)){
       const group=document.createElement('div');group.className='hp-track-group';
       const title=document.createElement('strong');title.textContent=instrumentName(id)+'（'+tracks.filter(t=>t.instrument===id).length+'録音）';
@@ -163,19 +168,65 @@
     if(button.dataset.shareReady)void deliverReadyExport();
   });
 
-  function beginRecording(){
+  async function beginRecording(){
     if(recordButton.disabled||busy)return;
     stopPlayback();
     if(tracks.length>=MAX_TRACKS){say('録音は最大30トラックです。不要な録音を削除してから追加してください。',true);return;}
+
+    const selected=audibleTracks();
+    if(selected.length){
+      busy=true;
+      recordButton.disabled=true;
+      updatePlayButton();
+      say('既存の録音を伴奏用に準備中…');
+      try{
+        await ensureEngine();
+        await preload(selected);
+        await ensureEngine();
+      }catch(error){
+        busy=false;
+        recordButton.disabled=false;
+        updatePlayButton();
+        say('伴奏を準備できませんでした：'+error.message,true);
+        return;
+      }
+    }
+
     const id=instrumentControl.value;
     recording={id:'take-'+Date.now()+'-'+takeNumber,instrument:id,name:instrumentName(id)+' '+takeNumber+'回目',muted:false,duration:0,notes:[]};
-    takeNumber++;recordingStartedAt=now();activeRecordedNotes.clear();
-    recordButton.setAttribute('aria-pressed','true');recordButton.textContent='■ 録音停止';playButton.disabled=true;
+    takeNumber++;activeRecordedNotes.clear();
+
+    const lead=selected.length?.12:0;
+    recordingStartedAt=now()+lead;
+
+    if(selected.length){
+      const startAt=engine.currentTime+lead;
+      playing=true;playbackSources=[];playbackBuses=[];
+      for(const track of selected){
+        const bus=engine.createGain();
+        bus.gain.value=isAudible(track)?1:0;
+        bus.connect(engineMaster);
+        playbackBuses.push({track,bus});
+        for(const note of track.notes)scheduleNote(engine,bus,track,note,startAt+note.start,playbackSources);
+      }
+      const duration=mixDuration(selected);
+      playbackEndTimer=setTimeout(()=>{
+        stopPlayback();
+        if(recording)say(instrumentName(recording.instrument)+' 録音中 · 伴奏再生終了');
+      },(duration+lead)*1000);
+    }
+
+    busy=false;
+    recordButton.disabled=false;
+    recordButton.setAttribute('aria-pressed','true');recordButton.textContent='■ 録音停止';
+    updatePlayButton();
     recordingTimer=setInterval(()=>{
-      if(!recording)return;const elapsed=now()-recordingStartedAt;say(instrumentName(recording.instrument)+' 録音中 · '+elapsed.toFixed(1)+'秒 · '+recording.notes.length+'音');
+      if(!recording)return;
+      const elapsed=Math.max(0,now()-recordingStartedAt);
+      say(instrumentName(recording.instrument)+' 録音中 · '+elapsed.toFixed(1)+'秒 · '+recording.notes.length+'音'+(playing?' · 伴奏再生中':''));
       if(elapsed>=MAX_SECONDS||recording.notes.length>=MAX_NOTES)finishRecording();
     },100);
-    say(instrumentName(id)+' 録音中 · 0.0秒');
+    say(instrumentName(id)+' 録音中 · 0.0秒'+(selected.length?' · 既存'+selected.length+'トラックを伴奏再生':''));
   }
   function finishRecording(){
     if(!recording)return;const endedAt=now();
@@ -183,6 +234,7 @@
     clearInterval(recordingTimer);recordingTimer=null;
     const finished=recording;recording=null;finished.duration=clamp(endedAt-recordingStartedAt,.01,MAX_SECONDS);
     recordButton.setAttribute('aria-pressed','false');recordButton.textContent='● 録音';
+    if(playing)stopPlayback();
     if(finished.notes.length){tracks.push(finished);saveState();say(finished.name+'：'+finished.notes.length+'音を保存しました');}
     else say('演奏がなかったため、空の録音は追加しませんでした');
     renderPanel();
@@ -202,7 +254,7 @@
   root.addEventListener('hp-stop-sound',()=>{stopPlayback();for(const token of [...activeRecordedNotes.keys()])endRecordedNote(token);});
   instrumentControl.addEventListener('change',()=>{if(recording)finishRecording();},true);
 
-  recordButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();recording?finishRecording():beginRecording();},true);
+  recordButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();recording?finishRecording():void beginRecording();},true);
   playButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();if(playing){stopPlayback();say('再生を停止しました');}else void startPlayback();},true);
   const buttonObserver=new MutationObserver(updatePlayButton);
   buttonObserver.observe(recordButton,{attributes:true,attributeFilter:['disabled']});
