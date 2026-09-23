@@ -75,9 +75,14 @@
   const isAudible=track=>!track.muted&&!groupMutes[track.instrument];
   const audibleTracks=()=>tracks.filter(track=>track.notes.length&&isAudible(track));
   function updatePlayButton(){
-    if(playing){playButton.disabled=false;playButton.textContent='■ 停止';return;}
-    playButton.textContent='▶ 全トラック再生';
-    playButton.disabled=recordButton.disabled||!tracks.some(track=>track.notes.length);
+    if(playing){
+      if(playButton.disabled)playButton.disabled=false;
+      if(playButton.textContent!=='■ 停止')playButton.textContent='■ 停止';
+      return;
+    }
+    if(playButton.textContent!=='▶ 全トラック再生')playButton.textContent='▶ 全トラック再生';
+    const shouldDisable=recordButton.disabled||!tracks.some(track=>track.notes.length);
+    if(playButton.disabled!==shouldDisable)playButton.disabled=shouldDisable;
   }
 
   function renderPanel(){
@@ -159,7 +164,6 @@
   playButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();if(playing){stopPlayback();say('再生を停止しました');}else void startPlayback();},true);
   const buttonObserver=new MutationObserver(updatePlayButton);
   buttonObserver.observe(recordButton,{attributes:true,attributeFilter:['disabled']});
-  buttonObserver.observe(playButton,{attributes:true,attributeFilter:['disabled']});
 
   async function ensureEngine(){
     if(!engine){
