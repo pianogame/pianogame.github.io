@@ -38,6 +38,44 @@
           "value": "no-cache, no-store, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/audio/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "src": "/audio/.*",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": {
+            "re": "(?i)(curl|wget|python-requests|aiohttp|httpx|go-http-client|libwww-perl|apachebench|wrk|k6)"
+          }
+        }
+      ],
+      "mitigate": {
+        "action": "deny"
+      }
+    },
+    {
+      "src": "/audio/.*",
+      "missing": [
+        {
+          "type": "header",
+          "key": "user-agent"
+        }
+      ],
+      "mitigate": {
+        "action": "deny"
+      }
     }
   ]
 }
