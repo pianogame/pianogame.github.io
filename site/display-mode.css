@@ -7,3 +7,17 @@
 #hp-four88 .hp-install-steps { margin:10px 0; padding-left:1.4em; }
 #hp-four88 .hp-install-steps li { margin:6px 0; }
 #hp-four88 .hp-install-note { font-size:13px; line-height:1.5; color:#786880; margin:8px 0 0; }
+
+html.hp-install-required #hp-viewport { display:none !important; }
+.hp-install-gate { position:fixed; inset:0; z-index:99999; overflow:auto; display:grid; place-items:center; min-height:100dvh; padding:max(24px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left)); box-sizing:border-box; background:linear-gradient(155deg,#e8dce8,#cdbbd1 55%,#b8a9c2); color:#544e58; font-family:ui-rounded,"Hiragino Maru Gothic ProN",system-ui,sans-serif; }
+.hp-install-gate[hidden] { display:none !important; }
+.hp-install-gate-card { width:min(520px,100%); padding:28px 24px; box-sizing:border-box; border:1px solid #c7b6cb; border-radius:24px; background:#fffafc; box-shadow:0 20px 60px #4f3d5740; text-align:center; }
+.hp-install-gate-mark { display:grid; place-items:center; width:72px; height:72px; margin:0 auto 14px; border-radius:20px; background:#665670; color:#fffaf2; font-size:42px; line-height:1; }
+.hp-install-gate h1 { margin:0; font-size:clamp(28px,8vw,40px); font-weight:650; letter-spacing:.02em; }
+.hp-install-gate-lead { margin:12px 0 18px; font-size:16px; line-height:1.7; }
+.hp-install-gate-button { width:100%; min-height:52px; margin:0 0 16px; border:0; border-radius:26px; background:#665670; color:#fff; font:600 16px/1.2 inherit; }
+.hp-install-gate-guide { margin:12px 0; padding:14px 16px; border-radius:16px; background:#f4edf7; text-align:left; font-size:15px; line-height:1.7; }
+.hp-install-gate-guide p { margin:0 0 8px; }
+.hp-install-gate-guide ol { margin:0; padding-left:1.4em; }
+.hp-install-gate-guide li { margin:7px 0; }
+.hp-install-gate-note { margin:14px 0 0; color:#786880; font-size:13px; line-height:1.6; }
