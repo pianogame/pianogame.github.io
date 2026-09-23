@@ -209,6 +209,22 @@
     } catch (_) { say('この表示では音声を開始できません',true); return false; }
   }
 
+  window.HP_AUDIO_BRIDGE = {
+    get() {
+      if (!ensureAudio() || !ctx || !master) return null;
+      return {context:ctx, output:master};
+    },
+    async resume() {
+      if (!ensureAudio() || !ctx) return false;
+      try {
+        if (ctx.state !== 'running') await ctx.resume();
+        return ctx.state === 'running';
+      } catch (_) {
+        return false;
+      }
+    }
+  };
+
   function updateReverb() {
     if (!ctx || !reverb) return;
     const decay = Number(decayControl.value);
