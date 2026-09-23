@@ -181,12 +181,31 @@
     const urls=new Set();for(const track of selected)for(const note of track.notes){const anchor=nearestMidi(track.instrument,note.midi);for(const sample of instruments[track.instrument].samples.filter(s=>s.midi===anchor))urls.add(sample.url);}
     const list=[...urls];let cursor=0;await Promise.all(Array.from({length:Math.min(4,list.length)},async()=>{while(cursor<list.length)await getSampleBuffer(list[cursor++]);}));
   }
+  function noteSoundLength(track,note){
+    const anchor=nearestMidi(track.instrument,note.midi);
+    const descriptor=instruments[track.instrument].samples.find(sample=>sample.midi===anchor&&sampleBuffers.has(sample.url));
+    const buffer=descriptor&&sampleBuffers.get(descriptor.url);
+    if(!buffer)return clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10);
+    const natural=buffer.duration/Math.pow(2,(note.midi-anchor)/12);
+    return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);
+  }
+  function mixDuration(selected){
+    return Math.max(...selected.flatMap(track=>track.notes.map(note=>note.start+noteSoundLength(track,note))))+.2;
+  }
   function scheduleNote(context,target,track,note,when,sourceList){
     const descriptor=descriptorFor(track.instrument,note.midi,'play'),buffer=sampleBuffers.get(descriptor.url);if(!buffer)return;
     const source=context.createBufferSource(),envelope=context.createGain();source.buffer=buffer;source.playbackRate.value=Math.pow(2,(note.midi-descriptor.midi)/12);
-    const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=note.sustain?Math.max(1.2,note.release):clamp(note.release,.01,10);
-    envelope.gain.setValueAtTime(.00001,when);envelope.gain.linearRampToValueAtTime(level,when+.003);envelope.gain.setValueAtTime(level,when+heldFor);envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
-    source.connect(envelope);envelope.connect(target);source.start(when);const natural=buffer.duration/source.playbackRate.value;source.stop(Math.min(when+natural,when+heldFor+releaseFor+.04));if(sourceList)sourceList.push(source);
+    const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=clamp(note.release,.01,10);
+    const natural=buffer.duration/source.playbackRate.value;
+    envelope.gain.setValueAtTime(.00001,when);envelope.gain.linearRampToValueAtTime(level,when+.003);
+    if(note.sustain){
+      envelope.gain.setValueAtTime(level,when+Math.min(heldFor,natural));
+      source.stop(when+natural);
+    }else{
+      envelope.gain.setValueAtTime(level,when+heldFor);envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
+      source.stop(Math.min(when+natural,when+heldFor+releaseFor+.04));
+    }
+    source.connect(envelope);envelope.connect(target);source.start(when);if(sourceList)sourceList.push(source);
   }
   function applyLiveMutes(){if(!engine)return;for(const item of playbackBuses)item.bus.gain.setTargetAtTime(isAudible(item.track)?1:0,engine.currentTime,.008);}
   function stopPlayback(){
@@ -199,7 +218,7 @@
     try{
       await ensureEngine();await preload(selected);const startAt=engine.currentTime+.12;playing=true;playbackSources=[];playbackBuses=[];
       for(const track of selected){const bus=engine.createGain();bus.gain.value=isAudible(track)?1:0;bus.connect(engineMaster);playbackBuses.push({track,bus});for(const note of track.notes)scheduleNote(engine,bus,track,note,startAt+note.start,playbackSources);}
-      const duration=Math.max(...selected.flatMap(track=>track.notes.map(note=>note.start+note.duration+(note.sustain?Math.max(1.2,note.release):note.release))))+.2;
+      const duration=mixDuration(selected);
       playbackEndTimer=setTimeout(()=>{stopPlayback();say('全トラックの再生が終わりました');},duration*1000);say('全トラック再生中 · '+selected.length+'トラック');updatePlayButton();
     }catch(error){stopPlayback();say('再生できませんでした：'+error.message,true);}finally{busy=false;if(!panel.hidden)renderPanel();}
   }
@@ -221,7 +240,7 @@
   async function exportMix(format){
     const selected=audibleTracks();if(!selected.length||busy)return;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
     try{
-      await ensureEngine();await preload(selected);const duration=Math.max(...selected.flatMap(track=>track.notes.map(note=>note.start+note.duration+(note.sustain?Math.max(1.2,note.release):note.release))))+.2;
+      await ensureEngine();await preload(selected);const duration=mixDuration(selected);
       const sampleRate=44100,Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!Offline)throw new Error('このブラウザでは音声書き出しを利用できません');
       const offline=new Offline(2,Math.ceil(duration*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
       for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,.01+note.start,null);const rendered=await offline.startRendering();
