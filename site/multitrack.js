@@ -80,7 +80,7 @@
       if(playButton.textContent!=='■ 停止')playButton.textContent='■ 停止';
       return;
     }
-    if(playButton.textContent!=='▶ 全トラック再生')playButton.textContent='▶ 全トラック再生';
+    if(playButton.textContent!=='▶ 全再生')playButton.textContent='▶ 全再生';
     const shouldDisable=recordButton.disabled||!tracks.some(track=>track.notes.length);
     if(playButton.disabled!==shouldDisable)playButton.disabled=shouldDisable;
   }
