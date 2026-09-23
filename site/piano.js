@@ -8,6 +8,17 @@
   const volume = root.querySelector('[data-control="volume"]');
   const reverbControl = root.querySelector('[data-control="reverb"]');
   const decayControl = root.querySelector('[data-control="decay"]');
+  function configureAudioSession() {
+    try {
+      if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
+        navigator.audioSession.type = 'playback';
+      }
+      return navigator.audioSession?.type || 'unsupported';
+    } catch (_) {
+      return 'unsupported';
+    }
+  }
+  configureAudioSession();
   const naturals = [0, 2, 4, 5, 7, 9, 11];
   const syllables = ['ド', 'レ', 'ミ', 'ファ', 'ソ', 'ラ', 'シ'];
   const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
@@ -179,6 +190,7 @@
 
   function ensureAudio() {
     try {
+      configureAudioSession();
       if (!ctx) {
         const Audio = window.AudioContext || window.webkitAudioContext;
         if (!Audio) throw new Error('unsupported');
@@ -240,6 +252,7 @@
   }
 
   function unlockAudioFromGesture() {
+    configureAudioSession();
     if (!ensureAudio() || !ctx) return false;
     try {
       // iOS standalone/PWA can require both resume() and an actual source.start()
@@ -278,6 +291,7 @@
   }, {capture:true,passive:true});
 
   window.HP_AUDIO_BRIDGE = {
+    configureSession: configureAudioSession,
     get() {
       if (!ensureAudio() || !ctx || !master) return null;
       return {context:ctx, output:master};
@@ -706,7 +720,10 @@
   });
   function pauseAll() { releaseHeld(); finishRecording(); if (playing) { stopPlayback(); say('再生を停止'); } if (ctx) allVoices.forEach(voice => voice.release(ctx.currentTime, .08)); }
   window.addEventListener('blur', pauseAll);
-  window.addEventListener('pageshow', () => { if (isStandalone) audioNeedsGestureUnlock = true; });
+  window.addEventListener('pageshow', () => {
+    configureAudioSession();
+    if (isStandalone) audioNeedsGestureUnlock = true;
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       pauseAll();
