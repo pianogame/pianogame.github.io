@@ -92,7 +92,19 @@
   trackButton.type='button';trackButton.className='hp-control';trackButton.textContent='🎚 録音一覧';trackButton.setAttribute('aria-expanded','false');
   root.querySelector('.hp-toolbar').insertBefore(trackButton,action('display-mode'));
   const panel=document.createElement('section');panel.className='hp-track-panel';panel.hidden=true;panel.setAttribute('aria-label','楽器別録音と保存');surface.append(panel);
-  trackButton.addEventListener('click',()=>{panel.hidden=!panel.hidden;trackButton.setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden)renderPanel();});
+  function setTrackPanel(open){
+    panel.hidden=!open;
+    trackButton.setAttribute('aria-expanded',String(open));
+    if(open)renderPanel();
+  }
+  trackButton.addEventListener('click',()=>setTrackPanel(panel.hidden));
+  document.addEventListener('pointerdown',event=>{
+    if(panel.hidden||panel.contains(event.target)||trackButton.contains(event.target))return;
+    setTrackPanel(false);
+  },true);
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!panel.hidden)setTrackPanel(false);
+  });
 
   const isAudible=track=>!track.muted&&!groupMutes[track.instrument];
   const audibleTracks=()=>tracks.filter(track=>track.notes.length&&isAudible(track));
