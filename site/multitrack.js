@@ -167,10 +167,27 @@
 
   async function ensureEngine(){
     if(!engine){
-      const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw new Error('このブラウザでは音声再生を利用できません');
-      engine=new Audio({latencyHint:'interactive'});engineMaster=engine.createGain();const limiter=engine.createDynamicsCompressor();limiter.threshold.value=-8;limiter.knee.value=12;limiter.ratio.value=4;engineMaster.connect(limiter);limiter.connect(engine.destination);
+      const shared=window.HP_AUDIO_BRIDGE?.get?.();
+      if(shared?.context&&shared?.output){
+        engine=shared.context;
+        engineMaster=engine.createGain();
+        const limiter=engine.createDynamicsCompressor();
+        limiter.threshold.value=-8;limiter.knee.value=12;limiter.ratio.value=4;
+        engineMaster.connect(limiter);limiter.connect(shared.output);
+      }else{
+        const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw new Error('このブラウザでは音声再生を利用できません');
+        engine=new Audio({latencyHint:'interactive'});
+        engineMaster=engine.createGain();
+        const limiter=engine.createDynamicsCompressor();
+        limiter.threshold.value=-8;limiter.knee.value=12;limiter.ratio.value=4;
+        engineMaster.connect(limiter);limiter.connect(engine.destination);
+      }
     }
-    engineMaster.gain.value=clamp(volumeControl.value,0,100)/100*.55;if(engine.state!=='running')await engine.resume();
+    engineMaster.gain.value=clamp(volumeControl.value,0,100)/100*.55;
+    if(engine.state!=='running'){
+      try{await engine.resume();}catch(_){}
+    }
+    if(engine.state!=='running')throw new Error('音声を開始できません。もう一度再生をタップしてください');
   }
   function nearestMidi(id,midi){let best=instruments[id].samples[0].midi;for(const sample of instruments[id].samples)if(Math.abs(sample.midi-midi)<Math.abs(best-midi))best=sample.midi;return best;}
   function descriptorFor(id,midi,purpose='load'){
@@ -220,7 +237,7 @@
     if(recording)finishRecording();const selected=audibleTracks();if(!selected.length){say('再生する録音がありません。ミュート設定を確認してください。',true);return;}if(busy)return;
     busy=true;say('録音した楽器の音源を準備中…');
     try{
-      await ensureEngine();await preload(selected);const startAt=engine.currentTime+.12;playing=true;playbackSources=[];playbackBuses=[];
+      await ensureEngine();await preload(selected);await ensureEngine();const startAt=engine.currentTime+.12;playing=true;playbackSources=[];playbackBuses=[];
       for(const track of selected){const bus=engine.createGain();bus.gain.value=isAudible(track)?1:0;bus.connect(engineMaster);playbackBuses.push({track,bus});for(const note of track.notes)scheduleNote(engine,bus,track,note,startAt+note.start,playbackSources);}
       const duration=mixDuration(selected);
       playbackEndTimer=setTimeout(()=>{stopPlayback();say('全トラックの再生が終わりました');},duration*1000);say('全トラック再生中 · '+selected.length+'トラック');updatePlayButton();
