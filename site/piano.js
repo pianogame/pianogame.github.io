@@ -19,10 +19,11 @@
   const buttons = new Map();
   const shortcuts = new Map();
   const held = new Map();
+  const pendingNoteOns = new Map();
   const pointerStarts = new Map();
   const allVoices = new Set();
   const playingCounts = new Map();
-  let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend;
+  let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, resumePromise = null;
   const effectUI = window.HP_EFFECTS_UI;
   const ambience = {piano:{amount:35,decay:.05},bass:{amount:4,decay:.3}};
   const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true}};
@@ -204,9 +205,25 @@
         effects.output.connect(master); effects.output.connect(ambienceSend); ambienceSend.connect(reverbInput);
         updateReverb();
       }
-      if (ctx.state !== 'running') ctx.resume().catch(() => say('もう一度タップして音を有効にしてください',true));
+      if (ctx.state !== 'running') {
+        void resumeAudioContext().then(ok => {
+          if (!ok) say('もう一度鍵盤をタップして音を有効にしてください',true);
+        });
+      }
       return true;
     } catch (_) { say('この表示では音声を開始できません',true); return false; }
+  }
+
+  function resumeAudioContext() {
+    if (!ctx) return Promise.resolve(false);
+    if (ctx.state === 'running') return Promise.resolve(true);
+    if (!resumePromise) {
+      resumePromise = ctx.resume()
+        .then(() => ctx.state === 'running')
+        .catch(() => false)
+        .finally(() => { resumePromise = null; });
+    }
+    return resumePromise;
   }
 
   window.HP_AUDIO_BRIDGE = {
@@ -216,12 +233,7 @@
     },
     async resume() {
       if (!ensureAudio() || !ctx) return false;
-      try {
-        if (ctx.state !== 'running') await ctx.resume();
-        return ctx.state === 'running';
-      } catch (_) {
-        return false;
-      }
+      return await resumeAudioContext();
     }
   };
 
@@ -442,8 +454,8 @@
     buttons.forEach((list, midi) => list.forEach(button => button.getAttribute('aria-pressed')!==String(notes.has(midi))&&button.setAttribute('aria-pressed', String(notes.has(midi)))));
     output.textContent = notes.size ? Array.from(notes).sort((a,b) => a-b).map(pitchName).join(' · ') : '—';
   }
-  function noteOn(token, midi) {
-    if (!samplesReady || held.has(token) || !ensureAudio()) return;
+  function playNoteNow(token, midi) {
+    if (!samplesReady || held.has(token) || !ctx || ctx.state !== 'running') return;
     const entry = {midi, voice: synth(midi), event: null};
     if (recording) {
       entry.event = {midi, start: Math.max(0, ctx.currentTime - recordStart), duration: .12, sustain};
@@ -452,13 +464,34 @@
     held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi}})); pendingSparkles.add(midi); redraw();
     if (!recording && !playing && status.textContent!=='演奏中') say('演奏中');
   }
+  function noteOn(token, midi) {
+    if (!samplesReady || held.has(token) || pendingNoteOns.has(token) || !ensureAudio()) return;
+    if (ctx.state === 'running') {
+      playNoteNow(token,midi);
+      return;
+    }
+    pendingNoteOns.set(token,midi);
+    void resumeAudioContext().then(ok => {
+      if (pendingNoteOns.get(token) !== midi) return;
+      pendingNoteOns.delete(token);
+      if (!ok) {
+        say('音声を再開できませんでした。もう一度鍵盤をタップしてください',true);
+        return;
+      }
+      playNoteNow(token,midi);
+    });
+  }
   function noteOff(token) {
+    pendingNoteOns.delete(token);
     const entry = held.get(token); if (!entry) return;
     entry.voice.release();
     if (entry.event && recording) entry.event.duration = Math.max(.06, ctx.currentTime - recordStart - entry.event.start);
     root.dispatchEvent(new CustomEvent('hp-note-off',{detail:{token,midi:entry.midi}})); held.delete(token); redraw();
   }
-  function releaseHeld() { Array.from(held.keys()).forEach(noteOff); }
+  function releaseHeld() {
+    pendingNoteOns.clear();
+    Array.from(held.keys()).forEach(noteOff);
+  }
   function stopPlayback() {
     playGeneration++; playbackTimers.forEach(clearTimeout); playbackTimers = [];
     clearInterval(scheduler); scheduler = null;
@@ -498,7 +531,7 @@
       pianoScroll.scrollTop = origin.scrollTop-dy;
       showRegister(); return;
     }
-    if (!held.has(token) || origin.scrolling) return;
+    if ((!held.has(token) && !pendingNoteOns.has(token)) || origin.scrolling) return;
     const samples = typeof event.getCoalescedEvents === 'function' ? event.getCoalescedEvents() : [event];
     const points = samples.length ? samples : [event];
     for (const sample of points) {
@@ -510,7 +543,8 @@
         const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
         const hit = document.elementFromPoint(x,y);
         const key = hit && hit.closest('[data-midi]');
-        if (key && root.contains(key) && Number(key.dataset.midi) !== held.get(token)?.midi) {
+        const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token);
+        if (key && root.contains(key) && Number(key.dataset.midi) !== currentMidi) {
           noteOff(token); noteOn(token, Number(key.dataset.midi));
         }
       }
