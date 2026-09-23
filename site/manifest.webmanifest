@@ -1,7 +1,7 @@
 {
   "name": "Piano Palette",
   "short_name": "Piano Palette",
-  "start_url": "/",
+  "start_url": "/?app=home",
   "scope": "/",
   "display": "fullscreen",
   "orientation": "landscape",
