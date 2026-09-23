@@ -342,7 +342,7 @@
     }
   }
   async function exportMix(format){
-    const selected=audibleTracks();if(!selected.length||busy)return;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
+    const selected=audibleTracks();if(!selected.length||busy)return;readyExport=null;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
     try{
       await ensureEngine();await preload(selected);const duration=mixDuration(selected);
       const sampleRate=44100,Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!Offline)throw new Error('このブラウザでは音声書き出しを利用できません');
