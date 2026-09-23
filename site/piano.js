@@ -24,6 +24,8 @@
   const allVoices = new Set();
   const playingCounts = new Map();
   let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, resumePromise = null;
+  let audioNeedsGestureUnlock = true;
+  const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
   const ambience = {piano:{amount:35,decay:.05},bass:{amount:4,decay:.3}};
   const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true}};
@@ -181,6 +183,10 @@
         const Audio = window.AudioContext || window.webkitAudioContext;
         if (!Audio) throw new Error('unsupported');
         ctx = new Audio({latencyHint:'interactive'});
+        audioNeedsGestureUnlock = true;
+        ctx.onstatechange = () => {
+          if (ctx.state !== 'running') audioNeedsGestureUnlock = true;
+        };
         master = ctx.createGain(); master.gain.value = Number(volume.value) / 100 * .9;
         compressor = ctx.createDynamicsCompressor();
         compressor.threshold.value = -8; compressor.knee.value = 15; compressor.ratio.value = 4;
@@ -216,15 +222,60 @@
 
   function resumeAudioContext() {
     if (!ctx) return Promise.resolve(false);
-    if (ctx.state === 'running') return Promise.resolve(true);
+    if (ctx.state === 'running') {
+      audioNeedsGestureUnlock = false;
+      return Promise.resolve(true);
+    }
     if (!resumePromise) {
       resumePromise = ctx.resume()
-        .then(() => ctx.state === 'running')
+        .then(() => {
+          const running = ctx.state === 'running';
+          if (running) audioNeedsGestureUnlock = false;
+          return running;
+        })
         .catch(() => false)
         .finally(() => { resumePromise = null; });
     }
     return resumePromise;
   }
+
+  function unlockAudioFromGesture() {
+    if (!ensureAudio() || !ctx) return false;
+    try {
+      // iOS standalone/PWA can require both resume() and an actual source.start()
+      // to happen directly inside the user's tap gesture.
+      if (ctx.state !== 'running') {
+        const attempt = ctx.resume();
+        if (attempt?.then) {
+          void attempt.then(() => {
+            if (ctx.state === 'running') audioNeedsGestureUnlock = false;
+          }).catch(() => {});
+        }
+      }
+      const buffer = ctx.createBuffer(1,1,22050);
+      const source = ctx.createBufferSource();
+      const silent = ctx.createGain();
+      silent.gain.value = 0;
+      source.buffer = buffer;
+      source.connect(silent);
+      silent.connect(ctx.destination);
+      source.onended = () => {
+        try { source.disconnect(); silent.disconnect(); } catch (_) {}
+      };
+      source.start(0);
+      if (ctx.state === 'running') audioNeedsGestureUnlock = false;
+      return true;
+    } catch (_) {
+      audioNeedsGestureUnlock = true;
+      return false;
+    }
+  }
+
+  root.addEventListener('pointerdown', () => {
+    if (isStandalone || audioNeedsGestureUnlock || (ctx && ctx.state !== 'running')) {
+      unlockAudioFromGesture();
+    }
+  }, {capture:true,passive:true});
 
   window.HP_AUDIO_BRIDGE = {
     get() {
@@ -564,7 +615,10 @@
     event.preventDefault(); noteOn('key:' + event.code, mapped.midi);
   });
   document.addEventListener('keyup', event => noteOff('key:' + event.code));
-  action('start').addEventListener('click', () => {void prepareSamples();});
+  action('start').addEventListener('click', () => {
+    unlockAudioFromGesture();
+    void prepareSamples();
+  });
   function showSettings(open) {
     releaseHeld(); pointerStarts.clear();
     settingsOverlay.hidden = !open;
@@ -652,7 +706,16 @@
   });
   function pauseAll() { releaseHeld(); finishRecording(); if (playing) { stopPlayback(); say('再生を停止'); } if (ctx) allVoices.forEach(voice => voice.release(ctx.currentTime, .08)); }
   window.addEventListener('blur', pauseAll);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) pauseAll(); });
+  window.addEventListener('pageshow', () => { if (isStandalone) audioNeedsGestureUnlock = true; });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseAll();
+      audioNeedsGestureUnlock = true;
+    } else if (isStandalone) {
+      audioNeedsGestureUnlock = true;
+      say('鍵盤をタップすると音声を再開します');
+    }
+  });
   const modelContext = document.modelContext;
   if (modelContext?.registerTool) {
     const lifecycle = new AbortController();
