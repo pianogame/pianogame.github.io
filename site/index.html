@@ -27,16 +27,16 @@
     }
   </script>
   <link rel="stylesheet" href="/piano.css">
-  <link rel="stylesheet" href="/landscape.css?v=9">
+  <link rel="stylesheet" href="/landscape.css?v=10">
   <script src="/orientation.js?v=9"></script>
   <script defer src="/instruments.js?v=9"></script>
   <link rel="stylesheet" href="/effects.css?v=9">
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=9"></script>
-  <script defer src="/piano.js?v=10"></script>
+  <script defer src="/piano.js?v=12"></script>
   <link rel="stylesheet" href="/multitrack.css?v=11">
-  <script defer src="/multitrack.js?v=11"></script>
+  <script defer src="/multitrack.js?v=12"></script>
   <link rel="stylesheet" href="/display-mode.css?v=9">
   <script defer src="/display-mode.js?v=9"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
@@ -47,7 +47,7 @@
 <div id="hp-four88" lang="ja">
   <div class="hp-surface" role="group" aria-label="グランドピアノ">
     <header class="hp-header" data-settings-background>
-      <label class="hp-layout-label"><span>鍵盤</span><select data-control="layout" aria-label="鍵盤の並べ方"><option value="88">88鍵・4段</option><option value="37" selected>37鍵・3段</option></select></label>
+      <div class="hp-layout-actions"><label class="hp-layout-label"><span>鍵盤</span><select data-control="layout" aria-label="鍵盤の並べ方"><option value="88">88鍵・4段</option><option value="37" selected>37鍵・3段</option></select></label><button type="button" class="hp-control hp-stop-sound" data-action="stop-sound">■ 鳴っている音を止める</button></div>
       <div class="hp-toolbar" aria-label="演奏の操作">
         <button type="button" class="hp-control" data-action="start">演奏をはじめる</button>
         <button type="button" class="hp-control" data-action="record" aria-pressed="false" disabled>● 録音</button>
@@ -80,7 +80,7 @@
 <p class="hp-setting-help">時計やホームバーがある部分は、余白を0にしても避けます。</p></section>
         <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span></label>
         <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">演奏をはじめるボタンで音源を準備</p>
-        <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button><button type="button" class="hp-control" data-action="stop-sound">■ 鳴っている音を止める</button></div>
+        <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button></div>
         <label class="hp-setting"><span class="hp-setting-heading"><span>① 音量</span><output data-output="volume">75%</output></span><span class="hp-setting-help">楽器と響き、両方の音の大きさ。</span><input type="range" data-control="volume" min="0" max="100" value="75" aria-label="音量"><span class="hp-scale-ends"><span>小さい</span><span>大きい</span></span></label>
         <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>② 響きの強さ（リバーブ）</span><output data-output="reverb">35%</output></span><span class="hp-setting-help">ホールで反射する音の量。0%なら反響なし。</span><input type="range" data-control="reverb" min="0" max="100" value="35" aria-label="響きの強さ"><span class="hp-scale-ends"><span>反響なし</span><span>よく響く</span></span></label>
         <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>③ 響きの長さ</span><output data-output="decay">0.05秒</output></span><span class="hp-setting-help">反響が小さくなるまでの時間。長くすると余韻が残ります。</span><input type="range" data-control="decay" min="0.02" max="8" step="0.01" value="0.05" aria-label="響きが消えるまでの時間"><span class="hp-scale-ends"><span>短い</span><span>長い</span></span></label>
