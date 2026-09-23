@@ -17,13 +17,17 @@
   const surface = root.querySelector('.hp-surface');
   const storageKey = 'piano-palette-multitrack-v1';
   const MAX_TRACKS = 30, MAX_SECONDS = 120, MAX_NOTES = 1500;
+  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const isStandalone=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
+  const stageStateKey='piano-palette-stage-open-v1';
+  const exportResumeKey='piano-palette-export-resume-until-v1';
 
   let tracks = [];
   let groupMutes = {piano:false,bass:false,guitar:false};
   let takeNumber = 1;
   let recording = null, recordingStartedAt = 0, recordingTimer = null;
   let playing = false, playbackEndTimer = null, playbackSources = [], playbackBuses = [];
-  let engine = null, engineMaster = null, busy = false;
+  let engine = null, engineMaster = null, busy = false, readyExport = null;
   const activeRecordedNotes = new Map();
   const sampleBuffers = new Map(), roundRobin = new Map();
 
@@ -59,11 +63,29 @@
   function measureHeader(){surface.style.setProperty('--hp-stage-top',root.querySelector('.hp-header').offsetHeight+'px');}
   measureHeader();new ResizeObserver(measureHeader).observe(root.querySelector('.hp-header'));
   window.addEventListener('resize',measureHeader);window.addEventListener('hp-viewport-resize',measureHeader);
+  function rememberStageOpen(){try{sessionStorage.setItem(stageStateKey,'1');}catch(_){}}
+  function rememberExportResume(){
+    rememberStageOpen();
+    try{localStorage.setItem(exportResumeKey,String(Date.now()+30000));}catch(_){}
+  }
+  function restoreStage(){
+    let opened=false;
+    try{opened=sessionStorage.getItem(stageStateKey)==='1';}catch(_){}
+    try{
+      const until=Number(localStorage.getItem(exportResumeKey)||0);
+      if(until>Date.now()){opened=true;sessionStorage.setItem(stageStateKey,'1');}
+      if(until) localStorage.removeItem(exportResumeKey);
+    }catch(_){}
+    if(opened){curtain.classList.add('open');curtain.hidden=true;}
+  }
   function openCurtainWhenReady(){
     if(!startButton.hidden||curtain.hidden||curtain.classList.contains('open'))return;
+    rememberStageOpen();
     curtain.classList.add('open');setTimeout(()=>{curtain.hidden=true;},1250);
   }
   new MutationObserver(openCurtainWhenReady).observe(startButton,{attributes:true,attributeFilter:['hidden']});
+  window.addEventListener('pageshow',restoreStage);
+  restoreStage();
   openCurtainWhenReady();
 
   const trackButton=document.createElement('button');
@@ -104,12 +126,19 @@
       }
     }
     const exportRow=document.createElement('div');exportRow.className='hp-export-row';
-    const format=document.createElement('select');format.dataset.exportFormat='true';format.setAttribute('aria-label','保存形式');format.append(new Option('WAV（非圧縮）','wav'));
-    if(window.MediaRecorder?.isTypeSupported?.('audio/mp4'))format.append(new Option('MP4（音声）','mp4'));
-    if(window.MediaRecorder?.isTypeSupported?.('audio/webm;codecs=opus'))format.append(new Option('WebM（音声）','webm'));
+    const format=document.createElement('select');format.dataset.exportFormat='true';format.setAttribute('aria-label','保存形式');format.append(new Option('WAV（高速・推奨）','wav'));
+    if(window.MediaRecorder?.isTypeSupported?.('audio/mpeg'))format.append(new Option('MP3（圧縮）','mp3'));
+    if(window.MediaRecorder?.isTypeSupported?.('audio/mp4'))format.append(new Option('MP4（圧縮）','mp4'));
+    if(window.MediaRecorder?.isTypeSupported?.('audio/webm;codecs=opus'))format.append(new Option('WebM（圧縮）','webm'));
     const save=document.createElement('button');save.type='button';save.dataset.exportMix='true';save.textContent=busy?'保存処理中…':'💾 全体の音を保存';save.disabled=busy||!audibleTracks().length;
     exportRow.append(format,save);panel.append(exportRow);
-    const note=document.createElement('p');note.className='hp-track-note';note.textContent='WAVは常に選べます。MP4 / WebM は、このブラウザがその音声形式に対応している場合だけ表示します。';panel.append(note);
+    if(readyExport){
+      const ready=document.createElement('div');ready.className='hp-export-row';
+      const readyText=document.createElement('strong');readyText.textContent='ファイル準備完了';
+      const share=document.createElement('button');share.type='button';share.dataset.shareReady='true';share.textContent='📤 保存先を選ぶ';
+      ready.append(readyText,share);panel.append(ready);
+    }
+    const note=document.createElement('p');note.className='hp-track-note';note.textContent='WAVは高速です。MP3 / MP4 / WebMなどの圧縮形式は端末の標準エンコーダーを使うため、機種によっては演奏時間と同程度かかります。';panel.append(note);
     updatePlayButton();
   }
 
@@ -119,6 +148,7 @@
     if(button.dataset.trackMute){const track=tracks.find(t=>t.id===button.dataset.trackMute);if(track){track.muted=!track.muted;applyLiveMutes();saveState();renderPanel();}return;}
     if(button.dataset.removeTrack){stopPlayback();tracks=tracks.filter(t=>t.id!==button.dataset.removeTrack);saveState();renderPanel();return;}
     if(button.dataset.exportMix)void exportMix(panel.querySelector('[data-export-format]').value);
+    if(button.dataset.shareReady)void deliverReadyExport();
   });
 
   function beginRecording(){
@@ -253,24 +283,89 @@
     const left=buffer.getChannelData(0),right=buffer.getChannelData(Math.min(1,buffer.numberOfChannels-1));let offset=44;for(let i=0;i<length;i++)for(const value of [left[i],right[i]]){const sample=Math.max(-1,Math.min(1,value));view.setInt16(offset,sample<0?sample*32768:sample*32767,true);offset+=2;}
     return new Blob([data],{type:'audio/wav'});
   }
-  function saveBlob(blob,extension){const link=document.createElement('a'),url=URL.createObjectURL(blob);link.href=url;link.download='Piano-Palette-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+extension;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-  async function encodeWithMediaRecorder(buffer,mimeType){
-    if(!window.MediaRecorder?.isTypeSupported?.(mimeType))throw new Error('この端末は選択した保存形式に対応していません');const Audio=window.AudioContext||window.webkitAudioContext,audio=new Audio();
-    try{await audio.resume();const destination=audio.createMediaStreamDestination(),source=audio.createBufferSource();source.buffer=buffer;source.connect(destination);const recorder=new MediaRecorder(destination.stream,{mimeType}),parts=[];
-      const finished=new Promise((resolve,reject)=>{recorder.ondataavailable=event=>{if(event.data.size)parts.push(event.data);};recorder.onerror=event=>reject(event.error||new Error('音声変換に失敗しました'));recorder.onstop=()=>resolve(new Blob(parts,{type:recorder.mimeType||mimeType}));});
-      recorder.start();source.start(audio.currentTime+.05);source.onended=()=>{if(recorder.state!=='inactive')recorder.stop();};return await finished;
-    }finally{await audio.close();}
+  function makeExportFile(blob,extension){
+    const name='Piano-Palette-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+extension;
+    return new File([blob],name,{type:blob.type||'application/octet-stream'});
+  }
+  function downloadFile(file){
+    rememberExportResume();
+    const link=document.createElement('a'),url=URL.createObjectURL(file);
+    link.href=url;link.download=file.name;document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+  async function deliverReadyExport(){
+    if(!readyExport)return;
+    const file=readyExport.file;
+    try{
+      if(isIOS&&isStandalone&&navigator.share&&navigator.canShare?.({files:[file]})){
+        await navigator.share({files:[file],title:'Piano Palette 録音'});
+      }else{
+        downloadFile(file);
+      }
+      say(file.name+' を保存しました');
+      readyExport=null;
+      renderPanel();
+    }catch(error){
+      if(error?.name==='AbortError'){say('保存をキャンセルしました');return;}
+      downloadFile(file);
+      readyExport=null;
+      renderPanel();
+    }
+  }
+  async function encodeWithMediaRecorder(buffer,mimeType,label){
+    if(!window.MediaRecorder?.isTypeSupported?.(mimeType))throw new Error('この端末は選択した保存形式に対応していません');
+    const Audio=window.AudioContext||window.webkitAudioContext,audio=new Audio();
+    const duration=Math.max(.1,buffer.duration);
+    let progressTimer=null;
+    try{
+      await audio.resume();
+      const destination=audio.createMediaStreamDestination(),source=audio.createBufferSource();
+      source.buffer=buffer;source.connect(destination);
+      const recorder=new MediaRecorder(destination.stream,{mimeType}),parts=[];
+      const started=performance.now();
+      const finished=new Promise((resolve,reject)=>{
+        recorder.ondataavailable=event=>{if(event.data.size)parts.push(event.data);};
+        recorder.onerror=event=>reject(event.error||new Error('音声変換に失敗しました'));
+        recorder.onstop=()=>resolve(new Blob(parts,{type:recorder.mimeType||mimeType}));
+      });
+      recorder.start(1000);
+      source.start(audio.currentTime+.03);
+      progressTimer=setInterval(()=>{
+        const elapsed=Math.min(duration,(performance.now()-started)/1000);
+        say(label+'圧縮中 · '+elapsed.toFixed(0)+' / '+duration.toFixed(0)+'秒');
+      },500);
+      source.onended=()=>{if(recorder.state!=='inactive')recorder.stop();};
+      return await finished;
+    }finally{
+      clearInterval(progressTimer);
+      await audio.close();
+    }
   }
   async function exportMix(format){
-    const selected=audibleTracks();if(!selected.length||busy)return;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
+    const selected=audibleTracks();if(!selected.length||busy)return;readyExport=null;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
     try{
       await ensureEngine();await preload(selected);const duration=mixDuration(selected);
       const sampleRate=44100,Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!Offline)throw new Error('このブラウザでは音声書き出しを利用できません');
       const offline=new Offline(2,Math.ceil(duration*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
-      for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,.01+note.start,null);const rendered=await offline.startRendering();
-      if(format==='wav')saveBlob(encodeWav(rendered),'wav');else if(format==='mp4')saveBlob(await encodeWithMediaRecorder(rendered,'audio/mp4'),'mp4');else saveBlob(await encodeWithMediaRecorder(rendered,'audio/webm;codecs=opus'),'webm');
-      say(selected.length+'トラックを'+format.toUpperCase()+'で保存しました');
-    }catch(error){say('保存できませんでした：'+error.message,true);}finally{busy=false;renderPanel();}
+      for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,.01+note.start,null);
+      const rendered=await offline.startRendering();
+      let blob,extension=format;
+      if(format==='wav')blob=encodeWav(rendered);
+      else if(format==='mp3')blob=await encodeWithMediaRecorder(rendered,'audio/mpeg','MP3');
+      else if(format==='mp4')blob=await encodeWithMediaRecorder(rendered,'audio/mp4','MP4');
+      else blob=await encodeWithMediaRecorder(rendered,'audio/webm;codecs=opus','WebM');
+      const file=makeExportFile(blob,extension);
+      if(isIOS&&isStandalone){
+        readyExport={file};
+        say(selected.length+'トラックの'+format.toUpperCase()+'を準備しました。「保存先を選ぶ」をタップしてください');
+      }else{
+        downloadFile(file);
+        say(selected.length+'トラックを'+format.toUpperCase()+'で保存しました');
+      }
+    }catch(error){
+      if(error?.name==='AbortError')say('保存をキャンセルしました');
+      else say('保存できませんでした：'+error.message,true);
+    }finally{busy=false;renderPanel();}
   }
 
   volumeControl.addEventListener('input',()=>{if(engineMaster&&engine)engineMaster.gain.setTargetAtTime(clamp(volumeControl.value,0,100)/100*.55,engine.currentTime,.01);});
