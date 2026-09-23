@@ -1,17 +1,122 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#241324">
-<title>Piano Palette - メンテナンス中</title>
-<style>
-html,body{margin:0;min-height:100%;background:#241324;color:#fffaf2;font-family:system-ui,-apple-system,"Hiragino Sans",sans-serif}
-body{display:grid;place-items:center;min-height:100dvh;padding:24px;box-sizing:border-box;text-align:center}
-main{max-width:560px}
-h1{font-size:clamp(28px,7vw,48px);margin:0 0 16px}
-p{line-height:1.8;color:#eadde8;margin:0}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#665670">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="description" content="Piano Paletteは37鍵・88鍵で演奏できるWeb楽器。ピアノ、エレキベース、エレキギター、エフェクター、録音に対応。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Piano Palette</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23665670'/%3E%3Cpath d='M6 7h6v19H6zm7 0h6v19h-6zm7 0h6v19h-6z' fill='%23fffaf2'/%3E%3Cpath d='M10 7h4v11h-4zm8 0h4v11h-4z' fill='%23504a54'/%3E%3C/svg%3E">
+  <meta name="apple-mobile-web-app-title" content="Piano Palette">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/piano-180.png">
+  <link rel="manifest" href="/manifest.webmanifest?v=10">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js', { scope: '/', updateViaCache: 'none' })
+          .then((registration) => registration.update())
+          .catch(() => {});
+      });
+    }
+  </script>
+  <link rel="stylesheet" href="/piano.css">
+  <link rel="stylesheet" href="/landscape.css?v=11">
+  <script src="/orientation.js?v=9"></script>
+  <script defer src="/instruments.js?v=9"></script>
+  <link rel="stylesheet" href="/effects.css?v=9">
+  <script defer src="/effects.js?v=9"></script>
+  <script defer src="/effects-ui.js?v=9"></script>
+  <script defer src="/key-layout.js?v=9"></script>
+  <script defer src="/piano.js?v=16"></script>
+  <link rel="stylesheet" href="/multitrack.css?v=11">
+  <script defer src="/multitrack.js?v=15"></script>
+  <link rel="stylesheet" href="/display-mode.css?v=10">
+  <script defer src="/display-mode.js?v=10"></script>
+  <link rel="stylesheet" href="/playability.css?v=9">
+  <script defer src="/playability.js?v=9"></script>
 </head>
-<body><main><h1>メンテナンス中</h1><p>Piano Paletteを改修しています。しばらくしてからもう一度開いてください。</p></main></body>
+<body>
+<main id="hp-viewport">
+<div id="hp-four88" lang="ja">
+  <div class="hp-surface" role="group" aria-label="グランドピアノ">
+    <header class="hp-header" data-settings-background>
+      <div class="hp-layout-actions"><label class="hp-layout-label"><span>鍵盤</span><select data-control="layout" aria-label="鍵盤の並べ方"><option value="88">88鍵・4段</option><option value="37" selected>37鍵・3段</option></select></label><button type="button" class="hp-control hp-stop-sound" data-action="stop-sound" aria-label="鳴っている音を止める" title="鳴っている音を止める">■ 音停止</button></div>
+      <div class="hp-toolbar" aria-label="演奏の操作">
+        <button type="button" class="hp-control" data-action="start" aria-label="演奏をはじめる">演奏開始</button>
+        <button type="button" class="hp-control" data-action="record" aria-pressed="false" disabled>● 録音</button>
+        <button type="button" class="hp-control" data-action="play" disabled>▶ 再生</button>
+        <button type="button" class="hp-control" data-action="display-mode">全画面</button>
+        <button type="button" class="hp-control" data-action="settings" aria-haspopup="dialog">設定</button>
+      </div>
+    </header>
+    <div class="hp-stage" data-settings-background><div class="hp-keyboard" aria-label="上段は高音、中段は中音、下段は低音"></div></div>
+    <div class="hp-piano-view" data-settings-background hidden>
+      <div class="hp-scroll-tools">
+        <button class="hp-control" type="button" data-action="higher">↑ 高い音へ</button>
+        <div class="hp-register-info"><output class="hp-range" data-output="register">C3–B6</output><span>余白を上下にスワイプ</span></div>
+        <button class="hp-control" type="button" data-action="lower">↓ 低い音へ</button>
+      </div>
+      <div class="hp-scroll-window" role="region" aria-label="88鍵の鍵盤。4段表示。上下にスクロールできます"><div class="hp-octave-stack"></div></div>
+    </div>
+    <div class="hp-footer" data-settings-background><span class="hp-status" role="status" aria-live="polite">演奏をはじめるボタンで音源を準備</span><span data-output="instrument-label">グランドピアノ</span></div>
+    <span data-output="notes" hidden></span>
+    <div class="hp-settings-overlay" hidden>
+      <div class="hp-settings-backdrop" data-action="settings-backdrop"></div>
+      <section class="hp-settings" role="dialog" aria-modal="true" aria-labelledby="hp-settings-title">
+        <div class="hp-settings-title"><h1 id="hp-settings-title">設定</h1><button class="hp-control" type="button" data-action="settings-close">閉じる</button></div>
+        <section class="hp-size-panel"><h2>鍵盤の押しやすさ</h2>
+<p class="hp-setting-help">白鍵は正方形、黒鍵は真円です。片方のサイズを変えても、もう片方は変わりません。100%が重ならずに使える最大サイズです。</p>
+<label class="hp-setting"><span class="hp-setting-heading">白鍵の大きさ<output data-size-output="white"></output></span><input type="range" data-key-size="white" min="60" max="100" value="100" aria-label="白鍵の大きさ"></label>
+<label class="hp-setting"><span class="hp-setting-heading">黒鍵の大きさ<output data-size-output="black"></output></span><input type="range" data-key-size="black" min="60" max="100" value="100" aria-label="黒鍵の大きさ"></label>
+<label class="hp-setting"><span class="hp-setting-heading">画面端からの余白<output data-size-output="edge"></output></span><input type="range" data-key-size="edge" min="0" max="48" value="8" aria-label="画面端からの余白"></label>
+<button type="button" class="hp-control" data-action="key-size-reset">画像に近いサイズ比に戻す</button>
+<p class="hp-setting-help">時計やホームバーがある部分は、余白を0にしても避けます。</p></section>
+        <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span></label>
+        <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">演奏をはじめるボタンで音源を準備</p>
+        <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button></div>
+        <label class="hp-setting"><span class="hp-setting-heading"><span>① 音量</span><output data-output="volume">75%</output></span><span class="hp-setting-help">楽器と響き、両方の音の大きさ。</span><input type="range" data-control="volume" min="0" max="100" value="75" aria-label="音量"><span class="hp-scale-ends"><span>小さい</span><span>大きい</span></span></label>
+        <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>② 響きの強さ（リバーブ）</span><output data-output="reverb">35%</output></span><span class="hp-setting-help">ホールで反射する音の量。0%なら反響なし。</span><input type="range" data-control="reverb" min="0" max="100" value="35" aria-label="響きの強さ"><span class="hp-scale-ends"><span>反響なし</span><span>よく響く</span></span></label>
+        <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>③ 響きの長さ</span><output data-output="decay">0.05秒</output></span><span class="hp-setting-help">反響が小さくなるまでの時間。長くすると余韻が残ります。</span><input type="range" data-control="decay" min="0.02" max="8" step="0.01" value="0.05" aria-label="響きが消えるまでの時間"><span class="hp-scale-ends"><span>短い</span><span>長い</span></span></label>
+
+        <div data-effects-panel hidden></div>
+
+<section class="hp-wallpaper-panel"><h2>画面・背景</h2>
+<label class="hp-wide-label"><input type="checkbox" data-control="wide" checked> 画面の端まで広く使う</label>
+<p class="hp-setting-help">余白を減らして鍵盤を広げます。端が押しにくい場合はOFFにできます。</p>
+<label class="hp-setting">壁紙<select data-control="wallpaper" aria-label="壁紙"><option value="default">いつもの背景</option><option value="night">夜色</option><option value="blue">青</option><option value="photo">自分の写真</option></select></label>
+<label class="hp-photo-label">写真を選ぶ<input type="file" data-control="photo" accept="image/*"></label>
+<button type="button" class="hp-control" data-action="photo-remove">写真を削除</button>
+<p class="hp-setting-help" data-output="photo-status" role="status">写真はこの端末のブラウザ内に保存します。</p></section>
+<section class="hp-install-panel" aria-labelledby="hp-install-title">
+          <h2 id="hp-install-title" tabindex="-1">アプリのように使う</h2>
+          <p class="hp-display-status" data-output="display-status" role="status" aria-live="polite">ホーム画面から開くと、SafariのURLバーなしで演奏できます。</p>
+          <div class="hp-display-actions"><button type="button" class="hp-control" data-action="fullscreen">この画面を全画面にする</button><button type="button" class="hp-control" data-action="install-app" hidden>ホーム画面に追加</button></div>
+          <div data-install-guide>
+            <p class="hp-install-browser-note">ChatGPT内で開いている場合は、先にメニューからSafariで開いてください。</p>
+            <ol class="hp-install-steps">
+              <li>Safariでこのサイトを開きます。</li>
+              <li>「共有」→「ホーム画面に追加」を選びます。</li>
+              <li>「Webアプリとして開く」が表示されたらONにして、「追加」を押します。</li>
+              <li>追加したピアノのアイコンから起動します。</li>
+            </ol>
+            <p class="hp-install-note">このサイトのURL自体が変わる機能ではありません。</p>
+          </div>
+        </section>
+        <p class="hp-credit">音源：<a href="https://sfzinstruments.github.io/pianos/salamander/" target="_blank" rel="noopener noreferrer">Salamander Grand Piano · Alexander Holm</a> · <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a><br>Yamaha C5。元録音から30音をAAC 192 kbpsに変換。音程・残響を調整。</p>
+        <p class="hp-credit">ベース：<a href="https://shop.karoryfer.com/pages/free-fashionbass" target="_blank" rel="noopener noreferrer">Fashionbass · Karoryfer Samples</a><br>ギター：<a href="https://shop.karoryfer.com/pages/free-black-and-green-guitars" target="_blank" rel="noopener noreferrer">Black And Green Guitars · Karoryfer Samples / Brian Wood</a><br><a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a>。元の録音をAAC 192 kbpsに変換。同じ音の2種類の録音を交互に再生。本来の音域外は音程を変換します。</p>
+      </section>
+    </div>
+  </div>
+</div>
+</main>
+<noscript>演奏するには、ブラウザのJavaScriptを有効にしてください。</noscript>
+<script defer src="./rotation-guide.js?v=1"></script>
+</body>
 </html>
