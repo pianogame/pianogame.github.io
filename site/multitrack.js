@@ -219,6 +219,9 @@
     const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=clamp(note.release,.01,10);
     const natural=buffer.duration/source.playbackRate.value;
     envelope.gain.setValueAtTime(.00001,when);envelope.gain.linearRampToValueAtTime(level,when+.003);
+    source.connect(envelope);envelope.connect(target);
+    // Safari / iOS requires AudioBufferSourceNode.start() before stop() is scheduled.
+    source.start(when);
     if(note.sustain){
       envelope.gain.setValueAtTime(level,when+Math.min(heldFor,natural));
       source.stop(when+natural);
@@ -226,7 +229,7 @@
       envelope.gain.setValueAtTime(level,when+heldFor);envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
       source.stop(Math.min(when+natural,when+heldFor+releaseFor+.04));
     }
-    source.connect(envelope);envelope.connect(target);source.start(when);if(sourceList)sourceList.push(source);
+    if(sourceList)sourceList.push(source);
   }
   function applyLiveMutes(){if(!engine)return;for(const item of playbackBuses)item.bus.gain.setTargetAtTime(isAudible(item.track)?1:0,engine.currentTime,.008);}
   function stopPlayback(){
