@@ -1,4 +1,4 @@
-const CACHE_NAME = 'piano-palette-shell-v1';
+const CACHE_NAME = 'piano-palette-shell-v2';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
