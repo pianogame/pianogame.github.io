@@ -20,6 +20,7 @@
   const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const isStandalone=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
   const stageStateKey='piano-palette-stage-open-v1';
+  const exportResumeKey='piano-palette-export-resume-until-v1';
 
   let tracks = [];
   let groupMutes = {piano:false,bass:false,guitar:false};
@@ -63,8 +64,18 @@
   measureHeader();new ResizeObserver(measureHeader).observe(root.querySelector('.hp-header'));
   window.addEventListener('resize',measureHeader);window.addEventListener('hp-viewport-resize',measureHeader);
   function rememberStageOpen(){try{sessionStorage.setItem(stageStateKey,'1');}catch(_){}}
+  function rememberExportResume(){
+    rememberStageOpen();
+    try{localStorage.setItem(exportResumeKey,String(Date.now()+30000));}catch(_){}
+  }
   function restoreStage(){
-    let opened=false;try{opened=sessionStorage.getItem(stageStateKey)==='1';}catch(_){}
+    let opened=false;
+    try{opened=sessionStorage.getItem(stageStateKey)==='1';}catch(_){}
+    try{
+      const until=Number(localStorage.getItem(exportResumeKey)||0);
+      if(until>Date.now()){opened=true;sessionStorage.setItem(stageStateKey,'1');}
+      if(until) localStorage.removeItem(exportResumeKey);
+    }catch(_){}
     if(opened){curtain.classList.add('open');curtain.hidden=true;}
   }
   function openCurtainWhenReady(){
@@ -277,7 +288,7 @@
     return new File([blob],name,{type:blob.type||'application/octet-stream'});
   }
   function downloadFile(file){
-    rememberStageOpen();
+    rememberExportResume();
     const link=document.createElement('a'),url=URL.createObjectURL(file);
     link.href=url;link.download=file.name;document.body.append(link);link.click();link.remove();
     setTimeout(()=>URL.revokeObjectURL(url),60000);
