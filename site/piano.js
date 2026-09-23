@@ -24,8 +24,8 @@
   const playingCounts = new Map();
   let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend;
   const effectUI = window.HP_EFFECTS_UI;
-  const ambience = {piano:{amount:35,decay:.8},bass:{amount:4,decay:.3}};
-  const articulation={piano:{release:.07,sustain:false},guitar:{release:.05,sustain:false},bass:{release:.06,sustain:false}};
+  const ambience = {piano:{amount:35,decay:.05},bass:{amount:4,decay:.3}};
+  const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true}};
   const releaseControl=root.querySelector('[data-control="release"]');
   let ambienceInstrument = 'piano';
   let samplesReady = false, sampleBuffers = new Map(), currentInstrument = 'piano', loadGeneration = 0;
@@ -433,14 +433,14 @@
       entry.event = {midi, start: Math.max(0, ctx.currentTime - recordStart), duration: .12, sustain};
       events.push(entry.event); eventCount++;
     }
-    held.set(token, entry); pendingSparkles.add(midi); redraw();
+    held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi}})); pendingSparkles.add(midi); redraw();
     if (!recording && !playing && status.textContent!=='演奏中') say('演奏中');
   }
   function noteOff(token) {
     const entry = held.get(token); if (!entry) return;
     entry.voice.release();
     if (entry.event && recording) entry.event.duration = Math.max(.06, ctx.currentTime - recordStart - entry.event.start);
-    held.delete(token); redraw();
+    root.dispatchEvent(new CustomEvent('hp-note-off',{detail:{token,midi:entry.midi}})); held.delete(token); redraw();
   }
   function releaseHeld() { Array.from(held.keys()).forEach(noteOff); }
   function stopPlayback() {
@@ -469,7 +469,7 @@
     event.preventDefault();
     try {root.setPointerCapture(event.pointerId);} catch(_) {}
     const point = localPointer(event);
-    pointerStarts.set(event.pointerId,{...point,scrollable:scrollable&&!key,scrollTop:pianoScroll.scrollTop,scrolling:false});
+    pointerStarts.set(event.pointerId,{...point,scrollable:scrollable&&!key,scrollTop:pianoScroll.scrollTop,scrolling:false,lastClientX:event.clientX,lastClientY:event.clientY});
     if (key) noteOn('pointer:' + event.pointerId, Number(key.dataset.midi));
   });
   root.addEventListener('pointermove', event => {
@@ -483,10 +483,22 @@
       showRegister(); return;
     }
     if (!held.has(token) || origin.scrolling) return;
-    const hit = document.elementFromPoint(event.clientX,event.clientY);
-    const key = hit && hit.closest('[data-midi]');
-    if (key && root.contains(key) && Number(key.dataset.midi) !== held.get(token).midi) {
-      noteOff(token); noteOn(token, Number(key.dataset.midi));
+    const samples = typeof event.getCoalescedEvents === 'function' ? event.getCoalescedEvents() : [event];
+    const points = samples.length ? samples : [event];
+    for (const sample of points) {
+      const fromX = Number.isFinite(origin.lastClientX) ? origin.lastClientX : sample.clientX;
+      const fromY = Number.isFinite(origin.lastClientY) ? origin.lastClientY : sample.clientY;
+      const moveX = sample.clientX-fromX, moveY = sample.clientY-fromY;
+      const steps = Math.min(18,Math.max(1,Math.ceil(Math.hypot(moveX,moveY)/10)));
+      for (let step=1;step<=steps;step++) {
+        const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
+        const hit = document.elementFromPoint(x,y);
+        const key = hit && hit.closest('[data-midi]');
+        if (key && root.contains(key) && Number(key.dataset.midi) !== held.get(token)?.midi) {
+          noteOff(token); noteOn(token, Number(key.dataset.midi));
+        }
+      }
+      origin.lastClientX=sample.clientX; origin.lastClientY=sample.clientY;
     }
   });
   ['pointerup','pointercancel','lostpointercapture'].forEach(name => root.addEventListener(name, event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); }));
@@ -529,6 +541,16 @@
     }
   });
   action('sustain').addEventListener('click', () => { sustain = !sustain; articulation[currentInstrument].sustain=sustain; action('sustain').setAttribute('aria-pressed', String(sustain)); action('sustain').textContent=sustain?'音を伸ばす：ON':'音を伸ばす：OFF'; if (!sustain && ctx) { const active=new Set(Array.from(held.values()).map(note=>note.voice)); allVoices.forEach(voice=>{if(!active.has(voice))voice.release(ctx.currentTime,articulation[currentInstrument].release);}); } });
+  action('stop-sound').addEventListener('click', () => {
+    stopPlayback(); releaseHeld(); pointerStarts.clear();
+    if (ctx) {
+      allVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
+      playingCounts.clear();
+      if (reverb) { reverb.buffer=null; updateReverb(); }
+    }
+    root.dispatchEvent(new Event('hp-stop-sound'));
+    redraw(); say('鳴っている音と余韻を止めました');
+  });
   action('record').addEventListener('click', () => {
     if (recording) { finishRecording(); return; }
     if (!ensureAudio()) return;
@@ -592,15 +614,15 @@
         description:'Set piano volume, reverb amount and decay using the same controls as the visible sound settings.',
         inputSchema:{
           type:'object',
-          properties:{volume:{type:'number',minimum:0,maximum:100},reverb:{type:'number',minimum:0,maximum:100},decay:{type:'number',minimum:0.1,maximum:8,multipleOf:0.1}},
+          properties:{volume:{type:'number',minimum:0,maximum:100},reverb:{type:'number',minimum:0,maximum:100},decay:{type:'number',minimum:0.02,maximum:8,multipleOf:0.01}},
           additionalProperties:false
         },
         annotations:{readOnlyHint:false,untrustedContentHint:false},
         execute(input) {
           if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Expected sound settings');
-          const bounds={volume:[0,100],reverb:[0,100],decay:[.1,8]};
+          const bounds={volume:[0,100],reverb:[0,100],decay:[.02,8]};
           Object.entries(input).forEach(([name,value]) => {
-            if (!bounds[name] || typeof value !== 'number' || !Number.isFinite(value) || value<bounds[name][0] || value>bounds[name][1] || (name==='decay' && Math.abs(value*10-Math.round(value*10))>1e-8)) throw new Error('Invalid sound setting');
+            if (!bounds[name] || typeof value !== 'number' || !Number.isFinite(value) || value<bounds[name][0] || value>bounds[name][1] || (name==='decay' && Math.abs(value*100-Math.round(value*100))>1e-8)) throw new Error('Invalid sound setting');
           });
           Object.entries(input).forEach(([name,value]) => {
             const control=root.querySelector('[data-control="'+name+'"]');
