@@ -39,9 +39,12 @@
 
   const startButton = document.querySelector('[data-action="start"]');
   if (startButton) {
-    startButton.addEventListener('click', () => {
-      if (!startButton.disabled) deliver('performance-start');
-    }, { passive: true });
+    const syncPerformanceStart = () => {
+      if (startButton.hidden) deliver('performance-start');
+    };
+    syncPerformanceStart();
+    const startObserver = new MutationObserver(syncPerformanceStart);
+    startObserver.observe(startButton, { attributes: true, attributeFilter: ['hidden'] });
   }
 
   const recordButton = document.querySelector('[data-action="record"]');
