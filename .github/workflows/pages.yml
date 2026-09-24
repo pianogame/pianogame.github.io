@@ -1,4 +1,4 @@
-name: Disable GitHub Pages site
+name: Publish piano
 
 on:
   push:
@@ -24,34 +24,15 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Prepare disabled Pages site
-        run: |
-          rm -rf _site
-          mkdir -p _site
-          cat > _site/404.html <<'EOF'
-          <!doctype html>
-          <html lang="ja">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width,initial-scale=1">
-            <meta name="robots" content="noindex,nofollow">
-            <title>404</title>
-          </head>
-          <body></body>
-          </html>
-          EOF
-          touch _site/.nojekyll
-
+      - name: Prepare piano and audio
+        run: python3 scripts/build_pages.py
       - name: Configure Pages
         uses: actions/configure-pages@v5
-
-      - name: Upload disabled site
+      - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-          name: disabled-pages-${{ github.run_id }}-${{ github.run_attempt }}
-
+          name: piano-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Wait for legacy Pages publication
         env:
           GH_TOKEN: ${{ github.token }}
@@ -65,7 +46,7 @@ jobs:
                   runs = json.load(response)["workflow_runs"]
               legacy = [r for r in runs if r["event"] == "dynamic" and r["name"] == "pages build and deployment" and r["head_sha"] == os.environ["GITHUB_SHA"]]
               if legacy and all(r["status"] == "completed" for r in legacy):
-                  print("Legacy publication finished; disabling GitHub Pages last.")
+                  print("Legacy publication finished; publishing Piano Palette last.")
                   break
               if not legacy and attempt >= 4:
                   print("No legacy publication found.")
@@ -74,9 +55,8 @@ jobs:
           else:
               raise SystemExit("Legacy publication is still running; refusing a racing deployment.")
           PY
-
-      - name: Publish disabled site
+      - name: Publish site
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: disabled-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          artifact_name: piano-pages-${{ github.run_id }}-${{ github.run_attempt }}
