@@ -16,7 +16,7 @@
   const gate=document.createElement('section');
   gate.className='hp-install-gate';
   gate.setAttribute('aria-labelledby','hp-install-gate-title');
-  gate.innerHTML='<div class="hp-install-gate-card"><div class="hp-install-gate-mark" aria-hidden="true">♪</div><h1 id="hp-install-gate-title">Piano Palette</h1><p class="hp-install-gate-lead">ホーム画面に追加してから起動してください。</p><button type="button" class="hp-install-gate-button" hidden>ホーム画面に追加</button><div class="hp-install-gate-guide"></div><p class="hp-install-gate-note">追加後は、ホーム画面のPiano Paletteアイコンから開くと演奏画面が表示されます。</p></div>';
+  gate.innerHTML='<div class="hp-install-gate-card"><div class="hp-install-gate-mark" aria-hidden="true">♪</div><h1 id="hp-install-gate-title">ピアノドリームステージ</h1><p class="hp-install-gate-lead">ホーム画面に追加してから起動してください。</p><button type="button" class="hp-install-gate-button" hidden>ホーム画面に追加</button><div class="hp-install-gate-guide"></div><p class="hp-install-gate-note">追加後は、ホーム画面のピアノドリームステージアイコンから開くと演奏画面が表示されます。</p></div>';
   document.body.append(gate);
   const gateButton=gate.querySelector('.hp-install-gate-button');
   const gateGuide=gate.querySelector('.hp-install-gate-guide');
@@ -90,7 +90,7 @@
     try {
       await prompt.prompt();
       const result=await prompt.userChoice;
-      status.textContent=result.outcome==='accepted'?'追加したPiano Paletteのアイコンから起動してください。':'追加をキャンセルしました。ブラウザのメニューからも追加できます。';
+      status.textContent=result.outcome==='accepted'?'追加したピアノドリームステージのアイコンから起動してください。':'追加をキャンセルしました。ブラウザのメニューからも追加できます。';
     } catch(_) {
       status.textContent='ブラウザのメニューからホーム画面に追加してください。';
     }
@@ -102,7 +102,7 @@
   action('fullscreen').addEventListener('click',()=>void enterFullscreen());
   action('install-app').addEventListener('click',()=>void installFromPrompt());
   window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;refresh();});
-  window.addEventListener('appinstalled',()=>{installPrompt=null;refresh();status.textContent='追加したPiano Paletteのアイコンから起動してください。';});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;refresh();status.textContent='追加したピアノドリームステージのアイコンから起動してください。';});
   document.addEventListener('fullscreenchange',refresh);
   document.addEventListener('webkitfullscreenchange',refresh);
   standalone.addEventListener?.('change',refresh);
@@ -110,10 +110,10 @@
   window.addEventListener('pageshow',refresh);
 
   if(!isIOS) {
-    root.querySelector('.hp-install-browser-note').textContent='ブラウザのメニューからPiano Paletteをアプリとしてインストールしてください。';
+    root.querySelector('.hp-install-browser-note').textContent='ブラウザのメニューからピアノドリームステージをアプリとしてインストールしてください。';
     const steps=root.querySelector('.hp-install-steps');
     steps.replaceChildren();
-    ['ブラウザでこのサイトを開きます。','ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選びます。','追加したPiano Paletteのアイコンから起動します。'].forEach(text=>{const li=document.createElement('li');li.textContent=text;steps.append(li);});
+    ['ブラウザでこのサイトを開きます。','ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選びます。','追加したピアノドリームステージのアイコンから起動します。'].forEach(text=>{const li=document.createElement('li');li.textContent=text;steps.append(li);});
   }
   refresh();
 })();
