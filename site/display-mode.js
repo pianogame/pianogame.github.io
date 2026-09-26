@@ -18,7 +18,7 @@
   const gate=document.createElement('section');
   gate.className='hp-install-gate';
   gate.setAttribute('aria-labelledby','hp-install-gate-title');
-  gate.innerHTML='<div class="hp-install-gate-card"><div class="hp-install-gate-mark" aria-hidden="true">♪</div><h1 id="hp-install-gate-title"><span class="hp-install-en">Piano Dream Stage</span><span class="hp-install-kana">ピアノ・ドリーム・ステージ</span></h1><p class="hp-install-gate-lead">ホーム画面に追加してから起動してください。</p><button type="button" class="hp-install-gate-button" hidden>ホーム画面に追加</button><div class="hp-install-gate-guide"></div><p class="hp-install-gate-note">追加後は、ホーム画面のピアノドリームステージアイコンから開くと演奏画面が表示されます。</p></div>';
+  gate.innerHTML='<div class="hp-install-gate-card"><div class="hp-install-gate-mark" aria-hidden="true">♪</div><h1 id="hp-install-gate-title"><span class="hp-install-en">Piano Dream Stage</span><span class="hp-install-kana">ピアノドリームステージ</span></h1><p class="hp-install-gate-lead">ホーム画面に追加してから起動してください。</p><button type="button" class="hp-install-gate-button" hidden>ホーム画面に追加</button><div class="hp-install-gate-guide"></div><p class="hp-install-gate-note">追加後は、ホーム画面のピアノドリームステージアイコンから開くと演奏画面が表示されます。</p></div>';
   document.body.append(gate);
   const gateButton=gate.querySelector('.hp-install-gate-button');
   const gateGuide=gate.querySelector('.hp-install-gate-guide');
