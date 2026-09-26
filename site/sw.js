@@ -1,4 +1,6 @@
-const CACHE_NAME = 'piano-palette-shell-v3';
+const CACHE_NAME = 'piano-dream-stage-shell-v1';
+const LEGACY_CACHE_PREFIX = 'piano-palette-shell-';
+const CACHE_PREFIX = 'piano-dream-stage-shell-';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -9,7 +11,7 @@ self.addEventListener('activate', (event) => {
     const names = await caches.keys();
     await Promise.all(
       names
-        .filter((name) => name.startsWith('piano-palette-shell-') && name !== CACHE_NAME)
+        .filter((name) => (name.startsWith(LEGACY_CACHE_PREFIX) || name.startsWith(CACHE_PREFIX)) && name !== CACHE_NAME)
         .map((name) => caches.delete(name))
     );
     await self.clients.claim();
