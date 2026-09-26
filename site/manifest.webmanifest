@@ -1,13 +1,13 @@
 {
   "name": "ピアノドリームステージ",
   "short_name": "ドリステ",
-  "start_url": "/?app=home",
-  "scope": "/",
+  "start_url": "/piano-dream-stage/?app=home",
+  "scope": "/piano-dream-stage/",
   "display": "fullscreen",
   "orientation": "landscape",
   "theme_color": "#665670",
   "background_color": "#eee5ed",
-  "id": "/",
+  "id": "/piano-dream-stage/",
   "display_override": [
     "fullscreen",
     "standalone"
