@@ -1,47 +1,32 @@
-"""Build the static site, restoring audio and publishing Piano Dream Stage at its canonical path."""
+"""Build output for Vercel while keeping GitHub Pages non-public."""
 from pathlib import Path
 import hashlib
 import io
 import json
+import os
 import shutil
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
-APP_PATH = "piano-dream-stage"
 
 if OUT.exists():
     shutil.rmtree(OUT)
-shutil.copytree(ROOT / "site", OUT)
+OUT.mkdir(parents=True, exist_ok=True)
 
-# Keep the full app at the branded URL while preserving shared assets at the site root.
-app_html = (OUT / "index.html").read_text(encoding="utf-8")
-app_dir = OUT / APP_PATH
-app_dir.mkdir(parents=True, exist_ok=True)
-(app_dir / "index.html").write_text(app_html, encoding="utf-8")
+# GitHub Pages is intentionally not a public distribution target.
+# Publish only a 404 page there so the github.io URL cannot serve the app.
+if os.environ.get("GITHUB_ACTIONS") == "true":
+    (OUT / ".nojekyll").write_text("", encoding="utf-8")
+    (OUT / "404.html").write_text(
+        """<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>404</title></head><body><h1>404</h1><p>このページは公開されていません。</p></body></html>""",
+        encoding="utf-8",
+    )
+    print("Ready: GitHub Pages intentionally publishes no app content")
+    raise SystemExit(0)
 
-# The former public URL must continue to work for people who already received it.
-redirect_html = """<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex">
-  <meta http-equiv="refresh" content="0;url=/piano-dream-stage/">
-  <title>ピアノドリームステージへ移動します</title>
-  <script>
-    (function () {
-      var target = '/piano-dream-stage/' + location.search + location.hash;
-      location.replace(target);
-    }());
-  </script>
-</head>
-<body>
-  <p><a href="/piano-dream-stage/">ピアノドリームステージを開く</a></p>
-</body>
-</html>
-"""
-(OUT / "index.html").write_text(redirect_html, encoding="utf-8")
+# Vercel: publish the actual app at the project root.
+shutil.copytree(ROOT / "site", OUT, dirs_exist_ok=True)
 
 bundles = ROOT / "sample-bundles"
 for bundle in json.loads((bundles / "parts.json").read_text()):
@@ -58,4 +43,4 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
 
 if len(list((OUT / "audio").rglob("*.m4a"))) != 102:
     raise ValueError("Expected all 102 audio samples")
-print("Ready: Piano Dream Stage at /piano-dream-stage/ with legacy root redirect and 102 unchanged audio samples")
+print("Ready: Piano Dream Stage for Vercel with 102 unchanged audio samples")
