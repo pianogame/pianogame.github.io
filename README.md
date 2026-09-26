@@ -5,7 +5,7 @@
 ## 公開
 
 GitHubのSettings → Pages → Build and deploymentで、Sourceを **GitHub Actions** に設定します。
-`main` の更新で `Publish piano` が実行され、`https://pianogame.github.io/piano-dream-stage/` に公開します。旧URL `https://pianogame.github.io/` は新URLへ自動転送します。
+`main` の更新はVercelの公開に使用します。GitHub Pages側ではアプリ本体を公開せず、github.io URLからはアクセスできない状態にします。
 
 ## ファイル
 
