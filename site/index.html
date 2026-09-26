@@ -16,14 +16,16 @@
   <link rel="icon" type="image/png" href="/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="ピアノドリームステージ">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png">
-  <link rel="manifest" href="/manifest.webmanifest?v=20">
+  <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon.png?v=10">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=10">
+  <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/apple-touch-icon-precomposed.png?v=10">
+  <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png?v=10">
+  <link rel="manifest" href="/manifest.webmanifest?v=21">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=7', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=8', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
