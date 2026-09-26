@@ -58,7 +58,7 @@
 
   const curtain=document.createElement('div');
   curtain.className='hp-curtain';curtain.setAttribute('aria-hidden','true');
-  curtain.innerHTML='<div class="hp-curtain-half"></div><div class="hp-curtain-half"></div><div class="hp-curtain-title">✦ Piano Dream Stage ✦</div>';
+  curtain.innerHTML='<div class="hp-curtain-half"></div><div class="hp-curtain-half"></div><div class="hp-curtain-title"><span style="display:block">✦ Piano Dream Stage ✦</span><span style="display:block;margin-top:6px;font-size:.45em;letter-spacing:.08em">ピアノ・ドリーム・ステージ</span></div>';
   surface.append(curtain);
   function measureHeader(){surface.style.setProperty('--hp-stage-top',root.querySelector('.hp-header').offsetHeight+'px');}
   measureHeader();new ResizeObserver(measureHeader).observe(root.querySelector('.hp-header'));
