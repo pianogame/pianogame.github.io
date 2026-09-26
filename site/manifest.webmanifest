@@ -1,6 +1,6 @@
 {
-  "name": "Piano Palette",
-  "short_name": "Piano Palette",
+  "name": "ピアノドリームステージ",
+  "short_name": "ドリステ",
   "start_url": "/?app=home",
   "scope": "/",
   "display": "fullscreen",
