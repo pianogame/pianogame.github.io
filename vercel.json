@@ -40,6 +40,24 @@
       ]
     },
     {
+      "source": "/icons/dreamstage-home-icon-v3.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/apple-touch-icon-v3.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/audio/(.*)",
       "headers": [
         {
