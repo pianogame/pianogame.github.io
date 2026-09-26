@@ -18,7 +18,7 @@
   const gate=document.createElement('section');
   gate.className='hp-install-gate';
   gate.setAttribute('aria-labelledby','hp-install-gate-title');
-  gate.innerHTML='<div class="hp-install-gate-card"><div class="hp-install-gate-mark" aria-hidden="true">♪</div><h1 id="hp-install-gate-title"><span class="hp-install-en">Piano Dream Stage</span><span class="hp-install-kana">ピアノ・ドリーム・ステージ</span></h1><p class="hp-install-gate-lead"><span class="hp-install-en">Add to Home Screen</span><span class="hp-install-kana">アド・トゥ・ホーム・スクリーン</span></p><button type="button" class="hp-install-gate-button" hidden><span class="hp-install-en">Install App</span><span class="hp-install-kana">インストール・アップ</span></button><div class="hp-install-gate-guide"></div><p class="hp-install-gate-note"><span class="hp-install-en">Open Piano Dream Stage from the new Home Screen icon.</span><span class="hp-install-kana">オープン・ピアノ・ドリーム・ステージ・フロム・ザ・ニュー・ホーム・スクリーン・アイコン</span></p></div>';
+  gate.innerHTML='<div class="hp-install-gate-card"><div class="hp-install-gate-mark" aria-hidden="true">♪</div><h1 id="hp-install-gate-title"><span class="hp-install-en">Piano Dream Stage</span><span class="hp-install-kana">ピアノ・ドリーム・ステージ</span></h1><p class="hp-install-gate-lead">ホーム画面に追加してから起動してください。</p><button type="button" class="hp-install-gate-button" hidden>ホーム画面に追加</button><div class="hp-install-gate-guide"></div><p class="hp-install-gate-note">追加後は、ホーム画面のピアノドリームステージアイコンから開くと演奏画面が表示されます。</p></div>';
   document.body.append(gate);
   const gateButton=gate.querySelector('.hp-install-gate-button');
   const gateGuide=gate.querySelector('.hp-install-gate-guide');
@@ -37,11 +37,7 @@
       el.style.letterSpacing='.06em';
       el.style.color='#8a748c';
     });
-    gate.querySelectorAll('.hp-install-gate-button .hp-install-kana').forEach((el)=>{
-      el.style.color='#eadfed';
-      el.style.fontSize='10px';
-    });
-  }
+      }
   styleBilingual();
 
   function renderGate() {
@@ -58,13 +54,13 @@
     if('inert' in (viewport||{})) viewport.inert=true;
     if(isIOS) {
       gateButton.hidden=true;
-      gateGuide.innerHTML='<ol class="hp-install-bilingual-steps"><li><span class="hp-install-en">Open in Safari</span><span class="hp-install-kana">オープン・イン・サファリ</span></li><li><span class="hp-install-en">Tap Share</span><span class="hp-install-kana">タップ・シェア</span></li><li><span class="hp-install-en">Add to Home Screen</span><span class="hp-install-kana">アド・トゥ・ホーム・スクリーン</span></li><li><span class="hp-install-en">Turn on Open as Web App</span><span class="hp-install-kana">ターン・オン・オープン・アズ・ウェブ・アップ</span></li><li><span class="hp-install-en">Tap Add</span><span class="hp-install-kana">タップ・アド</span></li></ol>';
+      gateGuide.innerHTML='<p>iPhone / iPadではSafariから次の手順で追加します。</p><ol><li>Safari下部の「共有」ボタンをタップ</li><li>「ホーム画面に追加」をタップ</li><li>「Webアプリとして開く」が表示されたらON</li><li>右上の「追加」をタップ</li></ol>';
     } else if(installPrompt) {
       gateButton.hidden=false;
-      gateGuide.innerHTML='<p><span class="hp-install-en">Install Piano Dream Stage as an app.</span><span class="hp-install-kana">インストール・ピアノ・ドリーム・ステージ・アズ・アン・アップ</span></p>';
+      gateGuide.innerHTML='<p>下のボタンからアプリとしてインストールできます。</p>';
     } else {
       gateButton.hidden=true;
-      gateGuide.innerHTML='<p><span class="hp-install-en">Choose Add to Home Screen or Install App from your browser menu.</span><span class="hp-install-kana">チューズ・アド・トゥ・ホーム・スクリーン・オア・インストール・アップ・フロム・ユア・ブラウザー・メニュー</span></p>';
+      gateGuide.innerHTML='<p>ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選んでください。</p>';
     }
     styleBilingual();
   }
