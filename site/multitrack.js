@@ -58,7 +58,7 @@
 
   const curtain=document.createElement('div');
   curtain.className='hp-curtain';curtain.setAttribute('aria-hidden','true');
-  curtain.innerHTML='<div class="hp-curtain-half"></div><div class="hp-curtain-half"></div><div class="hp-curtain-title">✦ Piano Palette ✦</div>';
+  curtain.innerHTML='<div class="hp-curtain-half"></div><div class="hp-curtain-half"></div><div class="hp-curtain-title">✦ Piano Dream Stage ✦</div>';
   surface.append(curtain);
   function measureHeader(){surface.style.setProperty('--hp-stage-top',root.querySelector('.hp-header').offsetHeight+'px');}
   measureHeader();new ResizeObserver(measureHeader).observe(root.querySelector('.hp-header'));
@@ -348,7 +348,7 @@
     return new Blob([data],{type:'audio/wav'});
   }
   function makeExportFile(blob,extension){
-    const name='Piano-Palette-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+extension;
+    const name='Piano-Dream-Stage-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+extension;
     return new File([blob],name,{type:blob.type||'application/octet-stream'});
   }
   function downloadFile(file){
@@ -362,7 +362,7 @@
     const file=readyExport.file;
     try{
       if(isIOS&&isStandalone&&navigator.share&&navigator.canShare?.({files:[file]})){
-        await navigator.share({files:[file],title:'Piano Palette 録音'});
+        await navigator.share({files:[file],title:'ピアノドリームステージ 録音'});
       }else{
         downloadFile(file);
       }
