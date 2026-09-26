@@ -15,8 +15,20 @@
   "lang": "ja",
   "icons": [
     {
-      "src": "/apple-touch-icon.png?v=9",
+      "src": "/apple-touch-icon.png",
       "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/dreamstage-icon-192-v9.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/dreamstage-icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     }
