@@ -97,3 +97,58 @@ html[data-hp-rotated="true"] #hp-viewport { width:var(--hp-view-height); height:
 #hp-four88 .hp-key:not(.hp-sharp) .hp-digit { font-size:clamp(14px,calc(var(--hp-white-width) * .43),30px); line-height:1; }
 #hp-four88 .hp-key:not(.hp-sharp) .hp-syllable { font-size:clamp(9px,calc(var(--hp-white-width) * .19),12px); line-height:1; margin-top:0; }
 #hp-four88 .hp-key:not(.hp-sharp) .hp-octave { height:3px; line-height:3px; font-size:8px; }
+
+
+/* Piano Dream Stage — rectangular piano keys (37-key and 88-key views) */
+#hp-four88 .hp-register-section {
+  --hp-white-width:80px;
+  --hp-white-height:56px;
+  --hp-white-top:8px;
+  --hp-black-width:38px;
+  --hp-black-height:38px;
+  --hp-black-top:7px;
+}
+#hp-four88 .hp-key,
+#hp-four88 .hp-stage .hp-key,
+#hp-four88 .hp-octave-stack .hp-key {
+  top:var(--hp-white-top);
+  bottom:auto;
+  width:var(--hp-white-width);
+  height:var(--hp-white-height);
+  min-width:0;
+  min-height:0;
+  aspect-ratio:auto;
+  border-radius:7px 7px 11px 11px;
+  padding:4px 0 8px;
+}
+#hp-four88 .hp-key.hp-sharp,
+#hp-four88 .hp-stage .hp-key.hp-sharp,
+#hp-four88 .hp-octave-stack .hp-key.hp-sharp {
+  top:var(--hp-black-top);
+  bottom:auto;
+  width:var(--hp-black-width);
+  height:var(--hp-black-height);
+  min-width:0;
+  min-height:0;
+  aspect-ratio:auto;
+  border-radius:4px 4px 7px 7px;
+  padding:0;
+}
+#hp-four88 .hp-stage .hp-keyboard {
+  gap:5px;
+}
+#hp-four88 .hp-stage .hp-register-section {
+  overflow:visible;
+  border:1px solid #4d3940;
+}
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-digit,
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-octave { display:none; }
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable {
+  font-size:clamp(11px,calc(var(--hp-white-height) * .21),16px);
+  line-height:1;
+  margin:0;
+}
+#hp-four88 .hp-key[aria-pressed="true"],
+#hp-four88 .hp-key.hp-sharp[aria-pressed="true"] {
+  transform:translate(-50%,4px);
+}
