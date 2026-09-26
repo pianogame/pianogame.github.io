@@ -1,13 +1,13 @@
 {
   "name": "ピアノドリームステージ",
   "short_name": "ドリステ",
-  "start_url": "/?app=home&pds_install_id=9",
+  "start_url": "/?app=home&pds_install_id=11",
   "scope": "/",
   "display": "fullscreen",
   "orientation": "landscape",
   "theme_color": "#241324",
   "background_color": "#241324",
-  "id": "/?pds_install_id=9",
+  "id": "/?pds_install_id=11",
   "display_override": [
     "fullscreen",
     "standalone"
@@ -15,7 +15,7 @@
   "lang": "ja",
   "icons": [
     {
-      "src": "/apple-touch-icon.png?v=10",
+      "src": "/apple-touch-icon-180x180.png?v=11",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
