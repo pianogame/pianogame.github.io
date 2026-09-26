@@ -56,3 +56,51 @@
   #hp-four88 .hp-key.hp-sharp[aria-pressed="true"]::before { background:#c2b787; border-color:#96875a; box-shadow:0 0 10px #fff3b7; }
   #hp-four88 .hp-scroll-tools .hp-control { padding:6px 9px; }
 }
+
+
+/* Piano Dream Stage — traditional piano-key appearance */
+#hp-four88 .hp-register-section { position:relative; }
+#hp-four88 .hp-key:not(.hp-sharp) {
+  width:var(--hp-white-width,80px);
+  height:var(--hp-white-height,56px);
+  top:var(--hp-white-top,10px);
+  min-width:0;
+  min-height:0;
+  aspect-ratio:auto;
+  border-radius:7px 7px 11px 11px;
+  border:1px solid #c8b8aa;
+  background:linear-gradient(90deg,#eee5dc 0,#fffdf8 8%,#fffaf2 50%,#f7eee5 92%,#d9c9ba 100%);
+  color:#5a463d;
+  box-shadow:inset 0 2px 1px #fff,inset 0 -5px 5px #d8cabd,0 3px 0 #a88f7e,0 5px 8px #39252a38;
+  justify-content:flex-end;
+  padding:4px 0 9px;
+}
+#hp-four88 .hp-key.hp-sharp {
+  width:var(--hp-black-width,38px);
+  height:var(--hp-black-height,40px);
+  top:var(--hp-black-top,8px);
+  min-width:0;
+  min-height:0;
+  aspect-ratio:auto;
+  border-radius:4px 4px 7px 7px;
+  border:1px solid #171820;
+  background:linear-gradient(90deg,#111218 0,#32343d 16%,#1c1d24 58%,#08090d 100%);
+  box-shadow:inset 0 2px 1px #6f7078,0 3px 0 #090a0d,0 5px 7px #251a205c;
+  padding:0;
+}
+#hp-four88 .hp-key.hp-sharp::before,
+#hp-four88 .hp-key.hp-sharp[aria-pressed="true"]::before { content:none; display:none; }
+#hp-four88 .hp-stage .hp-register-section {
+  border-radius:8px;
+  background:
+    linear-gradient(180deg,#241c23 0 7%,#6f4d4c 8%,#2f2329 18%,transparent 19% 100%);
+  box-shadow:inset 0 1px 0 #aa8277,inset 0 -2px 0 #2c2228,0 2px 5px #2a1b2445;
+}
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-digit,
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-octave { display:none; }
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable {
+  font-size:clamp(11px,1.35cqw,16px);
+  line-height:1;
+  margin:0;
+  font-weight:600;
+}
