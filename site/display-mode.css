@@ -21,3 +21,70 @@ html.hp-install-required #hp-viewport { display:none !important; }
 .hp-install-gate-guide ol { margin:0; padding-left:1.4em; }
 .hp-install-gate-guide li { margin:7px 0; }
 .hp-install-gate-note { margin:14px 0 0; color:#786880; font-size:13px; line-height:1.6; }
+
+/* Dream Stage install screen — icon-matched purple/gold fantasy theme */
+.hp-install-gate {
+  background:
+    radial-gradient(circle at 50% -8%, rgba(255,116,224,.42), transparent 34%),
+    radial-gradient(circle at 16% 22%, rgba(112,73,255,.42), transparent 30%),
+    radial-gradient(circle at 86% 78%, rgba(255,183,97,.22), transparent 28%),
+    linear-gradient(155deg,#120722 0%,#2a0b46 42%,#4b1261 66%,#17091f 100%);
+  color:#fff7ff;
+}
+.hp-install-gate-card {
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,217,139,.72);
+  background:linear-gradient(165deg,rgba(47,20,73,.94),rgba(21,8,39,.96));
+  box-shadow:0 24px 70px #08020f99,0 0 34px #ce6cff33,inset 0 0 28px #ffffff0a;
+}
+.hp-install-gate-card::before,
+.hp-install-gate-card::after {
+  position:absolute;
+  color:#ffe59a;
+  opacity:.8;
+  pointer-events:none;
+  text-shadow:0 0 12px #ffb3f0;
+}
+.hp-install-gate-card::before { content:"✦"; top:18px; left:22px; font-size:22px; transform:rotate(-12deg); }
+.hp-install-gate-card::after { content:"♪"; top:26px; right:24px; font-size:25px; transform:rotate(12deg); }
+.hp-install-gate-mark {
+  background:linear-gradient(145deg,#ffdd78,#ff8bd7 52%,#8f68ff);
+  color:#fff;
+  box-shadow:0 0 24px #ff9fe877,0 8px 24px #08020f77,inset 0 0 0 1px #fff8d5a8;
+}
+.hp-install-gate h1 {
+  position:relative;
+  font-family:ui-rounded,"Hiragino Maru Gothic ProN","Arial Rounded MT Bold",system-ui,sans-serif;
+  font-weight:900;
+  letter-spacing:.035em;
+  line-height:1.04;
+}
+.hp-install-gate h1 .hp-install-en {
+  background:linear-gradient(180deg,#fff9d8 0%,#ffd56e 40%,#ff9ee2 76%,#c5a0ff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 2px 0 #5d2159) drop-shadow(0 0 12px #ff91da88);
+  transform:rotate(-1deg);
+}
+.hp-install-gate h1 .hp-install-kana {
+  color:#ffe6a7 !important;
+  font-size:.40em !important;
+  margin-top:7px !important;
+  letter-spacing:.09em !important;
+  text-shadow:0 0 10px #ff8ed688;
+}
+.hp-install-gate-lead { color:#fff2fb; }
+.hp-install-gate-button {
+  background:linear-gradient(180deg,#ffe48c,#e9b94f);
+  color:#3a1644;
+  box-shadow:0 8px 24px #09020f77,0 0 18px #ffd77a44;
+}
+.hp-install-gate-guide {
+  border:1px solid rgba(255,218,146,.28);
+  background:rgba(255,255,255,.075);
+  color:#fff7ff;
+  box-shadow:inset 0 0 18px #ffffff08;
+}
+.hp-install-gate-note { color:#ead9ef; }
