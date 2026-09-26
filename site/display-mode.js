@@ -22,6 +22,27 @@
   document.body.append(gate);
   const gateButton=gate.querySelector('.hp-install-gate-button');
   const gateGuide=gate.querySelector('.hp-install-gate-guide');
+  function styleBilingual() {
+    gate.querySelectorAll('.hp-install-en').forEach((el)=>{
+      el.style.display='block';
+      el.style.fontWeight='700';
+      el.style.letterSpacing='.02em';
+    });
+    gate.querySelectorAll('.hp-install-kana').forEach((el)=>{
+      el.style.display='block';
+      el.style.marginTop='3px';
+      el.style.fontSize='.64em';
+      el.style.lineHeight='1.45';
+      el.style.fontWeight='500';
+      el.style.letterSpacing='.06em';
+      el.style.color='#8a748c';
+    });
+    gate.querySelectorAll('.hp-install-gate-button .hp-install-kana').forEach((el)=>{
+      el.style.color='#eadfed';
+      el.style.fontSize='10px';
+    });
+  }
+  styleBilingual();
 
   function renderGate() {
     if(isApp()&&!forceInstallGuide) {
@@ -45,6 +66,7 @@
       gateButton.hidden=true;
       gateGuide.innerHTML='<p><span class="hp-install-en">Choose Add to Home Screen or Install App from your browser menu.</span><span class="hp-install-kana">チューズ・アド・トゥ・ホーム・スクリーン・オア・インストール・アップ・フロム・ユア・ブラウザー・メニュー</span></p>';
     }
+    styleBilingual();
   }
 
   function refresh() {
