@@ -15,6 +15,12 @@
   "lang": "ja",
   "icons": [
     {
+      "src": "/icons/dreamstage-touch-180-v5.png?v=5",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/dreamstage-home-icon-v3.png",
       "sizes": "512x512",
       "type": "image/png",
