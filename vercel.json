@@ -40,6 +40,24 @@
       ]
     },
     {
+      "source": "/install/icon-512.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/install/icon-192.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/install/apple-touch-icon.png",
       "headers": [
         {
