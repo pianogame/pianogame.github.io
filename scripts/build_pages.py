@@ -13,6 +13,24 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
 
+OPENING_AUDIO_EXPECTED = {
+    "curtain-start-1.mp3": (73197, "1b20f11cde9736eeceb7902fa1c49074f6977a887555681182e27b9a01e56673"),
+    "curtain-start-2.mp3": (73197, "3e45fea2d8630805e29b55b31432109d5cefdc5a9acfd7b9beaa87d1bbce1ebb"),
+    "curtain-start-3.mp3": (73197, "b325e9a89645488549c402e3870705e4b7e7f6affae406d0df80e8ace6345406"),
+    "curtain-start-4.mp3": (73197, "d35759865b40a5acd85920115b4d35709ccab6878fc7803195336a04084fc1ee"),
+    "opening-3voices.m4a": (32587, "45894044bd44f4abfa7a25932e3b4b1e5fbe69f32161bab51be72cebf14e807b"),
+    "opening-bgm-01.m4a": (534697, "2ea88521d154cafa8493572835c3502b88e0420c84722e48f6de99295678c3dc"),
+    "opening-bgm-02.m4a": (558101, "f54f301528b11d70b7d46d56bb4b8b98dce867ba7b7a564cffc18982b0e32e3e"),
+    "opening-bgm-03.m4a": (558593, "44c1d292bf8c004c43573d7adcb8371ef0f28c4b62d4099f78d841563326aa13"),
+    "opening-bgm-04.m4a": (473836, "a30bfc48359676f7fda0d06f6a2e6f648afe5940c6c6cb73ee141e866e862778"),
+    "opening-bgm-05.m4a": (284932, "09db0a9bb1c3ade1134bb6604f357b5c1809b22a0fbe00902ad38d59d94126f5"),
+    "opening-bgm-06.m4a": (537067, "3833dda5b0c32cf5905ef190f17219c9b6cc51caab354a41cadee179118847c2"),
+    "opening-bgm-07.m4a": (514366, "ad0e2febf6c5e539b3bf0dd2b7bf2872776d70ed1d9d01d2e4d4c3dbc9c81b14"),
+    "opening-bgm-08.m4a": (533558, "7bcde226867bedd1de340de2651ee720893dfecb5fa90a3b2841c920f0280bb2"),
+    "opening-bgm-09.m4a": (266903, "99651e807d0b8d7e0db1bf644b5db4a65411d5d4f26a5cc176ff61121a9c1bd6"),
+    "opening-bgm-10.m4a": (542390, "6cfea560806a8589c931960821b00ad0737b79901ab03bd08b2b1b2c22554fb4"),
+}
+
 
 def _verify_app_sources():
     site = ROOT / "site"
@@ -49,6 +67,14 @@ def _verify_app_sources():
     missing_actions = sorted(referenced_actions - html_actions)
     if missing_actions:
         raise ValueError("JavaScript references missing data-action controls: " + ", ".join(missing_actions))
+
+    for name, (expected_size, expected_sha256) in OPENING_AUDIO_EXPECTED.items():
+        path = site / "audio" / name
+        if not path.is_file():
+            raise ValueError(f"Missing required opening audio: {name}")
+        data = path.read_bytes()
+        if len(data) != expected_size or hashlib.sha256(data).hexdigest() != expected_sha256:
+            raise ValueError(f"Opening audio checksum mismatch: {name}")
 
 
 _verify_app_sources()
@@ -284,7 +310,8 @@ for js_path in sorted(OUT.glob("*.js")):
         if not target.is_file():
             raise ValueError(f"Missing referenced audio asset: {asset} (from {js_path.name})")
 
-instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name != "opening-3voices.m4a"]
+instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name not in OPENING_AUDIO_EXPECTED]
 if len(instrument_samples) != 102:
     raise ValueError(f"Expected all 102 instrument audio samples, found {len(instrument_samples)}")
+print("Verified opening audio: 3-voice call, 4 supplied tap sounds and 10 supplied full BGM tracks")
 print("Ready: Piano Dream Stage for Vercel with 102 unchanged audio samples")
