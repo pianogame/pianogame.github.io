@@ -105,6 +105,19 @@ def _decode_indexed_png_rgba(data):
             q += 4
     return width, height, bytes(rgba)
 
+def _flatten_rgba(src, bg=(36, 19, 36)):
+    """Composite RGBA onto the app background and force alpha to 255."""
+    out = bytearray(len(src))
+    br, bgc, bb = bg
+    for i in range(0, len(src), 4):
+        r, g, b, a = src[i:i+4]
+        inv = 255 - a
+        out[i] = (r * a + br * inv + 127) // 255
+        out[i+1] = (g * a + bgc * inv + 127) // 255
+        out[i+2] = (b * a + bb * inv + 127) // 255
+        out[i+3] = 255
+    return bytes(out)
+
 def _resize_rgba(src, sw, sh, dw, dh):
     out = bytearray(dw * dh * 4)
     for y in range(dh):
@@ -152,19 +165,36 @@ sw0, sh0, rgba0 = _decode_indexed_png_rgba(source_icon)
 if (sw0, sh0) != (180, 180):
     raise ValueError(f"Unexpected source icon size: {sw0}x{sh0}")
 
-# Exact 180px source for iPhone Home Screen.
-(install_dir / "apple-touch-icon.png").write_bytes(source_icon)
+# Generate fully opaque install icons. Safari on iPhone can prefer the 120px
+# apple-touch-icon even on high-density phones, so ship all established Apple sizes.
+opaque0 = _flatten_rgba(rgba0)
 
-# Properly-sized manifest/fallback icons, all derived from that exact same picture.
+apple_icons = [
+    (120, "apple-touch-icon-120-v20.png"),
+    (152, "apple-touch-icon-152-v20.png"),
+    (167, "apple-touch-icon-167-v20.png"),
+    (180, "apple-touch-icon-180-v20.png"),
+]
+for size, name in apple_icons:
+    pixels = opaque0 if size == 180 else _resize_rgba(opaque0, sw0, sh0, size, size)
+    png = _encode_rgba_png(size, size, pixels)
+    (install_dir / name).write_bytes(png)
+
+# Root fallbacks used by Safari/Web Clip auto-discovery.
+root180 = _encode_rgba_png(180, 180, opaque0)
+(OUT / "apple-touch-icon.png").write_bytes(root180)
+(OUT / "apple-touch-icon-precomposed.png").write_bytes(root180)
+
+# Standard Web App Manifest sizes.
 for size, name in [
-    (192, "pwa-icon-192-v19.png"),
-    (512, "pwa-icon-512-v19.png"),
+    (192, "pwa-icon-192-v20.png"),
+    (512, "pwa-icon-512-v20.png"),
 ]:
-    resized = _resize_rgba(rgba0, sw0, sh0, size, size)
+    resized = _resize_rgba(opaque0, sw0, sh0, size, size)
     png = _encode_rgba_png(size, size, resized)
     (install_dir / name).write_bytes(png)
 
-# Fail the deployment if the generated PWA icons are not valid RGBA PNGs at the declared sizes.
+# Fail the deployment if any generated install icon is malformed or mis-sized.
 def _verify_png(path, expected):
     data = path.read_bytes()
     if data[:8] != b"\x89PNG\r\n\x1a\n":
@@ -177,9 +207,13 @@ def _verify_png(path, expected):
     if bit_depth != 8 or color_type != 6:
         raise ValueError(f"Unexpected icon format for {path}: depth={bit_depth}, color_type={color_type}")
 
-_verify_png(install_dir / "pwa-icon-192-v19.png", 192)
-_verify_png(install_dir / "pwa-icon-512-v19.png", 512)
-print("Verified PWA icons: 192x192 and 512x512 RGBA PNG")
+for size, name in apple_icons:
+    _verify_png(install_dir / name, size)
+_verify_png(OUT / "apple-touch-icon.png", 180)
+_verify_png(OUT / "apple-touch-icon-precomposed.png", 180)
+_verify_png(install_dir / "pwa-icon-192-v20.png", 192)
+_verify_png(install_dir / "pwa-icon-512-v20.png", 512)
+print("Verified install icons: Apple 120/152/167/180 and PWA 192/512, opaque RGBA PNG")
 
 bundles = ROOT / "sample-bundles"
 for bundle in json.loads((bundles / "parts.json").read_text()):
