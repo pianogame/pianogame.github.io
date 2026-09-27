@@ -581,7 +581,6 @@
     const scrollable = !!event.target.closest('.hp-scroll-window');
     if (!key && !scrollable) return;
     event.preventDefault();
-    try {root.setPointerCapture(event.pointerId);} catch(_) {}
     const point = localPointer(event);
     pointerStarts.set(event.pointerId,{...point,scrollable:scrollable&&!key,scrollTop:pianoScroll.scrollTop,scrolling:false,lastClientX:event.clientX,lastClientY:event.clientY});
     if (key) noteOn('pointer:' + event.pointerId, Number(key.dataset.midi));
@@ -697,7 +696,7 @@
         later(() => { playingCounts.set(event.midi, (playingCounts.get(event.midi) || 0) + 1); redraw(); sparkle(event.midi); }, when - ctx.currentTime);
         later(() => { const remaining = (playingCounts.get(event.midi) || 1) - 1; if (remaining) playingCounts.set(event.midi, remaining); else playingCounts.delete(event.midi); redraw(); }, when + event.duration - ctx.currentTime);
       }
-      const tail = Math.max(...Array.from(sampleBuffers.values()).flat().map(sample => sample.buffer.duration)) * 1.2 + Number(decayControl.value) * 1.25;
+      const tail = Math.min(1.2, Math.max(.18, Number(decayControl.value) + .18));
       if (ctx.currentTime >= start + recordDuration + tail) { stopPlayback(); say('再生が終わりました'); }
     }
     schedule(); scheduler = setInterval(schedule, 25);
