@@ -79,28 +79,36 @@
       }catch(_){}
     }
 
-    function scheduleCurtainVoice(){
-      if(voiceTimer||voicePlayed||opened)return;
+    function scheduleCurtainVoice(delay=800,restart=false){
+      if(voicePlayed||opened)return;
+      if(voiceTimer){
+        if(!restart)return;
+        clearTimeout(voiceTimer);
+      }
       voiceTimer=setTimeout(()=>{
         voiceTimer=0;
         playCurtainVoice();
-      },800);
+      },delay);
     }
 
     function startOpeningAudio(){
+      // Try BGM immediately when the curtain appears. If the browser delays or
+      // rejects audible autoplay, still try the voice independently rather than
+      // waiting for a curtain tap.
+      scheduleCurtainVoice(1400);
       try{
         curtainBgm.currentTime=0;
         const p=curtainBgm.play();
         if(p?.then){
           p.then(()=>{
             bgmPlaying=true;
-            scheduleCurtainVoice();
+            scheduleCurtainVoice(800,true);
           }).catch(()=>{
             bgmPlaying=false;
           });
         }else{
           bgmPlaying=true;
-          scheduleCurtainVoice();
+          scheduleCurtainVoice(800,true);
         }
       }catch(_){
         bgmPlaying=false;
