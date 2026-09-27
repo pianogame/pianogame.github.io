@@ -16,12 +16,12 @@
   <link rel="icon" type="image/png" href="/icons/dreamstage-touch-180-v8.png?v=12">
   <meta name="apple-mobile-web-app-title" content="ピアノドリームステージ">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="/manifest.webmanifest?v=23">
+  <link rel="manifest" href="/manifest.webmanifest?v=24">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=10', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=11', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
