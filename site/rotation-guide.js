@@ -56,56 +56,74 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,opened=false,voicePlayed=false,voiceNeedsGestureRetry=false,bgmPlaying=false,bgmNeedsGestureRetry=false;
-    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=3');
+    let started=false,opened=false,voicePlayed=false,bgmPlaying=false,voiceTimer=0;
+    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=4');
     voiceAudio.preload='auto';
     voiceAudio.volume=.9;
-    const tapAudios=['/audio/curtain-start-1.mp3?v=1','/audio/curtain-start-2.mp3?v=1','/audio/curtain-start-3.mp3?v=1','/audio/curtain-start-4.mp3?v=1'].map(url=>{
+    const tapAudios=['/audio/curtain-start-1.mp3?v=2','/audio/curtain-start-2.mp3?v=2','/audio/curtain-start-3.mp3?v=2','/audio/curtain-start-4.mp3?v=2'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=1','/audio/opening-bgm-02.m4a?v=1','/audio/opening-bgm-03.m4a?v=1','/audio/opening-bgm-04.m4a?v=1','/audio/opening-bgm-05.m4a?v=1','/audio/opening-bgm-06.m4a?v=1','/audio/opening-bgm-07.m4a?v=1','/audio/opening-bgm-08.m4a?v=1','/audio/opening-bgm-09.m4a?v=1','/audio/opening-bgm-10.m4a?v=1'];
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=2','/audio/opening-bgm-02.m4a?v=2','/audio/opening-bgm-03.m4a?v=2','/audio/opening-bgm-04.m4a?v=2','/audio/opening-bgm-05.m4a?v=2','/audio/opening-bgm-06.m4a?v=2','/audio/opening-bgm-07.m4a?v=2','/audio/opening-bgm-08.m4a?v=2','/audio/opening-bgm-09.m4a?v=2','/audio/opening-bgm-10.m4a?v=2'];
     const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
     curtainBgm.preload='auto';
     curtainBgm.loop=true;
     curtainBgm.volume=.12;
-    function playCurtainVoice(fromGesture=false){
-      if(voicePlayed)return;
+
+    function playCurtainVoice(){
+      if(voicePlayed||opened)return;
       try{
-        if(fromGesture&&voiceAudio.currentTime>0)voiceAudio.currentTime=0;
+        voiceAudio.currentTime=0;
         const p=voiceAudio.play();
-        if(p?.then){p.then(()=>{voicePlayed=true;voiceNeedsGestureRetry=false;}).catch(()=>{voicePlayed=false;voiceNeedsGestureRetry=true;});}
-        else{voicePlayed=true;voiceNeedsGestureRetry=false;}
-      }catch(_){voicePlayed=false;voiceNeedsGestureRetry=true;}
+        if(p?.then)p.then(()=>{voicePlayed=true;}).catch(()=>{});
+        else voicePlayed=true;
+      }catch(_){}
     }
-    function playCurtainBgm(fromGesture=false){
-      if(bgmPlaying)return;
+
+    function scheduleCurtainVoice(){
+      if(voiceTimer||voicePlayed||opened)return;
+      voiceTimer=setTimeout(()=>{
+        voiceTimer=0;
+        playCurtainVoice();
+      },800);
+    }
+
+    function startOpeningAudio(){
       try{
-        if(fromGesture&&curtainBgm.currentTime>0)curtainBgm.currentTime=0;
+        curtainBgm.currentTime=0;
         const p=curtainBgm.play();
-        if(p?.then){p.then(()=>{bgmPlaying=true;bgmNeedsGestureRetry=false;}).catch(()=>{bgmPlaying=false;bgmNeedsGestureRetry=true;});}
-        else{bgmPlaying=true;bgmNeedsGestureRetry=false;}
-      }catch(_){bgmPlaying=false;bgmNeedsGestureRetry=true;}
+        if(p?.then){
+          p.then(()=>{
+            bgmPlaying=true;
+            scheduleCurtainVoice();
+          }).catch(()=>{
+            bgmPlaying=false;
+          });
+        }else{
+          bgmPlaying=true;
+          scheduleCurtainVoice();
+        }
+      }catch(_){
+        bgmPlaying=false;
+      }
     }
-    let bgmFadeFrame=0;
+
     function stopCurtainBgm(){
-      if(bgmFadeFrame){cancelAnimationFrame(bgmFadeFrame);bgmFadeFrame=0;}
-      try{curtainBgm.pause();curtainBgm.currentTime=0;curtainBgm.volume=.12;}catch(_){}
+      try{
+        curtainBgm.pause();
+        curtainBgm.currentTime=0;
+        curtainBgm.volume=.12;
+      }catch(_){}
       bgmPlaying=false;
     }
-    function fadeOutCurtainBgm(duration=1200){
-      if(!bgmPlaying){stopCurtainBgm();return;}
-      if(bgmFadeFrame)cancelAnimationFrame(bgmFadeFrame);
-      const startVolume=curtainBgm.volume,startTime=performance.now();
-      const step=now=>{
-        const progress=Math.min(1,(now-startTime)/duration);
-        curtainBgm.volume=startVolume*(1-progress);
-        if(progress<1){bgmFadeFrame=requestAnimationFrame(step);return;}
-        bgmFadeFrame=0;
-        stopCurtainBgm();
-      };
-      bgmFadeFrame=requestAnimationFrame(step);
+
+    function chime(){
+      const audio=tapAudios[Math.floor(Math.random()*tapAudios.length)];
+      try{
+        audio.currentTime=0;
+        const p=audio.play();
+        p?.catch(()=>{});
+      }catch(_){}
     }
-    function chime(){const audio=tapAudios[Math.floor(Math.random()*tapAudios.length)];try{audio.currentTime=0;const p=audio.play();p?.catch(()=>{});}catch(_){}}
 
     const landscape=()=>{
       const v=window.visualViewport;
@@ -118,23 +136,16 @@
       setTimeout(()=>{
         orientation.hidden=true;
         title.classList.add('hp-show');
-        playCurtainVoice();
-        playCurtainBgm();
+        startOpeningAudio();
         title.addEventListener('pointerup',()=>{
           if(opened)return;
           opened=true;
-          const needsAudioUnlock=!voicePlayed||!bgmPlaying||voiceNeedsGestureRetry||bgmNeedsGestureRetry;
-          if(!voicePlayed||voiceNeedsGestureRetry)playCurtainVoice(true);
-          if(!bgmPlaying||bgmNeedsGestureRetry)playCurtainBgm(true);
+          stopCurtainBgm();
           chime();
-          const openCurtain=()=>{
-            fadeOutCurtainBgm(1200);
-            window.dispatchEvent(new Event('hp-curtain-start'));
-            title.classList.add('hp-curtain-open');
-            setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
-            setTimeout(()=>{stopCurtainBgm();opening.remove();},1950);
-          };
-          if(needsAudioUnlock)setTimeout(openCurtain,900);else openCurtain();
+          window.dispatchEvent(new Event('hp-curtain-start'));
+          title.classList.add('hp-curtain-open');
+          setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
+          setTimeout(()=>opening.remove(),1950);
         },{once:true});
       },850);
     }
