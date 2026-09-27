@@ -270,7 +270,7 @@
     const buffer=descriptor&&sampleBuffers.get(descriptor.url);
     if(!buffer)return clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10);
     const natural=buffer.duration/Math.pow(2,(note.midi-anchor)/12);
-    return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);
+    return note.sustain?Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+Math.min(.8,clamp(note.release,.01,10))+.08):Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+Math.min(.8,clamp(note.release,.01,10))+.04);
   }
   function mixDuration(selected){
     return Math.max(...selected.flatMap(track=>track.notes.map(note=>note.start+noteSoundLength(track,note))))+.2;
