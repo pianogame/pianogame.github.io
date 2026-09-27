@@ -12,6 +12,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ピアノドリームステージ</title>
+  <script>
+    (() => {
+      const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const installed = navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches;
+      if (ios && !installed && location.pathname === '/') {
+        location.replace('/install-v22/');
+      }
+    })();
+  </script>
   <link rel="canonical" href="https://piano-dream-stage.vercel.app/">
   <link rel="icon" type="image/png" sizes="192x192" href="/install/pwa-icon-192-v21.png">
   <link rel="apple-touch-icon" sizes="120x120" href="/install/apple-touch-icon-120-v21.png">
