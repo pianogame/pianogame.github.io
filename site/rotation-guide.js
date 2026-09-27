@@ -5,7 +5,8 @@
 
     const style=document.createElement('style');
     style.textContent=`
-      body.hp-booting #hp-viewport{visibility:hidden!important}\n      #hp-opening-sequence{position:fixed;inset:0;z-index:10000;overflow:hidden;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
+      body.hp-booting #hp-viewport{visibility:hidden!important}
+      #hp-opening-sequence{position:fixed;inset:0;z-index:10000;overflow:hidden;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
       #hp-opening-sequence[hidden]{display:none!important}
       .hp-opening-orientation,.hp-opening-title{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box}
       .hp-opening-orientation{z-index:3;padding:28px;background:#fff;color:#29242c;text-align:center;opacity:1;transition:opacity .9s ease}
@@ -30,7 +31,9 @@
       .hp-opening-spark.s1{left:24%;top:38%}.hp-opening-spark.s2{right:22%;top:55%;animation-delay:.7s}.hp-opening-spark.s3{left:55%;top:27%;animation-delay:1.3s}
       @keyframes hp-turn{0%,22%{transform:rotate(0deg)}58%,90%{transform:rotate(90deg)}100%{transform:rotate(0deg)}}
       @keyframes hp-gold-sweep{0%,20%{background-position:100% center}70%,100%{background-position:-100% center}}
-      @keyframes hp-spark{0%,100%{opacity:0;transform:scale(.3)}45%{opacity:1;transform:scale(1.5)}}\n      .hp-opening-tap{display:block;margin-top:22px;font:600 14px system-ui,sans-serif;letter-spacing:.18em;color:#f5e6c8;animation:hp-tap-pulse 1.45s ease-in-out infinite;filter:drop-shadow(0 0 7px #ffe0a566)}\n      @keyframes hp-tap-pulse{0%,100%{opacity:.45;transform:translateY(0) scale(.98)}50%{opacity:1;transform:translateY(-2px) scale(1.04)}}
+      @keyframes hp-spark{0%,100%{opacity:0;transform:scale(.3)}45%{opacity:1;transform:scale(1.5)}}
+      .hp-opening-tap{display:block;margin-top:22px;font:600 14px system-ui,sans-serif;letter-spacing:.18em;color:#f5e6c8;animation:hp-tap-pulse 1.45s ease-in-out infinite;filter:drop-shadow(0 0 7px #ffe0a566)}
+      @keyframes hp-tap-pulse{0%,100%{opacity:.45;transform:translateY(0) scale(.98)}50%{opacity:1;transform:translateY(-2px) scale(1.04)}}
       @media(prefers-reduced-motion:reduce){.hp-opening-phone,.hp-opening-en,.hp-opening-spark{animation:none}.hp-opening-orientation,.hp-opening-title,.hp-opening-logo,.hp-opening-title:before,.hp-opening-title:after{transition-duration:.01ms}}
     `;
     document.head.append(style);
@@ -53,8 +56,11 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,opened=false,voicePlayed=false;\n    function playCurtainVoice(){if(voicePlayed)return;voicePlayed=true;try{const a=new Audio('/audio/opening-3voices.m4a?v=1');a.volume=.9;void a.play();}catch(_){}}\n    window.HP_OPENING_SOUND_URLS=['/audio/curtain-start-1.mp3?v=1','/audio/curtain-start-2.mp3?v=1','/audio/curtain-start-3.mp3?v=1','/audio/curtain-start-4.mp3?v=1'];
-    function chime(){const sounds=window.HP_OPENING_SOUND_URLS||[];if(sounds.length){try{const audio=new Audio(sounds[Math.floor(Math.random()*sounds.length)]);audio.volume=.9;const p=audio.play();p?.catch(()=>fallbackChime());return;}catch(_){}}fallbackChime();}\n    function fallbackChime(){try{const A=window.AudioContext||window.webkitAudioContext,c=new A(),g=c.createGain(),now=c.currentTime;g.connect(c.destination);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.13,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+.7);[784,1046.5,1318.5].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(now+i*.035);o.stop(now+.72);});setTimeout(()=>c.close(),900);}catch(_){}}
+    let started=false,opened=false,voicePlayed=false;
+    function playCurtainVoice(){if(voicePlayed)return;voicePlayed=true;try{const a=new Audio('/audio/opening-3voices.m4a?v=1');a.volume=.9;void a.play();}catch(_){}}
+    window.HP_OPENING_SOUND_URLS=['/audio/curtain-start-1.mp3?v=1','/audio/curtain-start-2.mp3?v=1','/audio/curtain-start-3.mp3?v=1','/audio/curtain-start-4.mp3?v=1'];
+    function chime(){const sounds=window.HP_OPENING_SOUND_URLS||[];if(sounds.length){try{const audio=new Audio(sounds[Math.floor(Math.random()*sounds.length)]);audio.volume=.9;const p=audio.play();p?.catch(()=>fallbackChime());return;}catch(_){}}fallbackChime();}
+    function fallbackChime(){try{const A=window.AudioContext||window.webkitAudioContext,c=new A(),g=c.createGain(),now=c.currentTime;g.connect(c.destination);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.13,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+.7);[784,1046.5,1318.5].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(now+i*.035);o.stop(now+.72);});setTimeout(()=>c.close(),900);}catch(_){}}
 
     const landscape=()=>{
       const v=window.visualViewport;
@@ -66,7 +72,8 @@
       orientation.classList.add('hp-leave');
       setTimeout(()=>{
         orientation.hidden=true;
-        title.classList.add('hp-show');\n        playCurtainVoice();
+        title.classList.add('hp-show');
+        playCurtainVoice();
         title.addEventListener('pointerup',()=>{if(opened)return;opened=true;chime();window.dispatchEvent(new Event('hp-curtain-start'));title.classList.add('hp-curtain-open');setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);setTimeout(()=>opening.remove(),1950);},{once:true});
       },850);
     }
