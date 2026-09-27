@@ -40,6 +40,24 @@
       ]
     },
     {
+      "source": "/apple-touch-icon-dreamstage-v15.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/icons/dreamstage-touch-180-v15.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/icons/dreamstage-home-192-v14.png",
       "headers": [
         {
