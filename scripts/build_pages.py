@@ -24,8 +24,8 @@ def _verify_app_sources():
     # and multitrack.js. This project does not intentionally use them in JS source.
     for path in js_files:
         source = path.read_text(encoding="utf-8")
-        if "\\\\n" in source:
-            raise ValueError(f"Suspicious literal \\\\n found in JavaScript source: {path.relative_to(ROOT)}")
+        if "\\n" in source:
+            raise ValueError(f"Suspicious literal \\n found in JavaScript source: {path.relative_to(ROOT)}")
         try:
             subprocess.run(
                 ["node", "--check", str(path)],
@@ -45,7 +45,7 @@ def _verify_app_sources():
     referenced_actions = set()
     for path in js_files:
         source = path.read_text(encoding="utf-8")
-        referenced_actions.update(re.findall(r'action\\([\'\"]([^\'\"]+)[\'\"]\\)', source))
+        referenced_actions.update(re.findall(r'action\([\'"]([^\'"]+)[\'"]\)', source))
     missing_actions = sorted(referenced_actions - html_actions)
     if missing_actions:
         raise ValueError("JavaScript references missing data-action controls: " + ", ".join(missing_actions))
@@ -274,6 +274,15 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
                 raise ValueError(f"Unexpected archive path: {entry.filename}")
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(entry))
+
+# Validate every absolute /audio/... URL referenced by JavaScript after the sample bundles
+# have been expanded into the Vercel output directory.
+for js_path in sorted(OUT.glob("*.js")):
+    source = js_path.read_text(encoding="utf-8")
+    for asset in set(re.findall(r'[\'"](/audio/[^\'"?]+)', source)):
+        target = OUT / asset.lstrip("/")
+        if not target.is_file():
+            raise ValueError(f"Missing referenced audio asset: {asset} (from {js_path.name})")
 
 instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name != "opening-3voices.m4a"]
 if len(instrument_samples) != 102:
