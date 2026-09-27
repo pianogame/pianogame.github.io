@@ -15,8 +15,8 @@
       .hp-opening-phone:after{content:"";position:absolute;left:50%;bottom:7px;width:7px;height:7px;border:1px solid #77717b;border-radius:50%;transform:translateX(-50%)}
       .hp-opening-orientation strong{display:block;font-size:clamp(21px,5vw,31px);font-weight:500;letter-spacing:.08em}
       .hp-opening-orientation span{display:block;margin-top:13px;color:#77717b;font-family:system-ui,sans-serif;font-size:14px;line-height:1.8}
-      .hp-opening-title{z-index:2;background:linear-gradient(145deg,#160a20,#301333 55%,#160a20);color:#fff;opacity:0;transition:opacity 1s ease}
-      .hp-opening-title.hp-show{opacity:1}
+      .hp-opening-title{z-index:10001;background:linear-gradient(145deg,#160a20,#301333 55%,#160a20);color:#fff;opacity:0;transition:opacity 1s ease}
+      .hp-opening-title.hp-show{opacity:1;cursor:pointer}
       .hp-opening-title:before,.hp-opening-title:after{content:"";position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(90deg,#1c0b20,#5c244c 58%,#2a1029);box-shadow:inset -20px 0 45px #09030a66;transition:transform 1.5s cubic-bezier(.7,0,.2,1)}
       .hp-opening-title:before{left:0;transform-origin:left}
       .hp-opening-title:after{right:0;transform:scaleX(-1);transform-origin:right}
@@ -47,13 +47,14 @@
       </section>
       <section class="hp-opening-title" aria-label="ピアノドリームステージ">
         <i class="hp-opening-spark s1"></i><i class="hp-opening-spark s2"></i><i class="hp-opening-spark s3"></i>
-        <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span></div>
+        <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span style="display:block;margin-top:22px;font:14px system-ui,sans-serif;letter-spacing:.14em;color:#ead9c0">幕をタッチして開演</span></div>
       </section>`;
     document.body.append(opening);
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false;
+    let started=false,opened=false;
+    function chime(){try{const A=window.AudioContext||window.webkitAudioContext;const c=new A();const g=c.createGain();g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.12,c.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.8);g.connect(c.destination);[659.25,987.77,1318.51].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(c.currentTime+i*.06);o.stop(c.currentTime+.85);});setTimeout(()=>c.close(),1100);}catch(_){}}
 
     const landscape=()=>{
       const v=window.visualViewport;
@@ -66,9 +67,7 @@
       setTimeout(()=>{
         orientation.hidden=true;
         title.classList.add('hp-show');
-        setTimeout(()=>title.classList.add('hp-curtain-open'),2100);
-        setTimeout(()=>{opening.style.transition='opacity .65s ease';opening.style.opacity='0';},3550);
-        setTimeout(()=>opening.remove(),4250);
+        title.addEventListener('pointerup',()=>{if(opened)return;opened=true;chime();window.dispatchEvent(new Event('hp-curtain-start'));title.classList.add('hp-curtain-open');setTimeout(()=>{opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1450);setTimeout(()=>opening.remove(),2150);},{once:true});
       },850);
     }
     window.addEventListener('resize',begin);
