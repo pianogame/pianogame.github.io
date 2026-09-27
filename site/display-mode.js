@@ -9,7 +9,9 @@
   const standalone=window.matchMedia('(display-mode: standalone)');
   const fullscreen=window.matchMedia('(display-mode: fullscreen)');
   const fullscreenElement=()=>document.fullscreenElement||document.webkitFullscreenElement;
-  const isApp=()=>navigator.standalone===true||standalone.matches||(fullscreen.matches&&!fullscreenElement());
+  const launchParams=new URLSearchParams(location.search);
+  const isHomeLaunch=launchParams.get('app')==='home';
+  const isApp=()=>isHomeLaunch||navigator.standalone===true||standalone.matches||(fullscreen.matches&&!fullscreenElement());
   let installPrompt=null;
   const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const installParams=new URLSearchParams(location.search);
