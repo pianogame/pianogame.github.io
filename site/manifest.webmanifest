@@ -1,13 +1,13 @@
 {
   "name": "ピアノドリームステージ",
   "short_name": "ドリステ",
-  "start_url": "/?app=home&pds_install_id=21",
+  "start_url": "/?app=home&pds_install_id=24",
   "scope": "/",
   "display": "fullscreen",
   "orientation": "landscape",
   "theme_color": "#241324",
   "background_color": "#241324",
-  "id": "/?pds_app_id=21",
+  "id": "/?pds_app_id=24",
   "display_override": [
     "fullscreen",
     "standalone"

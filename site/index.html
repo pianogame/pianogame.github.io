@@ -12,27 +12,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>ピアノドリームステージ</title>
-  <script>
-    (() => {
-      const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const installed = navigator.standalone === true ||
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.matchMedia('(display-mode: fullscreen)').matches;
-      if (ios && !installed && location.pathname === '/') {
-        location.replace('/install-v23/');
-      }
-    })();
-  </script>
   <link rel="canonical" href="https://piano-dream-stage.vercel.app/">
-  <link rel="icon" type="image/png" sizes="192x192" href="/install/pwa-icon-192-v21.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="/install/apple-touch-icon-120-v21.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="/install/apple-touch-icon-152-v21.png">
-  <link rel="apple-touch-icon" sizes="167x167" href="/install/apple-touch-icon-167-v21.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/install/apple-touch-icon-180-v21.png">
+  <link rel="icon" type="image/png" href="/apple-touch-icon.png?v=24">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=24">
   <meta name="apple-mobile-web-app-title" content="ピアノドリームステージ">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="/manifest.webmanifest?v=21">
+  <link rel="manifest" href="/manifest.webmanifest?v=24">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
