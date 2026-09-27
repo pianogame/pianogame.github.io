@@ -23,7 +23,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=11', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=12', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -124,6 +124,6 @@
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/usage-analytics.js?v=2"></script>
-<script defer src="./rotation-guide.js?v=15"></script>
+<script defer src="./rotation-guide.js?v=16"></script>
 </body>
 </html>

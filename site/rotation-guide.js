@@ -41,8 +41,8 @@
       .hp-opening-phone:after{content:"";position:absolute;left:50%;bottom:7px;width:7px;height:7px;border:1px solid #77717b;border-radius:50%;transform:translateX(-50%)}
       .hp-opening-orientation strong{display:block;font-size:clamp(21px,5vw,31px);font-weight:500;letter-spacing:.08em}
       .hp-opening-orientation span{display:block;margin-top:13px;color:#77717b;font-family:system-ui,sans-serif;font-size:14px;line-height:1.8}
-      .hp-opening-title{z-index:10001;background:#120713;color:#fff;opacity:0;transition:opacity 1s ease}
-      .hp-opening-title.hp-show{opacity:1;cursor:pointer}
+      .hp-opening-title{z-index:10001;background:#120713;color:#fff;opacity:0;pointer-events:none;transition:opacity 1s ease}
+      .hp-opening-title.hp-show{opacity:1;pointer-events:auto;cursor:pointer}
       .hp-opening-title:before,.hp-opening-title:after{content:"";position:absolute;top:0;bottom:0;width:50%;background:repeating-linear-gradient(90deg,#3b0d29 0%,#711d4b 7%,#4b102f 14%,#8a285c 21%,#45102d 28%);box-shadow:inset -28px 0 38px #14040db8,inset 16px 0 26px #c66b9a25,0 0 24px #050105aa;transition:transform 1.5s cubic-bezier(.7,0,.2,1)}
       .hp-opening-title:before{left:0;transform-origin:left;border-right:4px solid #c8a35b}
       .hp-opening-title:after{right:0;transform-origin:right;border-left:4px solid #c8a35b}
