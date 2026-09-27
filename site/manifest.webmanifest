@@ -15,7 +15,7 @@
   "lang": "ja",
   "icons": [
     {
-      "src": "/apple-touch-icon.png?v=3",
+      "src": "/install/apple-touch-icon.png?v=4",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
