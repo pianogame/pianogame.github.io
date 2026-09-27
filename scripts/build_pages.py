@@ -233,6 +233,7 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(entry))
 
-if len(list((OUT / "audio").rglob("*.m4a"))) != 102:
-    raise ValueError("Expected all 102 audio samples")
+instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name != "opening-3voices.m4a"]
+if len(instrument_samples) != 102:
+    raise ValueError(f"Expected all 102 instrument audio samples, found {len(instrument_samples)}")
 print("Ready: Piano Dream Stage for Vercel with 102 unchanged audio samples")
