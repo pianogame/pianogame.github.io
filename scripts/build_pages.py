@@ -76,6 +76,17 @@ def _verify_app_sources():
         if len(data) != expected_size or hashlib.sha256(data).hexdigest() != expected_sha256:
             raise ValueError(f"Opening audio checksum mismatch: {name}")
 
+    opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
+    for name in OPENING_AUDIO_EXPECTED:
+        if f"/audio/{name}" not in opening_source:
+            raise ValueError(f"Opening audio is not referenced by rotation-guide.js: {name}")
+    if opening_source.count("opening-bgm-") != 10:
+        raise ValueError("Expected exactly 10 opening BGM references")
+    if "fadeOutCurtainBgm(1200)" not in opening_source:
+        raise ValueError("Curtain BGM fade-out is missing")
+    if "scheduleCurtainVoice(800,true)" not in opening_source:
+        raise ValueError("Delayed opening voice timing is missing")
+
 
 _verify_app_sources()
 
