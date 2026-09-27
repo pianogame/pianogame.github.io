@@ -583,7 +583,7 @@
     event.preventDefault();
     const point = localPointer(event);
     pointerStarts.set(event.pointerId,{...point,scrollable:scrollable&&!key,scrollTop:pianoScroll.scrollTop,scrolling:false,lastClientX:event.clientX,lastClientY:event.clientY});
-    if (key) noteOn('pointer:' + event.pointerId, Number(key.dataset.midi));
+    if (key) { const token='pointer:' + event.pointerId; noteOff(token); noteOn(token, Number(key.dataset.midi)); }
   });
   root.addEventListener('pointermove', event => {
     const token = 'pointer:' + event.pointerId;
@@ -615,7 +615,7 @@
       origin.lastClientX=sample.clientX; origin.lastClientY=sample.clientY;
     }
   });
-  ['pointerup','pointercancel','lostpointercapture'].forEach(name => root.addEventListener(name, event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); }));
+  const releasePointer = event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); };\n  ['pointerup','pointercancel'].forEach(name => window.addEventListener(name, releasePointer, true));\n  root.addEventListener('lostpointercapture', releasePointer);
   root.addEventListener('click', event => {
     const key = event.target.closest('[data-midi]');
     if (key && event.detail === 0 && !event.pointerType && !event.sourceCapabilities?.firesTouchEvents) { const token = 'accessible:' + key.dataset.midi; noteOn(token, Number(key.dataset.midi)); setTimeout(() => noteOff(token),180); }
