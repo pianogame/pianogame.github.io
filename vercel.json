@@ -40,6 +40,15 @@
       ]
     },
     {
+      "source": "/apple-touch-icon.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/audio/(.*)",
       "headers": [
         {
