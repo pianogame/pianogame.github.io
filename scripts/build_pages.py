@@ -147,7 +147,7 @@ def _encode_rgba_png(width, height, rgba):
 
 install_dir = OUT / "install"
 install_dir.mkdir(parents=True, exist_ok=True)
-source_icon = (ROOT / "site" / "icons" / "dreamstage-touch-180-v8.png").read_bytes()
+source_icon = (ROOT / "site" / "install" / "apple-touch-icon.png").read_bytes()
 sw0, sh0, rgba0 = _decode_indexed_png_rgba(source_icon)
 if (sw0, sh0) != (180, 180):
     raise ValueError(f"Unexpected source icon size: {sw0}x{sh0}")
