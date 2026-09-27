@@ -22,3 +22,56 @@
 #hp-four88 .hp-curtain.open .hp-curtain-title{opacity:0}
 #hp-four88 [data-action="stop-sound"]{margin-left:8px}
 @media(prefers-reduced-motion:reduce){#hp-four88 .hp-curtain-half{transition-duration:.01ms}}
+
+
+/* Dream Stage launch curtain — icon-matched purple/gold fantasy theme */
+#hp-four88 .hp-curtain {
+  background:
+    radial-gradient(circle at 50% 24%,rgba(255,108,218,.28),transparent 35%),
+    linear-gradient(180deg,#160823,#2c0a42 58%,#12061c);
+}
+#hp-four88 .hp-curtain::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:.5;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 18%,#fff6c8 0 1px,transparent 2px),
+    radial-gradient(circle at 78% 24%,#ffd886 0 1px,transparent 2px),
+    radial-gradient(circle at 66% 72%,#ffb6ef 0 1px,transparent 2px),
+    radial-gradient(circle at 34% 78%,#fff0ae 0 1px,transparent 2px);
+  background-size:110px 110px,140px 140px,125px 125px,160px 160px;
+  opacity:.65;
+}
+#hp-four88 .hp-curtain-half {
+  background:
+    linear-gradient(90deg,rgba(255,213,112,.08),transparent 8%,transparent 92%,rgba(255,213,112,.08)),
+    repeating-linear-gradient(90deg,#321044 0%,#5c176f 8%,#7a2784 13%,#421250 20%,#260b34 27%);
+  box-shadow:inset 0 0 26px #100419,0 0 22px #0008;
+}
+#hp-four88 .hp-curtain-half:first-child { border-right-color:#e8bd68; }
+#hp-four88 .hp-curtain-half:nth-child(2) { border-left-color:#e8bd68; }
+#hp-four88 .hp-curtain-title {
+  z-index:2;
+  font-family:ui-rounded,"Hiragino Maru Gothic ProN","Arial Rounded MT Bold",system-ui,sans-serif;
+  font-weight:900;
+}
+#hp-four88 .hp-dream-title-main {
+  display:block;
+  letter-spacing:.055em;
+  background:linear-gradient(180deg,#fff9d7 0%,#ffd568 42%,#ff9fe4 77%,#c7a4ff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 2px 0 #5a1f58) drop-shadow(0 0 14px #ff93dd99);
+  transform:rotate(-1deg);
+}
+#hp-four88 .hp-dream-title-kana {
+  display:block;
+  margin-top:7px;
+  font-size:.43em;
+  letter-spacing:.10em;
+  color:#ffe7a8;
+  text-shadow:0 0 11px #ff8fdd99;
+}
