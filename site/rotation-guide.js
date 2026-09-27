@@ -19,9 +19,9 @@
       .hp-opening-title.hp-show{opacity:1;cursor:pointer}
       .hp-opening-title:before,.hp-opening-title:after{content:"";position:absolute;top:0;bottom:0;width:52%;background:repeating-linear-gradient(90deg,#3b0d29 0%,#711d4b 7%,#4b102f 14%,#8a285c 21%,#45102d 28%);box-shadow:inset -28px 0 38px #14040db8,inset 16px 0 26px #c66b9a25,0 0 24px #050105aa;transition:transform 1.5s cubic-bezier(.7,0,.2,1)}
       .hp-opening-title:before{left:0;transform-origin:left;border-right:4px solid #c8a35b}
-      .hp-opening-title:after{right:0;transform:scaleX(-1);transform-origin:right;border-right:4px solid #c8a35b}
+      .hp-opening-title:after{right:0;transform-origin:right;border-left:4px solid #c8a35b}
       .hp-opening-title.hp-curtain-open:before{transform:translateX(-97%)}
-      .hp-opening-title.hp-curtain-open:after{transform:scaleX(-1) translateX(-97%)}
+      .hp-opening-title.hp-curtain-open:after{transform:translateX(97%)}
       .hp-opening-logo{position:relative;z-index:1;padding:24px;text-align:center;opacity:0;transform:translateY(8px);transition:opacity 1.1s ease .25s,transform 1.1s ease .25s}
       .hp-opening-title.hp-show .hp-opening-logo{opacity:1;transform:none}
       .hp-opening-en{position:relative;display:block;font-size:clamp(29px,7vw,68px);font-weight:400;letter-spacing:.12em;background:linear-gradient(100deg,#d9b86d,#fff6d0 42%,#d2a553 57%,#f8e7b3);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 8px #0008);animation:hp-gold-sweep 2.8s ease-in-out infinite}
@@ -30,7 +30,7 @@
       .hp-opening-spark.s1{left:24%;top:38%}.hp-opening-spark.s2{right:22%;top:55%;animation-delay:.7s}.hp-opening-spark.s3{left:55%;top:27%;animation-delay:1.3s}
       @keyframes hp-turn{0%,22%{transform:rotate(0deg)}58%,90%{transform:rotate(90deg)}100%{transform:rotate(0deg)}}
       @keyframes hp-gold-sweep{0%,20%{background-position:100% center}70%,100%{background-position:-100% center}}
-      @keyframes hp-spark{0%,100%{opacity:0;transform:scale(.3)}45%{opacity:1;transform:scale(1.5)}}
+      @keyframes hp-spark{0%,100%{opacity:0;transform:scale(.3)}45%{opacity:1;transform:scale(1.5)}}\n      .hp-opening-tap{display:block;margin-top:22px;font:600 14px system-ui,sans-serif;letter-spacing:.18em;color:#f5e6c8;animation:hp-tap-pulse 1.45s ease-in-out infinite;filter:drop-shadow(0 0 7px #ffe0a566)}\n      @keyframes hp-tap-pulse{0%,100%{opacity:.45;transform:translateY(0) scale(.98)}50%{opacity:1;transform:translateY(-2px) scale(1.04)}}
       @media(prefers-reduced-motion:reduce){.hp-opening-phone,.hp-opening-en,.hp-opening-spark{animation:none}.hp-opening-orientation,.hp-opening-title,.hp-opening-logo,.hp-opening-title:before,.hp-opening-title:after{transition-duration:.01ms}}
     `;
     document.head.append(style);
@@ -47,14 +47,14 @@
       </section>
       <section class="hp-opening-title" aria-label="ピアノドリームステージ">
         <i class="hp-opening-spark s1"></i><i class="hp-opening-spark s2"></i><i class="hp-opening-spark s3"></i>
-        <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span style="display:block;margin-top:22px;font:14px system-ui,sans-serif;letter-spacing:.14em;color:#ead9c0">幕をタッチして開演</span></div>
+        <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span class="hp-opening-tap">Tap Curtain Start</span></div>
       </section>`;
     document.body.append(opening);
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
     let started=false,opened=false;
-    function chime(){try{const A=window.AudioContext||window.webkitAudioContext;const c=new A();const g=c.createGain();g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.12,c.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.8);g.connect(c.destination);[659.25,987.77,1318.51].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(c.currentTime+i*.06);o.stop(c.currentTime+.85);});setTimeout(()=>c.close(),1100);}catch(_){}}
+    function chime(){const sounds=window.HP_OPENING_SOUND_URLS||[];if(!sounds.length)return;try{const audio=new Audio(sounds[Math.floor(Math.random()*sounds.length)]);audio.volume=.9;void audio.play();}catch(_){}}
 
     const landscape=()=>{
       const v=window.visualViewport;
