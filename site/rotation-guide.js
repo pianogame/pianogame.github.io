@@ -54,7 +54,7 @@
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
     let started=false,opened=false,voicePlayed=false;\n    function playCurtainVoice(){if(voicePlayed)return;voicePlayed=true;try{const a=new Audio('/audio/opening-3voices.m4a?v=1');a.volume=.9;void a.play();}catch(_){}}\n    window.HP_OPENING_SOUND_URLS=['/audio/curtain-start-1.mp3?v=1','/audio/curtain-start-2.mp3?v=1','/audio/curtain-start-3.mp3?v=1','/audio/curtain-start-4.mp3?v=1'];
-    function chime(){const sounds=window.HP_OPENING_SOUND_URLS||[];if(!sounds.length)return;try{const audio=new Audio(sounds[Math.floor(Math.random()*sounds.length)]);audio.volume=.9;void audio.play();}catch(_){}}
+    function chime(){const sounds=window.HP_OPENING_SOUND_URLS||[];if(sounds.length){try{const audio=new Audio(sounds[Math.floor(Math.random()*sounds.length)]);audio.volume=.9;const p=audio.play();p?.catch(()=>fallbackChime());return;}catch(_){}}fallbackChime();}\n    function fallbackChime(){try{const A=window.AudioContext||window.webkitAudioContext,c=new A(),g=c.createGain(),now=c.currentTime;g.connect(c.destination);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.13,now+.015);g.gain.exponentialRampToValueAtTime(.0001,now+.7);[784,1046.5,1318.5].forEach((f,i)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=f;o.connect(g);o.start(now+i*.035);o.stop(now+.72);});setTimeout(()=>c.close(),900);}catch(_){}}
 
     const landscape=()=>{
       const v=window.visualViewport;
