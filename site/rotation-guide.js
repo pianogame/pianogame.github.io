@@ -17,7 +17,10 @@
       .hp-opening-orientation.hp-ready .hp-opening-phone{animation:none;transform:rotate(90deg)}
       .hp-opening-orientation.hp-ready .hp-opening-orientation-inner{transform:scale(1.02)}
       .hp-ready-main{display:none}
-      .hp-opening-orientation.hp-ready .hp-turn-main{display:none}
+      .hp-loading-main{display:none}
+      .hp-opening-orientation.hp-loading .hp-turn-main{display:none}
+      .hp-opening-orientation.hp-loading .hp-loading-main{display:block}
+      .hp-opening-orientation.hp-ready .hp-turn-main,.hp-opening-orientation.hp-ready .hp-loading-main{display:none}
       .hp-opening-orientation.hp-ready .hp-ready-main{display:block}
       .hp-ready-main em{display:block;margin-top:12px;font:600 13px system-ui,sans-serif;font-style:normal;letter-spacing:.12em;color:#a05a77}
       .hp-shards{position:absolute;inset:-4%;z-index:3;pointer-events:none}
@@ -70,6 +73,7 @@
         <div class="hp-opening-orientation-inner">
           <div class="hp-opening-phone" aria-hidden="true"></div>
           <div class="hp-turn-main"><strong>横向きにしてお楽しみください</strong><span>端末を横向きにしてください。</span></div>
+          <div class="hp-loading-main"><strong>音源を準備中…</strong><span>このまま少しだけお待ちください。</span></div>
           <div class="hp-ready-main"><strong>準備完了にしよう</strong><span>画面を長押しするか、好きな方向へスワイプしてください。</span><em>LONG PRESS / SWIPE</em></div>
         </div>
         <div class="hp-shards" aria-hidden="true"><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i></div>
@@ -91,6 +95,7 @@
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
     let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null;
+    let audioBuffersReady=false,audioLoadFailed=false,landscapeReached=false;
     const decodeAudio=async url=>{
       if(!openingAudioContext)return null;
       const response=await fetch(url,{cache:'no-store'});
@@ -100,8 +105,14 @@
     const openingAudioReady=openingAudioContext
       ? Promise.all([
           decodeAudio(selectedBgm).then(buffer=>{bgmBuffer=buffer;}),
-          decodeAudio('/audio/opening-3voices.m4a?v=6').then(buffer=>{voiceBuffer=buffer;})
-        ]).catch(()=>{})
+          decodeAudio('/audio/opening-3voices.m4a?v=7').then(buffer=>{voiceBuffer=buffer;})
+        ]).then(()=>{
+          audioBuffersReady=!!(bgmBuffer&&voiceBuffer);
+          maybeArmPreparation();
+        }).catch(()=>{
+          audioLoadFailed=true;
+          maybeArmPreparation();
+        })
       : Promise.resolve();
 
     function startBufferedOpeningAudio(){
@@ -129,14 +140,6 @@
       }
     }
 
-    async function unlockAndStartOpeningAudio(){
-      if(!openingAudioContext)return;
-      try{await openingAudioContext.resume();}catch(_){}
-      await openingAudioReady;
-      if(opened)return;
-      startBufferedOpeningAudio();
-    }
-
     function stopCurtainBgm(){
       try{bgmSource?.stop();}catch(_){}
       try{bgmSource?.disconnect();}catch(_){}
@@ -144,7 +147,7 @@
       bgmSource=null;bgmGain=null;bgmPlaying=false;
     }
 
-    function fadeOutCurtainBgm(duration=.9){
+    function fadeOutCurtainBgm(duration=.75){
       if(!bgmPlaying||!bgmGain||!openingAudioContext){stopCurtainBgm();return;}
       try{
         const now=openingAudioContext.currentTime;
@@ -152,7 +155,7 @@
         const start=Math.max(.0001,gain.value||.12);
         gain.cancelScheduledValues(now);
         gain.setValueAtTime(start,now);
-        gain.setValueCurveAtTime(new Float32Array([start,start*.68,start*.38,start*.18,start*.065,.0001]),now,duration);
+        gain.setValueCurveAtTime(new Float32Array([start,start*.46,start*.20,start*.075,start*.018,.0001]),now,duration);
         setTimeout(stopCurtainBgm,Math.ceil(duration*1000)+40);
       }catch(_){stopCurtainBgm();}
     }
@@ -172,10 +175,25 @@
     };
 
     let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0;
-    function armPreparation(){
-      if(started||!landscape())return;
+    function maybeArmPreparation(){
+      if(started||!landscapeReached)return;
+      orientation.classList.remove('hp-turn-main');
+      if(audioLoadFailed){
+        orientation.classList.add('hp-loading');
+        return;
+      }
+      if(!audioBuffersReady){
+        orientation.classList.add('hp-loading');
+        return;
+      }
       started=true;
+      orientation.classList.remove('hp-loading');
       orientation.classList.add('hp-ready');
+    }
+    function armPreparation(){
+      if(!landscape())return;
+      landscapeReached=true;
+      maybeArmPreparation();
     }
     function finishPreparation(event){
       if(prepared||!started||!event.isTrusted)return;
@@ -183,9 +201,14 @@
       const distance=Math.hypot(dx,dy);
       const held=performance.now()-gestureStartedAt;
       if(distance<72&&held<520)return;
+
+      // Everything that requires user activation happens synchronously here.
+      try{openingAudioContext?.resume();}catch(_){}
+      const didStart=startBufferedOpeningAudio();
+      if(!didStart)return;
+
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
-      void unlockAndStartOpeningAudio();
       orientation.classList.add('hp-shatter');
       setTimeout(()=>{
         orientation.classList.add('hp-leave');
@@ -218,7 +241,7 @@
     title.addEventListener('pointerup',()=>{
       if(opened||!prepared)return;
       opened=true;
-      fadeOutCurtainBgm(.9);
+      fadeOutCurtainBgm(.75);
       chime();
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');

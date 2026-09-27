@@ -82,12 +82,14 @@ def _verify_app_sources():
             raise ValueError(f"Opening audio is not referenced by rotation-guide.js: {name}")
     if opening_source.count("opening-bgm-") != 10:
         raise ValueError("Expected exactly 10 opening BGM references")
-    if "fadeOutCurtainBgm(.9)" not in opening_source or "setValueCurveAtTime" not in opening_source:
+    if "fadeOutCurtainBgm(.75)" not in opening_source or "setValueCurveAtTime" not in opening_source:
         raise ValueError("Strong curtain BGM fade-out is missing")
     if "voiceSource.start(openingAudioContext.currentTime+.8)" not in opening_source:
         raise ValueError("Delayed opening voice timing is missing")
-    if "void unlockAndStartOpeningAudio();" not in opening_source or "!event.isTrusted" not in opening_source:
+    if "openingAudioContext?.resume()" not in opening_source or "!event.isTrusted" not in opening_source:
         raise ValueError("Opening audio must be unlocked by a trusted preparation gesture")
+    if "audioBuffersReady" not in opening_source or "startBufferedOpeningAudio()" not in opening_source:
+        raise ValueError("Opening audio must be fully buffered before the preparation gesture")
     if "distance<72&&held<520" not in opening_source or "LONG PRESS / SWIPE" not in opening_source:
         raise ValueError("Swipe-or-hold preparation gesture is missing")
     if "startOpeningAudio();" in opening_source or "playCurtainVoice(true)" in opening_source or "playCurtainBgm(true)" in opening_source:
