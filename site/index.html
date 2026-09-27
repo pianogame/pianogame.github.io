@@ -17,6 +17,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=24">
   <meta name="apple-mobile-web-app-title" content="ドリステ">
   <meta name="mobile-web-app-capable" content="yes">
+  <style>body.hp-booting{background:#fff!important}body.hp-booting #hp-viewport{visibility:hidden!important}</style>
   <link rel="manifest" href="/manifest.webmanifest?v=24">
   <script>
     if ('serviceWorker' in navigator) {
@@ -36,9 +37,9 @@
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
-  <script defer src="/piano.js?v=19"></script>
+  <script defer src="/piano.js?v=20"></script>
   <link rel="stylesheet" href="/multitrack.css?v=12">
-  <script defer src="/multitrack.js?v=17"></script>
+  <script defer src="/multitrack.js?v=18"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
   <script defer src="/display-mode.js?v=15"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
@@ -66,7 +67,7 @@
       </div>
       <div class="hp-scroll-window" role="region" aria-label="88鍵の鍵盤。4段表示。上下にスクロールできます"><div class="hp-octave-stack"></div></div>
     </div>
-    <div class="hp-footer" data-settings-background><span class="hp-status" role="status" aria-live="polite">演奏をはじめるボタンで音源を準備</span><span data-output="instrument-label">グランドピアノ</span></div>
+    <div class="hp-footer" data-settings-background><span class="hp-status" role="status" aria-live="polite">幕をタップすると音源を準備</span><span data-output="instrument-label">グランドピアノ</span></div>
     <span data-output="notes" hidden></span>
     <div class="hp-settings-overlay" hidden>
       <div class="hp-settings-backdrop" data-action="settings-backdrop"></div>
@@ -80,7 +81,7 @@
 <button type="button" class="hp-control" data-action="key-size-reset">標準のピアノ鍵盤サイズに戻す</button>
 <p class="hp-setting-help">時計やホームバーがある部分は、余白を0にしても避けます。</p></section>
         <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span></label>
-        <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">演奏をはじめるボタンで音源を準備</p>
+        <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">幕をタップすると音源を準備</p>
         <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button></div>
         <label class="hp-setting"><span class="hp-setting-heading"><span>① 音量</span><output data-output="volume">75%</output></span><span class="hp-setting-help">楽器と響き、両方の音の大きさ。</span><input type="range" data-control="volume" min="0" max="100" value="75" aria-label="音量"><span class="hp-scale-ends"><span>小さい</span><span>大きい</span></span></label>
         <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>② 響きの強さ（リバーブ）</span><output data-output="reverb">35%</output></span><span class="hp-setting-help">ホールで反射する音の量。0%なら反響なし。</span><input type="range" data-control="reverb" min="0" max="100" value="35" aria-label="響きの強さ"><span class="hp-scale-ends"><span>反響なし</span><span>よく響く</span></span></label>
@@ -123,6 +124,6 @@
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/usage-analytics.js?v=2"></script>
-<script defer src="./rotation-guide.js?v=8"></script>
+<script defer src="./rotation-guide.js?v=9"></script>
 </body>
 </html>

@@ -8,7 +8,6 @@
   const action = name => root.querySelector('[data-action="' + name + '"]');
   const recordButton = action('record');
   const playButton = action('play');
-  const startButton = action('start');
   const instrumentControl = root.querySelector('[data-control="instrument"]');
   const releaseControl = root.querySelector('[data-control="release"]');
   const sustainButton = action('sustain');
@@ -56,7 +55,9 @@
   }
   loadState();
 
-  // The launch curtain is owned by rotation-guide.js. Keep multitrack focused on recording UI.\n\n  const trackButton=document.createElement('button');
+  // The launch curtain is owned by rotation-guide.js. Keep multitrack focused on recording UI.
+
+  const trackButton=document.createElement('button');
   trackButton.type='button';trackButton.className='hp-control';trackButton.textContent='🎚 録音一覧';trackButton.setAttribute('aria-expanded','false');
   root.querySelector('.hp-toolbar').insertBefore(trackButton,action('display-mode'));
   const panel=document.createElement('section');panel.className='hp-track-panel';panel.hidden=true;panel.setAttribute('aria-label','楽器別録音と保存');surface.append(panel);

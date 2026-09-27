@@ -7,9 +7,51 @@ import json
 import os
 import shutil
 import zipfile
+import re
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
+
+
+def _verify_app_sources():
+    site = ROOT / "site"
+    js_files = sorted(site.glob("*.js"))
+    if not js_files:
+        raise ValueError("No JavaScript source files found")
+
+    # Literal backslash-n sequences previously corrupted generated edits in piano.js
+    # and multitrack.js. This project does not intentionally use them in JS source.
+    for path in js_files:
+        source = path.read_text(encoding="utf-8")
+        if "\\\\n" in source:
+            raise ValueError(f"Suspicious literal \\\\n found in JavaScript source: {path.relative_to(ROOT)}")
+        try:
+            subprocess.run(
+                ["node", "--check", str(path)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("node is required for JavaScript syntax validation") from exc
+        except subprocess.CalledProcessError as exc:
+            detail = (exc.stderr or exc.stdout or "").strip()
+            raise ValueError(f"JavaScript syntax check failed for {path.relative_to(ROOT)}: {detail}") from exc
+
+    html = (site / "index.html").read_text(encoding="utf-8")
+    html_actions = set(re.findall(r'data-action="([^"]+)"', html))
+    referenced_actions = set()
+    for path in js_files:
+        source = path.read_text(encoding="utf-8")
+        referenced_actions.update(re.findall(r'action\\([\'\"]([^\'\"]+)[\'\"]\\)', source))
+    missing_actions = sorted(referenced_actions - html_actions)
+    if missing_actions:
+        raise ValueError("JavaScript references missing data-action controls: " + ", ".join(missing_actions))
+
+
+_verify_app_sources()
 
 if OUT.exists():
     shutil.rmtree(OUT)

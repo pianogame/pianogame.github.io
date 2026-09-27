@@ -412,7 +412,6 @@
     samplesReady=false; buttons.forEach(list=>list.forEach(button=>button.disabled=true));
     effectUI.setReady(false);
     instrumentControl.disabled=true; action('record').disabled=true; action('play').disabled=true;
-    const startButton=action('start'); if(startButton){startButton.disabled=true; startButton.textContent='音源を準備中…';}
     say(instruments[id].name+'を準備中');
     try {
       await ctx.resume();
@@ -423,16 +422,15 @@
       build37(instruments[id].shift37); updateInstrumentUI();
       if(id!==previous)activeTopRow=instruments[id].row88;
       requestAnimationFrame(sizeRegister);
-      if(startButton)startButton.hidden=true; say(instruments[id].name+'で演奏できます');
+      say(instruments[id].name+'で演奏できます');
     } catch(_) {
       if(generation!==loadGeneration)return;
       currentInstrument=previous; sampleBuffers=previousBank; samplesReady=wasReady;
       updateInstrumentUI();
-      if(startButton){startButton.hidden=wasReady; startButton.textContent='音源を再準備';}
       say(wasReady?'音源を読み込めなかったため、前の音源に戻しました。':'音源を読み込めませんでした。通信を確認して、もう一度お試しください',true);
     } finally {
       if(generation===loadGeneration) {
-        instrumentControl.disabled=false; if(startButton)startButton.disabled=false;
+        instrumentControl.disabled=false;
         buttons.forEach(list=>list.forEach(button=>button.disabled=!samplesReady));
         action('record').disabled=!samplesReady; action('play').disabled=!samplesReady||events.length===0;
       }
@@ -444,7 +442,7 @@
     if(!ctx) {
       currentInstrument=id; build37(instruments[id].shift37); updateInstrumentUI();
       activeTopRow=instruments[id].row88; requestAnimationFrame(sizeRegister);
-      say('演奏をはじめるボタンで'+instruments[id].name+'を準備');
+      say('幕をタップすると'+instruments[id].name+'を準備');
     } else {void prepareSamples(id);}
   });
 
@@ -615,7 +613,9 @@
       origin.lastClientX=sample.clientX; origin.lastClientY=sample.clientY;
     }
   });
-  const releasePointer = event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); };\n  ['pointerup','pointercancel'].forEach(name => window.addEventListener(name, releasePointer, true));\n  root.addEventListener('lostpointercapture', releasePointer);
+  const releasePointer = event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); };
+  ['pointerup','pointercancel'].forEach(name => window.addEventListener(name, releasePointer, true));
+  root.addEventListener('lostpointercapture', releasePointer);
   root.addEventListener('click', event => {
     const key = event.target.closest('[data-midi]');
     if (key && event.detail === 0 && !event.pointerType && !event.sourceCapabilities?.firesTouchEvents) { const token = 'accessible:' + key.dataset.midi; noteOn(token, Number(key.dataset.midi)); setTimeout(() => noteOff(token),180); }
