@@ -86,87 +86,87 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,prepared=false,opened=false,bgmPlaying=false;
-    const tapAudios=['/audio/curtain-start-1.mp3?v=4','/audio/curtain-start-2.mp3?v=4','/audio/curtain-start-3.mp3?v=4','/audio/curtain-start-4.mp3?v=4'].map(url=>{
-      const audio=new Audio(url);audio.preload='auto';audio.volume=.9;return audio;
+    let started=false,prepared=false,opened=false,bgmPlaying=false,voiceTimer=0,lastAudioError='';
+    const tapAudios=['/audio/curtain-start-1.mp3?v=5','/audio/curtain-start-2.mp3?v=5','/audio/curtain-start-3.mp3?v=5','/audio/curtain-start-4.mp3?v=5'].map(url=>{
+      const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=4','/audio/opening-bgm-02.m4a?v=4','/audio/opening-bgm-03.m4a?v=4','/audio/opening-bgm-04.m4a?v=4','/audio/opening-bgm-05.m4a?v=4','/audio/opening-bgm-06.m4a?v=4','/audio/opening-bgm-07.m4a?v=4','/audio/opening-bgm-08.m4a?v=4','/audio/opening-bgm-09.m4a?v=4','/audio/opening-bgm-10.m4a?v=4'];
-    const selectedBgm=bgmUrls[Math.floor(Math.random()*bgmUrls.length)];
-    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
-    const openingAudioContext=AudioContextClass?new AudioContextClass():null;
-    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null;
-    let audioBuffersReady=false,audioLoadFailed=false,landscapeReached=false;
-    const decodeAudio=async url=>{
-      if(!openingAudioContext)return null;
-      const response=await fetch(url,{cache:'no-store'});
-      if(!response.ok)throw new Error('audio '+response.status);
-      return openingAudioContext.decodeAudioData(await response.arrayBuffer());
-    };
-    const openingAudioReady=openingAudioContext
-      ? Promise.all([
-          decodeAudio(selectedBgm).then(buffer=>{bgmBuffer=buffer;}),
-          decodeAudio('/audio/opening-3voices.m4a?v=7').then(buffer=>{voiceBuffer=buffer;})
-        ]).then(()=>{
-          audioBuffersReady=!!(bgmBuffer&&voiceBuffer);
-          maybeArmPreparation();
-        }).catch(()=>{
-          audioLoadFailed=true;
-          maybeArmPreparation();
-        })
-      : Promise.resolve();
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=5','/audio/opening-bgm-02.m4a?v=5','/audio/opening-bgm-03.m4a?v=5','/audio/opening-bgm-04.m4a?v=5','/audio/opening-bgm-05.m4a?v=5','/audio/opening-bgm-06.m4a?v=5','/audio/opening-bgm-07.m4a?v=5','/audio/opening-bgm-08.m4a?v=5','/audio/opening-bgm-09.m4a?v=5','/audio/opening-bgm-10.m4a?v=5'];
+    const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
+    curtainBgm.preload='auto';
+    curtainBgm.loop=true;
+    curtainBgm.volume=.12;
+    curtainBgm.load();
+    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=8');
+    voiceAudio.preload='auto';
+    voiceAudio.volume=.9;
+    voiceAudio.load();
 
-    function startBufferedOpeningAudio(){
-      if(opened||bgmPlaying||!openingAudioContext||!bgmBuffer)return false;
+    function scheduleVoice(){
+      if(opened||voiceTimer)return;
+      voiceTimer=setTimeout(()=>{
+        voiceTimer=0;
+        if(opened)return;
+        try{
+          voiceAudio.currentTime=0;
+          const p=voiceAudio.play();
+          p?.catch(error=>{lastAudioError='voice:'+(error?.name||'play-failed');});
+        }catch(error){lastAudioError='voice:'+(error?.name||'play-failed');}
+      },800);
+    }
+
+    function startOpeningMedia(){
+      if(opened||bgmPlaying)return true;
       try{
-        bgmGain=openingAudioContext.createGain();
-        bgmGain.gain.setValueAtTime(.12,openingAudioContext.currentTime);
-        bgmGain.connect(openingAudioContext.destination);
-        bgmSource=openingAudioContext.createBufferSource();
-        bgmSource.buffer=bgmBuffer;
-        bgmSource.loop=true;
-        bgmSource.connect(bgmGain);
-        bgmSource.start();
-        bgmPlaying=true;
-        if(voiceBuffer){
-          voiceSource=openingAudioContext.createBufferSource();
-          voiceSource.buffer=voiceBuffer;
-          voiceSource.connect(openingAudioContext.destination);
-          voiceSource.start(openingAudioContext.currentTime+.8);
+        curtainBgm.currentTime=0;
+        const p=curtainBgm.play();
+        if(p?.then){
+          p.then(()=>{
+            if(opened){stopCurtainBgm();return;}
+            bgmPlaying=true;
+            lastAudioError='';
+            scheduleVoice();
+          }).catch(error=>{
+            bgmPlaying=false;
+            lastAudioError='bgm:'+(error?.name||'play-failed');
+          });
+        }else{
+          bgmPlaying=true;
+          scheduleVoice();
         }
         return true;
-      }catch(_){
+      }catch(error){
         bgmPlaying=false;
+        lastAudioError='bgm:'+(error?.name||'play-failed');
         return false;
       }
     }
 
+    let bgmFadeFrame=0;
     function stopCurtainBgm(){
-      try{bgmSource?.stop();}catch(_){}
-      try{bgmSource?.disconnect();}catch(_){}
-      try{bgmGain?.disconnect();}catch(_){}
-      bgmSource=null;bgmGain=null;bgmPlaying=false;
+      if(bgmFadeFrame){cancelAnimationFrame(bgmFadeFrame);bgmFadeFrame=0;}
+      try{curtainBgm.pause();curtainBgm.currentTime=0;curtainBgm.volume=.12;}catch(_){}
+      bgmPlaying=false;
     }
 
-    function fadeOutCurtainBgm(duration=.75){
-      if(!bgmPlaying||!bgmGain||!openingAudioContext){stopCurtainBgm();return;}
-      try{
-        const now=openingAudioContext.currentTime;
-        const gain=bgmGain.gain;
-        const start=Math.max(.0001,gain.value||.12);
-        gain.cancelScheduledValues(now);
-        gain.setValueAtTime(start,now);
-        gain.setValueCurveAtTime(new Float32Array([start,start*.46,start*.20,start*.075,start*.018,.0001]),now,duration);
-        setTimeout(stopCurtainBgm,Math.ceil(duration*1000)+40);
-      }catch(_){stopCurtainBgm();}
+    function fadeOutCurtainBgm(duration=650){
+      if(!bgmPlaying||curtainBgm.paused){stopCurtainBgm();return;}
+      if(bgmFadeFrame)cancelAnimationFrame(bgmFadeFrame);
+      const startVolume=Math.max(.01,curtainBgm.volume||.12);
+      const startedAt=performance.now();
+      const step=now=>{
+        const p=Math.min(1,(now-startedAt)/duration);
+        const eased=Math.pow(1-p,3.4);
+        try{curtainBgm.volume=Math.max(0,startVolume*eased);}catch(_){}
+        if(p<1){bgmFadeFrame=requestAnimationFrame(step);return;}
+        bgmFadeFrame=0;
+        stopCurtainBgm();
+      };
+      bgmFadeFrame=requestAnimationFrame(step);
     }
 
     function chime(){
       const audio=tapAudios[Math.floor(Math.random()*tapAudios.length)];
-      try{
-        audio.currentTime=0;
-        const p=audio.play();
-        p?.catch(()=>{});
-      }catch(_){}
+      try{audio.currentTime=0;const p=audio.play();p?.catch(()=>{});}catch(_){}
     }
 
     const landscape=()=>{
@@ -175,25 +175,14 @@
     };
 
     let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0;
-    function maybeArmPreparation(){
-      if(started||!landscapeReached)return;
-      orientation.classList.remove('hp-turn-main');
-      if(audioLoadFailed){
-        orientation.classList.add('hp-loading');
-        return;
-      }
-      if(!audioBuffersReady){
-        orientation.classList.add('hp-loading');
-        return;
-      }
+    function armPreparation(){
+      if(started||!landscape())return;
       started=true;
       orientation.classList.remove('hp-loading');
       orientation.classList.add('hp-ready');
-    }
-    function armPreparation(){
-      if(!landscape())return;
-      landscapeReached=true;
-      maybeArmPreparation();
+      // Best-effort autoplay at the exact landscape transition.
+      // Safari may reject this; the trusted swipe/hold gesture below is the fallback.
+      startOpeningMedia();
     }
     function finishPreparation(event){
       if(prepared||!started||!event.isTrusted)return;
@@ -202,10 +191,8 @@
       const held=performance.now()-gestureStartedAt;
       if(distance<72&&held<520)return;
 
-      // Everything that requires user activation happens synchronously here.
-      try{openingAudioContext?.resume();}catch(_){}
-      const didStart=startBufferedOpeningAudio();
-      if(!didStart)return;
+      // Direct HTMLMediaElement.play() in the same trusted pointerup event.
+      startOpeningMedia();
 
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
@@ -241,7 +228,7 @@
     title.addEventListener('pointerup',()=>{
       if(opened||!prepared)return;
       opened=true;
-      fadeOutCurtainBgm(.75);
+      fadeOutCurtainBgm(650);
       chime();
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');

@@ -82,18 +82,18 @@ def _verify_app_sources():
             raise ValueError(f"Opening audio is not referenced by rotation-guide.js: {name}")
     if opening_source.count("opening-bgm-") != 10:
         raise ValueError("Expected exactly 10 opening BGM references")
-    if "fadeOutCurtainBgm(.75)" not in opening_source or "setValueCurveAtTime" not in opening_source:
+    if "fadeOutCurtainBgm(650)" not in opening_source or "Math.pow(1-p,3.4)" not in opening_source:
         raise ValueError("Strong curtain BGM fade-out is missing")
-    if "voiceSource.start(openingAudioContext.currentTime+.8)" not in opening_source:
+    if "setTimeout(()=>{" not in opening_source or "},800);" not in opening_source:
         raise ValueError("Delayed opening voice timing is missing")
-    if "openingAudioContext?.resume()" not in opening_source or "!event.isTrusted" not in opening_source:
-        raise ValueError("Opening audio must be unlocked by a trusted preparation gesture")
-    if "audioBuffersReady" not in opening_source or "startBufferedOpeningAudio()" not in opening_source:
-        raise ValueError("Opening audio must be fully buffered before the preparation gesture")
+    if "startOpeningMedia();" not in opening_source or "!event.isTrusted" not in opening_source:
+        raise ValueError("Opening audio must use direct media play with a trusted preparation gesture")
+    if "curtainBgm.play()" not in opening_source or "voiceAudio.play()" not in opening_source:
+        raise ValueError("Opening audio must use HTMLMediaElement.play()")
     if "distance<72&&held<520" not in opening_source or "LONG PRESS / SWIPE" not in opening_source:
         raise ValueError("Swipe-or-hold preparation gesture is missing")
-    if "startOpeningAudio();" in opening_source or "playCurtainVoice(true)" in opening_source or "playCurtainBgm(true)" in opening_source:
-        raise ValueError("Legacy autoplay/tap fallback must not remain")
+    if "startBufferedOpeningAudio()" in opening_source or "unlockAndStartOpeningAudio" in opening_source:
+        raise ValueError("Legacy Web Audio opening playback must not remain")
     if any(line.strip() == "undefined" for line in opening_source.splitlines()):
         raise ValueError("Unexpected undefined line in rotation-guide.js")
 
