@@ -170,10 +170,10 @@ if (sw0, sh0) != (180, 180):
 opaque0 = _flatten_rgba(rgba0)
 
 apple_icons = [
-    (120, "apple-touch-icon-120-v20.png"),
-    (152, "apple-touch-icon-152-v20.png"),
-    (167, "apple-touch-icon-167-v20.png"),
-    (180, "apple-touch-icon-180-v20.png"),
+    (120, "apple-touch-icon-120-v21.png"),
+    (152, "apple-touch-icon-152-v21.png"),
+    (167, "apple-touch-icon-167-v21.png"),
+    (180, "apple-touch-icon-180-v21.png"),
 ]
 for size, name in apple_icons:
     pixels = opaque0 if size == 180 else _resize_rgba(opaque0, sw0, sh0, size, size)
@@ -187,8 +187,8 @@ root180 = _encode_rgba_png(180, 180, opaque0)
 
 # Standard Web App Manifest sizes.
 for size, name in [
-    (192, "pwa-icon-192-v20.png"),
-    (512, "pwa-icon-512-v20.png"),
+    (192, "pwa-icon-192-v21.png"),
+    (512, "pwa-icon-512-v21.png"),
 ]:
     resized = _resize_rgba(opaque0, sw0, sh0, size, size)
     png = _encode_rgba_png(size, size, resized)
@@ -211,8 +211,8 @@ for size, name in apple_icons:
     _verify_png(install_dir / name, size)
 _verify_png(OUT / "apple-touch-icon.png", 180)
 _verify_png(OUT / "apple-touch-icon-precomposed.png", 180)
-_verify_png(install_dir / "pwa-icon-192-v20.png", 192)
-_verify_png(install_dir / "pwa-icon-512-v20.png", 512)
+_verify_png(install_dir / "pwa-icon-192-v21.png", 192)
+_verify_png(install_dir / "pwa-icon-512-v21.png", 512)
 print("Verified install icons: Apple 120/152/167/180 and PWA 192/512, opaque RGBA PNG")
 
 bundles = ROOT / "sample-bundles"

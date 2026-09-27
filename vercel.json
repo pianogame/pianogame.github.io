@@ -40,7 +40,7 @@
       ]
     },
     {
-      "source": "/install/pwa-icon-512-v20.png",
+      "source": "/install/pwa-icon-512-v21.png",
       "headers": [
         {
           "key": "Cache-Control",
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "source": "/install/pwa-icon-192-v20.png",
+      "source": "/install/pwa-icon-192-v21.png",
       "headers": [
         {
           "key": "Cache-Control",
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "source": "/install/apple-touch-icon-180-v20.png",
+      "source": "/install/apple-touch-icon-180-v21.png",
       "headers": [
         {
           "key": "Cache-Control",
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "source": "/install/apple-touch-icon-167-v20.png",
+      "source": "/install/apple-touch-icon-167-v21.png",
       "headers": [
         {
           "key": "Cache-Control",
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "source": "/install/apple-touch-icon-152-v20.png",
+      "source": "/install/apple-touch-icon-152-v21.png",
       "headers": [
         {
           "key": "Cache-Control",
@@ -85,7 +85,7 @@
       ]
     },
     {
-      "source": "/install/apple-touch-icon-120-v20.png",
+      "source": "/install/apple-touch-icon-120-v21.png",
       "headers": [
         {
           "key": "Cache-Control",
