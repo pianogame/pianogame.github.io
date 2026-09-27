@@ -86,8 +86,8 @@ def _verify_app_sources():
         raise ValueError("Curtain BGM fade-out is missing")
     if "scheduleCurtainVoice(800)" not in opening_source:
         raise ValueError("Delayed opening voice timing is missing")
-    if "started=true;\n      // Make the autoplay attempt synchronously at the landscape transition.\n      // This is the earliest browser event we can legally use without adding a tap.\n      startOpeningAudio();" not in opening_source:
-        raise ValueError("Landscape-triggered opening audio attempt is missing")
+    if "title.classList.add('hp-show');\n        startOpeningAudio();" not in opening_source:
+        raise ValueError("Curtain-visible opening audio start is missing")
     if "scheduleCurtainVoice(1400)" in opening_source or "playCurtainVoice(true)" in opening_source or "playCurtainBgm(true)" in opening_source:
         raise ValueError("Opening audio must not wait for a curtain tap")
     if any(line.strip() == "undefined" for line in opening_source.splitlines()):
