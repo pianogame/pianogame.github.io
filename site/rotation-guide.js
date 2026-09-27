@@ -57,13 +57,13 @@
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
     let started=false,opened=false,voicePlayed=false,bgmPlaying=false,voiceTimer=0;
-    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=4');
+    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=5');
     voiceAudio.preload='auto';
     voiceAudio.volume=.9;
-    const tapAudios=['/audio/curtain-start-1.mp3?v=2','/audio/curtain-start-2.mp3?v=2','/audio/curtain-start-3.mp3?v=2','/audio/curtain-start-4.mp3?v=2'].map(url=>{
+    const tapAudios=['/audio/curtain-start-1.mp3?v=3','/audio/curtain-start-2.mp3?v=3','/audio/curtain-start-3.mp3?v=3','/audio/curtain-start-4.mp3?v=3'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=2','/audio/opening-bgm-02.m4a?v=2','/audio/opening-bgm-03.m4a?v=2','/audio/opening-bgm-04.m4a?v=2','/audio/opening-bgm-05.m4a?v=2','/audio/opening-bgm-06.m4a?v=2','/audio/opening-bgm-07.m4a?v=2','/audio/opening-bgm-08.m4a?v=2','/audio/opening-bgm-09.m4a?v=2','/audio/opening-bgm-10.m4a?v=2'];
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=3','/audio/opening-bgm-02.m4a?v=3','/audio/opening-bgm-03.m4a?v=3','/audio/opening-bgm-04.m4a?v=3','/audio/opening-bgm-05.m4a?v=3','/audio/opening-bgm-06.m4a?v=3','/audio/opening-bgm-07.m4a?v=3','/audio/opening-bgm-08.m4a?v=3','/audio/opening-bgm-09.m4a?v=3','/audio/opening-bgm-10.m4a?v=3'];
     const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
     curtainBgm.preload='auto';
     curtainBgm.loop=true;
@@ -79,12 +79,8 @@
       }catch(_){}
     }
 
-    function scheduleCurtainVoice(delay=800,restart=false){
-      if(voicePlayed||opened)return;
-      if(voiceTimer){
-        if(!restart)return;
-        clearTimeout(voiceTimer);
-      }
+    function scheduleCurtainVoice(delay=800){
+      if(voicePlayed||opened||voiceTimer)return;
       voiceTimer=setTimeout(()=>{
         voiceTimer=0;
         playCurtainVoice();
@@ -92,23 +88,21 @@
     }
 
     function startOpeningAudio(){
-      // Try BGM immediately when the curtain appears. If the browser delays or
-      // rejects audible autoplay, still try the voice independently rather than
-      // waiting for a curtain tap.
-      scheduleCurtainVoice(1400);
+      if(bgmPlaying||opened)return;
       try{
         curtainBgm.currentTime=0;
         const p=curtainBgm.play();
         if(p?.then){
           p.then(()=>{
+            if(opened){stopCurtainBgm();return;}
             bgmPlaying=true;
-            scheduleCurtainVoice(800,true);
+            scheduleCurtainVoice(800);
           }).catch(()=>{
             bgmPlaying=false;
           });
         }else{
           bgmPlaying=true;
-          scheduleCurtainVoice(800,true);
+          scheduleCurtainVoice(800);
         }
       }catch(_){
         bgmPlaying=false;
@@ -157,11 +151,13 @@
     function begin(){
       if(started||!landscape())return;
       started=true;
+      // Make the autoplay attempt synchronously at the landscape transition.
+      // This is the earliest browser event we can legally use without adding a tap.
+      startOpeningAudio();
       orientation.classList.add('hp-leave');
       setTimeout(()=>{
         orientation.hidden=true;
         title.classList.add('hp-show');
-        startOpeningAudio();
         title.addEventListener('pointerup',()=>{
           if(opened)return;
           opened=true;

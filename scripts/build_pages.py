@@ -84,8 +84,14 @@ def _verify_app_sources():
         raise ValueError("Expected exactly 10 opening BGM references")
     if "fadeOutCurtainBgm(1200)" not in opening_source:
         raise ValueError("Curtain BGM fade-out is missing")
-    if "scheduleCurtainVoice(800,true)" not in opening_source:
+    if "scheduleCurtainVoice(800)" not in opening_source:
         raise ValueError("Delayed opening voice timing is missing")
+    if "started=true;\n      // Make the autoplay attempt synchronously at the landscape transition.\n      // This is the earliest browser event we can legally use without adding a tap.\n      startOpeningAudio();" not in opening_source:
+        raise ValueError("Landscape-triggered opening audio attempt is missing")
+    if "scheduleCurtainVoice(1400)" in opening_source or "playCurtainVoice(true)" in opening_source or "playCurtainBgm(true)" in opening_source:
+        raise ValueError("Opening audio must not wait for a curtain tap")
+    if any(line.strip() == "undefined" for line in opening_source.splitlines()):
+        raise ValueError("Unexpected undefined line in rotation-guide.js")
 
 
 _verify_app_sources()
