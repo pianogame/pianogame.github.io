@@ -56,39 +56,7 @@
   }
   loadState();
 
-  const curtain=document.createElement('div');
-  curtain.className='hp-curtain';curtain.setAttribute('aria-hidden','true');
-  curtain.innerHTML='<div class="hp-curtain-half"></div><div class="hp-curtain-half"></div><div class="hp-curtain-title"><span class="hp-dream-title-main">✦ Piano Dream Stage ✦</span><span class="hp-dream-title-kana">ピアノドリームステージ</span></div>';
-  surface.append(curtain);
-  function measureHeader(){surface.style.setProperty('--hp-stage-top',root.querySelector('.hp-header').offsetHeight+'px');}
-  measureHeader();new ResizeObserver(measureHeader).observe(root.querySelector('.hp-header'));
-  window.addEventListener('resize',measureHeader);window.addEventListener('hp-viewport-resize',measureHeader);
-  function rememberStageOpen(){try{sessionStorage.setItem(stageStateKey,'1');}catch(_){}}
-  function rememberExportResume(){
-    rememberStageOpen();
-    try{localStorage.setItem(exportResumeKey,String(Date.now()+30000));}catch(_){}
-  }
-  function restoreStage(){
-    let opened=false;
-    try{opened=sessionStorage.getItem(stageStateKey)==='1';}catch(_){}
-    try{
-      const until=Number(localStorage.getItem(exportResumeKey)||0);
-      if(until>Date.now()){opened=true;sessionStorage.setItem(stageStateKey,'1');}
-      if(until) localStorage.removeItem(exportResumeKey);
-    }catch(_){}
-    if(opened){curtain.classList.add('open');curtain.hidden=true;}
-  }
-  function openCurtainWhenReady(){
-    if(!startButton.hidden||curtain.hidden||curtain.classList.contains('open'))return;
-    rememberStageOpen();
-    curtain.classList.add('open');setTimeout(()=>{curtain.hidden=true;},1250);
-  }
-  new MutationObserver(openCurtainWhenReady).observe(startButton,{attributes:true,attributeFilter:['hidden']});
-  window.addEventListener('pageshow',restoreStage);
-  restoreStage();
-  openCurtainWhenReady();
-
-  const trackButton=document.createElement('button');
+  // The launch curtain is owned by rotation-guide.js. Keep multitrack focused on recording UI.\n\n  const trackButton=document.createElement('button');
   trackButton.type='button';trackButton.className='hp-control';trackButton.textContent='🎚 録音一覧';trackButton.setAttribute('aria-expanded','false');
   root.querySelector('.hp-toolbar').insertBefore(trackButton,action('display-mode'));
   const panel=document.createElement('section');panel.className='hp-track-panel';panel.hidden=true;panel.setAttribute('aria-label','楽器別録音と保存');surface.append(panel);
