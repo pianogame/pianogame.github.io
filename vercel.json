@@ -40,7 +40,7 @@
       ]
     },
     {
-      "source": "/install/icon-512.png",
+      "source": "/install/pwa-icon-512-v19.png",
       "headers": [
         {
           "key": "Cache-Control",
@@ -49,25 +49,7 @@
       ]
     },
     {
-      "source": "/install/icon-192.png",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/install/apple-touch-icon.png",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/apple-touch-icon.png",
+      "source": "/install/pwa-icon-192-v19.png",
       "headers": [
         {
           "key": "Cache-Control",

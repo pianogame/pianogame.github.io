@@ -157,13 +157,29 @@ if (sw0, sh0) != (180, 180):
 
 # Properly-sized manifest/fallback icons, all derived from that exact same picture.
 for size, name in [
-    (192, "icon-192.png"),
-    (512, "icon-512.png"),
+    (192, "pwa-icon-192-v19.png"),
+    (512, "pwa-icon-512-v19.png"),
 ]:
     resized = _resize_rgba(rgba0, sw0, sh0, size, size)
     png = _encode_rgba_png(size, size, resized)
     (install_dir / name).write_bytes(png)
 
+# Fail the deployment if the generated PWA icons are not valid RGBA PNGs at the declared sizes.
+def _verify_png(path, expected):
+    data = path.read_bytes()
+    if data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError(f"Invalid PNG signature: {path}")
+    if len(data) < 33 or data[12:16] != b"IHDR":
+        raise ValueError(f"Missing PNG IHDR: {path}")
+    width, height, bit_depth, color_type = struct.unpack(">IIBB", data[16:26])
+    if (width, height) != (expected, expected):
+        raise ValueError(f"Wrong icon size for {path}: {width}x{height}")
+    if bit_depth != 8 or color_type != 6:
+        raise ValueError(f"Unexpected icon format for {path}: depth={bit_depth}, color_type={color_type}")
+
+_verify_png(install_dir / "pwa-icon-192-v19.png", 192)
+_verify_png(install_dir / "pwa-icon-512-v19.png", 512)
+print("Verified PWA icons: 192x192 and 512x512 RGBA PNG")
 
 bundles = ROOT / "sample-bundles"
 for bundle in json.loads((bundles / "parts.json").read_text()):
