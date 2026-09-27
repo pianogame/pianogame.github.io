@@ -53,7 +53,7 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,opened=false;
+    let started=false,opened=false,voicePlayed=false;\n    function playCurtainVoice(){if(voicePlayed)return;voicePlayed=true;try{const a=new Audio('/audio/opening-3voices.m4a?v=1');a.volume=.9;void a.play();}catch(_){}}\n    window.HP_OPENING_SOUND_URLS=['/audio/curtain-start-1.mp3?v=1','/audio/curtain-start-2.mp3?v=1','/audio/curtain-start-3.mp3?v=1','/audio/curtain-start-4.mp3?v=1'];
     function chime(){const sounds=window.HP_OPENING_SOUND_URLS||[];if(!sounds.length)return;try{const audio=new Audio(sounds[Math.floor(Math.random()*sounds.length)]);audio.volume=.9;void audio.play();}catch(_){}}
 
     const landscape=()=>{
@@ -66,7 +66,7 @@
       orientation.classList.add('hp-leave');
       setTimeout(()=>{
         orientation.hidden=true;
-        title.classList.add('hp-show');
+        title.classList.add('hp-show');\n        playCurtainVoice();
         title.addEventListener('pointerup',()=>{if(opened)return;opened=true;chime();window.dispatchEvent(new Event('hp-curtain-start'));title.classList.add('hp-curtain-open');setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);setTimeout(()=>opening.remove(),1950);},{once:true});
       },850);
     }
