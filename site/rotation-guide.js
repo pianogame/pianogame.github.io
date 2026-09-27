@@ -151,13 +151,11 @@
     function begin(){
       if(started||!landscape())return;
       started=true;
-      // Make the autoplay attempt synchronously at the landscape transition.
-      // This is the earliest browser event we can legally use without adding a tap.
-      startOpeningAudio();
       orientation.classList.add('hp-leave');
       setTimeout(()=>{
         orientation.hidden=true;
         title.classList.add('hp-show');
+        startOpeningAudio();
         title.addEventListener('pointerup',()=>{
           if(opened)return;
           opened=true;
