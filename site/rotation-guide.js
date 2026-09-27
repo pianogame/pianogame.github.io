@@ -63,7 +63,7 @@
     const tapAudios=['/audio/curtain-start-1.mp3?v=1','/audio/curtain-start-2.mp3?v=1','/audio/curtain-start-3.mp3?v=1','/audio/curtain-start-4.mp3?v=1'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;return audio;
     });
-    const bgmUrls=Array.from({length:10},(_,i)=>'/audio/opening-bgm-'+String(i+1).padStart(2,'0')+'.m4a?v=1');
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=1','/audio/opening-bgm-02.m4a?v=1','/audio/opening-bgm-03.m4a?v=1','/audio/opening-bgm-04.m4a?v=1','/audio/opening-bgm-05.m4a?v=1','/audio/opening-bgm-06.m4a?v=1','/audio/opening-bgm-07.m4a?v=1','/audio/opening-bgm-08.m4a?v=1','/audio/opening-bgm-09.m4a?v=1','/audio/opening-bgm-10.m4a?v=1'];
     const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
     curtainBgm.preload='auto';
     curtainBgm.loop=true;
