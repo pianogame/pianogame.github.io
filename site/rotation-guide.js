@@ -107,13 +107,30 @@
       }
     }
 
+    let bgmFadeFrame=0;
     function stopCurtainBgm(){
+      if(bgmFadeFrame){cancelAnimationFrame(bgmFadeFrame);bgmFadeFrame=0;}
       try{
         curtainBgm.pause();
         curtainBgm.currentTime=0;
         curtainBgm.volume=.12;
       }catch(_){}
       bgmPlaying=false;
+    }
+
+    function fadeOutCurtainBgm(duration=1200){
+      if(!bgmPlaying||curtainBgm.paused){stopCurtainBgm();return;}
+      if(bgmFadeFrame)cancelAnimationFrame(bgmFadeFrame);
+      const startVolume=curtainBgm.volume;
+      const startedAt=performance.now();
+      const step=now=>{
+        const progress=Math.min(1,(now-startedAt)/duration);
+        curtainBgm.volume=Math.max(0,startVolume*(1-progress));
+        if(progress<1){bgmFadeFrame=requestAnimationFrame(step);return;}
+        bgmFadeFrame=0;
+        stopCurtainBgm();
+      };
+      bgmFadeFrame=requestAnimationFrame(step);
     }
 
     function chime(){
@@ -140,7 +157,7 @@
         title.addEventListener('pointerup',()=>{
           if(opened)return;
           opened=true;
-          stopCurtainBgm();
+          fadeOutCurtainBgm(1200);
           chime();
           window.dispatchEvent(new Event('hp-curtain-start'));
           title.classList.add('hp-curtain-open');
