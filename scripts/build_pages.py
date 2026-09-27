@@ -185,6 +185,10 @@ root180 = _encode_rgba_png(180, 180, opaque0)
 (OUT / "apple-touch-icon.png").write_bytes(root180)
 (OUT / "apple-touch-icon-precomposed.png").write_bytes(root180)
 
+install_v23 = OUT / "install-v23"
+install_v23.mkdir(parents=True, exist_ok=True)
+(install_v23 / "piano-dream-stage-touch-v23.png").write_bytes(root180)
+
 # Standard Web App Manifest sizes.
 for size, name in [
     (192, "pwa-icon-192-v21.png"),
@@ -211,6 +215,7 @@ for size, name in apple_icons:
     _verify_png(install_dir / name, size)
 _verify_png(OUT / "apple-touch-icon.png", 180)
 _verify_png(OUT / "apple-touch-icon-precomposed.png", 180)
+_verify_png(OUT / "install-v23" / "piano-dream-stage-touch-v23.png", 180)
 _verify_png(install_dir / "pwa-icon-192-v21.png", 192)
 _verify_png(install_dir / "pwa-icon-512-v21.png", 512)
 print("Verified install icons: Apple 120/152/167/180 and PWA 192/512, opaque RGBA PNG")
