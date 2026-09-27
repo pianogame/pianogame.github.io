@@ -86,7 +86,25 @@
         else{bgmPlaying=true;bgmNeedsGestureRetry=false;}
       }catch(_){bgmPlaying=false;bgmNeedsGestureRetry=true;}
     }
-    function stopCurtainBgm(){try{curtainBgm.pause();curtainBgm.currentTime=0;}catch(_){}bgmPlaying=false;}
+    let bgmFadeFrame=0;
+    function stopCurtainBgm(){
+      if(bgmFadeFrame){cancelAnimationFrame(bgmFadeFrame);bgmFadeFrame=0;}
+      try{curtainBgm.pause();curtainBgm.currentTime=0;curtainBgm.volume=.12;}catch(_){}
+      bgmPlaying=false;
+    }
+    function fadeOutCurtainBgm(duration=1200){
+      if(!bgmPlaying){stopCurtainBgm();return;}
+      if(bgmFadeFrame)cancelAnimationFrame(bgmFadeFrame);
+      const startVolume=curtainBgm.volume,startTime=performance.now();
+      const step=now=>{
+        const progress=Math.min(1,(now-startTime)/duration);
+        curtainBgm.volume=startVolume*(1-progress);
+        if(progress<1){bgmFadeFrame=requestAnimationFrame(step);return;}
+        bgmFadeFrame=0;
+        stopCurtainBgm();
+      };
+      bgmFadeFrame=requestAnimationFrame(step);
+    }
     function chime(){const audio=tapAudios[Math.floor(Math.random()*tapAudios.length)];try{audio.currentTime=0;const p=audio.play();p?.catch(()=>{});}catch(_){}}
 
     const landscape=()=>{
@@ -110,7 +128,7 @@
           if(!bgmPlaying||bgmNeedsGestureRetry)playCurtainBgm(true);
           chime();
           const openCurtain=()=>{
-            stopCurtainBgm();
+            fadeOutCurtainBgm(1200);
             window.dispatchEvent(new Event('hp-curtain-start'));
             title.classList.add('hp-curtain-open');
             setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
