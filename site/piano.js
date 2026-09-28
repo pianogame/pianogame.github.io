@@ -48,7 +48,7 @@
   const instrumentControl = root.querySelector('[data-control="instrument"]');
   const settingsOverlay = root.querySelector('.hp-settings-overlay');
   let sustain = false, showSharps = true, recording = false, playing = false;
-  let events = [], recordStart = 0, recordDuration = 0, timer = null;
+  let events = [], recordStart = 0, recordDuration = 0, timer = null, soundStopEvents = [];
   let playbackTimers = [], playbackVoices = [], playGeneration = 0, scheduler = null;
   let eventCount = 0;
 
@@ -681,6 +681,11 @@
   });
   action('sustain').addEventListener('click', () => { sustain = !sustain; articulation[currentInstrument].sustain=sustain; action('sustain').setAttribute('aria-pressed', String(sustain)); action('sustain').textContent=sustain?'音を伸ばす：ON':'音を伸ばす：OFF'; if (!sustain && ctx) { const active=new Set(Array.from(held.values()).map(note=>note.voice)); allVoices.forEach(voice=>{if(!active.has(voice))voice.release(ctx.currentTime,articulation[currentInstrument].release);}); } });
   action('stop-sound').addEventListener('click', () => {
+    if(recording&&ctx){
+      const stopAt=Math.max(0,ctx.currentTime-recordStart);
+      const last=soundStopEvents[soundStopEvents.length-1];
+      if(!Number.isFinite(last)||Math.abs(last-stopAt)>.02)soundStopEvents.push(stopAt);
+    }
     markHeldCutForRecording();
     root.dispatchEvent(new Event('hp-stop-sound'));
     stopPlayback(); releaseHeld(); pointerStarts.clear();
@@ -694,7 +699,7 @@
   action('record').addEventListener('click', () => {
     if (recording) { finishRecording(); return; }
     if (!ensureAudio()) return;
-    stopPlayback(); releaseHeld(); events = []; eventCount = 0; recordStart = ctx.currentTime; recording = true;
+    stopPlayback(); releaseHeld(); events = []; soundStopEvents = []; eventCount = 0; recordStart = ctx.currentTime; recording = true;
     action('record').setAttribute('aria-pressed','true'); action('record').textContent = '■ 録音停止'; action('play').disabled = true;
     say('録音中 · 0.0秒');
     timer = setInterval(() => {
@@ -719,6 +724,8 @@
         const event = events[nextEvent++], when = Math.max(ctx.currentTime, start + event.start);
         const voice = synth(event.midi, when); playbackVoices.push(voice);
         voice.release(when + event.duration, event.cut ? .02 : (event.sustain ? Infinity : articulation[currentInstrument].release));
+        const globalStop=soundStopEvents.find(value=>Number.isFinite(value)&&value>event.start+.001);
+        if(Number.isFinite(globalStop))voice.release(start+globalStop,.02);
         later(() => { playingCounts.set(event.midi, (playingCounts.get(event.midi) || 0) + 1); redraw(); sparkle(event.midi); }, when - ctx.currentTime);
         later(() => { const remaining = (playingCounts.get(event.midi) || 1) - 1; if (remaining) playingCounts.set(event.midi, remaining); else playingCounts.delete(event.midi); redraw(); }, when + event.duration - ctx.currentTime);
       }
