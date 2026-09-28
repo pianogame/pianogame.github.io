@@ -17,43 +17,17 @@
       .hp-opening-orientation.hp-ready .hp-opening-phone{animation:none;transform:rotate(90deg)}
       .hp-opening-orientation.hp-ready .hp-opening-orientation-inner{transform:scale(1.02)}
       .hp-ready-main{display:none}
-      .hp-ready-break{display:none}
+      .hp-ready-wave{display:none}
       .hp-loading-main{display:none}
       .hp-opening-orientation.hp-loading .hp-turn-main{display:none}
       .hp-opening-orientation.hp-loading .hp-loading-main{display:block}
       .hp-opening-orientation.hp-ready .hp-turn-main,.hp-opening-orientation.hp-ready .hp-loading-main{display:none}
       .hp-opening-orientation.hp-ready .hp-ready-main{display:block}
-      .hp-opening-orientation.hp-cracked .hp-ready-unlock{display:none}
-      .hp-opening-orientation.hp-cracked .hp-ready-break{display:block}
+      .hp-opening-orientation.hp-wave-armed .hp-ready-unlock{display:none}
+      .hp-opening-orientation.hp-wave-armed .hp-ready-wave{display:block}
       .hp-ready-main em{display:block;margin-top:12px;font:600 13px system-ui,sans-serif;font-style:normal;letter-spacing:.12em;color:#a05a77}
-      .hp-crack-lines{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .16s ease}
-      .hp-opening-orientation.hp-cracked .hp-crack-lines{opacity:1}
-      .hp-crack-lines i{position:absolute;left:50%;top:50%;width:min(34vw,240px);height:2px;background:linear-gradient(90deg,#b76f88,#6f4657 55%,transparent);transform-origin:left center;filter:drop-shadow(0 0 2px #fff)}
-      .hp-crack-lines i:nth-child(1){transform:rotate(8deg)}
-      .hp-crack-lines i:nth-child(2){transform:rotate(41deg);width:min(28vw,210px)}
-      .hp-crack-lines i:nth-child(3){transform:rotate(83deg);width:min(24vw,180px)}
-      .hp-crack-lines i:nth-child(4){transform:rotate(132deg)}
-      .hp-crack-lines i:nth-child(5){transform:rotate(181deg);width:min(30vw,220px)}
-      .hp-crack-lines i:nth-child(6){transform:rotate(221deg);width:min(25vw,190px)}
-      .hp-crack-lines i:nth-child(7){transform:rotate(274deg);width:min(29vw,210px)}
-      .hp-crack-lines i:nth-child(8){transform:rotate(318deg);width:min(27vw,200px)}
-      .hp-shards{position:absolute;inset:-4%;z-index:3;pointer-events:none}
-      .hp-shard{position:absolute;background:#fff;box-shadow:0 0 0 1px #eadfe5;opacity:0}
-      .hp-opening-orientation.hp-shatter .hp-opening-orientation-inner{opacity:0;transform:scale(1.09)}
-      .hp-opening-orientation.hp-shatter .hp-shard{opacity:1;animation:hp-shard-fly .72s cubic-bezier(.3,.75,.2,1) forwards}
-      .hp-shard:nth-child(1){left:-2%;top:-2%;width:35%;height:37%;clip-path:polygon(0 0,100% 0,78% 100%,15% 78%);--tx:-28vw;--ty:-22vh;--rot:-18deg}
-      .hp-shard:nth-child(2){left:27%;top:-3%;width:28%;height:42%;clip-path:polygon(10% 0,100% 0,82% 83%,0 100%);--tx:-8vw;--ty:-28vh;--rot:12deg;animation-delay:.03s}
-      .hp-shard:nth-child(3){left:51%;top:-2%;width:28%;height:38%;clip-path:polygon(0 0,100% 0,88% 100%,18% 82%);--tx:12vw;--ty:-26vh;--rot:-10deg;animation-delay:.05s}
-      .hp-shard:nth-child(4){right:-3%;top:-2%;width:28%;height:44%;clip-path:polygon(0 0,100% 0,100% 80%,12% 100%);--tx:30vw;--ty:-20vh;--rot:20deg;animation-delay:.02s}
-      .hp-shard:nth-child(5){left:-3%;top:30%;width:31%;height:39%;clip-path:polygon(0 10%,92% 0,100% 100%,18% 82%);--tx:-32vw;--ty:-2vh;--rot:15deg;animation-delay:.04s}
-      .hp-shard:nth-child(6){left:23%;top:32%;width:30%;height:38%;clip-path:polygon(8% 0,100% 8%,82% 100%,0 84%);--tx:-14vw;--ty:8vh;--rot:-16deg;animation-delay:.07s}
-      .hp-shard:nth-child(7){left:49%;top:29%;width:29%;height:41%;clip-path:polygon(0 8%,92% 0,100% 82%,18% 100%);--tx:14vw;--ty:7vh;--rot:18deg;animation-delay:.05s}
-      .hp-shard:nth-child(8){right:-2%;top:30%;width:28%;height:40%;clip-path:polygon(0 0,100% 15%,84% 100%,8% 86%);--tx:33vw;--ty:2vh;--rot:-14deg;animation-delay:.08s}
-      .hp-shard:nth-child(9){left:-2%;bottom:-2%;width:34%;height:36%;clip-path:polygon(0 0,88% 14%,100% 100%,0 100%);--tx:-26vw;--ty:26vh;--rot:-20deg;animation-delay:.06s}
-      .hp-shard:nth-child(10){left:28%;bottom:-2%;width:28%;height:36%;clip-path:polygon(0 12%,100% 0,84% 100%,10% 100%);--tx:-7vw;--ty:29vh;--rot:15deg;animation-delay:.09s}
-      .hp-shard:nth-child(11){left:52%;bottom:-2%;width:27%;height:38%;clip-path:polygon(12% 0,100% 14%,100% 100%,0 100%);--tx:10vw;--ty:28vh;--rot:-17deg;animation-delay:.08s}
-      .hp-shard:nth-child(12){right:-3%;bottom:-2%;width:27%;height:38%;clip-path:polygon(0 12%,100% 0,100% 100%,14% 100%);--tx:30vw;--ty:25vh;--rot:21deg;animation-delay:.1s}
-      @keyframes hp-shard-fly{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot));opacity:0}}
+      .hp-opening-orientation.hp-ripple-release .hp-opening-orientation-inner{opacity:0;transform:scale(1.045);transition:opacity .38s ease,transform .52s ease}
+      .hp-ripple-fx{position:absolute;inset:0;z-index:10002;width:100%;height:100%;pointer-events:none}
       .hp-opening-phone{position:relative;width:74px;height:132px;margin:0 auto 25px;border:2px solid #4c4650;border-radius:15px;animation:hp-turn 2.2s cubic-bezier(.65,0,.25,1) infinite}
       .hp-opening-phone:after{content:"";position:absolute;left:50%;bottom:7px;width:7px;height:7px;border:1px solid #77717b;border-radius:50%;transform:translateX(-50%)}
       .hp-opening-orientation strong{display:block;font-size:clamp(21px,5vw,31px);font-weight:500;letter-spacing:.08em}
@@ -89,12 +63,12 @@
           <div class="hp-turn-main"><strong>横向きにしてお楽しみください</strong><span>端末を横向きにしてください。</span></div>
           <div class="hp-loading-main"><strong>音源を準備中…</strong><span>このまま少しだけお待ちください。</span></div>
           <div class="hp-ready-main">
-            <div class="hp-ready-unlock"><strong>準備完了まであと少し</strong><span>画面をタップして、まずヒビを入れてください。</span><em>TAP TO CRACK</em></div>
-            <div class="hp-ready-break"><strong>準備完了にしよう</strong><span>ヒビの入った画面を長押しするか、好きな方向へスワイプしてください。</span><em>LONG PRESS / SWIPE</em></div>
+            <div class="hp-ready-unlock"><strong>準備完了まであと少し</strong><span>画面をタップして、音の波紋を起こしてください。</span><em>TAP TO RIPPLE</em></div>
+            <div class="hp-ready-wave"><strong>準備完了にしよう</strong><span>波紋が出たら、画面を長押しするか好きな方向へスワイプしてください。</span><em>LONG PRESS / SWIPE</em></div>
           </div>
         </div>
-        <div class="hp-crack-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="hp-shards" aria-hidden="true"><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i></div>
+      </section>
+      <canvas class="hp-ripple-fx" aria-hidden="true"></canvas>
       </section>
       <section class="hp-opening-title" aria-label="ピアノドリームステージ">
         <i class="hp-opening-spark s1"></i><i class="hp-opening-spark s2"></i><i class="hp-opening-spark s3"></i>
@@ -104,6 +78,8 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
+    const rippleCanvas=opening.querySelector('.hp-ripple-fx');
+    const rippleCtx=rippleCanvas.getContext('2d');
     let started=false,prepared=false,opened=false,bgmPlaying=false,audioReady=false,audioLoadFailed=false,audioUnlocked=false,lastAudioError='';
     const tapAudios=['/audio/curtain-start-1.mp3?v=10','/audio/curtain-start-2.mp3?v=10','/audio/curtain-start-3.mp3?v=10','/audio/curtain-start-4.mp3?v=10'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
@@ -191,7 +167,7 @@
     }
 
     function cancelPreparationAudio(){
-      // Audio stays unlocked after the playful crack tap.
+      // Audio stays unlocked after the playful ripple tap.
     }
 
     function stopOpeningVoice(){
@@ -232,6 +208,167 @@
       try{audio.currentTime=0;const p=audio.play();p?.catch(()=>{});}catch(_){}
     }
 
+    let rippleAnimationFrame=0;
+    const rippleParticles=Array.from({length:34},(_,i)=>({
+      angle:(Math.PI*2*i/34)+(((i*37)%17)-8)*.006,
+      base:55+((i*29)%74),
+      travel:250+((i*43)%145),
+      yScale:.48+((i*11)%18)/100,
+      size:2+(i%3),
+      phase:(((i*19)%15)-7)*.008
+    }));
+
+    function sizeRippleCanvas(){
+      const ratio=Math.min(2,window.devicePixelRatio||1);
+      rippleCanvas.width=Math.max(1,Math.round(innerWidth*ratio));
+      rippleCanvas.height=Math.max(1,Math.round(innerHeight*ratio));
+      rippleCanvas.style.width=innerWidth+'px';
+      rippleCanvas.style.height=innerHeight+'px';
+      rippleCtx.setTransform(ratio,0,0,ratio,0,0);
+    }
+    sizeRippleCanvas();
+    window.addEventListener('resize',sizeRippleCanvas);
+
+    const clamp01=value=>Math.max(0,Math.min(1,value));
+    const easeOut=value=>1-Math.pow(1-clamp01(value),3);
+    const smooth=value=>{value=clamp01(value);return value*value*(3-2*value);};
+
+    function clearRippleFx(){
+      if(rippleAnimationFrame){cancelAnimationFrame(rippleAnimationFrame);rippleAnimationFrame=0;}
+      rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+    }
+
+    function drawStaff(ctx,cx,cy,progress,alpha=1){
+      const width=Math.min(innerWidth*.42,520)*progress;
+      ctx.save();
+      ctx.strokeStyle='rgba(215,177,101,'+(0.72*alpha)+')';
+      ctx.lineWidth=1.4;
+      for(let i=0;i<5;i++){
+        const y=cy-32+i*16;
+        ctx.beginPath();ctx.moveTo(cx-width,y);ctx.lineTo(cx+width,y);ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawNote(ctx,text,x,y,alpha,size=18){
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle='#c08b4f';
+      ctx.font='600 '+size+'px system-ui,sans-serif';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText(text,x,y);
+      ctx.restore();
+    }
+
+    function playUnlockRipple(clientX,clientY){
+      clearRippleFx();
+      const cx=Number.isFinite(clientX)?clientX:innerWidth/2;
+      const cy=Number.isFinite(clientY)?clientY:innerHeight/2;
+      const startedAt=performance.now();
+      const notes=['♪','♫','♩','♬','♪','♩'];
+      const frame=now=>{
+        const elapsed=now-startedAt;
+        rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+        const staff=easeOut(elapsed/620);
+        drawStaff(rippleCtx,cx,cy,staff,1);
+        for(let i=0;i<4;i++){
+          const p=(elapsed-i*95)/720;
+          if(p<=0||p>=1)continue;
+          const radius=18+Math.min(innerWidth,innerHeight)*.30*easeOut(p);
+          rippleCtx.save();
+          rippleCtx.globalAlpha=(1-p)*.82;
+          rippleCtx.strokeStyle='#e1b96e';
+          rippleCtx.lineWidth=Math.max(.7,3.6*(1-p));
+          rippleCtx.beginPath();rippleCtx.arc(cx,cy,radius,0,Math.PI*2);rippleCtx.stroke();
+          rippleCtx.restore();
+        }
+        const orbit=clamp01(elapsed/760);
+        notes.forEach((note,i)=>{
+          const angle=(Math.PI*2*i/notes.length)+orbit*.85;
+          const radius=62+orbit*92;
+          drawNote(rippleCtx,note,cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius*.56,orbit*(1-clamp01((elapsed-650)/250)),17);
+        });
+        if(elapsed<980)rippleAnimationFrame=requestAnimationFrame(frame);
+        else{rippleAnimationFrame=0;rippleCtx.clearRect(0,0,innerWidth,innerHeight);}
+      };
+      rippleAnimationFrame=requestAnimationFrame(frame);
+    }
+
+    function playReleaseRipple(clientX,clientY){
+      clearRippleFx();
+      const cx=Number.isFinite(clientX)?clientX:innerWidth/2;
+      const cy=Number.isFinite(clientY)?clientY:innerHeight/2;
+      const startedAt=performance.now();
+      const notes=['♪','♫','♩','♬','♪','♩'];
+      const frame=now=>{
+        const elapsed=now-startedAt;
+        rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+
+        const staffProgress=easeOut(elapsed/520);
+        const staffFade=1-smooth((elapsed-650)/520);
+        drawStaff(rippleCtx,cx,cy,staffProgress,staffFade);
+
+        for(let i=0;i<5;i++){
+          const p=(elapsed-i*90)/880;
+          if(p<=0||p>=1)continue;
+          const radius=22+Math.min(innerWidth,innerHeight)*.46*easeOut(p);
+          rippleCtx.save();
+          rippleCtx.globalAlpha=(1-p)*.78;
+          rippleCtx.strokeStyle='#e7bf73';
+          rippleCtx.lineWidth=Math.max(.6,4.2*(1-p));
+          rippleCtx.beginPath();rippleCtx.arc(cx,cy,radius,0,Math.PI*2);rippleCtx.stroke();
+          rippleCtx.restore();
+        }
+
+        const orbit=clamp01(elapsed/720);
+        const noteFade=1-smooth((elapsed-700)/500);
+        notes.forEach((note,i)=>{
+          const angle=(Math.PI*2*i/notes.length)+orbit*1.2;
+          const radius=82+orbit*130;
+          drawNote(rippleCtx,note,cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius*.56,orbit*noteFade,18);
+        });
+
+        // Golden dots move outward and fade continuously to zero.
+        let particleAlpha=0;
+        let motion=0;
+        if(elapsed<500){
+          motion=smooth(elapsed/500);
+          particleAlpha=smooth(elapsed/220);
+        }else if(elapsed<1500){
+          motion=1+((elapsed-500)/1000)*.58;
+          particleAlpha=1-smooth((elapsed-500)/1000)*.92;
+        }else if(elapsed<1950){
+          motion=1.58+((elapsed-1500)/450)*.18;
+          particleAlpha=.08*(1-smooth((elapsed-1500)/450));
+        }
+        if(particleAlpha>0){
+          rippleParticles.forEach((particle,i)=>{
+            const m=Math.max(0,motion+particle.phase);
+            const distance=particle.base+particle.travel*m;
+            const x=cx+Math.cos(particle.angle)*distance;
+            const y=cy+Math.sin(particle.angle)*distance*particle.yScale;
+            const alpha=Math.max(0,particleAlpha*(1-.1*(i%4)));
+            rippleCtx.save();
+            rippleCtx.globalAlpha=alpha*.18;
+            rippleCtx.fillStyle='#ffe7a4';
+            rippleCtx.beginPath();rippleCtx.arc(x,y,particle.size*3,0,Math.PI*2);rippleCtx.fill();
+            rippleCtx.globalAlpha=alpha;
+            rippleCtx.fillStyle='#ffe8a5';
+            rippleCtx.beginPath();rippleCtx.arc(x,y,particle.size,0,Math.PI*2);rippleCtx.fill();
+            rippleCtx.restore();
+          });
+        }
+
+        if(elapsed<1980)rippleAnimationFrame=requestAnimationFrame(frame);
+        else{
+          rippleAnimationFrame=0;
+          rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+        }
+      };
+      rippleAnimationFrame=requestAnimationFrame(frame);
+    }
+
     const landscape=()=>{
       const v=window.visualViewport;
       return (v?.width||innerWidth) >= (v?.height||innerHeight);
@@ -240,7 +377,10 @@
     orientation.addEventListener('click',async event=>{
       if(!started||prepared||audioUnlocked||!event.isTrusted)return;
       const unlocked=await unlockOpeningAudio();
-      if(unlocked)orientation.classList.add('hp-cracked');
+      if(unlocked){
+        orientation.classList.add('hp-wave-armed');
+        playUnlockRipple(event.clientX,event.clientY);
+      }
     });
 
     let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0,landscapeReached=false;
@@ -271,12 +411,12 @@
       if(!beginAudibleOpening())return;
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
-      orientation.classList.add('hp-shatter');
+      orientation.classList.add('hp-ripple-release');
+      playReleaseRipple(event.clientX,event.clientY);
       setTimeout(()=>{
-        orientation.classList.add('hp-leave');
+        orientation.hidden=true;
         title.classList.add('hp-show');
-      },260);
-      setTimeout(()=>{orientation.hidden=true;},720);
+      },520);
     }
     orientation.addEventListener('pointerdown',event=>{
       if(!started||prepared||!audioUnlocked)return;

@@ -90,8 +90,12 @@ def _verify_app_sources():
         raise ValueError("Opening audio must be unlocked by a real tap before swipe-or-hold")
     if "openingAudioContext.resume()" not in opening_source or "audioUnlocked=true" not in opening_source:
         raise ValueError("Opening AudioContext unlock is missing")
-    if "hp-cracked" not in opening_source or "TAP TO CRACK" not in opening_source:
-        raise ValueError("Playful crack-unlock stage is missing")
+    if "hp-wave-armed" not in opening_source or "TAP TO RIPPLE" not in opening_source:
+        raise ValueError("Musical ripple unlock stage is missing")
+    if "playUnlockRipple(" not in opening_source or "playReleaseRipple(" not in opening_source:
+        raise ValueError("Musical ripple canvas effects are missing")
+    if "particleAlpha=.08*(1-smooth" not in opening_source:
+        raise ValueError("Ripple particles must fade smoothly to zero")
     if "beginAudibleOpening()" not in opening_source:
         raise ValueError("Opening BGM must begin only after swipe-or-hold succeeds")
     if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:
