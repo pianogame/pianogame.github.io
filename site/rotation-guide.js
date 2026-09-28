@@ -317,7 +317,7 @@
 
         // Keep the first ripple visible for a short beat, then fade the entire
         // effect smoothly instead of clearing it abruptly.
-        const unlockFade=1-smooth((elapsed-500)/420);
+        const unlockFade=1-smooth((elapsed-350)/320);
         rippleCtx.save();
         rippleCtx.globalAlpha=unlockFade;
 
@@ -355,7 +355,7 @@
 
         rippleCtx.restore();
 
-        if(elapsed<1000)rippleAnimationFrame=requestAnimationFrame(frame);
+        if(elapsed<720)rippleAnimationFrame=requestAnimationFrame(frame);
         else{
           rippleAnimationFrame=0;
           rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
