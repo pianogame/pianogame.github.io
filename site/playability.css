@@ -35,3 +35,15 @@ html[data-hp-rotated="true"] #hp-four88 .hp-keyboard,html[data-hp-rotated="true"
 #hp-four88 .hp-size-panel h2 { font-size:18px; }
 
 html[data-hp-wide="false"] #hp-four88 .hp-keyboard,html[data-hp-wide="false"] #hp-four88 .hp-scroll-window { padding-left:var(--hp-key-edge,8px); padding-right:var(--hp-key-edge,8px); }
+
+#hp-four88 .hp-dynamics-panel{border-bottom:1px solid #d8cbdf;padding:12px 0 16px}
+#hp-four88 .hp-dynamics-panel h2{font-size:18px;margin:0 0 6px}
+#hp-four88 .hp-dynamics-test-banner{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:120;width:min(520px,calc(100% - 24px));padding:10px 14px;border-radius:14px;background:#fffafced;box-shadow:0 6px 22px #30243c55;text-align:center;pointer-events:none}
+#hp-four88 .hp-dynamics-test-banner strong{display:block;font-size:15px}
+#hp-four88 .hp-dynamics-test-banner span{display:block;margin-top:3px;font-size:12px;color:#6c5f70}
+#hp-four88 .hp-dynamics-modal{position:absolute;inset:0;z-index:130;display:grid;place-items:center;padding:18px}
+#hp-four88 .hp-dynamics-modal[hidden],#hp-four88 .hp-dynamics-test-banner[hidden]{display:none!important}
+#hp-four88 .hp-dynamics-modal-backdrop{position:absolute;inset:0;background:#241b2b88}
+#hp-four88 .hp-dynamics-modal-card{position:relative;width:min(420px,100%);padding:20px;border-radius:18px;background:#fffafc;box-shadow:0 12px 36px #241b2b77;text-align:center}
+#hp-four88 .hp-dynamics-modal-card h2{margin:0 0 8px;font-size:20px}
+#hp-four88 .hp-dynamics-modal-card p{margin:0 0 16px;line-height:1.6;color:#64586a}

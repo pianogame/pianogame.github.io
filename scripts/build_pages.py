@@ -104,6 +104,20 @@ def _verify_app_sources():
     if "#hp-four88 .hp-key.hp-sharp {\n  z-index:10;" not in piano_css:
         raise ValueError("Black piano keys must always stay above white keys")
 
+    piano_source = (site / "piano.js").read_text(encoding="utf-8")
+    required_dynamics = [
+        "data-action=\"dynamics-test\"",
+        "data-control=\"dynamics-enabled\"",
+        "function startDynamicsTest()",
+        "function captureDynamicsSample(event)",
+        "function dynamicsGainFromEvent(event)",
+        "velocity:gain",
+    ]
+    combined_dynamics = html + piano_source
+    for marker in required_dynamics:
+        if marker not in combined_dynamics:
+            raise ValueError(f"Dynamics verification feature is incomplete: {marker}")
+
     multitrack_source = (site / "multitrack.js").read_text(encoding="utf-8")
     if "return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);" not in multitrack_source:
         raise ValueError("Multitrack playback duration must include the full scheduled release tail")
@@ -111,6 +125,10 @@ def _verify_app_sources():
         raise ValueError("Multitrack playback must not truncate release tails to 0.8 seconds")
     if "const recordedStop=clamp(track.duration,0,MAX_SECONDS);" not in multitrack_source or "return Math.max(recordedStop,audibleEnd);" not in multitrack_source:
         raise ValueError("Multitrack playback/export must preserve the recorded stop-button position")
+    if "velocity:velocityGain(n.velocity)" not in multitrack_source or "event.detail.velocity" not in multitrack_source:
+        raise ValueError("Recorded dynamics must persist in multitrack data")
+    if "gain*.65*velocityGain(note.velocity)" not in multitrack_source:
+        raise ValueError("Recorded dynamics must affect playback and export volume")
 
     opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
     for name in OPENING_AUDIO_EXPECTED:

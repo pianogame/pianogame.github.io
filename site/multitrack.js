@@ -32,6 +32,7 @@
 
   const now = () => performance.now()/1000;
   const clamp = (value,low,high) => Math.min(high,Math.max(low,Number(value)||0));
+  const velocityGain=value=>Number.isFinite(Number(value))?clamp(Number(value),.45,1.25):1;
   const instrumentName = id => instruments[id]?.name || id;
   const say = (text,error=false) => { status.textContent=text; status.dataset.error=String(error); };
 
@@ -42,7 +43,7 @@
       tracks=saved.tracks.slice(0,MAX_TRACKS).filter(t=>instruments[t.instrument]&&Array.isArray(t.notes)).map(t=>({
         id:String(t.id),instrument:t.instrument,name:String(t.name||instrumentName(t.instrument)).slice(0,64),muted:!!t.muted,
         duration:clamp(t.duration,0,MAX_SECONDS),notes:t.notes.slice(0,MAX_NOTES).filter(n=>Number.isFinite(n.midi)&&n.midi>=18&&n.midi<=108).map(n=>({
-          midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain
+          midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain,velocity:velocityGain(n.velocity)
         }))
       }));
       for(const id of Object.keys(groupMutes))groupMutes[id]=!!saved.groupMutes?.[id];
@@ -208,17 +209,17 @@
     else say('演奏がなかったため、空の録音は追加しませんでした');
     renderPanel();
   }
-  function beginRecordedNote(token,midi,startedAt=now()){
+  function beginRecordedNote(token,midi,velocity=1,startedAt=now()){
     if(!recording||activeRecordedNotes.has(token)||token==='audition')return;
     if(recording.notes.length>=MAX_NOTES){finishRecording();return;}
-    const note={midi,start:clamp(startedAt-recordingStartedAt,0,MAX_SECONDS),duration:.06,release:clamp(releaseControl.value,.01,10),sustain:sustainButton.getAttribute('aria-pressed')==='true'};
+    const note={midi,start:clamp(startedAt-recordingStartedAt,0,MAX_SECONDS),duration:.06,release:clamp(releaseControl.value,.01,10),sustain:sustainButton.getAttribute('aria-pressed')==='true',velocity:velocityGain(velocity)};
     recording.notes.push(note);activeRecordedNotes.set(token,{note,startedAt});
   }
   function endRecordedNote(token,endedAt=now()){
     const entry=activeRecordedNotes.get(token);if(!entry)return;
     entry.note.duration=clamp(endedAt-entry.startedAt,.015,MAX_SECONDS);activeRecordedNotes.delete(token);
   }
-  root.addEventListener('hp-note-on',event=>beginRecordedNote(event.detail.token,event.detail.midi));
+  root.addEventListener('hp-note-on',event=>beginRecordedNote(event.detail.token,event.detail.midi,event.detail.velocity));
   root.addEventListener('hp-note-off',event=>endRecordedNote(event.detail.token));
   root.addEventListener('hp-stop-sound',()=>{stopPlayback();for(const token of [...activeRecordedNotes.keys()])endRecordedNote(token);});
   instrumentControl.addEventListener('change',()=>{if(recording)finishRecording();},true);
@@ -286,7 +287,7 @@
   function scheduleNote(context,target,track,note,when,sourceList){
     const descriptor=descriptorFor(track.instrument,note.midi,'play'),buffer=sampleBuffers.get(descriptor.url);if(!buffer)return;
     const source=context.createBufferSource(),envelope=context.createGain();source.buffer=buffer;source.playbackRate.value=Math.pow(2,(note.midi-descriptor.midi)/12);
-    const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=clamp(note.release,.01,10);
+    const level=clamp(instruments[track.instrument].gain*.65*velocityGain(note.velocity),0,2.5),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=clamp(note.release,.01,10);
     const natural=buffer.duration/source.playbackRate.value;
     envelope.gain.setValueAtTime(.00001,when);envelope.gain.linearRampToValueAtTime(level,when+.003);
     source.connect(envelope);envelope.connect(target);

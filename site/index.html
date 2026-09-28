@@ -23,7 +23,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=40', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=41', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -37,12 +37,12 @@
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
-  <script defer src="/piano.js?v=21"></script>
+  <script defer src="/piano.js?v=22"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
-  <script defer src="/multitrack.js?v=20"></script>
+  <script defer src="/multitrack.js?v=21"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
   <script defer src="/display-mode.js?v=15"></script>
-  <link rel="stylesheet" href="/playability.css?v=9">
+  <link rel="stylesheet" href="/playability.css?v=8">
   <script defer src="/playability.js?v=9"></script>
 </head>
 <body class="hp-booting">
@@ -83,6 +83,16 @@
         <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span></label>
         <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">幕をタップすると音源を準備</p>
         <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button></div>
+        <section class="hp-dynamics-panel">
+          <h2>演奏強弱</h2>
+          <p class="hp-setting-help">端末がタッチの圧力または接触変化を取得できるか、実際に鍵盤を弾いて確認します。検証は初回のみで、成功後は自由にON/OFFできます。</p>
+          <button type="button" class="hp-control" data-action="dynamics-test">強弱入力を検証</button>
+          <div data-dynamics-controls hidden>
+            <label class="hp-wide-label"><input type="checkbox" data-control="dynamics-enabled"> 演奏強弱を使う</label>
+            <p class="hp-setting-help" data-output="dynamics-method"></p>
+            <button type="button" class="hp-control" data-action="dynamics-retest">再検証</button>
+          </div>
+        </section>
         <label class="hp-setting"><span class="hp-setting-heading"><span>① 音量</span><output data-output="volume">75%</output></span><span class="hp-setting-help">楽器と響き、両方の音の大きさ。</span><input type="range" data-control="volume" min="0" max="100" value="75" aria-label="音量"><span class="hp-scale-ends"><span>小さい</span><span>大きい</span></span></label>
         <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>② 響きの強さ（リバーブ）</span><output data-output="reverb">35%</output></span><span class="hp-setting-help">ホールで反射する音の量。0%なら反響なし。</span><input type="range" data-control="reverb" min="0" max="100" value="35" aria-label="響きの強さ"><span class="hp-scale-ends"><span>反響なし</span><span>よく響く</span></span></label>
         <label class="hp-setting" data-common-ambience><span class="hp-setting-heading"><span>③ 響きの長さ</span><output data-output="decay">0.05秒</output></span><span class="hp-setting-help">反響が小さくなるまでの時間。長くすると余韻が残ります。</span><input type="range" data-control="decay" min="0.02" max="8" step="0.01" value="0.05" aria-label="響きが消えるまでの時間"><span class="hp-scale-ends"><span>短い</span><span>長い</span></span></label>
