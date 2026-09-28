@@ -120,6 +120,15 @@ def _verify_app_sources():
     for marker in required_dynamics:
         if marker not in combined_dynamics:
             raise ValueError(f"Dynamics verification feature is incomplete: {marker}")
+    if "return t<=.5 ? .30+t*1.40 : 1+(t-.5)*1.20;" not in piano_source:
+        raise ValueError("Dynamics range must use the stronger 0.30–1.60 mapping")
+    if "Math.min(1.65,Math.max(.28,number))" not in piano_source:
+        raise ValueError("Live dynamics clamp must preserve the stronger range")
+
+    orientation_source = (site / "orientation.js").read_text(encoding="utf-8")
+    for marker in ["function settleFit()", "[80,220,500,900]", "window.addEventListener('focus', settleFit)", "visibilitychange"]:
+        if marker not in orientation_source:
+            raise ValueError(f"Orientation settling guard is missing: {marker}")
 
     multitrack_source = (site / "multitrack.js").read_text(encoding="utf-8")
     if "return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);" not in multitrack_source:

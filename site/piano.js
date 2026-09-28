@@ -121,7 +121,7 @@
     const raw=dynamicsRawFromEvent(event,dynamicsConfig.method);
     const span=Math.max(.0001,dynamicsConfig.max-dynamicsConfig.min);
     const t=Math.min(1,Math.max(0,(raw-dynamicsConfig.min)/span));
-    return t<=.5 ? .65+t*.70 : 1+(t-.5)*.40;
+    return t<=.5 ? .30+t*1.40 : 1+(t-.5)*1.20;
   }
   function finishDynamicsTest(){
     if(!dynamicsTesting)return;
@@ -175,7 +175,7 @@
   }
   function velocityGain(value){
     const number=Number(value);
-    return Number.isFinite(number)?Math.min(1.25,Math.max(.45,number)):1;
+    return Number.isFinite(number)?Math.min(1.65,Math.max(.28,number)):1;
   }
 
   const pitchName = midi => noteNames[midi % 12] + (Math.floor(midi / 12) - 1);

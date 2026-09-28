@@ -32,7 +32,7 @@
 
   const now = () => performance.now()/1000;
   const clamp = (value,low,high) => Math.min(high,Math.max(low,Number(value)||0));
-  const velocityGain=value=>Number.isFinite(Number(value))?clamp(Number(value),.45,1.25):1;
+  const velocityGain=value=>Number.isFinite(Number(value))?clamp(Number(value),.28,1.65):1;
   const instrumentName = id => instruments[id]?.name || id;
   const say = (text,error=false) => { status.textContent=text; status.dataset.error=String(error); };
 

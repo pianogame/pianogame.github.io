@@ -23,7 +23,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=42', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=43', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -31,15 +31,15 @@
   </script>
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
-  <script src="/orientation.js?v=9"></script>
+  <script src="/orientation.js?v=10"></script>
   <script defer src="/instruments.js?v=9"></script>
   <link rel="stylesheet" href="/effects.css?v=9">
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
-  <script defer src="/piano.js?v=23"></script>
+  <script defer src="/piano.js?v=24"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
-  <script defer src="/multitrack.js?v=22"></script>
+  <script defer src="/multitrack.js?v=23"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
   <script defer src="/display-mode.js?v=15"></script>
   <link rel="stylesheet" href="/playability.css?v=8">
