@@ -105,6 +105,9 @@ def _verify_app_sources():
         raise ValueError("Black piano keys must always stay above white keys")
 
     piano_source = (site / "piano.js").read_text(encoding="utf-8")
+    if "start + recordDuration + tail" in piano_source or "start + recordDuration)" not in piano_source:
+        raise ValueError("Normal recording playback must end exactly at the stop-button duration")
+
     required_dynamics = [
         "data-action=\"dynamics-test\"",
         "data-control=\"dynamics-enabled\"",
@@ -123,8 +126,12 @@ def _verify_app_sources():
         raise ValueError("Multitrack playback duration must include the full scheduled release tail")
     if "Math.min(.8,clamp(note.release,.01,10))" in multitrack_source:
         raise ValueError("Multitrack playback must not truncate release tails to 0.8 seconds")
-    if "const recordedStop=clamp(track.duration,0,MAX_SECONDS);" not in multitrack_source or "return Math.max(recordedStop,audibleEnd);" not in multitrack_source:
-        raise ValueError("Multitrack playback/export must preserve the recorded stop-button position")
+    if "if(recordedStop>0)return recordedStop;" not in multitrack_source:
+        raise ValueError("Multitrack playback/export must end at the recorded stop-button position")
+    if "return Math.max(recordedStop,audibleEnd);" in multitrack_source:
+        raise ValueError("Audible release tails must not extend playback past the stop button")
+    if "const playbackLead=.12;" not in multitrack_source:
+        raise ValueError("Multitrack playback end must include the scheduling lead")
     if "velocity:velocityGain(n.velocity)" not in multitrack_source or "event.detail.velocity" not in multitrack_source:
         raise ValueError("Recorded dynamics must persist in multitrack data")
     if "gain*.65*velocityGain(note.velocity)" not in multitrack_source:

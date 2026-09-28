@@ -275,14 +275,13 @@
     return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);
   }
   function mixDuration(selected){
-    const end=Math.max(...selected.map(track=>{
+    return Math.max(...selected.map(track=>{
       const recordedStop=clamp(track.duration,0,MAX_SECONDS);
-      const audibleEnd=track.notes.length
+      if(recordedStop>0)return recordedStop;
+      return track.notes.length
         ? Math.max(...track.notes.map(note=>note.start+noteSoundLength(track,note)))
         : 0;
-      return Math.max(recordedStop,audibleEnd);
     }));
-    return end+.05;
   }
   function scheduleNote(context,target,track,note,when,sourceList){
     const descriptor=descriptorFor(track.instrument,note.midi,'play'),buffer=sampleBuffers.get(descriptor.url);if(!buffer)return;
@@ -314,7 +313,8 @@
       await ensureEngine();await preload(selected);await ensureEngine();const startAt=engine.currentTime+.12;playing=true;playbackSources=[];playbackBuses=[];
       for(const track of selected){const bus=engine.createGain();bus.gain.value=isAudible(track)?1:0;bus.connect(engineMaster);playbackBuses.push({track,bus});for(const note of track.notes)scheduleNote(engine,bus,track,note,startAt+note.start,playbackSources);}
       const duration=mixDuration(selected);
-      playbackEndTimer=setTimeout(()=>{stopPlayback();say('全トラックの再生が終わりました');},duration*1000);say('全トラック再生中 · '+selected.length+'トラック');updatePlayButton();
+      const playbackLead=.12;
+      playbackEndTimer=setTimeout(()=>{stopPlayback();say('全トラックの再生が終わりました');},(duration+playbackLead)*1000);say('全トラック再生中 · '+selected.length+'トラック');updatePlayButton();
     }catch(error){stopPlayback();say('再生できませんでした：'+error.message,true);}finally{busy=false;if(!panel.hidden)renderPanel();}
   }
 
@@ -385,10 +385,10 @@
   async function exportMix(format){
     const selected=audibleTracks();if(!selected.length||busy)return;readyExport=null;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
     try{
-      await ensureEngine();await preload(selected);const duration=mixDuration(selected);
+      await ensureEngine();await preload(selected);const duration=mixDuration(selected),renderLead=.01;
       const sampleRate=44100,Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!Offline)throw new Error('このブラウザでは音声書き出しを利用できません');
-      const offline=new Offline(2,Math.ceil(duration*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
-      for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,.01+note.start,null);
+      const offline=new Offline(2,Math.ceil((duration+renderLead)*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
+      for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,renderLead+note.start,null);
       const rendered=await offline.startRendering();
       let blob,extension=format;
       if(format==='wav')blob=encodeWav(rendered);

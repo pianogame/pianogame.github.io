@@ -849,8 +849,7 @@
         later(() => { playingCounts.set(event.midi, (playingCounts.get(event.midi) || 0) + 1); redraw(); sparkle(event.midi); }, when - ctx.currentTime);
         later(() => { const remaining = (playingCounts.get(event.midi) || 1) - 1; if (remaining) playingCounts.set(event.midi, remaining); else playingCounts.delete(event.midi); redraw(); }, when + event.duration - ctx.currentTime);
       }
-      const tail = Math.min(1.2, Math.max(.18, Number(decayControl.value) + .18));
-      if (ctx.currentTime >= start + recordDuration + tail) { stopPlayback(); say('再生が終わりました'); }
+      if (ctx.currentTime >= start + recordDuration) { stopPlayback(); say('再生が終わりました'); }
     }
     schedule(); scheduler = setInterval(schedule, 25);
   });
