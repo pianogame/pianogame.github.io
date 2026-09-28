@@ -84,16 +84,16 @@ def _verify_app_sources():
         raise ValueError("Expected exactly 10 opening BGM references")
     if "fadeOutCurtainBgm(.78)" not in opening_source or "setValueCurveAtTime" not in opening_source:
         raise ValueError("Strong Web Audio BGM fade-out is missing")
-    if "voiceAt=now+1.5" not in opening_source:
-        raise ValueError("Opening voice must become audible 1.5 seconds after BGM")
-    if "primeOpeningAudio();" not in opening_source or "openingAudioContext.resume()" not in opening_source:
-        raise ValueError("Opening AudioContext and sources must be primed on pointerdown")
-    if "bgmSource.playbackRate.setValueAtTime(1,now)" not in opening_source:
-        raise ValueError("Opening BGM source must start running silently on pointerdown")
-    if "voiceSource.playbackRate.setValueAtTime(0,now)" not in opening_source:
-        raise ValueError("Opening voice source must stay frozen and silent until its delay")
+    if "voiceSource.start(now+1.5)" not in opening_source:
+        raise ValueError("Opening voice must start 1.5 seconds after BGM")
+    if "orientation.addEventListener('click'" not in opening_source or "unlockOpeningAudio()" not in opening_source:
+        raise ValueError("Opening audio must be unlocked by a real tap before swipe-or-hold")
+    if "openingAudioContext.resume()" not in opening_source or "audioUnlocked=true" not in opening_source:
+        raise ValueError("Opening AudioContext unlock is missing")
+    if "hp-cracked" not in opening_source or "TAP TO CRACK" not in opening_source:
+        raise ValueError("Playful crack-unlock stage is missing")
     if "beginAudibleOpening()" not in opening_source:
-        raise ValueError("Opening BGM must become audible only after swipe-or-hold succeeds")
+        raise ValueError("Opening BGM must begin only after swipe-or-hold succeeds")
     if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:
         raise ValueError("Opening audio must use Web Audio buffers and gain control")
     if "cancelPreparationAudio();" not in opening_source:

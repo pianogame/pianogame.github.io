@@ -17,12 +17,26 @@
       .hp-opening-orientation.hp-ready .hp-opening-phone{animation:none;transform:rotate(90deg)}
       .hp-opening-orientation.hp-ready .hp-opening-orientation-inner{transform:scale(1.02)}
       .hp-ready-main{display:none}
+      .hp-ready-break{display:none}
       .hp-loading-main{display:none}
       .hp-opening-orientation.hp-loading .hp-turn-main{display:none}
       .hp-opening-orientation.hp-loading .hp-loading-main{display:block}
       .hp-opening-orientation.hp-ready .hp-turn-main,.hp-opening-orientation.hp-ready .hp-loading-main{display:none}
       .hp-opening-orientation.hp-ready .hp-ready-main{display:block}
+      .hp-opening-orientation.hp-cracked .hp-ready-unlock{display:none}
+      .hp-opening-orientation.hp-cracked .hp-ready-break{display:block}
       .hp-ready-main em{display:block;margin-top:12px;font:600 13px system-ui,sans-serif;font-style:normal;letter-spacing:.12em;color:#a05a77}
+      .hp-crack-lines{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .16s ease}
+      .hp-opening-orientation.hp-cracked .hp-crack-lines{opacity:1}
+      .hp-crack-lines i{position:absolute;left:50%;top:50%;width:min(34vw,240px);height:2px;background:linear-gradient(90deg,#b76f88,#6f4657 55%,transparent);transform-origin:left center;filter:drop-shadow(0 0 2px #fff)}
+      .hp-crack-lines i:nth-child(1){transform:rotate(8deg)}
+      .hp-crack-lines i:nth-child(2){transform:rotate(41deg);width:min(28vw,210px)}
+      .hp-crack-lines i:nth-child(3){transform:rotate(83deg);width:min(24vw,180px)}
+      .hp-crack-lines i:nth-child(4){transform:rotate(132deg)}
+      .hp-crack-lines i:nth-child(5){transform:rotate(181deg);width:min(30vw,220px)}
+      .hp-crack-lines i:nth-child(6){transform:rotate(221deg);width:min(25vw,190px)}
+      .hp-crack-lines i:nth-child(7){transform:rotate(274deg);width:min(29vw,210px)}
+      .hp-crack-lines i:nth-child(8){transform:rotate(318deg);width:min(27vw,200px)}
       .hp-shards{position:absolute;inset:-4%;z-index:3;pointer-events:none}
       .hp-shard{position:absolute;background:#fff;box-shadow:0 0 0 1px #eadfe5;opacity:0}
       .hp-opening-orientation.hp-shatter .hp-opening-orientation-inner{opacity:0;transform:scale(1.09)}
@@ -74,8 +88,12 @@
           <div class="hp-opening-phone" aria-hidden="true"></div>
           <div class="hp-turn-main"><strong>横向きにしてお楽しみください</strong><span>端末を横向きにしてください。</span></div>
           <div class="hp-loading-main"><strong>音源を準備中…</strong><span>このまま少しだけお待ちください。</span></div>
-          <div class="hp-ready-main"><strong>準備完了にしよう</strong><span>画面を長押しするか、好きな方向へスワイプしてください。</span><em>LONG PRESS / SWIPE</em></div>
+          <div class="hp-ready-main">
+            <div class="hp-ready-unlock"><strong>準備完了まであと少し</strong><span>画面をタップして、まずヒビを入れてください。</span><em>TAP TO CRACK</em></div>
+            <div class="hp-ready-break"><strong>準備完了にしよう</strong><span>ヒビの入った画面を長押しするか、好きな方向へスワイプしてください。</span><em>LONG PRESS / SWIPE</em></div>
+          </div>
         </div>
+        <div class="hp-crack-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="hp-shards" aria-hidden="true"><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i><i class="hp-shard"></i></div>
       </section>
       <section class="hp-opening-title" aria-label="ピアノドリームステージ">
@@ -86,15 +104,15 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,prepared=false,opened=false,bgmPlaying=false,audioReady=false,audioLoadFailed=false,audioPrimed=false,lastAudioError='';
-    const tapAudios=['/audio/curtain-start-1.mp3?v=9','/audio/curtain-start-2.mp3?v=9','/audio/curtain-start-3.mp3?v=9','/audio/curtain-start-4.mp3?v=9'].map(url=>{
+    let started=false,prepared=false,opened=false,bgmPlaying=false,audioReady=false,audioLoadFailed=false,audioUnlocked=false,lastAudioError='';
+    const tapAudios=['/audio/curtain-start-1.mp3?v=10','/audio/curtain-start-2.mp3?v=10','/audio/curtain-start-3.mp3?v=10','/audio/curtain-start-4.mp3?v=10'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=9','/audio/opening-bgm-02.m4a?v=9','/audio/opening-bgm-03.m4a?v=9','/audio/opening-bgm-04.m4a?v=9','/audio/opening-bgm-05.m4a?v=9','/audio/opening-bgm-06.m4a?v=9','/audio/opening-bgm-07.m4a?v=9','/audio/opening-bgm-08.m4a?v=9','/audio/opening-bgm-09.m4a?v=9','/audio/opening-bgm-10.m4a?v=9'];
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=10','/audio/opening-bgm-02.m4a?v=10','/audio/opening-bgm-03.m4a?v=10','/audio/opening-bgm-04.m4a?v=10','/audio/opening-bgm-05.m4a?v=10','/audio/opening-bgm-06.m4a?v=10','/audio/opening-bgm-07.m4a?v=10','/audio/opening-bgm-08.m4a?v=10','/audio/opening-bgm-09.m4a?v=10','/audio/opening-bgm-10.m4a?v=10'];
     const selectedBgm=bgmUrls[Math.floor(Math.random()*bgmUrls.length)];
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
-    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,voiceGain=null,resumePromise=null;
+    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null;
 
     async function decodeAudio(url){
       if(!openingAudioContext)return null;
@@ -106,7 +124,7 @@
     const openingAudioReady=openingAudioContext
       ? Promise.all([
           decodeAudio(selectedBgm).then(buffer=>{bgmBuffer=buffer;}),
-          decodeAudio('/audio/opening-3voices.m4a?v=12').then(buffer=>{voiceBuffer=buffer;})
+          decodeAudio('/audio/opening-3voices.m4a?v=13').then(buffer=>{voiceBuffer=buffer;})
         ]).then(()=>{
           audioReady=!!(bgmBuffer&&voiceBuffer);
           maybeArmPreparation();
@@ -117,62 +135,54 @@
         })
       : Promise.resolve();
 
-    function primeOpeningAudio(){
-      if(opened||audioPrimed||!openingAudioContext||!bgmBuffer||!voiceBuffer)return false;
+    async function unlockOpeningAudio(){
+      if(audioUnlocked||!openingAudioContext||!audioReady)return false;
       try{
-        resumePromise=openingAudioContext.resume();
-        resumePromise?.catch(error=>{lastAudioError='resume:'+(error?.name||'failed');});
+        await openingAudioContext.resume();
+        if(openingAudioContext.state!=='running')return false;
 
-        const now=openingAudioContext.currentTime;
+        // Force WebKit to establish an audible-capable AudioSession during the real tap.
+        const gain=openingAudioContext.createGain();
+        gain.gain.setValueAtTime(0,openingAudioContext.currentTime);
+        gain.connect(openingAudioContext.destination);
+        const source=openingAudioContext.createBufferSource();
+        source.buffer=openingAudioContext.createBuffer(1,1,openingAudioContext.sampleRate);
+        source.connect(gain);
+        source.start();
+        source.stop(openingAudioContext.currentTime+.02);
+        source.onended=()=>{try{source.disconnect();gain.disconnect();}catch(_){}};
 
-        bgmGain=openingAudioContext.createGain();
-        bgmGain.gain.setValueAtTime(0,now);
-        bgmGain.connect(openingAudioContext.destination);
-
-        bgmSource=openingAudioContext.createBufferSource();
-        bgmSource.buffer=bgmBuffer;
-        bgmSource.loop=true;
-        bgmSource.playbackRate.setValueAtTime(1,now);
-        bgmSource.connect(bgmGain);
-        bgmSource.start(now);
-
-        voiceGain=openingAudioContext.createGain();
-        voiceGain.gain.setValueAtTime(0,now);
-        voiceGain.connect(openingAudioContext.destination);
-
-        voiceSource=openingAudioContext.createBufferSource();
-        voiceSource.buffer=voiceBuffer;
-        voiceSource.playbackRate.setValueAtTime(0,now);
-        voiceSource.connect(voiceGain);
-        voiceSource.start(now);
-
-        audioPrimed=true;
+        audioUnlocked=true;
         lastAudioError='';
         return true;
       }catch(error){
-        audioPrimed=false;
-        lastAudioError='prime:'+(error?.name||'failed');
+        lastAudioError='unlock:'+(error?.name||'failed');
         return false;
       }
     }
 
     function beginAudibleOpening(){
-      if(opened||!audioPrimed||!openingAudioContext||!bgmSource||!voiceSource||!bgmGain||!voiceGain)return false;
+      if(opened||!audioUnlocked||!audioReady||!openingAudioContext||!bgmBuffer||!voiceBuffer)return false;
       try{
         const now=openingAudioContext.currentTime;
 
-        bgmGain.gain.cancelScheduledValues(now);
+        bgmGain=openingAudioContext.createGain();
         bgmGain.gain.setValueAtTime(.12,now);
+        bgmGain.connect(openingAudioContext.destination);
+
+        bgmSource=openingAudioContext.createBufferSource();
+        bgmSource.buffer=bgmBuffer;
+        bgmSource.loop=true;
+        bgmSource.connect(bgmGain);
+        bgmSource.start(now);
+
+        voiceSource=openingAudioContext.createBufferSource();
+        voiceSource.buffer=voiceBuffer;
+        voiceSource.connect(openingAudioContext.destination);
+        voiceSource.start(now+1.5);
+
         bgmPlaying=true;
-
-        const voiceAt=now+1.5;
-        voiceSource.playbackRate.cancelScheduledValues(now);
-        voiceSource.playbackRate.setValueAtTime(0,now);
-        voiceSource.playbackRate.setValueAtTime(1,voiceAt);
-        voiceGain.gain.cancelScheduledValues(now);
-        voiceGain.gain.setValueAtTime(0,now);
-        voiceGain.gain.setValueAtTime(.9,voiceAt);
-
+        lastAudioError='';
         return true;
       }catch(error){
         lastAudioError='audible:'+(error?.name||'failed');
@@ -181,16 +191,13 @@
     }
 
     function cancelPreparationAudio(){
-      // The BGM source is already running silently and the voice source is frozen.
-      // A later successful gesture only reveals them; no new start() call is needed.
+      // Audio stays unlocked after the playful crack tap.
     }
 
     function stopOpeningVoice(){
       try{voiceSource?.stop();}catch(_){}
       try{voiceSource?.disconnect();}catch(_){}
-      try{voiceGain?.disconnect();}catch(_){}
       voiceSource=null;
-      voiceGain=null;
     }
 
     function stopCurtainBgm(){
@@ -230,6 +237,12 @@
       return (v?.width||innerWidth) >= (v?.height||innerHeight);
     };
 
+    orientation.addEventListener('click',async event=>{
+      if(!started||prepared||audioUnlocked||!event.isTrusted)return;
+      const unlocked=await unlockOpeningAudio();
+      if(unlocked)orientation.classList.add('hp-cracked');
+    });
+
     let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0,landscapeReached=false;
     function maybeArmPreparation(){
       if(started||!landscapeReached)return;
@@ -246,7 +259,7 @@
       maybeArmPreparation();
     }
     function finishPreparation(event){
-      if(prepared||!started||!event.isTrusted)return;
+      if(prepared||!started||!audioUnlocked||!event.isTrusted)return;
       const dx=event.clientX-gestureStartX,dy=event.clientY-gestureStartY;
       const distance=Math.hypot(dx,dy);
       const held=performance.now()-gestureStartedAt;
@@ -266,15 +279,12 @@
       setTimeout(()=>{orientation.hidden=true;},720);
     }
     orientation.addEventListener('pointerdown',event=>{
-      if(!started||prepared)return;
+      if(!started||prepared||!audioUnlocked)return;
       gesturePointerId=event.pointerId;
       gestureStartedAt=performance.now();
       gestureStartX=event.clientX;
       gestureStartY=event.clientY;
       orientation.classList.add('hp-gesture-active');
-      // Start both sources during the real touch, but freeze and mute them.
-      // Gesture completion only changes playbackRate/Gain, so Safari sees no new start().
-      primeOpeningAudio();
       try{orientation.setPointerCapture(event.pointerId);}catch(_){}
       event.preventDefault();
     });
