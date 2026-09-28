@@ -64,7 +64,7 @@
           <div class="hp-loading-main"><strong>音源を準備中…</strong><span>このまま少しだけお待ちください。</span></div>
           <div class="hp-ready-main">
             <div class="hp-ready-unlock"><strong>準備完了まであと少し</strong><span>画面をタップして、音の波紋を起こしてください。</span><em>TAP TO RIPPLE</em></div>
-            <div class="hp-ready-wave"><strong>準備完了にしよう</strong><span>波紋が出たら、画面を長押しするか好きな方向へスワイプしてください。</span><em>LONG PRESS / SWIPE</em></div>
+            <div class="hp-ready-wave"><strong>準備完了にしよう</strong><span>波紋が出たら、好きな方向へスワイプしてください。</span><em>SWIPE TO START</em></div>
           </div>
         </div>
       </section>
@@ -111,6 +111,51 @@
         })
       : Promise.resolve();
 
+    function playPianoPluck(frequency,when,level=.16,duration=.62){
+      if(!openingAudioContext||openingAudioContext.state!=='running')return;
+      try{
+        const master=openingAudioContext.createGain();
+        master.gain.setValueAtTime(.0001,when);
+        master.gain.exponentialRampToValueAtTime(level,when+.008);
+        master.gain.exponentialRampToValueAtTime(.0001,when+duration);
+        master.connect(openingAudioContext.destination);
+
+        const partials=[
+          [1,'triangle',1],
+          [2,'sine',.34],
+          [3,'sine',.16]
+        ];
+        partials.forEach(([multiple,type,mix])=>{
+          const osc=openingAudioContext.createOscillator();
+          const gain=openingAudioContext.createGain();
+          osc.type=type;
+          osc.frequency.setValueAtTime(frequency*multiple,when);
+          osc.frequency.exponentialRampToValueAtTime(frequency*multiple*.997,when+.12);
+          gain.gain.value=mix;
+          osc.connect(gain);
+          gain.connect(master);
+          osc.start(when);
+          osc.stop(when+duration+.05);
+          osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch(_){}};
+        });
+        setTimeout(()=>{try{master.disconnect();}catch(_){}},Math.ceil((duration+.15)*1000));
+      }catch(_){}
+    }
+
+    function playTapPianoCue(){
+      if(!openingAudioContext)return;
+      const now=openingAudioContext.currentTime;
+      playPianoPluck(880,now,.13,.72);
+    }
+
+    function playSwipePianoCue(){
+      if(!openingAudioContext)return;
+      const now=openingAudioContext.currentTime;
+      [523.25,659.25,783.99,1046.5].forEach((frequency,i)=>{
+        playPianoPluck(frequency,now+i*.065,.105,.54);
+      });
+    }
+
     async function unlockOpeningAudio(){
       if(audioUnlocked||!openingAudioContext||!audioReady)return false;
       try{
@@ -130,6 +175,7 @@
 
         audioUnlocked=true;
         lastAudioError='';
+        playTapPianoCue();
         return true;
       }catch(error){
         lastAudioError='unlock:'+(error?.name||'failed');
@@ -428,7 +474,7 @@
       }
     });
 
-    let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0,landscapeReached=false;
+    let gesturePointerId=null,gestureStartX=0,gestureStartY=0,landscapeReached=false;
     function maybeArmPreparation(){
       if(started||!landscapeReached)return;
       orientation.classList.add('hp-loading');
@@ -444,16 +490,13 @@
       maybeArmPreparation();
     }
     function finishPreparation(event){
-      if(prepared||!started||!audioUnlocked||!event.isTrusted)return;
+      if(prepared||!started||!audioUnlocked||!event.isTrusted)return false;
       const dx=event.clientX-gestureStartX,dy=event.clientY-gestureStartY;
       const distance=Math.hypot(dx,dy);
-      const held=performance.now()-gestureStartedAt;
-      if(distance<72&&held<520){
-        cancelPreparationAudio();
-        return;
-      }
+      if(distance<72)return false;
 
-      if(!beginAudibleOpening())return;
+      if(!beginAudibleOpening())return false;
+      playSwipePianoCue();
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
       orientation.classList.add('hp-ripple-release');
@@ -462,20 +505,27 @@
         orientation.hidden=true;
         title.classList.add('hp-show');
       },520);
+      return true;
     }
     orientation.addEventListener('pointerdown',event=>{
       if(!started||prepared||!audioUnlocked)return;
       gesturePointerId=event.pointerId;
-      gestureStartedAt=performance.now();
       gestureStartX=event.clientX;
       gestureStartY=event.clientY;
       orientation.classList.add('hp-gesture-active');
       try{orientation.setPointerCapture(event.pointerId);}catch(_){}
       event.preventDefault();
     });
+    orientation.addEventListener('pointermove',event=>{
+      if(prepared||event.pointerId!==gesturePointerId)return;
+      if(finishPreparation(event)){
+        gesturePointerId=null;
+        event.preventDefault();
+      }
+    });
     orientation.addEventListener('pointerup',event=>{
       if(event.pointerId!==gesturePointerId||prepared)return;
-      finishPreparation(event);
+      cancelPreparationAudio();
       gesturePointerId=null;
       orientation.classList.remove('hp-gesture-active');
       event.preventDefault();

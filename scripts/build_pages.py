@@ -118,8 +118,14 @@ def _verify_app_sources():
         raise ValueError("Opening audio must use Web Audio buffers and gain control")
     if "cancelPreparationAudio();" not in opening_source:
         raise ValueError("A normal tap must not complete the preparation gesture")
-    if "distance<72&&held<520" not in opening_source or "LONG PRESS / SWIPE" not in opening_source:
-        raise ValueError("Swipe-or-hold preparation gesture is missing")
+    if "if(distance<72)return false;" not in opening_source or "SWIPE TO START" not in opening_source:
+        raise ValueError("Swipe-only preparation gesture is missing")
+    if "held=performance.now()-gestureStartedAt" in opening_source or "LONG PRESS / SWIPE" in opening_source:
+        raise ValueError("Long-press preparation must not remain")
+    if "playTapPianoCue()" not in opening_source or "playSwipePianoCue()" not in opening_source:
+        raise ValueError("Piano gesture cues are missing")
+    if "orientation.addEventListener('pointermove'" not in opening_source:
+        raise ValueError("Swipe must complete during pointer movement")
     if "voiceAudio.volume" in opening_source or "curtainBgm.volume" in opening_source:
         raise ValueError("Do not use HTMLMediaElement volume for opening audio on iOS")
     if any(line.strip() == "undefined" for line in opening_source.splitlines()):
