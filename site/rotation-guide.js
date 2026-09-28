@@ -88,7 +88,7 @@
     const selectedBgm=bgmUrls[Math.floor(Math.random()*bgmUrls.length)];
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
-    let bgmBuffer=null,voiceBuffer=null,tapSeBuffer=null,swipeSeBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null;
+    let bgmBuffer=null,voiceBuffer=null,tapSeBuffer=null,swipeSeBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,voiceGain=null;
 
     async function decodeAudio(url){
       if(!openingAudioContext)return null;
@@ -168,7 +168,7 @@
         const now=openingAudioContext.currentTime;
 
         bgmGain=openingAudioContext.createGain();
-        bgmGain.gain.setValueAtTime(.30,now);
+        bgmGain.gain.setValueAtTime(.60,now);
         bgmGain.connect(openingAudioContext.destination);
 
         bgmSource=openingAudioContext.createBufferSource();
@@ -177,9 +177,13 @@
         bgmSource.connect(bgmGain);
         bgmSource.start(now);
 
+        voiceGain=openingAudioContext.createGain();
+        voiceGain.gain.setValueAtTime(1.50,now);
+        voiceGain.connect(openingAudioContext.destination);
+
         voiceSource=openingAudioContext.createBufferSource();
         voiceSource.buffer=voiceBuffer;
-        voiceSource.connect(openingAudioContext.destination);
+        voiceSource.connect(voiceGain);
         voiceSource.start(now+2.0);
 
         bgmPlaying=true;
@@ -198,7 +202,9 @@
     function stopOpeningVoice(){
       try{voiceSource?.stop();}catch(_){}
       try{voiceSource?.disconnect();}catch(_){}
+      try{voiceGain?.disconnect();}catch(_){}
       voiceSource=null;
+      voiceGain=null;
     }
 
     function stopCurtainBgm(){
@@ -216,7 +222,7 @@
       try{
         const now=openingAudioContext.currentTime;
         const gain=bgmGain.gain;
-        const start=Math.max(.0001,gain.value||.30);
+        const start=Math.max(.0001,gain.value||.60);
         gain.cancelScheduledValues(now);
         gain.setValueAtTime(start,now);
         gain.setValueCurveAtTime(
