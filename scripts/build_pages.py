@@ -110,22 +110,8 @@ def _verify_app_sources():
     if "markHeldCutForRecording();" not in piano_source or "event.cut ? .02" not in piano_source:
         raise ValueError("Sound-stop must be recorded as a forced cut")
 
-    required_dynamics = [
-        "data-action=\"dynamics-test\"",
-        "data-control=\"dynamics-enabled\"",
-        "function startDynamicsTest()",
-        "function captureDynamicsSample(event)",
-        "function dynamicsGainFromEvent(event)",
-        "velocity:gain",
-    ]
-    combined_dynamics = html + piano_source
-    for marker in required_dynamics:
-        if marker not in combined_dynamics:
-            raise ValueError(f"Dynamics verification feature is incomplete: {marker}")
-    if "return t<=.5 ? .30+t*1.40 : 1+(t-.5)*1.20;" not in piano_source:
-        raise ValueError("Dynamics range must use the stronger 0.30–1.60 mapping")
-    if "Math.min(1.65,Math.max(.28,number))" not in piano_source:
-        raise ValueError("Live dynamics clamp must preserve the stronger range")
+    if 'data-action="dynamics-test"' in html or "dynamicsGainFromEvent" in piano_source or "dynamicsStorageKey" in piano_source:
+        raise ValueError("Experimental touch dynamics must remain removed")
 
     orientation_source = (site / "orientation.js").read_text(encoding="utf-8")
     for marker in ["function settleFit()", "[80,220,500,900]", "window.addEventListener('focus', settleFit)", "visibilitychange"]:
@@ -145,10 +131,8 @@ def _verify_app_sources():
         raise ValueError("Multitrack playback end must include the scheduling lead")
     if "endRecordedNote(token,now(),true)" not in multitrack_source or "entry.note.release=.02;" not in multitrack_source:
         raise ValueError("Multitrack sound-stop must be preserved as a forced cut")
-    if "velocity:velocityGain(n.velocity)" not in multitrack_source or "event.detail.velocity" not in multitrack_source:
-        raise ValueError("Recorded dynamics must persist in multitrack data")
-    if "gain*.65*velocityGain(note.velocity)" not in multitrack_source:
-        raise ValueError("Recorded dynamics must affect playback and export volume")
+    if "velocityGain(" in multitrack_source or "event.detail.velocity" in multitrack_source:
+        raise ValueError("Experimental dynamics must remain removed from multitrack playback")
 
     opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
     for name in OPENING_AUDIO_EXPECTED:
