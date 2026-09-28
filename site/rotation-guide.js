@@ -261,10 +261,10 @@
       ctx.restore();
     }
 
-    function playUnlockRipple(clientX,clientY){
+    function playUnlockRipple(){
       clearRippleFx();
-      const cx=Number.isFinite(clientX)?clientX:innerWidth/2;
-      const cy=Number.isFinite(clientY)?clientY:innerHeight/2;
+      const cx=innerWidth/2;
+      const cy=innerHeight/2;
       const startedAt=performance.now();
       const notes=['♪','♫','♩','♬','♪','♩'];
       const frame=now=>{
@@ -295,10 +295,10 @@
       rippleAnimationFrame=requestAnimationFrame(frame);
     }
 
-    function playReleaseRipple(clientX,clientY){
+    function playReleaseRipple(){
       clearRippleFx();
-      const cx=Number.isFinite(clientX)?clientX:innerWidth/2;
-      const cy=Number.isFinite(clientY)?clientY:innerHeight/2;
+      const cx=innerWidth/2;
+      const cy=innerHeight/2;
       const startedAt=performance.now();
       const notes=['♪','♫','♩','♬','♪','♩'];
       const frame=now=>{
@@ -379,7 +379,7 @@
       const unlocked=await unlockOpeningAudio();
       if(unlocked){
         orientation.classList.add('hp-wave-armed');
-        playUnlockRipple(event.clientX,event.clientY);
+        playUnlockRipple();
       }
     });
 
@@ -412,7 +412,7 @@
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
       orientation.classList.add('hp-ripple-release');
-      playReleaseRipple(event.clientX,event.clientY);
+      playReleaseRipple();
       setTimeout(()=>{
         orientation.hidden=true;
         title.classList.add('hp-show');
