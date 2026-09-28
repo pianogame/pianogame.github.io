@@ -184,6 +184,16 @@
         voiceSource=openingAudioContext.createBufferSource();
         voiceSource.buffer=voiceBuffer;
         voiceSource.connect(voiceGain);
+        voiceSource.onended=()=>{
+          if(opened||!bgmPlaying||!bgmGain||!openingAudioContext)return;
+          try{
+            const riseAt=openingAudioContext.currentTime;
+            const current=Math.max(.0001,bgmGain.gain.value||.80);
+            bgmGain.gain.cancelScheduledValues(riseAt);
+            bgmGain.gain.setValueAtTime(current,riseAt);
+            bgmGain.gain.linearRampToValueAtTime(1.00,riseAt+.35);
+          }catch(_){}
+        };
         voiceSource.start(now+2.0);
 
         bgmPlaying=true;

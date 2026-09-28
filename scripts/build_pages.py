@@ -92,6 +92,10 @@ def _verify_app_sources():
         raise ValueError("Opening BGM gain must use the raised rhythm-game level")
     if "voiceGain.gain.setValueAtTime(1.70,now)" not in opening_source or "voiceSource.connect(voiceGain)" not in opening_source:
         raise ValueError("Opening voice must use the requested 1.70 gain")
+    if "voiceSource.onended=()=>{" not in opening_source or "linearRampToValueAtTime(1.00,riseAt+.35)" not in opening_source:
+        raise ValueError("BGM must rise smoothly to 1.00 after the opening voice finishes")
+    if "if(opened||!bgmPlaying||!bgmGain||!openingAudioContext)return;" not in opening_source:
+        raise ValueError("BGM post-voice boost must not run after the curtain opens")
     if "document.addEventListener('visibilitychange'" not in opening_source or "openingAudioContext.suspend()" not in opening_source:
         raise ValueError("Opening audio must suspend when the app goes to background")
     if "resumeOpeningFromBackground()" not in opening_source or "window.addEventListener('pagehide'" not in opening_source or "window.addEventListener('pageshow'" not in opening_source:
