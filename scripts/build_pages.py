@@ -131,7 +131,7 @@ def _verify_app_sources():
         raise ValueError("Audible release tails must not extend playback past the stop button")
     if "const playbackLead=.12;" not in multitrack_source:
         raise ValueError("Multitrack playback end must include the scheduling lead")
-    if "endRecordedNote(token,now(),true)" not in multitrack_source or "entry.note.release=.02;" not in multitrack_source:
+    if "endRecordedNote(token,stoppedAt,true)" not in multitrack_source or "entry.note.release=.02;" not in multitrack_source:
         raise ValueError("Multitrack sound-stop must be preserved as a forced cut")
     if "recording.cuts.push(cutAt)" not in multitrack_source or "const nextGlobalCut=(track.cuts||[]).find" not in multitrack_source:
         raise ValueError("Multitrack recording must preserve global sound-stop events")
