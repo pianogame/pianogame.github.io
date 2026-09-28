@@ -30,7 +30,7 @@ OPENING_AUDIO_EXPECTED = {
     "opening-bgm-09.m4a": (266903, "99651e807d0b8d7e0db1bf644b5db4a65411d5d4f26a5cc176ff61121a9c1bd6"),
     "opening-bgm-10.m4a": (542390, "6cfea560806a8589c931960821b00ad0737b79901ab03bd08b2b1b2c22554fb4"),
     "kiryan.m4a": (9337, "e84a018606d78e9fddddf0622990aa52ce4d73152cc53f7a5b3db54a557325bc"),
-    "pororoponponpin.m4a": (22056, "f0dea58696be34b027371aa6f34d8a84e2567d662c54fd5cdd58f22e37680a5c"),
+    "pororoponponpin.m4a": (18062, "2845a6fa6f9eca46eb6e6abc66fb7235723fe5aae37b177fd005281e7da80775"),
 }
 
 
@@ -138,6 +138,26 @@ def _verify_app_sources():
         raise ValueError("Unexpected undefined line in rotation-guide.js")
 
 
+def _restore_embedded_swipe_sound():
+    parts = [
+        ROOT / "scripts" / "assets" / f"pororoponponpin.b64.{index}"
+        for index in range(1, 5)
+    ]
+    encoded = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+    data = base64.b64decode(encoded, validate=True)
+    expected_size = 18062
+    expected_sha256 = "2845a6fa6f9eca46eb6e6abc66fb7235723fe5aae37b177fd005281e7da80775"
+    actual_sha256 = hashlib.sha256(data).hexdigest()
+    if len(data) != expected_size or actual_sha256 != expected_sha256:
+        raise ValueError(
+            f"Embedded swipe sound mismatch: size={len(data)}, sha256={actual_sha256}"
+        )
+    target = ROOT / "site" / "audio" / "pororoponponpin.m4a"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(data)
+
+
+_restore_embedded_swipe_sound()
 _verify_app_sources()
 
 if OUT.exists():
