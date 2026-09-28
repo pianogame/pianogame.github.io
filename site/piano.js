@@ -52,132 +52,6 @@
   let playbackTimers = [], playbackVoices = [], playGeneration = 0, scheduler = null;
   let eventCount = 0;
 
-  const dynamicsStorageKey='piano-dream-stage-dynamics-v1';
-  const dynamicsControls=root.querySelector('[data-dynamics-controls]');
-  const dynamicsEnabledControl=root.querySelector('[data-control="dynamics-enabled"]');
-  const dynamicsMethodOutput=root.querySelector('[data-output="dynamics-method"]');
-  let dynamicsConfig={verified:false,method:null,enabled:false,min:0,max:1};
-  let dynamicsTesting=false,dynamicsSamples=[];
-
-  try{
-    const saved=JSON.parse(localStorage.getItem(dynamicsStorageKey)||'null');
-    if(saved?.verified&&(saved.method==='pressure'||saved.method==='contact')&&Number.isFinite(saved.min)&&Number.isFinite(saved.max)&&saved.max>saved.min){
-      dynamicsConfig={verified:true,method:saved.method,enabled:!!saved.enabled,min:saved.min,max:saved.max};
-    }
-  }catch(_){}
-
-  const dynamicsBanner=document.createElement('div');
-  dynamicsBanner.className='hp-dynamics-test-banner';
-  dynamicsBanner.hidden=true;
-  dynamicsBanner.setAttribute('role','status');
-  dynamicsBanner.innerHTML='<strong>強弱入力を検証中…</strong><span>鍵盤を弱く・普通・強めに9回弾いてください</span>';
-  root.append(dynamicsBanner);
-
-  const dynamicsModal=document.createElement('div');
-  dynamicsModal.className='hp-dynamics-modal';
-  dynamicsModal.hidden=true;
-  dynamicsModal.innerHTML='<div class="hp-dynamics-modal-backdrop"></div><div class="hp-dynamics-modal-card" role="dialog" aria-modal="true"><h2></h2><p></p><button type="button" class="hp-control">OK</button></div>';
-  root.append(dynamicsModal);
-  const dynamicsModalTitle=dynamicsModal.querySelector('h2');
-  const dynamicsModalText=dynamicsModal.querySelector('p');
-  const dynamicsModalButton=dynamicsModal.querySelector('button');
-
-  function saveDynamicsConfig(){
-    try{localStorage.setItem(dynamicsStorageKey,JSON.stringify(dynamicsConfig));}catch(_){}
-  }
-  function refreshDynamicsUI(){
-    if(!dynamicsControls||!dynamicsEnabledControl||!dynamicsMethodOutput)return;
-    dynamicsControls.hidden=!dynamicsConfig.verified;
-    const firstTest=action('dynamics-test');
-    if(firstTest)firstTest.hidden=dynamicsConfig.verified;
-    dynamicsEnabledControl.checked=!!dynamicsConfig.enabled;
-    dynamicsMethodOutput.textContent=dynamicsConfig.verified
-      ? '検出方式：'+(dynamicsConfig.method==='pressure'?'タッチ圧力':'指の接触変化')
-      : '';
-  }
-  function showDynamicsPopup(title,message){
-    dynamicsModalTitle.textContent=title;
-    dynamicsModalText.textContent=message;
-    dynamicsModal.hidden=false;
-    dynamicsModalButton.focus();
-  }
-  function closeDynamicsPopup(){
-    dynamicsModal.hidden=true;
-    showSettings(true);
-  }
-  dynamicsModalButton.addEventListener('click',closeDynamicsPopup);
-  dynamicsModal.querySelector('.hp-dynamics-modal-backdrop').addEventListener('click',closeDynamicsPopup);
-
-  function dynamicsRawFromEvent(event,method){
-    if(method==='pressure'){
-      const value=Number(event.pressure);
-      return Number.isFinite(value)?value:0;
-    }
-    const width=Number(event.width),height=Number(event.height);
-    return Number.isFinite(width)&&Number.isFinite(height)?Math.max(1,width)*Math.max(1,height):1;
-  }
-  function dynamicsGainFromEvent(event){
-    if(!dynamicsConfig.verified||!dynamicsConfig.enabled)return 1;
-    const raw=dynamicsRawFromEvent(event,dynamicsConfig.method);
-    const span=Math.max(.0001,dynamicsConfig.max-dynamicsConfig.min);
-    const t=Math.min(1,Math.max(0,(raw-dynamicsConfig.min)/span));
-    return t<=.5 ? .30+t*1.40 : 1+(t-.5)*1.20;
-  }
-  function finishDynamicsTest(){
-    if(!dynamicsTesting)return;
-    dynamicsTesting=false;
-    dynamicsBanner.hidden=true;
-    const pressures=dynamicsSamples.map(sample=>sample.pressure).filter(value=>Number.isFinite(value)&&value>0&&value<=1);
-    const contacts=dynamicsSamples.map(sample=>sample.contact).filter(value=>Number.isFinite(value)&&value>1);
-    const range=values=>values.length?[Math.min(...values),Math.max(...values)]:[0,0];
-    const [pMin,pMax]=range(pressures),[cMin,cMax]=range(contacts);
-    const pDistinct=new Set(pressures.map(value=>value.toFixed(3))).size;
-    const cDistinct=new Set(contacts.map(value=>Math.round(value))).size;
-    let method=null,min=0,max=1;
-    if(pressures.length>=6&&pDistinct>=3&&pMax-pMin>=.10){
-      method='pressure';min=pMin;max=pMax;
-    }else if(contacts.length>=6&&cDistinct>=3&&cMax/cMin>=1.22){
-      method='contact';min=cMin;max=cMax;
-    }
-    if(method){
-      const keepEnabled=dynamicsConfig.verified&&dynamicsConfig.enabled;
-      dynamicsConfig={verified:true,method,enabled:keepEnabled,min,max};
-      saveDynamicsConfig();
-      refreshDynamicsUI();
-      showDynamicsPopup('強弱入力を検出しました','この端末では、タッチの強さに応じた演奏表現を利用できます。設定に「演奏強弱」を追加しました。初期状態はOFFです。');
-    }else{
-      showDynamicsPopup('強弱入力を検出できませんでした','この端末またはブラウザでは、押し方による入力差を十分に取得できない可能性があります。別のブラウザや端末では利用できる場合があります。');
-    }
-    dynamicsSamples=[];
-  }
-  function captureDynamicsSample(event){
-    if(!dynamicsTesting||event.pointerType==='mouse')return;
-    const pressure=Number.isFinite(Number(event.pressure))?Number(event.pressure):0;
-    const width=Number(event.width),height=Number(event.height);
-    const contact=Number.isFinite(width)&&Number.isFinite(height)?Math.max(1,width)*Math.max(1,height):1;
-    dynamicsSamples.push({pressure,contact});
-    const remaining=Math.max(0,9-dynamicsSamples.length);
-    const label=dynamicsBanner.querySelector('span');
-    if(label)label.textContent=remaining
-      ? '鍵盤を弱く・普通・強めにあと'+remaining+'回弾いてください'
-      : '検証結果を確認しています…';
-    if(dynamicsSamples.length>=9)finishDynamicsTest();
-  }
-  function startDynamicsTest(){
-    if(dynamicsTesting)return;
-    dynamicsTesting=true;
-    dynamicsSamples=[];
-    showSettings(false);
-    dynamicsBanner.hidden=false;
-    const label=dynamicsBanner.querySelector('span');
-    if(label)label.textContent='鍵盤を弱く・普通・強めに9回弾いてください';
-    say('強弱入力を検証中…');
-  }
-  function velocityGain(value){
-    const number=Number(value);
-    return Number.isFinite(number)?Math.min(1.65,Math.max(.28,number)):1;
-  }
-
   const pitchName = midi => noteNames[midi % 12] + (Math.floor(midi / 12) - 1);
   const say = (message, error = false) => {
     status.textContent = message; status.dataset.error = String(error);
@@ -573,7 +447,7 @@
     } else {void prepareSamples(id);}
   });
 
-  function synth(midi, when = ctx.currentTime, velocity = 1) {
+  function synth(midi, when = ctx.currentTime) {
     while (allVoices.size >= 48) {
       const oldest = allVoices.values().next().value; oldest.release(ctx.currentTime,.04); allVoices.delete(oldest);
     }
@@ -583,7 +457,7 @@
     const preset = instruments[currentInstrument];
     const source = ctx.createBufferSource(), bus = ctx.createGain();
     source.buffer = sample.buffer; source.playbackRate.value = Math.pow(2,(midi-anchor)/12);
-    const level = preset.gain * velocityGain(velocity);
+    const level = preset.gain;
     bus.gain.setValueAtTime(.00001,when); bus.gain.linearRampToValueAtTime(level,when+.002);
     const fade = ctx.createGain();
     const naturalDuration = (sample.buffer.duration-sample.offset)/source.playbackRate.value;
@@ -644,36 +518,34 @@
     buttons.forEach((list, midi) => list.forEach(button => button.getAttribute('aria-pressed')!==String(notes.has(midi))&&button.setAttribute('aria-pressed', String(notes.has(midi)))));
     output.textContent = notes.size ? Array.from(notes).sort((a,b) => a-b).map(pitchName).join(' · ') : '—';
   }
-  function playNoteNow(token, midi, velocity=1) {
+  function playNoteNow(token, midi) {
     if (!samplesReady || held.has(token) || !ctx || ctx.state !== 'running') return;
-    const gain=velocityGain(velocity);
-    const entry = {midi, velocity:gain, voice: synth(midi,ctx.currentTime,gain), event: null};
+    const entry = {midi, voice: synth(midi), event: null};
     if (recording) {
-      entry.event = {midi, start: Math.max(0, ctx.currentTime - recordStart), duration: .12, sustain, velocity:gain};
+      entry.event = {midi, start: Math.max(0, ctx.currentTime - recordStart), duration: .12, sustain, cut:false};
       events.push(entry.event); eventCount++;
     }
-    held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi,velocity:gain}})); pendingSparkles.add(midi); redraw();
+    held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi}})); pendingSparkles.add(midi); redraw();
     if (!recording && !playing && status.textContent!=='演奏中') say('演奏中');
   }
-  function noteOn(token, midi, velocity=1) {
+  function noteOn(token, midi) {
     if (!samplesReady || held.has(token) || pendingNoteOns.has(token) || !ensureAudio()) return;
-    const gain=velocityGain(velocity);
     if (ctx.state === 'running') {
-      playNoteNow(token,midi,gain);
+      playNoteNow(token,midi);
       return;
     }
-    pendingNoteOns.set(token,{midi,velocity:gain});
+    pendingNoteOns.set(token,midi);
     void resumeAudioContext().then(ok => {
-      const pending=pendingNoteOns.get(token);
-      if (!pending || pending.midi !== midi) return;
+      if (pendingNoteOns.get(token) !== midi) return;
       pendingNoteOns.delete(token);
       if (!ok) {
         say('音声を再開できませんでした。もう一度鍵盤をタップしてください',true);
         return;
       }
-      playNoteNow(token,midi,pending.velocity);
+      playNoteNow(token,midi);
     });
   }
+
   function noteOff(token) {
     pendingNoteOns.delete(token);
     const entry = held.get(token); if (!entry) return;
@@ -734,7 +606,7 @@
     event.preventDefault();
     const point = localPointer(event);
     pointerStarts.set(event.pointerId,{...point,scrollable:scrollable&&!key,scrollTop:pianoScroll.scrollTop,scrolling:false,lastClientX:event.clientX,lastClientY:event.clientY});
-    if (key) { captureDynamicsSample(event); const token='pointer:' + event.pointerId; noteOff(token); noteOn(token, Number(key.dataset.midi), dynamicsGainFromEvent(event)); }
+    if (key) { const token='pointer:' + event.pointerId; noteOff(token); noteOn(token, Number(key.dataset.midi)); }
   });
   root.addEventListener('pointermove', event => {
     const token = 'pointer:' + event.pointerId;
@@ -758,9 +630,9 @@
         const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
         const hit = document.elementFromPoint(x,y);
         const key = keyAtPoint(x,y,hit);
-        const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token)?.midi;
+        const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token);
         if (key && root.contains(key) && Number(key.dataset.midi) !== currentMidi) {
-          noteOff(token); noteOn(token, Number(key.dataset.midi), dynamicsGainFromEvent(sample));
+          noteOff(token); noteOn(token, Number(key.dataset.midi));
         }
       }
       origin.lastClientX=sample.clientX; origin.lastClientY=sample.clientY;
@@ -791,15 +663,6 @@
   action('settings').addEventListener('click', () => showSettings(true));
   action('settings-close').addEventListener('click', () => showSettings(false));
   action('settings-backdrop').addEventListener('click', () => showSettings(false));
-  action('dynamics-test')?.addEventListener('click',startDynamicsTest);
-  action('dynamics-retest')?.addEventListener('click',startDynamicsTest);
-  dynamicsEnabledControl?.addEventListener('change',()=>{
-    if(!dynamicsConfig.verified){dynamicsEnabledControl.checked=false;return;}
-    dynamicsConfig.enabled=dynamicsEnabledControl.checked;
-    saveDynamicsConfig();
-    say(dynamicsConfig.enabled?'演奏強弱：ON':'演奏強弱：OFF');
-  });
-  refreshDynamicsUI();
   document.addEventListener('keydown', event => {
     if (settingsOverlay.hidden) return;
     if (event.key === 'Escape') { event.preventDefault(); showSettings(false); }
@@ -854,7 +717,7 @@
       if (generation !== playGeneration) return;
       while (nextEvent < events.length && start + events[nextEvent].start < ctx.currentTime + .14) {
         const event = events[nextEvent++], when = Math.max(ctx.currentTime, start + event.start);
-        const voice = synth(event.midi, when, event.velocity ?? 1); playbackVoices.push(voice);
+        const voice = synth(event.midi, when); playbackVoices.push(voice);
         voice.release(when + event.duration, event.cut ? .02 : (event.sustain ? Infinity : articulation[currentInstrument].release));
         later(() => { playingCounts.set(event.midi, (playingCounts.get(event.midi) || 0) + 1); redraw(); sparkle(event.midi); }, when - ctx.currentTime);
         later(() => { const remaining = (playingCounts.get(event.midi) || 1) - 1; if (remaining) playingCounts.set(event.midi, remaining); else playingCounts.delete(event.midi); redraw(); }, when + event.duration - ctx.currentTime);
