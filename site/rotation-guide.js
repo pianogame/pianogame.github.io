@@ -168,7 +168,7 @@
         const now=openingAudioContext.currentTime;
 
         bgmGain=openingAudioContext.createGain();
-        bgmGain.gain.setValueAtTime(.60,now);
+        bgmGain.gain.setValueAtTime(.80,now);
         bgmGain.connect(openingAudioContext.destination);
 
         bgmSource=openingAudioContext.createBufferSource();
@@ -178,7 +178,7 @@
         bgmSource.start(now);
 
         voiceGain=openingAudioContext.createGain();
-        voiceGain.gain.setValueAtTime(1.50,now);
+        voiceGain.gain.setValueAtTime(1.70,now);
         voiceGain.connect(openingAudioContext.destination);
 
         voiceSource=openingAudioContext.createBufferSource();
@@ -222,7 +222,7 @@
       try{
         const now=openingAudioContext.currentTime;
         const gain=bgmGain.gain;
-        const start=Math.max(.0001,gain.value||.60);
+        const start=Math.max(.0001,gain.value||.80);
         gain.cancelScheduledValues(now);
         gain.setValueAtTime(start,now);
         gain.setValueCurveAtTime(
