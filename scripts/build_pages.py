@@ -109,6 +109,8 @@ def _verify_app_sources():
         raise ValueError("Normal recording playback must end exactly at the stop-button duration")
     if "markHeldCutForRecording();" not in piano_source or "event.cut ? .02" not in piano_source:
         raise ValueError("Sound-stop must be recorded as a forced cut")
+    if "soundStopEvents.push(stopAt)" not in piano_source or "voice.release(start+globalStop,.02)" not in piano_source:
+        raise ValueError("Piano recording must preserve global sound-stop events")
 
     if 'data-action="dynamics-test"' in html or "dynamicsGainFromEvent" in piano_source or "dynamicsStorageKey" in piano_source:
         raise ValueError("Experimental touch dynamics must remain removed")
@@ -131,6 +133,8 @@ def _verify_app_sources():
         raise ValueError("Multitrack playback end must include the scheduling lead")
     if "endRecordedNote(token,now(),true)" not in multitrack_source or "entry.note.release=.02;" not in multitrack_source:
         raise ValueError("Multitrack sound-stop must be preserved as a forced cut")
+    if "recording.cuts.push(cutAt)" not in multitrack_source or "const nextGlobalCut=(track.cuts||[]).find" not in multitrack_source:
+        raise ValueError("Multitrack recording must preserve global sound-stop events")
     if "velocityGain(" in multitrack_source or "event.detail.velocity" in multitrack_source:
         raise ValueError("Experimental dynamics must remain removed from multitrack playback")
 
