@@ -41,7 +41,9 @@
       if(!saved||!Array.isArray(saved.tracks))return;
       tracks=saved.tracks.slice(0,MAX_TRACKS).filter(t=>instruments[t.instrument]&&Array.isArray(t.notes)).map(t=>({
         id:String(t.id),instrument:t.instrument,name:String(t.name||instrumentName(t.instrument)).slice(0,64),muted:!!t.muted,
-        duration:clamp(t.duration,0,MAX_SECONDS),notes:t.notes.slice(0,MAX_NOTES).filter(n=>Number.isFinite(n.midi)&&n.midi>=18&&n.midi<=108).map(n=>({
+        duration:clamp(t.duration,0,MAX_SECONDS),
+        cuts:Array.isArray(t.cuts)?t.cuts.map(value=>clamp(value,0,MAX_SECONDS)).filter(Number.isFinite).sort((a,b)=>a-b):[],
+        notes:t.notes.slice(0,MAX_NOTES).filter(n=>Number.isFinite(n.midi)&&n.midi>=18&&n.midi<=108).map(n=>({
           midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain,cut:!!n.cut
         }))
       }));
@@ -162,7 +164,7 @@
     }
 
     const id=instrumentControl.value;
-    recording={id:'take-'+Date.now()+'-'+takeNumber,instrument:id,name:instrumentName(id)+' '+takeNumber+'回目',muted:false,duration:0,notes:[]};
+    recording={id:'take-'+Date.now()+'-'+takeNumber,instrument:id,name:instrumentName(id)+' '+takeNumber+'回目',muted:false,duration:0,cuts:[],notes:[]};
     takeNumber++;activeRecordedNotes.clear();
 
     const lead=selected.length?.12:0;
@@ -226,7 +228,16 @@
   }
   root.addEventListener('hp-note-on',event=>beginRecordedNote(event.detail.token,event.detail.midi));
   root.addEventListener('hp-note-off',event=>endRecordedNote(event.detail.token));
-  root.addEventListener('hp-stop-sound',()=>{stopPlayback();for(const token of [...activeRecordedNotes.keys()])endRecordedNote(token,now(),true);});
+  root.addEventListener('hp-stop-sound',()=>{
+    stopPlayback();
+    const stoppedAt=now();
+    if(recording){
+      const cutAt=clamp(stoppedAt-recordingStartedAt,0,MAX_SECONDS);
+      const last=recording.cuts[recording.cuts.length-1];
+      if(!Number.isFinite(last)||Math.abs(last-cutAt)>.02)recording.cuts.push(cutAt);
+    }
+    for(const token of [...activeRecordedNotes.keys()])endRecordedNote(token,stoppedAt,true);
+  });
   instrumentControl.addEventListener('change',()=>{if(recording)finishRecording();},true);
 
   recordButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();recording?finishRecording():void beginRecording();},true);
@@ -293,15 +304,34 @@
     const source=context.createBufferSource(),envelope=context.createGain();source.buffer=buffer;source.playbackRate.value=Math.pow(2,(note.midi-descriptor.midi)/12);
     const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=note.cut?.02:clamp(note.release,.01,10);
     const natural=buffer.duration/source.playbackRate.value;
-    envelope.gain.setValueAtTime(.00001,when);envelope.gain.linearRampToValueAtTime(level,when+.003);
+    const nextGlobalCut=(track.cuts||[]).find(value=>Number.isFinite(value)&&value>note.start+.001);
+    const globalCutAfter=Number.isFinite(nextGlobalCut)?Math.max(.001,nextGlobalCut-note.start):Infinity;
+    const noteCutAfter=note.cut?heldFor:Infinity;
+    const forcedCutAfter=Math.min(globalCutAfter,noteCutAfter);
+
+    envelope.gain.setValueAtTime(.00001,when);
+    envelope.gain.linearRampToValueAtTime(level,when+.003);
     source.connect(envelope);envelope.connect(target);
-    // Safari / iOS requires AudioBufferSourceNode.start() before stop() is scheduled.
     source.start(when);
-    if(note.sustain){
+
+    if(Number.isFinite(forcedCutAfter)&&forcedCutAfter<natural){
+      const cutTime=when+forcedCutAfter;
+      if(note.sustain||forcedCutAfter<=heldFor){
+        envelope.gain.setValueAtTime(level,Math.max(when+.003,cutTime));
+      }else{
+        const progress=Math.min(1,Math.max(0,(forcedCutAfter-heldFor)/Math.max(.001,releaseFor)));
+        const current=Math.max(.0001,level*Math.pow(.0001/Math.max(.0001,level),progress));
+        envelope.gain.setValueAtTime(level,when+heldFor);
+        envelope.gain.exponentialRampToValueAtTime(current,cutTime);
+      }
+      envelope.gain.exponentialRampToValueAtTime(.0001,cutTime+.015);
+      source.stop(cutTime+.025);
+    }else if(note.sustain){
       envelope.gain.setValueAtTime(level,when+Math.min(heldFor,natural));
       source.stop(when+natural);
     }else{
-      envelope.gain.setValueAtTime(level,when+heldFor);envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
+      envelope.gain.setValueAtTime(level,when+heldFor);
+      envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
       source.stop(Math.min(when+natural,when+heldFor+releaseFor+.04));
     }
     if(sourceList)sourceList.push(source);
