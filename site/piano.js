@@ -573,9 +573,23 @@
   const localPointer = event => document.documentElement.dataset.hpRotated === 'true'
     ? {x:event.clientY,y:-event.clientX}
     : {x:event.clientX,y:event.clientY};
+
+  function keyAtPoint(clientX,clientY,fallbackTarget=null){
+    // Black keys always win when their visible rectangle overlaps the touch point,
+    // even if a lit/pressed white key has its own stacking context.
+    const sharps=root.querySelectorAll('.hp-key.hp-sharp[data-midi]');
+    for(const sharp of sharps){
+      if(sharp.disabled||sharp.hidden||sharp.offsetParent===null)continue;
+      const rect=sharp.getBoundingClientRect();
+      if(clientX>=rect.left&&clientX<=rect.right&&clientY>=rect.top&&clientY<=rect.bottom){
+        return sharp;
+      }
+    }
+    return fallbackTarget?.closest?.('[data-midi]')||null;
+  }
   root.addEventListener('pointerdown', event => {
     if (!settingsOverlay.hidden || (event.pointerType === 'mouse' && event.button !== 0)) return;
-    const key = event.target.closest('[data-midi]');
+    const key = keyAtPoint(event.clientX,event.clientY,event.target);
     const scrollable = !!event.target.closest('.hp-scroll-window');
     if (!key && !scrollable) return;
     event.preventDefault();
@@ -604,7 +618,7 @@
       for (let step=1;step<=steps;step++) {
         const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
         const hit = document.elementFromPoint(x,y);
-        const key = hit && hit.closest('[data-midi]');
+        const key = keyAtPoint(x,y,hit);
         const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token);
         if (key && root.contains(key) && Number(key.dataset.midi) !== currentMidi) {
           noteOff(token); noteOn(token, Number(key.dataset.midi));

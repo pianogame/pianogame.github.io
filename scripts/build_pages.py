@@ -78,6 +78,20 @@ def _verify_app_sources():
         if len(data) != expected_size or hashlib.sha256(data).hexdigest() != expected_sha256:
             raise ValueError(f"Opening audio checksum mismatch: {name}")
 
+    landscape_css = (site / "landscape.css").read_text(encoding="utf-8")
+    if "#hp-four88 .hp-key.hp-sharp { z-index:20;" not in landscape_css:
+        raise ValueError("Landscape black keys must stay above white keys")
+    if "#hp-four88 .hp-key.hp-sharp.hp-lit, #hp-four88 .hp-key.hp-sharp[aria-pressed=\"true\"] { z-index:30; }" not in landscape_css:
+        raise ValueError("Active black keys must stay above active white keys")
+
+    piano_source = (site / "piano.js").read_text(encoding="utf-8")
+    if "function keyAtPoint(clientX,clientY,fallbackTarget=null)" not in piano_source:
+        raise ValueError("Black-key-first hit testing is missing")
+    if "const key = keyAtPoint(event.clientX,event.clientY,event.target);" not in piano_source:
+        raise ValueError("Pointer down must use black-key-first hit testing")
+    if "const key = keyAtPoint(x,y,hit);" not in piano_source:
+        raise ValueError("Pointer move must use black-key-first hit testing")
+
     piano_css = (site / "piano.css").read_text(encoding="utf-8")
     if "#hp-four88 .hp-key:not(.hp-sharp) {\n  z-index:1;" not in piano_css:
         raise ValueError("White piano keys must stay below black keys")
