@@ -2,21 +2,25 @@
   const page = document.documentElement;
   let frame = 0, previous = '', forcePending = false, settleTimers = [];
 
-  function portraitState(width,height) {
-    const type = window.screen?.orientation?.type || '';
-    if (type.startsWith('landscape')) return false;
-    if (type.startsWith('portrait')) return true;
-    const media = window.matchMedia?.('(orientation: portrait)');
-    if (media) return media.matches;
-    return height > width;
+  function measure() {
+    const viewport = window.visualViewport;
+    const vw = Math.max(1,Math.round(viewport?.width || window.innerWidth));
+    const vh = Math.max(1,Math.round(viewport?.height || window.innerHeight));
+    const iw = Math.max(1,Math.round(window.innerWidth || vw));
+    const ih = Math.max(1,Math.round(window.innerHeight || vh));
+    const viewportPortrait = vh > vw;
+    const innerPortrait = ih > iw;
+    const agreed = viewportPortrait === innerPortrait;
+    return {
+      width: agreed ? vw : iw,
+      height: agreed ? vh : ih,
+      rotated: viewportPortrait && innerPortrait
+    };
   }
 
   function fitLandscape(force = false) {
     frame = 0;
-    const viewport = window.visualViewport;
-    const width = Math.max(1,Math.round(viewport?.width || window.innerWidth));
-    const height = Math.max(1,Math.round(viewport?.height || window.innerHeight));
-    const rotated = portraitState(width,height);
+    const {width,height,rotated} = measure();
     const signature = width + 'x' + height + ':' + rotated;
     if (!force && signature === previous) return;
     previous = signature;
@@ -39,7 +43,7 @@
   function settleFit() {
     scheduleFit(true);
     settleTimers.forEach(clearTimeout);
-    settleTimers = [80,220,500,900].map(delay => setTimeout(() => scheduleFit(true),delay));
+    settleTimers = [80,220,500,900,1400].map(delay => setTimeout(() => scheduleFit(true),delay));
   }
 
   window.addEventListener('resize', () => scheduleFit(false));
