@@ -94,8 +94,12 @@ def _verify_app_sources():
         raise ValueError("Musical ripple unlock stage is missing")
     if "playUnlockRipple(" not in opening_source or "playReleaseRipple(" not in opening_source:
         raise ValueError("Musical ripple canvas effects are missing")
-    if "const cx=innerWidth/2;" not in opening_source or "const cy=innerHeight/2;" not in opening_source:
-        raise ValueError("Musical ripple origin must be fixed to screen center")
+    if "const cx=rippleWidth/2;" not in opening_source or "const cy=rippleHeight/2;" not in opening_source:
+        raise ValueError("Musical ripple origin must be fixed to the rendered canvas center")
+    if "new ResizeObserver(sizeRippleCanvas)" not in opening_source or "visualViewport?.addEventListener('resize',sizeRippleCanvas)" not in opening_source:
+        raise ValueError("Ripple canvas must track real viewport size on landscape launch")
+    if "opening.getBoundingClientRect()" not in opening_source:
+        raise ValueError("Ripple canvas must size from the rendered opening layer")
     if "playUnlockRipple(event.clientX,event.clientY)" in opening_source or "playReleaseRipple(event.clientX,event.clientY)" in opening_source:
         raise ValueError("Musical ripple origin must not follow the touch position")
     if "particleAlpha=.08*(1-smooth" not in opening_source:

@@ -218,16 +218,34 @@
       phase:(((i*19)%15)-7)*.008
     }));
 
+    let rippleWidth=1,rippleHeight=1;
     function sizeRippleCanvas(){
+      const rect=opening.getBoundingClientRect();
+      const viewport=window.visualViewport;
+      const width=Math.max(1,Math.round(rect.width||viewport?.width||document.documentElement.clientWidth||innerWidth));
+      const height=Math.max(1,Math.round(rect.height||viewport?.height||document.documentElement.clientHeight||innerHeight));
       const ratio=Math.min(2,window.devicePixelRatio||1);
-      rippleCanvas.width=Math.max(1,Math.round(innerWidth*ratio));
-      rippleCanvas.height=Math.max(1,Math.round(innerHeight*ratio));
-      rippleCanvas.style.width=innerWidth+'px';
-      rippleCanvas.style.height=innerHeight+'px';
+      rippleWidth=width;
+      rippleHeight=height;
+      rippleCanvas.style.width='100%';
+      rippleCanvas.style.height='100%';
+      const pixelWidth=Math.max(1,Math.round(width*ratio));
+      const pixelHeight=Math.max(1,Math.round(height*ratio));
+      if(rippleCanvas.width!==pixelWidth||rippleCanvas.height!==pixelHeight){
+        rippleCanvas.width=pixelWidth;
+        rippleCanvas.height=pixelHeight;
+      }
       rippleCtx.setTransform(ratio,0,0,ratio,0,0);
     }
     sizeRippleCanvas();
+    const rippleResizeObserver=window.ResizeObserver?new ResizeObserver(sizeRippleCanvas):null;
+    rippleResizeObserver?.observe(opening);
     window.addEventListener('resize',sizeRippleCanvas);
+    window.visualViewport?.addEventListener('resize',sizeRippleCanvas);
+    window.addEventListener('pageshow',sizeRippleCanvas);
+    requestAnimationFrame(()=>requestAnimationFrame(sizeRippleCanvas));
+    setTimeout(sizeRippleCanvas,120);
+    setTimeout(sizeRippleCanvas,360);
 
     const clamp01=value=>Math.max(0,Math.min(1,value));
     const easeOut=value=>1-Math.pow(1-clamp01(value),3);
@@ -235,11 +253,11 @@
 
     function clearRippleFx(){
       if(rippleAnimationFrame){cancelAnimationFrame(rippleAnimationFrame);rippleAnimationFrame=0;}
-      rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+      rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
     }
 
     function drawStaff(ctx,cx,cy,progress,alpha=1){
-      const width=Math.min(innerWidth*.42,520)*progress;
+      const width=Math.min(rippleWidth*.42,520)*progress;
       ctx.save();
       ctx.strokeStyle='rgba(215,177,101,'+(0.72*alpha)+')';
       ctx.lineWidth=1.4;
@@ -262,20 +280,21 @@
     }
 
     function playUnlockRipple(){
+      sizeRippleCanvas();
       clearRippleFx();
-      const cx=innerWidth/2;
-      const cy=innerHeight/2;
+      const cx=rippleWidth/2;
+      const cy=rippleHeight/2;
       const startedAt=performance.now();
       const notes=['♪','♫','♩','♬','♪','♩'];
       const frame=now=>{
         const elapsed=now-startedAt;
-        rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+        rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
         const staff=easeOut(elapsed/620);
         drawStaff(rippleCtx,cx,cy,staff,1);
         for(let i=0;i<4;i++){
           const p=(elapsed-i*95)/720;
           if(p<=0||p>=1)continue;
-          const radius=18+Math.min(innerWidth,innerHeight)*.30*easeOut(p);
+          const radius=18+Math.min(rippleWidth,rippleHeight)*.30*easeOut(p);
           rippleCtx.save();
           rippleCtx.globalAlpha=(1-p)*.82;
           rippleCtx.strokeStyle='#e1b96e';
@@ -290,20 +309,21 @@
           drawNote(rippleCtx,note,cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius*.56,orbit*(1-clamp01((elapsed-650)/250)),17);
         });
         if(elapsed<980)rippleAnimationFrame=requestAnimationFrame(frame);
-        else{rippleAnimationFrame=0;rippleCtx.clearRect(0,0,innerWidth,innerHeight);}
+        else{rippleAnimationFrame=0;rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);}
       };
       rippleAnimationFrame=requestAnimationFrame(frame);
     }
 
     function playReleaseRipple(){
+      sizeRippleCanvas();
       clearRippleFx();
-      const cx=innerWidth/2;
-      const cy=innerHeight/2;
+      const cx=rippleWidth/2;
+      const cy=rippleHeight/2;
       const startedAt=performance.now();
       const notes=['♪','♫','♩','♬','♪','♩'];
       const frame=now=>{
         const elapsed=now-startedAt;
-        rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+        rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
 
         const staffProgress=easeOut(elapsed/520);
         const staffFade=1-smooth((elapsed-650)/520);
@@ -312,7 +332,7 @@
         for(let i=0;i<5;i++){
           const p=(elapsed-i*90)/880;
           if(p<=0||p>=1)continue;
-          const radius=22+Math.min(innerWidth,innerHeight)*.46*easeOut(p);
+          const radius=22+Math.min(rippleWidth,rippleHeight)*.46*easeOut(p);
           rippleCtx.save();
           rippleCtx.globalAlpha=(1-p)*.78;
           rippleCtx.strokeStyle='#e7bf73';
@@ -363,7 +383,7 @@
         if(elapsed<1980)rippleAnimationFrame=requestAnimationFrame(frame);
         else{
           rippleAnimationFrame=0;
-          rippleCtx.clearRect(0,0,innerWidth,innerHeight);
+          rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
         }
       };
       rippleAnimationFrame=requestAnimationFrame(frame);
@@ -449,7 +469,7 @@
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');
       setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
-      setTimeout(()=>opening.remove(),1950);
+      setTimeout(()=>{rippleResizeObserver?.disconnect();opening.remove();},1950);
     },{once:true});
 
     window.addEventListener('resize',armPreparation);
