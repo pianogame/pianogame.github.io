@@ -86,99 +86,124 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,prepared=false,opened=false,bgmPlaying=false,mediaPrimed=false,voiceRevealTimer=0,lastAudioError='';
-    const tapAudios=['/audio/curtain-start-1.mp3?v=7','/audio/curtain-start-2.mp3?v=7','/audio/curtain-start-3.mp3?v=7','/audio/curtain-start-4.mp3?v=7'].map(url=>{
+    let started=false,prepared=false,opened=false,bgmPlaying=false,audioReady=false,audioLoadFailed=false,lastAudioError='';
+    const tapAudios=['/audio/curtain-start-1.mp3?v=8','/audio/curtain-start-2.mp3?v=8','/audio/curtain-start-3.mp3?v=8','/audio/curtain-start-4.mp3?v=8'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=7','/audio/opening-bgm-02.m4a?v=7','/audio/opening-bgm-03.m4a?v=7','/audio/opening-bgm-04.m4a?v=7','/audio/opening-bgm-05.m4a?v=7','/audio/opening-bgm-06.m4a?v=7','/audio/opening-bgm-07.m4a?v=7','/audio/opening-bgm-08.m4a?v=7','/audio/opening-bgm-09.m4a?v=7','/audio/opening-bgm-10.m4a?v=7'];
-    const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
-    curtainBgm.preload='auto';
-    curtainBgm.loop=true;
-    curtainBgm.volume=0;
-    curtainBgm.load();
-    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=10');
-    voiceAudio.preload='auto';
-    voiceAudio.volume=0;
-    voiceAudio.load();
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=8','/audio/opening-bgm-02.m4a?v=8','/audio/opening-bgm-03.m4a?v=8','/audio/opening-bgm-04.m4a?v=8','/audio/opening-bgm-05.m4a?v=8','/audio/opening-bgm-06.m4a?v=8','/audio/opening-bgm-07.m4a?v=8','/audio/opening-bgm-08.m4a?v=8','/audio/opening-bgm-09.m4a?v=8','/audio/opening-bgm-10.m4a?v=8'];
+    const selectedBgm=bgmUrls[Math.floor(Math.random()*bgmUrls.length)];
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    const openingAudioContext=AudioContextClass?new AudioContextClass():null;
+    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,resumePromise=null;
 
-    function stopOpeningVoice(){
-      if(voiceRevealTimer){clearTimeout(voiceRevealTimer);voiceRevealTimer=0;}
-      try{voiceAudio.pause();voiceAudio.currentTime=0;voiceAudio.volume=0;}catch(_){}
+    async function decodeAudio(url){
+      if(!openingAudioContext)return null;
+      const response=await fetch(url,{cache:'no-store'});
+      if(!response.ok)throw new Error('audio '+response.status);
+      const data=await response.arrayBuffer();
+      return openingAudioContext.decodeAudioData(data);
     }
 
-    function primeOpeningMedia(){
-      if(opened||mediaPrimed)return;
+    const openingAudioReady=openingAudioContext
+      ? Promise.all([
+          decodeAudio(selectedBgm).then(buffer=>{bgmBuffer=buffer;}),
+          decodeAudio('/audio/opening-3voices.m4a?v=11').then(buffer=>{voiceBuffer=buffer;})
+        ]).then(()=>{
+          audioReady=!!(bgmBuffer&&voiceBuffer);
+          maybeArmPreparation();
+        }).catch(error=>{
+          audioLoadFailed=true;
+          lastAudioError='load:'+(error?.name||'failed');
+          maybeArmPreparation();
+        })
+      : Promise.resolve();
+
+    function unlockOpeningAudio(){
+      if(!openingAudioContext)return;
       try{
-        curtainBgm.pause();
-        curtainBgm.currentTime=0;
-        curtainBgm.volume=0;
-        voiceAudio.pause();
-        voiceAudio.currentTime=0;
-        voiceAudio.volume=0;
-
-        const bgmPromise=curtainBgm.play();
-        const voicePromise=voiceAudio.play();
-        mediaPrimed=true;
-
-        bgmPromise?.catch(error=>{
-          mediaPrimed=false;
-          lastAudioError='bgm:'+(error?.name||'play-failed');
-        });
-        voicePromise?.catch(error=>{
-          lastAudioError='voice:'+(error?.name||'play-failed');
-        });
+        resumePromise=openingAudioContext.resume();
+        resumePromise?.catch(error=>{lastAudioError='resume:'+(error?.name||'failed');});
       }catch(error){
-        mediaPrimed=false;
-        lastAudioError='prime:'+(error?.name||'play-failed');
+        lastAudioError='resume:'+(error?.name||'failed');
       }
     }
 
-    function beginAudibleOpening(){
-      if(opened||!mediaPrimed)return false;
+    function startOpeningAudioGraph(){
+      if(opened||bgmPlaying||!openingAudioContext||!bgmBuffer||!voiceBuffer)return false;
       try{
-        curtainBgm.volume=.12;
+        const now=openingAudioContext.currentTime;
+        bgmGain=openingAudioContext.createGain();
+        bgmGain.gain.setValueAtTime(.12,now);
+        bgmGain.connect(openingAudioContext.destination);
+
+        bgmSource=openingAudioContext.createBufferSource();
+        bgmSource.buffer=bgmBuffer;
+        bgmSource.loop=true;
+        bgmSource.connect(bgmGain);
+        bgmSource.start(now);
+
+        voiceSource=openingAudioContext.createBufferSource();
+        voiceSource.buffer=voiceBuffer;
+        voiceSource.connect(openingAudioContext.destination);
+        voiceSource.start(now+3);
+
         bgmPlaying=true;
         lastAudioError='';
-        if(voiceRevealTimer)clearTimeout(voiceRevealTimer);
-        voiceRevealTimer=setTimeout(()=>{
-          voiceRevealTimer=0;
-          if(opened){stopOpeningVoice();return;}
-          try{voiceAudio.volume=.9;}catch(_){}
-        },3000);
         return true;
       }catch(error){
-        lastAudioError='audible:'+(error?.name||'play-failed');
+        bgmPlaying=false;
+        lastAudioError='start:'+(error?.name||'failed');
         return false;
       }
     }
 
-    function cancelPreparationAudio(){
-      stopCurtainBgm();
-      stopOpeningVoice();
-      mediaPrimed=false;
+    function beginAudibleOpening(){
+      if(opened||!audioReady||!openingAudioContext)return false;
+      if(openingAudioContext.state==='running')return startOpeningAudioGraph();
+      if(resumePromise?.then){
+        resumePromise.then(()=>{
+          if(!opened&&!bgmPlaying)startOpeningAudioGraph();
+        }).catch(()=>{});
+        return true;
+      }
+      return false;
     }
 
-    let bgmFadeFrame=0;
+    function cancelPreparationAudio(){
+      // The AudioContext stays unlocked; no sound has started yet.
+    }
+
+    function stopOpeningVoice(){
+      try{voiceSource?.stop();}catch(_){}
+      try{voiceSource?.disconnect();}catch(_){}
+      voiceSource=null;
+    }
+
     function stopCurtainBgm(){
-      if(bgmFadeFrame){cancelAnimationFrame(bgmFadeFrame);bgmFadeFrame=0;}
-      try{curtainBgm.pause();curtainBgm.currentTime=0;curtainBgm.volume=0;}catch(_){}
+      try{bgmSource?.stop();}catch(_){}
+      try{bgmSource?.disconnect();}catch(_){}
+      try{bgmGain?.disconnect();}catch(_){}
+      bgmSource=null;
+      bgmGain=null;
       bgmPlaying=false;
     }
 
-    function fadeOutCurtainBgm(duration=780){
-      if(!bgmPlaying||curtainBgm.paused){stopCurtainBgm();return;}
-      if(bgmFadeFrame)cancelAnimationFrame(bgmFadeFrame);
-      const startVolume=Math.max(.01,curtainBgm.volume||.12);
-      const startedAt=performance.now();
-      const step=now=>{
-        const p=Math.min(1,(now-startedAt)/duration);
-        const eased=Math.pow(1-p,3.4);
-        try{curtainBgm.volume=Math.max(0,startVolume*eased);}catch(_){}
-        if(p<1){bgmFadeFrame=requestAnimationFrame(step);return;}
-        bgmFadeFrame=0;
-        stopCurtainBgm();
-      };
-      bgmFadeFrame=requestAnimationFrame(step);
+    function fadeOutCurtainBgm(duration=.78){
+      stopOpeningVoice();
+      if(!bgmPlaying||!bgmGain||!openingAudioContext){stopCurtainBgm();return;}
+      try{
+        const now=openingAudioContext.currentTime;
+        const gain=bgmGain.gain;
+        const start=Math.max(.0001,gain.value||.12);
+        gain.cancelScheduledValues(now);
+        gain.setValueAtTime(start,now);
+        gain.setValueCurveAtTime(
+          new Float32Array([start,start*.42,start*.16,start*.055,start*.012,.0001]),
+          now,
+          duration
+        );
+        setTimeout(stopCurtainBgm,Math.ceil(duration*1000)+50);
+      }catch(_){stopCurtainBgm();}
     }
 
     function chime(){
@@ -191,12 +216,20 @@
       return (v?.width||innerWidth) >= (v?.height||innerHeight);
     };
 
-    let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0;
-    function armPreparation(){
-      if(started||!landscape())return;
+    let gesturePointerId=null,gestureStartedAt=0,gestureStartX=0,gestureStartY=0,landscapeReached=false;
+    function maybeArmPreparation(){
+      if(started||!landscapeReached)return;
+      orientation.classList.add('hp-loading');
+      if(audioLoadFailed)return;
+      if(!audioReady)return;
       started=true;
       orientation.classList.remove('hp-loading');
       orientation.classList.add('hp-ready');
+    }
+    function armPreparation(){
+      if(!landscape())return;
+      landscapeReached=true;
+      maybeArmPreparation();
     }
     function finishPreparation(event){
       if(prepared||!started||!event.isTrusted)return;
@@ -225,9 +258,8 @@
       gestureStartX=event.clientX;
       gestureStartY=event.clientY;
       orientation.classList.add('hp-gesture-active');
-      // Keep both tracks silent on the first real touch so Safari grants playback.
-      // They become audible only after the swipe/long-press has actually succeeded.
-      primeOpeningMedia();
+      // Resume Web Audio at the first real touch. No sound starts yet.
+      unlockOpeningAudio();
       try{orientation.setPointerCapture(event.pointerId);}catch(_){}
       event.preventDefault();
     });
@@ -247,7 +279,7 @@
     title.addEventListener('pointerup',()=>{
       if(opened||!prepared)return;
       opened=true;
-      fadeOutCurtainBgm(780);
+      fadeOutCurtainBgm(.78);
       chime();
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');

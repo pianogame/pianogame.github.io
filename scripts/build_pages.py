@@ -82,24 +82,22 @@ def _verify_app_sources():
             raise ValueError(f"Opening audio is not referenced by rotation-guide.js: {name}")
     if opening_source.count("opening-bgm-") != 10:
         raise ValueError("Expected exactly 10 opening BGM references")
-    if "fadeOutCurtainBgm(780)" not in opening_source or "Math.pow(1-p,3.4)" not in opening_source:
-        raise ValueError("Strong curtain BGM fade-out is missing")
-    if "voiceAudio.volume=0" not in opening_source or "voiceAudio.volume=.9" not in opening_source or "},3000);" not in opening_source:
-        raise ValueError("Opening voice must become audible 3 seconds after preparation succeeds")
-    if "curtainBgm.volume=0" not in opening_source or "curtainBgm.volume=.12" not in opening_source:
-        raise ValueError("Opening BGM must remain silent until preparation succeeds")
-    if "orientation.addEventListener('pointerdown'" not in opening_source or "primeOpeningMedia();" not in opening_source:
-        raise ValueError("Opening media must be silently primed on the trusted pointerdown gesture")
-    if "beginAudibleOpening()" not in opening_source:
-        raise ValueError("Opening BGM must become audible only after swipe-or-hold succeeds")
-    if "curtainBgm.play()" not in opening_source or "voiceAudio.play()" not in opening_source:
-        raise ValueError("Opening audio must use HTMLMediaElement.play()")
+    if "fadeOutCurtainBgm(.78)" not in opening_source or "setValueCurveAtTime" not in opening_source:
+        raise ValueError("Strong Web Audio BGM fade-out is missing")
+    if "voiceSource.start(now+3)" not in opening_source:
+        raise ValueError("Opening voice must start exactly 3 seconds after BGM")
+    if "unlockOpeningAudio();" not in opening_source or "openingAudioContext.resume()" not in opening_source:
+        raise ValueError("Opening AudioContext must be unlocked on pointerdown")
+    if "beginAudibleOpening()" not in opening_source or "startOpeningAudioGraph()" not in opening_source:
+        raise ValueError("Opening audio graph must start only after swipe-or-hold succeeds")
+    if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:
+        raise ValueError("Opening audio must use Web Audio buffers and gain control")
     if "cancelPreparationAudio();" not in opening_source:
         raise ValueError("A normal tap must not complete the preparation gesture")
     if "distance<72&&held<520" not in opening_source or "LONG PRESS / SWIPE" not in opening_source:
         raise ValueError("Swipe-or-hold preparation gesture is missing")
-    if "startBufferedOpeningAudio()" in opening_source or "unlockAndStartOpeningAudio" in opening_source:
-        raise ValueError("Legacy Web Audio opening playback must not remain")
+    if "voiceAudio.volume" in opening_source or "curtainBgm.volume" in opening_source:
+        raise ValueError("Do not use HTMLMediaElement volume for opening audio on iOS")
     if any(line.strip() == "undefined" for line in opening_source.splitlines()):
         raise ValueError("Unexpected undefined line in rotation-guide.js")
 
