@@ -114,7 +114,7 @@ def _verify_app_sources():
         raise ValueError("Experimental touch dynamics must remain removed")
 
     orientation_source = (site / "orientation.js").read_text(encoding="utf-8")
-    for marker in ["function settleFit()", "[80,220,500,900]", "window.addEventListener('focus', settleFit)", "visibilitychange"]:
+    for marker in ["function measure()", "viewportPortrait && innerPortrait", "[80,220,500,900,1400]", "window.addEventListener('focus', settleFit)", "visibilitychange"]:
         if marker not in orientation_source:
             raise ValueError(f"Orientation settling guard is missing: {marker}")
 
