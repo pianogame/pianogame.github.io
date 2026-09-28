@@ -143,7 +143,7 @@
         const now=openingAudioContext.currentTime;
 
         bgmGain=openingAudioContext.createGain();
-        bgmGain.gain.setValueAtTime(.12,now);
+        bgmGain.gain.setValueAtTime(.18,now);
         bgmGain.connect(openingAudioContext.destination);
 
         bgmSource=openingAudioContext.createBufferSource();
@@ -191,7 +191,7 @@
       try{
         const now=openingAudioContext.currentTime;
         const gain=bgmGain.gain;
-        const start=Math.max(.0001,gain.value||.12);
+        const start=Math.max(.0001,gain.value||.18);
         gain.cancelScheduledValues(now);
         gain.setValueAtTime(start,now);
         gain.setValueCurveAtTime(
@@ -459,6 +459,37 @@
       if(!prepared)cancelPreparationAudio();
       gesturePointerId=null;
       orientation.classList.remove('hp-gesture-active');
+    });
+
+    let suspendedByVisibility=false;
+    async function suspendOpeningForBackground(){
+      if(!openingAudioContext||openingAudioContext.state!=='running')return;
+      try{
+        await openingAudioContext.suspend();
+        suspendedByVisibility=true;
+      }catch(error){
+        lastAudioError='suspend:'+(error?.name||'failed');
+      }
+    }
+    async function resumeOpeningFromBackground(){
+      if(!suspendedByVisibility||!openingAudioContext||opened)return;
+      try{
+        await openingAudioContext.resume();
+        suspendedByVisibility=false;
+      }catch(error){
+        lastAudioError='resume-visible:'+(error?.name||'failed');
+      }
+    }
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='hidden'){
+        void suspendOpeningForBackground();
+      }else if(document.visibilityState==='visible'){
+        void resumeOpeningFromBackground();
+      }
+    });
+    window.addEventListener('pagehide',()=>{void suspendOpeningForBackground();});
+    window.addEventListener('pageshow',()=>{
+      if(document.visibilityState!=='hidden')void resumeOpeningFromBackground();
     });
 
     title.addEventListener('pointerup',()=>{

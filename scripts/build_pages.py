@@ -86,6 +86,12 @@ def _verify_app_sources():
         raise ValueError("Strong Web Audio BGM fade-out is missing")
     if "voiceSource.start(now+1.5)" not in opening_source:
         raise ValueError("Opening voice must start 1.5 seconds after BGM")
+    if "bgmGain.gain.setValueAtTime(.18,now)" not in opening_source:
+        raise ValueError("Opening BGM gain must use the raised rhythm-game level")
+    if "document.addEventListener('visibilitychange'" not in opening_source or "openingAudioContext.suspend()" not in opening_source:
+        raise ValueError("Opening audio must suspend when the app goes to background")
+    if "resumeOpeningFromBackground()" not in opening_source or "window.addEventListener('pagehide'" not in opening_source or "window.addEventListener('pageshow'" not in opening_source:
+        raise ValueError("Opening audio background lifecycle handling is incomplete")
     if "orientation.addEventListener('click'" not in opening_source or "unlockOpeningAudio()" not in opening_source:
         raise ValueError("Opening audio must be unlocked by a real tap before swipe-or-hold")
     if "openingAudioContext.resume()" not in opening_source or "audioUnlocked=true" not in opening_source:
