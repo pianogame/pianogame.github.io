@@ -681,6 +681,15 @@
     if (entry.event && recording) entry.event.duration = Math.max(.06, ctx.currentTime - recordStart - entry.event.start);
     root.dispatchEvent(new CustomEvent('hp-note-off',{detail:{token,midi:entry.midi}})); held.delete(token); redraw();
   }
+  function markHeldCutForRecording() {
+    if(!recording||!ctx)return;
+    const stoppedAt=ctx.currentTime;
+    held.forEach(entry=>{
+      if(!entry.event)return;
+      entry.event.cut=true;
+      entry.event.duration=Math.max(.015,stoppedAt-recordStart-entry.event.start);
+    });
+  }
   function releaseHeld() {
     pendingNoteOns.clear();
     Array.from(held.keys()).forEach(noteOff);
@@ -809,13 +818,14 @@
   });
   action('sustain').addEventListener('click', () => { sustain = !sustain; articulation[currentInstrument].sustain=sustain; action('sustain').setAttribute('aria-pressed', String(sustain)); action('sustain').textContent=sustain?'音を伸ばす：ON':'音を伸ばす：OFF'; if (!sustain && ctx) { const active=new Set(Array.from(held.values()).map(note=>note.voice)); allVoices.forEach(voice=>{if(!active.has(voice))voice.release(ctx.currentTime,articulation[currentInstrument].release);}); } });
   action('stop-sound').addEventListener('click', () => {
+    markHeldCutForRecording();
+    root.dispatchEvent(new Event('hp-stop-sound'));
     stopPlayback(); releaseHeld(); pointerStarts.clear();
     if (ctx) {
       allVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
       playingCounts.clear();
       if (reverb) { reverb.buffer=null; updateReverb(); }
     }
-    root.dispatchEvent(new Event('hp-stop-sound'));
     redraw(); say('鳴っている音と余韻を止めました');
   });
   action('record').addEventListener('click', () => {
@@ -845,7 +855,7 @@
       while (nextEvent < events.length && start + events[nextEvent].start < ctx.currentTime + .14) {
         const event = events[nextEvent++], when = Math.max(ctx.currentTime, start + event.start);
         const voice = synth(event.midi, when, event.velocity ?? 1); playbackVoices.push(voice);
-        voice.release(when + event.duration, event.sustain ? Infinity : articulation[currentInstrument].release);
+        voice.release(when + event.duration, event.cut ? .02 : (event.sustain ? Infinity : articulation[currentInstrument].release));
         later(() => { playingCounts.set(event.midi, (playingCounts.get(event.midi) || 0) + 1); redraw(); sparkle(event.midi); }, when - ctx.currentTime);
         later(() => { const remaining = (playingCounts.get(event.midi) || 1) - 1; if (remaining) playingCounts.set(event.midi, remaining); else playingCounts.delete(event.midi); redraw(); }, when + event.duration - ctx.currentTime);
       }
