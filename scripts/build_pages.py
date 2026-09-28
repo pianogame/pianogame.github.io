@@ -88,7 +88,7 @@ def _verify_app_sources():
         raise ValueError("Strong Web Audio BGM fade-out is missing")
     if "voiceSource.start(now+2.0)" not in opening_source:
         raise ValueError("Opening voice must start 2.0 seconds after BGM")
-    if "bgmGain.gain.setValueAtTime(.18,now)" not in opening_source:
+    if "bgmGain.gain.setValueAtTime(.30,now)" not in opening_source:
         raise ValueError("Opening BGM gain must use the raised rhythm-game level")
     if "document.addEventListener('visibilitychange'" not in opening_source or "openingAudioContext.suspend()" not in opening_source:
         raise ValueError("Opening audio must suspend when the app goes to background")
