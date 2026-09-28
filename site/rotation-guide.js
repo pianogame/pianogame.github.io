@@ -88,7 +88,7 @@
     const selectedBgm=bgmUrls[Math.floor(Math.random()*bgmUrls.length)];
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
-    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null;
+    let bgmBuffer=null,voiceBuffer=null,tapSeBuffer=null,swipeSeBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null;
 
     async function decodeAudio(url){
       if(!openingAudioContext)return null;
@@ -100,9 +100,11 @@
     const openingAudioReady=openingAudioContext
       ? Promise.all([
           decodeAudio(selectedBgm).then(buffer=>{bgmBuffer=buffer;}),
-          decodeAudio('/audio/opening-3voices.m4a?v=13').then(buffer=>{voiceBuffer=buffer;})
+          decodeAudio('/audio/opening-3voices.m4a?v=13').then(buffer=>{voiceBuffer=buffer;}),
+          decodeAudio('/audio/kiryan.m4a?v=1').then(buffer=>{tapSeBuffer=buffer;}),
+          decodeAudio('/audio/pororoponponpin.m4a?v=1').then(buffer=>{swipeSeBuffer=buffer;})
         ]).then(()=>{
-          audioReady=!!(bgmBuffer&&voiceBuffer);
+          audioReady=!!(bgmBuffer&&voiceBuffer&&tapSeBuffer&&swipeSeBuffer);
           maybeArmPreparation();
         }).catch(error=>{
           audioLoadFailed=true;
@@ -111,49 +113,26 @@
         })
       : Promise.resolve();
 
-    function playPianoPluck(frequency,when,level=.16,duration=.62){
-      if(!openingAudioContext||openingAudioContext.state!=='running')return;
+    function playOpeningCue(buffer,level){
+      if(!openingAudioContext||openingAudioContext.state!=='running'||!buffer)return;
       try{
-        const master=openingAudioContext.createGain();
-        master.gain.setValueAtTime(.0001,when);
-        master.gain.exponentialRampToValueAtTime(level,when+.008);
-        master.gain.exponentialRampToValueAtTime(.0001,when+duration);
-        master.connect(openingAudioContext.destination);
-
-        const partials=[
-          [1,'triangle',1],
-          [2,'sine',.34],
-          [3,'sine',.16]
-        ];
-        partials.forEach(([multiple,type,mix])=>{
-          const osc=openingAudioContext.createOscillator();
-          const gain=openingAudioContext.createGain();
-          osc.type=type;
-          osc.frequency.setValueAtTime(frequency*multiple,when);
-          osc.frequency.exponentialRampToValueAtTime(frequency*multiple*.997,when+.12);
-          gain.gain.value=mix;
-          osc.connect(gain);
-          gain.connect(master);
-          osc.start(when);
-          osc.stop(when+duration+.05);
-          osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch(_){}};
-        });
-        setTimeout(()=>{try{master.disconnect();}catch(_){}},Math.ceil((duration+.15)*1000));
+        const source=openingAudioContext.createBufferSource();
+        const gain=openingAudioContext.createGain();
+        gain.gain.setValueAtTime(level,openingAudioContext.currentTime);
+        source.buffer=buffer;
+        source.connect(gain);
+        gain.connect(openingAudioContext.destination);
+        source.start();
+        source.onended=()=>{try{source.disconnect();gain.disconnect();}catch(_){}};
       }catch(_){}
     }
 
     function playTapPianoCue(){
-      if(!openingAudioContext)return;
-      const now=openingAudioContext.currentTime;
-      playPianoPluck(880,now,.13,.72);
+      playOpeningCue(tapSeBuffer,.9);
     }
 
     function playSwipePianoCue(){
-      if(!openingAudioContext)return;
-      const now=openingAudioContext.currentTime;
-      [523.25,659.25,783.99,1046.5].forEach((frequency,i)=>{
-        playPianoPluck(frequency,now+i*.065,.105,.54);
-      });
+      playOpeningCue(swipeSeBuffer,.78);
     }
 
     async function unlockOpeningAudio(){

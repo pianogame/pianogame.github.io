@@ -29,6 +29,8 @@ OPENING_AUDIO_EXPECTED = {
     "opening-bgm-08.m4a": (533558, "7bcde226867bedd1de340de2651ee720893dfecb5fa90a3b2841c920f0280bb2"),
     "opening-bgm-09.m4a": (266903, "99651e807d0b8d7e0db1bf644b5db4a65411d5d4f26a5cc176ff61121a9c1bd6"),
     "opening-bgm-10.m4a": (542390, "6cfea560806a8589c931960821b00ad0737b79901ab03bd08b2b1b2c22554fb4"),
+    "kiryan.m4a": (9337, "e84a018606d78e9fddddf0622990aa52ce4d73152cc53f7a5b3db54a557325bc"),
+    "pororoponponpin.m4a": (22056, "f0dea58696be34b027371aa6f34d8a84e2567d662c54fd5cdd58f22e37680a5c"),
 }
 
 
@@ -93,7 +95,7 @@ def _verify_app_sources():
     if "resumeOpeningFromBackground()" not in opening_source or "window.addEventListener('pagehide'" not in opening_source or "window.addEventListener('pageshow'" not in opening_source:
         raise ValueError("Opening audio background lifecycle handling is incomplete")
     if "orientation.addEventListener('click'" not in opening_source or "unlockOpeningAudio()" not in opening_source:
-        raise ValueError("Opening audio must be unlocked by a real tap before swipe-or-hold")
+        raise ValueError("Opening audio must be unlocked by a real tap before swipe")
     if "openingAudioContext.resume()" not in opening_source or "audioUnlocked=true" not in opening_source:
         raise ValueError("Opening AudioContext unlock is missing")
     if "hp-wave-armed" not in opening_source or "TAP TO RIPPLE" not in opening_source:
@@ -113,7 +115,7 @@ def _verify_app_sources():
     if "particleAlpha=.08*(1-smooth" not in opening_source:
         raise ValueError("Ripple particles must fade smoothly to zero")
     if "beginAudibleOpening()" not in opening_source:
-        raise ValueError("Opening BGM must begin only after swipe-or-hold succeeds")
+        raise ValueError("Opening BGM must begin only after swipe succeeds")
     if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:
         raise ValueError("Opening audio must use Web Audio buffers and gain control")
     if "cancelPreparationAudio();" not in opening_source:
@@ -122,8 +124,12 @@ def _verify_app_sources():
         raise ValueError("Swipe-only preparation gesture is missing")
     if "held=performance.now()-gestureStartedAt" in opening_source or "LONG PRESS / SWIPE" in opening_source:
         raise ValueError("Long-press preparation must not remain")
+    if "/audio/kiryan.m4a?v=1" not in opening_source or "/audio/pororoponponpin.m4a?v=1" not in opening_source:
+        raise ValueError("Provided tap/swipe sound effects are not wired")
     if "playTapPianoCue()" not in opening_source or "playSwipePianoCue()" not in opening_source:
-        raise ValueError("Piano gesture cues are missing")
+        raise ValueError("Tap/swipe sound effect triggers are missing")
+    if "createOscillator()" in opening_source or "playPianoPluck(" in opening_source:
+        raise ValueError("Temporary synthesized piano cues must not remain")
     if "orientation.addEventListener('pointermove'" not in opening_source:
         raise ValueError("Swipe must complete during pointer movement")
     if "voiceAudio.volume" in opening_source or "curtainBgm.volume" in opening_source:
