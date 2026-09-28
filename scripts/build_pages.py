@@ -100,6 +100,8 @@ def _verify_app_sources():
         raise ValueError("Musical ripple unlock stage is missing")
     if "playUnlockRipple(" not in opening_source or "playReleaseRipple(" not in opening_source:
         raise ValueError("Musical ripple canvas effects are missing")
+    if "const unlockFade=1-smooth((elapsed-760)/620);" not in opening_source or "if(elapsed<1400)" not in opening_source:
+        raise ValueError("Initial musical ripple must fade out smoothly instead of disappearing abruptly")
     if "const cx=rippleWidth/2;" not in opening_source or "const cy=rippleHeight/2;" not in opening_source:
         raise ValueError("Musical ripple origin must be fixed to the rendered canvas center")
     if "new ResizeObserver(sizeRippleCanvas)" not in opening_source or "visualViewport?.addEventListener('resize',sizeRippleCanvas)" not in opening_source:

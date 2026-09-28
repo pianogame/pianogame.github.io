@@ -289,10 +289,28 @@
       const frame=now=>{
         const elapsed=now-startedAt;
         rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
+
+        // Keep the first ripple visible for a short beat, then fade the entire
+        // effect smoothly instead of clearing it abruptly.
+        const unlockFade=1-smooth((elapsed-760)/620);
+        rippleCtx.save();
+        rippleCtx.globalAlpha=unlockFade;
+
         const staff=easeOut(elapsed/620);
         drawStaff(rippleCtx,cx,cy,staff,1);
+
+        // Soft center glow that fades with the same curve.
+        const glowProgress=clamp01(elapsed/520);
+        const glowRadius=24+88*easeOut(glowProgress);
+        const gradient=rippleCtx.createRadialGradient(cx,cy,0,cx,cy,glowRadius);
+        gradient.addColorStop(0,'rgba(255,247,214,.72)');
+        gradient.addColorStop(.35,'rgba(244,211,139,.30)');
+        gradient.addColorStop(1,'rgba(244,211,139,0)');
+        rippleCtx.fillStyle=gradient;
+        rippleCtx.beginPath();rippleCtx.arc(cx,cy,glowRadius,0,Math.PI*2);rippleCtx.fill();
+
         for(let i=0;i<4;i++){
-          const p=(elapsed-i*95)/720;
+          const p=(elapsed-i*95)/820;
           if(p<=0||p>=1)continue;
           const radius=18+Math.min(rippleWidth,rippleHeight)*.30*easeOut(p);
           rippleCtx.save();
@@ -302,14 +320,21 @@
           rippleCtx.beginPath();rippleCtx.arc(cx,cy,radius,0,Math.PI*2);rippleCtx.stroke();
           rippleCtx.restore();
         }
+
         const orbit=clamp01(elapsed/760);
         notes.forEach((note,i)=>{
           const angle=(Math.PI*2*i/notes.length)+orbit*.85;
           const radius=62+orbit*92;
-          drawNote(rippleCtx,note,cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius*.56,orbit*(1-clamp01((elapsed-650)/250)),17);
+          drawNote(rippleCtx,note,cx+Math.cos(angle)*radius,cy+Math.sin(angle)*radius*.56,orbit,17);
         });
-        if(elapsed<980)rippleAnimationFrame=requestAnimationFrame(frame);
-        else{rippleAnimationFrame=0;rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);}
+
+        rippleCtx.restore();
+
+        if(elapsed<1400)rippleAnimationFrame=requestAnimationFrame(frame);
+        else{
+          rippleAnimationFrame=0;
+          rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
+        }
       };
       rippleAnimationFrame=requestAnimationFrame(frame);
     }
