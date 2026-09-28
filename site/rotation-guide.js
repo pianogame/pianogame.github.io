@@ -86,28 +86,27 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,prepared=false,opened=false,bgmPlaying=false,audioReady=false,audioLoadFailed=false,lastAudioError='';
-    const tapAudios=['/audio/curtain-start-1.mp3?v=8','/audio/curtain-start-2.mp3?v=8','/audio/curtain-start-3.mp3?v=8','/audio/curtain-start-4.mp3?v=8'].map(url=>{
+    let started=false,prepared=false,opened=false,bgmPlaying=false,audioReady=false,audioLoadFailed=false,audioPrimed=false,lastAudioError='';
+    const tapAudios=['/audio/curtain-start-1.mp3?v=9','/audio/curtain-start-2.mp3?v=9','/audio/curtain-start-3.mp3?v=9','/audio/curtain-start-4.mp3?v=9'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=8','/audio/opening-bgm-02.m4a?v=8','/audio/opening-bgm-03.m4a?v=8','/audio/opening-bgm-04.m4a?v=8','/audio/opening-bgm-05.m4a?v=8','/audio/opening-bgm-06.m4a?v=8','/audio/opening-bgm-07.m4a?v=8','/audio/opening-bgm-08.m4a?v=8','/audio/opening-bgm-09.m4a?v=8','/audio/opening-bgm-10.m4a?v=8'];
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=9','/audio/opening-bgm-02.m4a?v=9','/audio/opening-bgm-03.m4a?v=9','/audio/opening-bgm-04.m4a?v=9','/audio/opening-bgm-05.m4a?v=9','/audio/opening-bgm-06.m4a?v=9','/audio/opening-bgm-07.m4a?v=9','/audio/opening-bgm-08.m4a?v=9','/audio/opening-bgm-09.m4a?v=9','/audio/opening-bgm-10.m4a?v=9'];
     const selectedBgm=bgmUrls[Math.floor(Math.random()*bgmUrls.length)];
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
-    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,resumePromise=null;
+    let bgmBuffer=null,voiceBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,voiceGain=null,resumePromise=null;
 
     async function decodeAudio(url){
       if(!openingAudioContext)return null;
       const response=await fetch(url,{cache:'no-store'});
       if(!response.ok)throw new Error('audio '+response.status);
-      const data=await response.arrayBuffer();
-      return openingAudioContext.decodeAudioData(data);
+      return openingAudioContext.decodeAudioData(await response.arrayBuffer());
     }
 
     const openingAudioReady=openingAudioContext
       ? Promise.all([
           decodeAudio(selectedBgm).then(buffer=>{bgmBuffer=buffer;}),
-          decodeAudio('/audio/opening-3voices.m4a?v=11').then(buffer=>{voiceBuffer=buffer;})
+          decodeAudio('/audio/opening-3voices.m4a?v=12').then(buffer=>{voiceBuffer=buffer;})
         ]).then(()=>{
           audioReady=!!(bgmBuffer&&voiceBuffer);
           maybeArmPreparation();
@@ -118,65 +117,82 @@
         })
       : Promise.resolve();
 
-    function unlockOpeningAudio(){
-      if(!openingAudioContext)return;
+    function primeOpeningAudio(){
+      if(opened||audioPrimed||!openingAudioContext||!bgmBuffer||!voiceBuffer)return false;
       try{
         resumePromise=openingAudioContext.resume();
         resumePromise?.catch(error=>{lastAudioError='resume:'+(error?.name||'failed');});
-      }catch(error){
-        lastAudioError='resume:'+(error?.name||'failed');
-      }
-    }
 
-    function startOpeningAudioGraph(){
-      if(opened||bgmPlaying||!openingAudioContext||!bgmBuffer||!voiceBuffer)return false;
-      try{
         const now=openingAudioContext.currentTime;
+
         bgmGain=openingAudioContext.createGain();
-        bgmGain.gain.setValueAtTime(.12,now);
+        bgmGain.gain.setValueAtTime(0,now);
         bgmGain.connect(openingAudioContext.destination);
 
         bgmSource=openingAudioContext.createBufferSource();
         bgmSource.buffer=bgmBuffer;
         bgmSource.loop=true;
+        bgmSource.playbackRate.setValueAtTime(0,now);
         bgmSource.connect(bgmGain);
         bgmSource.start(now);
 
+        voiceGain=openingAudioContext.createGain();
+        voiceGain.gain.setValueAtTime(0,now);
+        voiceGain.connect(openingAudioContext.destination);
+
         voiceSource=openingAudioContext.createBufferSource();
         voiceSource.buffer=voiceBuffer;
-        voiceSource.connect(openingAudioContext.destination);
-        voiceSource.start(now+3);
+        voiceSource.playbackRate.setValueAtTime(0,now);
+        voiceSource.connect(voiceGain);
+        voiceSource.start(now);
 
-        bgmPlaying=true;
+        audioPrimed=true;
         lastAudioError='';
         return true;
       }catch(error){
-        bgmPlaying=false;
-        lastAudioError='start:'+(error?.name||'failed');
+        audioPrimed=false;
+        lastAudioError='prime:'+(error?.name||'failed');
         return false;
       }
     }
 
     function beginAudibleOpening(){
-      if(opened||!audioReady||!openingAudioContext)return false;
-      if(openingAudioContext.state==='running')return startOpeningAudioGraph();
-      if(resumePromise?.then){
-        resumePromise.then(()=>{
-          if(!opened&&!bgmPlaying)startOpeningAudioGraph();
-        }).catch(()=>{});
+      if(opened||!audioPrimed||!openingAudioContext||!bgmSource||!voiceSource||!bgmGain||!voiceGain)return false;
+      try{
+        const now=openingAudioContext.currentTime;
+
+        bgmSource.playbackRate.cancelScheduledValues(now);
+        bgmSource.playbackRate.setValueAtTime(1,now);
+        bgmGain.gain.cancelScheduledValues(now);
+        bgmGain.gain.setValueAtTime(.12,now);
+        bgmPlaying=true;
+
+        const voiceAt=now+1.5;
+        voiceSource.playbackRate.cancelScheduledValues(now);
+        voiceSource.playbackRate.setValueAtTime(0,now);
+        voiceSource.playbackRate.setValueAtTime(1,voiceAt);
+        voiceGain.gain.cancelScheduledValues(now);
+        voiceGain.gain.setValueAtTime(0,now);
+        voiceGain.gain.setValueAtTime(.9,voiceAt);
+
         return true;
+      }catch(error){
+        lastAudioError='audible:'+(error?.name||'failed');
+        return false;
       }
-      return false;
     }
 
     function cancelPreparationAudio(){
-      // The AudioContext stays unlocked; no sound has started yet.
+      // Keep the already-started sources frozen and silent so the next real gesture
+      // can use the same user-unlocked AudioContext without another start() call.
     }
 
     function stopOpeningVoice(){
       try{voiceSource?.stop();}catch(_){}
       try{voiceSource?.disconnect();}catch(_){}
+      try{voiceGain?.disconnect();}catch(_){}
       voiceSource=null;
+      voiceGain=null;
     }
 
     function stopCurtainBgm(){
@@ -258,8 +274,9 @@
       gestureStartX=event.clientX;
       gestureStartY=event.clientY;
       orientation.classList.add('hp-gesture-active');
-      // Resume Web Audio at the first real touch. No sound starts yet.
-      unlockOpeningAudio();
+      // Start both sources during the real touch, but freeze and mute them.
+      // Gesture completion only changes playbackRate/Gain, so Safari sees no new start().
+      primeOpeningAudio();
       try{orientation.setPointerCapture(event.pointerId);}catch(_){}
       event.preventDefault();
     });

@@ -84,12 +84,14 @@ def _verify_app_sources():
         raise ValueError("Expected exactly 10 opening BGM references")
     if "fadeOutCurtainBgm(.78)" not in opening_source or "setValueCurveAtTime" not in opening_source:
         raise ValueError("Strong Web Audio BGM fade-out is missing")
-    if "voiceSource.start(now+3)" not in opening_source:
-        raise ValueError("Opening voice must start exactly 3 seconds after BGM")
-    if "unlockOpeningAudio();" not in opening_source or "openingAudioContext.resume()" not in opening_source:
-        raise ValueError("Opening AudioContext must be unlocked on pointerdown")
-    if "beginAudibleOpening()" not in opening_source or "startOpeningAudioGraph()" not in opening_source:
-        raise ValueError("Opening audio graph must start only after swipe-or-hold succeeds")
+    if "voiceAt=now+1.5" not in opening_source:
+        raise ValueError("Opening voice must become audible 1.5 seconds after BGM")
+    if "primeOpeningAudio();" not in opening_source or "openingAudioContext.resume()" not in opening_source:
+        raise ValueError("Opening AudioContext and sources must be primed on pointerdown")
+    if "playbackRate.setValueAtTime(0,now)" not in opening_source:
+        raise ValueError("Opening sources must start frozen and silent on pointerdown")
+    if "beginAudibleOpening()" not in opening_source:
+        raise ValueError("Opening BGM must become audible only after swipe-or-hold succeeds")
     if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:
         raise ValueError("Opening audio must use Web Audio buffers and gain control")
     if "cancelPreparationAudio();" not in opening_source:
