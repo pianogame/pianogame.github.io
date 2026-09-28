@@ -85,9 +85,13 @@ def _verify_app_sources():
     if "fadeOutCurtainBgm(780)" not in opening_source or "Math.pow(1-p,3.4)" not in opening_source:
         raise ValueError("Strong curtain BGM fade-out is missing")
     if "voiceAudio.volume=0" not in opening_source or "voiceAudio.volume=.9" not in opening_source or "},800);" not in opening_source:
-        raise ValueError("Opening voice must start silently on touch and become audible after 0.8 seconds")
-    if "orientation.addEventListener('pointerdown'" not in opening_source or "startOpeningMedia();" not in opening_source:
-        raise ValueError("Opening media must begin on the trusted pointerdown gesture")
+        raise ValueError("Opening voice must become audible 0.8 seconds after preparation succeeds")
+    if "curtainBgm.volume=0" not in opening_source or "curtainBgm.volume=.12" not in opening_source:
+        raise ValueError("Opening BGM must remain silent until preparation succeeds")
+    if "orientation.addEventListener('pointerdown'" not in opening_source or "primeOpeningMedia();" not in opening_source:
+        raise ValueError("Opening media must be silently primed on the trusted pointerdown gesture")
+    if "beginAudibleOpening()" not in opening_source:
+        raise ValueError("Opening BGM must become audible only after swipe-or-hold succeeds")
     if "curtainBgm.play()" not in opening_source or "voiceAudio.play()" not in opening_source:
         raise ValueError("Opening audio must use HTMLMediaElement.play()")
     if "cancelPreparationAudio();" not in opening_source:

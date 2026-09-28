@@ -86,17 +86,17 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,prepared=false,opened=false,bgmPlaying=false,voiceRevealTimer=0,lastAudioError='';
-    const tapAudios=['/audio/curtain-start-1.mp3?v=6','/audio/curtain-start-2.mp3?v=6','/audio/curtain-start-3.mp3?v=6','/audio/curtain-start-4.mp3?v=6'].map(url=>{
+    let started=false,prepared=false,opened=false,bgmPlaying=false,mediaPrimed=false,voiceRevealTimer=0,lastAudioError='';
+    const tapAudios=['/audio/curtain-start-1.mp3?v=7','/audio/curtain-start-2.mp3?v=7','/audio/curtain-start-3.mp3?v=7','/audio/curtain-start-4.mp3?v=7'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=6','/audio/opening-bgm-02.m4a?v=6','/audio/opening-bgm-03.m4a?v=6','/audio/opening-bgm-04.m4a?v=6','/audio/opening-bgm-05.m4a?v=6','/audio/opening-bgm-06.m4a?v=6','/audio/opening-bgm-07.m4a?v=6','/audio/opening-bgm-08.m4a?v=6','/audio/opening-bgm-09.m4a?v=6','/audio/opening-bgm-10.m4a?v=6'];
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=7','/audio/opening-bgm-02.m4a?v=7','/audio/opening-bgm-03.m4a?v=7','/audio/opening-bgm-04.m4a?v=7','/audio/opening-bgm-05.m4a?v=7','/audio/opening-bgm-06.m4a?v=7','/audio/opening-bgm-07.m4a?v=7','/audio/opening-bgm-08.m4a?v=7','/audio/opening-bgm-09.m4a?v=7','/audio/opening-bgm-10.m4a?v=7'];
     const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
     curtainBgm.preload='auto';
     curtainBgm.loop=true;
-    curtainBgm.volume=.12;
+    curtainBgm.volume=0;
     curtainBgm.load();
-    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=9');
+    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=10');
     voiceAudio.preload='auto';
     voiceAudio.volume=0;
     voiceAudio.load();
@@ -106,62 +106,48 @@
       try{voiceAudio.pause();voiceAudio.currentTime=0;voiceAudio.volume=0;}catch(_){}
     }
 
-    function primeOpeningVoice(){
-      if(opened)return;
-      if(voiceRevealTimer){clearTimeout(voiceRevealTimer);voiceRevealTimer=0;}
+    function primeOpeningMedia(){
+      if(opened||mediaPrimed)return;
       try{
+        curtainBgm.pause();
+        curtainBgm.currentTime=0;
+        curtainBgm.volume=0;
         voiceAudio.pause();
         voiceAudio.currentTime=0;
         voiceAudio.volume=0;
-        const p=voiceAudio.play();
-        const reveal=()=>{
-          voiceRevealTimer=setTimeout(()=>{
-            voiceRevealTimer=0;
-            if(opened){stopOpeningVoice();return;}
-            try{voiceAudio.volume=.9;}catch(_){}
-          },800);
-        };
-        if(p?.then){
-          p.then(()=>{
-            lastAudioError='';
-            reveal();
-          }).catch(error=>{
-            lastAudioError='voice:'+(error?.name||'play-failed');
-          });
-        }else{
-          reveal();
-        }
+
+        const bgmPromise=curtainBgm.play();
+        const voicePromise=voiceAudio.play();
+        mediaPrimed=true;
+
+        bgmPromise?.catch(error=>{
+          mediaPrimed=false;
+          lastAudioError='bgm:'+(error?.name||'play-failed');
+        });
+        voicePromise?.catch(error=>{
+          lastAudioError='voice:'+(error?.name||'play-failed');
+        });
       }catch(error){
-        lastAudioError='voice:'+(error?.name||'play-failed');
+        mediaPrimed=false;
+        lastAudioError='prime:'+(error?.name||'play-failed');
       }
     }
 
-    function startOpeningMedia(){
-      if(opened)return false;
+    function beginAudibleOpening(){
+      if(opened||!mediaPrimed)return false;
       try{
-        if(curtainBgm.paused||!bgmPlaying){
-          curtainBgm.currentTime=0;
-          curtainBgm.volume=.12;
-          const p=curtainBgm.play();
-          if(p?.then){
-            p.then(()=>{
-              if(opened){stopCurtainBgm();return;}
-              bgmPlaying=true;
-              lastAudioError='';
-            }).catch(error=>{
-              bgmPlaying=false;
-              lastAudioError='bgm:'+(error?.name||'play-failed');
-            });
-          }else{
-            bgmPlaying=true;
-          }
-        }
-        // Important for iPhone: play() itself happens during the same trusted touch.
-        primeOpeningVoice();
+        curtainBgm.volume=.12;
+        bgmPlaying=true;
+        lastAudioError='';
+        if(voiceRevealTimer)clearTimeout(voiceRevealTimer);
+        voiceRevealTimer=setTimeout(()=>{
+          voiceRevealTimer=0;
+          if(opened){stopOpeningVoice();return;}
+          try{voiceAudio.volume=.9;}catch(_){}
+        },800);
         return true;
       }catch(error){
-        bgmPlaying=false;
-        lastAudioError='bgm:'+(error?.name||'play-failed');
+        lastAudioError='audible:'+(error?.name||'play-failed');
         return false;
       }
     }
@@ -169,12 +155,13 @@
     function cancelPreparationAudio(){
       stopCurtainBgm();
       stopOpeningVoice();
+      mediaPrimed=false;
     }
 
     let bgmFadeFrame=0;
     function stopCurtainBgm(){
       if(bgmFadeFrame){cancelAnimationFrame(bgmFadeFrame);bgmFadeFrame=0;}
-      try{curtainBgm.pause();curtainBgm.currentTime=0;curtainBgm.volume=.12;}catch(_){}
+      try{curtainBgm.pause();curtainBgm.currentTime=0;curtainBgm.volume=0;}catch(_){}
       bgmPlaying=false;
     }
 
@@ -210,9 +197,6 @@
       started=true;
       orientation.classList.remove('hp-loading');
       orientation.classList.add('hp-ready');
-      // Best-effort autoplay at the exact landscape transition.
-      // Safari may reject this; the trusted swipe/hold gesture below is the fallback.
-      startOpeningMedia();
     }
     function finishPreparation(event){
       if(prepared||!started||!event.isTrusted)return;
@@ -224,6 +208,7 @@
         return;
       }
 
+      if(!beginAudibleOpening())return;
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
       orientation.classList.add('hp-shatter');
@@ -240,9 +225,9 @@
       gestureStartX=event.clientX;
       gestureStartY=event.clientY;
       orientation.classList.add('hp-gesture-active');
-      // Safari accepts media playback at the initial real touch more reliably
-      // than after a long-press/swipe has completed.
-      startOpeningMedia();
+      // Keep both tracks silent on the first real touch so Safari grants playback.
+      // They become audible only after the swipe/long-press has actually succeeded.
+      primeOpeningMedia();
       try{orientation.setPointerCapture(event.pointerId);}catch(_){}
       event.preventDefault();
     });
