@@ -109,6 +109,8 @@ def _verify_app_sources():
         raise ValueError("Multitrack playback duration must include the full scheduled release tail")
     if "Math.min(.8,clamp(note.release,.01,10))" in multitrack_source:
         raise ValueError("Multitrack playback must not truncate release tails to 0.8 seconds")
+    if "const recordedStop=clamp(track.duration,0,MAX_SECONDS);" not in multitrack_source or "return Math.max(recordedStop,audibleEnd);" not in multitrack_source:
+        raise ValueError("Multitrack playback/export must preserve the recorded stop-button position")
 
     opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
     for name in OPENING_AUDIO_EXPECTED:

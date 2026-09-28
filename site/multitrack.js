@@ -274,7 +274,14 @@
     return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);
   }
   function mixDuration(selected){
-    return Math.max(...selected.flatMap(track=>track.notes.map(note=>note.start+noteSoundLength(track,note))))+.2;
+    const end=Math.max(...selected.map(track=>{
+      const recordedStop=clamp(track.duration,0,MAX_SECONDS);
+      const audibleEnd=track.notes.length
+        ? Math.max(...track.notes.map(note=>note.start+noteSoundLength(track,note)))
+        : 0;
+      return Math.max(recordedStop,audibleEnd);
+    }));
+    return end+.05;
   }
   function scheduleNote(context,target,track,note,when,sourceList){
     const descriptor=descriptorFor(track.instrument,note.midi,'play'),buffer=sampleBuffers.get(descriptor.url);if(!buffer)return;
