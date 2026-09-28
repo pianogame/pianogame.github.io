@@ -23,7 +23,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=38', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=39', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -39,7 +39,7 @@
   <script defer src="/key-layout.js?v=10"></script>
   <script defer src="/piano.js?v=21"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
-  <script defer src="/multitrack.js?v=18"></script>
+  <script defer src="/multitrack.js?v=19"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
   <script defer src="/display-mode.js?v=15"></script>
   <link rel="stylesheet" href="/playability.css?v=9">

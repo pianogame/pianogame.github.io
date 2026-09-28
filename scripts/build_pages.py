@@ -104,6 +104,12 @@ def _verify_app_sources():
     if "#hp-four88 .hp-key.hp-sharp {\n  z-index:10;" not in piano_css:
         raise ValueError("Black piano keys must always stay above white keys")
 
+    multitrack_source = (site / "multitrack.js").read_text(encoding="utf-8")
+    if "return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);" not in multitrack_source:
+        raise ValueError("Multitrack playback duration must include the full scheduled release tail")
+    if "Math.min(.8,clamp(note.release,.01,10))" in multitrack_source:
+        raise ValueError("Multitrack playback must not truncate release tails to 0.8 seconds")
+
     opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
     for name in OPENING_AUDIO_EXPECTED:
         if f"/audio/{name}" not in opening_source:
