@@ -23,7 +23,7 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=44', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=45', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -37,12 +37,12 @@
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
-  <script defer src="/piano.js?v=25"></script>
+  <script defer src="/piano.js?v=26"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
-  <script defer src="/multitrack.js?v=24"></script>
+  <script defer src="/multitrack.js?v=25"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
   <script defer src="/display-mode.js?v=15"></script>
-  <link rel="stylesheet" href="/playability.css?v=8">
+  <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=9"></script>
 </head>
 <body class="hp-booting">
