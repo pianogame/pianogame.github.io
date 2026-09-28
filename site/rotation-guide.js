@@ -180,7 +180,7 @@
         voiceSource=openingAudioContext.createBufferSource();
         voiceSource.buffer=voiceBuffer;
         voiceSource.connect(openingAudioContext.destination);
-        voiceSource.start(now+1.5);
+        voiceSource.start(now+2.0);
 
         bgmPlaying=true;
         lastAudioError='';
@@ -317,7 +317,7 @@
 
         // Keep the first ripple visible for a short beat, then fade the entire
         // effect smoothly instead of clearing it abruptly.
-        const unlockFade=1-smooth((elapsed-760)/620);
+        const unlockFade=1-smooth((elapsed-500)/420);
         rippleCtx.save();
         rippleCtx.globalAlpha=unlockFade;
 
@@ -355,7 +355,7 @@
 
         rippleCtx.restore();
 
-        if(elapsed<1400)rippleAnimationFrame=requestAnimationFrame(frame);
+        if(elapsed<1000)rippleAnimationFrame=requestAnimationFrame(frame);
         else{
           rippleAnimationFrame=0;
           rippleCtx.clearRect(0,0,rippleWidth,rippleHeight);
