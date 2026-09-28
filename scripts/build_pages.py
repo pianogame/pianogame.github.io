@@ -88,8 +88,10 @@ def _verify_app_sources():
         raise ValueError("Opening voice must become audible 1.5 seconds after BGM")
     if "primeOpeningAudio();" not in opening_source or "openingAudioContext.resume()" not in opening_source:
         raise ValueError("Opening AudioContext and sources must be primed on pointerdown")
-    if "playbackRate.setValueAtTime(0,now)" not in opening_source:
-        raise ValueError("Opening sources must start frozen and silent on pointerdown")
+    if "bgmSource.playbackRate.setValueAtTime(1,now)" not in opening_source:
+        raise ValueError("Opening BGM source must start running silently on pointerdown")
+    if "voiceSource.playbackRate.setValueAtTime(0,now)" not in opening_source:
+        raise ValueError("Opening voice source must stay frozen and silent until its delay")
     if "beginAudibleOpening()" not in opening_source:
         raise ValueError("Opening BGM must become audible only after swipe-or-hold succeeds")
     if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:

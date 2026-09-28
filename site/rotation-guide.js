@@ -132,7 +132,7 @@
         bgmSource=openingAudioContext.createBufferSource();
         bgmSource.buffer=bgmBuffer;
         bgmSource.loop=true;
-        bgmSource.playbackRate.setValueAtTime(0,now);
+        bgmSource.playbackRate.setValueAtTime(1,now);
         bgmSource.connect(bgmGain);
         bgmSource.start(now);
 
@@ -161,8 +161,6 @@
       try{
         const now=openingAudioContext.currentTime;
 
-        bgmSource.playbackRate.cancelScheduledValues(now);
-        bgmSource.playbackRate.setValueAtTime(1,now);
         bgmGain.gain.cancelScheduledValues(now);
         bgmGain.gain.setValueAtTime(.12,now);
         bgmPlaying=true;
@@ -183,8 +181,8 @@
     }
 
     function cancelPreparationAudio(){
-      // Keep the already-started sources frozen and silent so the next real gesture
-      // can use the same user-unlocked AudioContext without another start() call.
+      // The BGM source is already running silently and the voice source is frozen.
+      // A later successful gesture only reveals them; no new start() call is needed.
     }
 
     function stopOpeningVoice(){
