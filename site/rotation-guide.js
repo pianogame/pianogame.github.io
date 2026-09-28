@@ -86,59 +86,89 @@
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
-    let started=false,prepared=false,opened=false,bgmPlaying=false,voiceTimer=0,lastAudioError='';
-    const tapAudios=['/audio/curtain-start-1.mp3?v=5','/audio/curtain-start-2.mp3?v=5','/audio/curtain-start-3.mp3?v=5','/audio/curtain-start-4.mp3?v=5'].map(url=>{
+    let started=false,prepared=false,opened=false,bgmPlaying=false,voiceRevealTimer=0,lastAudioError='';
+    const tapAudios=['/audio/curtain-start-1.mp3?v=6','/audio/curtain-start-2.mp3?v=6','/audio/curtain-start-3.mp3?v=6','/audio/curtain-start-4.mp3?v=6'].map(url=>{
       const audio=new Audio(url);audio.preload='auto';audio.volume=.9;audio.load();return audio;
     });
-    const bgmUrls=['/audio/opening-bgm-01.m4a?v=5','/audio/opening-bgm-02.m4a?v=5','/audio/opening-bgm-03.m4a?v=5','/audio/opening-bgm-04.m4a?v=5','/audio/opening-bgm-05.m4a?v=5','/audio/opening-bgm-06.m4a?v=5','/audio/opening-bgm-07.m4a?v=5','/audio/opening-bgm-08.m4a?v=5','/audio/opening-bgm-09.m4a?v=5','/audio/opening-bgm-10.m4a?v=5'];
+    const bgmUrls=['/audio/opening-bgm-01.m4a?v=6','/audio/opening-bgm-02.m4a?v=6','/audio/opening-bgm-03.m4a?v=6','/audio/opening-bgm-04.m4a?v=6','/audio/opening-bgm-05.m4a?v=6','/audio/opening-bgm-06.m4a?v=6','/audio/opening-bgm-07.m4a?v=6','/audio/opening-bgm-08.m4a?v=6','/audio/opening-bgm-09.m4a?v=6','/audio/opening-bgm-10.m4a?v=6'];
     const curtainBgm=new Audio(bgmUrls[Math.floor(Math.random()*bgmUrls.length)]);
     curtainBgm.preload='auto';
     curtainBgm.loop=true;
     curtainBgm.volume=.12;
     curtainBgm.load();
-    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=8');
+    const voiceAudio=new Audio('/audio/opening-3voices.m4a?v=9');
     voiceAudio.preload='auto';
-    voiceAudio.volume=.9;
+    voiceAudio.volume=0;
     voiceAudio.load();
 
-    function scheduleVoice(){
-      if(opened||voiceTimer)return;
-      voiceTimer=setTimeout(()=>{
-        voiceTimer=0;
-        if(opened)return;
-        try{
-          voiceAudio.currentTime=0;
-          const p=voiceAudio.play();
-          p?.catch(error=>{lastAudioError='voice:'+(error?.name||'play-failed');});
-        }catch(error){lastAudioError='voice:'+(error?.name||'play-failed');}
-      },800);
+    function stopOpeningVoice(){
+      if(voiceRevealTimer){clearTimeout(voiceRevealTimer);voiceRevealTimer=0;}
+      try{voiceAudio.pause();voiceAudio.currentTime=0;voiceAudio.volume=0;}catch(_){}
+    }
+
+    function primeOpeningVoice(){
+      if(opened)return;
+      if(voiceRevealTimer){clearTimeout(voiceRevealTimer);voiceRevealTimer=0;}
+      try{
+        voiceAudio.pause();
+        voiceAudio.currentTime=0;
+        voiceAudio.volume=0;
+        const p=voiceAudio.play();
+        const reveal=()=>{
+          voiceRevealTimer=setTimeout(()=>{
+            voiceRevealTimer=0;
+            if(opened){stopOpeningVoice();return;}
+            try{voiceAudio.volume=.9;}catch(_){}
+          },800);
+        };
+        if(p?.then){
+          p.then(()=>{
+            lastAudioError='';
+            reveal();
+          }).catch(error=>{
+            lastAudioError='voice:'+(error?.name||'play-failed');
+          });
+        }else{
+          reveal();
+        }
+      }catch(error){
+        lastAudioError='voice:'+(error?.name||'play-failed');
+      }
     }
 
     function startOpeningMedia(){
-      if(opened||bgmPlaying)return true;
+      if(opened)return false;
       try{
-        curtainBgm.currentTime=0;
-        const p=curtainBgm.play();
-        if(p?.then){
-          p.then(()=>{
-            if(opened){stopCurtainBgm();return;}
+        if(curtainBgm.paused||!bgmPlaying){
+          curtainBgm.currentTime=0;
+          curtainBgm.volume=.12;
+          const p=curtainBgm.play();
+          if(p?.then){
+            p.then(()=>{
+              if(opened){stopCurtainBgm();return;}
+              bgmPlaying=true;
+              lastAudioError='';
+            }).catch(error=>{
+              bgmPlaying=false;
+              lastAudioError='bgm:'+(error?.name||'play-failed');
+            });
+          }else{
             bgmPlaying=true;
-            lastAudioError='';
-            scheduleVoice();
-          }).catch(error=>{
-            bgmPlaying=false;
-            lastAudioError='bgm:'+(error?.name||'play-failed');
-          });
-        }else{
-          bgmPlaying=true;
-          scheduleVoice();
+          }
         }
+        // Important for iPhone: play() itself happens during the same trusted touch.
+        primeOpeningVoice();
         return true;
       }catch(error){
         bgmPlaying=false;
         lastAudioError='bgm:'+(error?.name||'play-failed');
         return false;
       }
+    }
+
+    function cancelPreparationAudio(){
+      stopCurtainBgm();
+      stopOpeningVoice();
     }
 
     let bgmFadeFrame=0;
@@ -148,7 +178,7 @@
       bgmPlaying=false;
     }
 
-    function fadeOutCurtainBgm(duration=650){
+    function fadeOutCurtainBgm(duration=780){
       if(!bgmPlaying||curtainBgm.paused){stopCurtainBgm();return;}
       if(bgmFadeFrame)cancelAnimationFrame(bgmFadeFrame);
       const startVolume=Math.max(.01,curtainBgm.volume||.12);
@@ -189,10 +219,10 @@
       const dx=event.clientX-gestureStartX,dy=event.clientY-gestureStartY;
       const distance=Math.hypot(dx,dy);
       const held=performance.now()-gestureStartedAt;
-      if(distance<72&&held<520)return;
-
-      // Direct HTMLMediaElement.play() in the same trusted pointerup event.
-      startOpeningMedia();
+      if(distance<72&&held<520){
+        cancelPreparationAudio();
+        return;
+      }
 
       prepared=true;
       orientation.classList.remove('hp-gesture-active');
@@ -210,6 +240,9 @@
       gestureStartX=event.clientX;
       gestureStartY=event.clientY;
       orientation.classList.add('hp-gesture-active');
+      // Safari accepts media playback at the initial real touch more reliably
+      // than after a long-press/swipe has completed.
+      startOpeningMedia();
       try{orientation.setPointerCapture(event.pointerId);}catch(_){}
       event.preventDefault();
     });
@@ -221,6 +254,7 @@
       event.preventDefault();
     });
     orientation.addEventListener('pointercancel',()=>{
+      if(!prepared)cancelPreparationAudio();
       gesturePointerId=null;
       orientation.classList.remove('hp-gesture-active');
     });
@@ -228,7 +262,7 @@
     title.addEventListener('pointerup',()=>{
       if(opened||!prepared)return;
       opened=true;
-      fadeOutCurtainBgm(650);
+      fadeOutCurtainBgm(780);
       chime();
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');

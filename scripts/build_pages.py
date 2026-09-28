@@ -82,14 +82,16 @@ def _verify_app_sources():
             raise ValueError(f"Opening audio is not referenced by rotation-guide.js: {name}")
     if opening_source.count("opening-bgm-") != 10:
         raise ValueError("Expected exactly 10 opening BGM references")
-    if "fadeOutCurtainBgm(650)" not in opening_source or "Math.pow(1-p,3.4)" not in opening_source:
+    if "fadeOutCurtainBgm(780)" not in opening_source or "Math.pow(1-p,3.4)" not in opening_source:
         raise ValueError("Strong curtain BGM fade-out is missing")
-    if "setTimeout(()=>{" not in opening_source or "},800);" not in opening_source:
-        raise ValueError("Delayed opening voice timing is missing")
-    if "startOpeningMedia();" not in opening_source or "!event.isTrusted" not in opening_source:
-        raise ValueError("Opening audio must use direct media play with a trusted preparation gesture")
+    if "voiceAudio.volume=0" not in opening_source or "voiceAudio.volume=.9" not in opening_source or "},800);" not in opening_source:
+        raise ValueError("Opening voice must start silently on touch and become audible after 0.8 seconds")
+    if "orientation.addEventListener('pointerdown'" not in opening_source or "startOpeningMedia();" not in opening_source:
+        raise ValueError("Opening media must begin on the trusted pointerdown gesture")
     if "curtainBgm.play()" not in opening_source or "voiceAudio.play()" not in opening_source:
         raise ValueError("Opening audio must use HTMLMediaElement.play()")
+    if "cancelPreparationAudio();" not in opening_source:
+        raise ValueError("A normal tap must not complete the preparation gesture")
     if "distance<72&&held<520" not in opening_source or "LONG PRESS / SWIPE" not in opening_source:
         raise ValueError("Swipe-or-hold preparation gesture is missing")
     if "startBufferedOpeningAudio()" in opening_source or "unlockAndStartOpeningAudio" in opening_source:
