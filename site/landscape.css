@@ -58,7 +58,7 @@ html[data-hp-rotated="true"] #hp-viewport { width:var(--hp-view-height); height:
 @media (prefers-reduced-motion:reduce) { #hp-four88 .hp-key, #hp-four88 .hp-key-glow { transition:none; } #hp-four88 .hp-spark-burst { display:none; } }
 #hp-four88 .hp-footer { padding:2px 12px; min-height:22px; display:flex; gap:8px; align-items:center; justify-content:space-between; background:#f4edf3; color:#736478; font-size:12px; flex:none; }
 #hp-four88 .hp-status { padding:0; text-align:left; font-size:12px; }
-#hp-four88 .hp-settings-overlay { position:absolute; inset:0; z-index:10; }
+#hp-four88 .hp-settings-overlay { position:absolute; inset:0; z-index:100; }
 #hp-four88 .hp-settings-backdrop { position:absolute; inset:0; background:#302b3a77; }
 #hp-four88 .hp-settings { position:absolute; top:0; right:0; bottom:0; width:min(470px,100%); overflow-y:auto; overscroll-behavior:contain; padding:0 18px 14px; background:#fffafc; box-shadow:-4px 0 20px #302b3a33; }
 #hp-four88 .hp-settings-title { position:sticky; top:0; padding:8px 0; display:flex; align-items:center; justify-content:space-between; gap:12px; background:#fffafc; z-index:1; }

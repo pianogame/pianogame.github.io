@@ -83,6 +83,8 @@ def _verify_app_sources():
         raise ValueError("Landscape black keys must stay above white keys")
     if "#hp-four88 .hp-key.hp-sharp.hp-lit, #hp-four88 .hp-key.hp-sharp[aria-pressed=\"true\"] { z-index:30; }" not in landscape_css:
         raise ValueError("Active black keys must stay above active white keys")
+    if "#hp-four88 .hp-settings-overlay { position:absolute; inset:0; z-index:100; }" not in landscape_css:
+        raise ValueError("Settings overlay must stay above all piano keys")
 
     piano_source = (site / "piano.js").read_text(encoding="utf-8")
     if "function keyAtPoint(clientX,clientY,fallbackTarget=null)" not in piano_source:
