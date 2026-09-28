@@ -1,0 +1,20 @@
+name: Verify staging
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/build_pages.py
+      - name: Run full Vercel-style build verification
+        run: env -u GITHUB_ACTIONS python3 scripts/build_pages.py

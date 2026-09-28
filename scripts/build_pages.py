@@ -7,9 +7,224 @@ import json
 import os
 import shutil
 import zipfile
+import re
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
+
+OPENING_AUDIO_EXPECTED = {
+    "curtain-start-1.mp3": (73197, "1b20f11cde9736eeceb7902fa1c49074f6977a887555681182e27b9a01e56673"),
+    "curtain-start-2.mp3": (73197, "3e45fea2d8630805e29b55b31432109d5cefdc5a9acfd7b9beaa87d1bbce1ebb"),
+    "curtain-start-3.mp3": (73197, "b325e9a89645488549c402e3870705e4b7e7f6affae406d0df80e8ace6345406"),
+    "curtain-start-4.mp3": (73197, "d35759865b40a5acd85920115b4d35709ccab6878fc7803195336a04084fc1ee"),
+    "opening-3voices.m4a": (32587, "45894044bd44f4abfa7a25932e3b4b1e5fbe69f32161bab51be72cebf14e807b"),
+    "opening-bgm-01.m4a": (534697, "2ea88521d154cafa8493572835c3502b88e0420c84722e48f6de99295678c3dc"),
+    "opening-bgm-02.m4a": (558101, "f54f301528b11d70b7d46d56bb4b8b98dce867ba7b7a564cffc18982b0e32e3e"),
+    "opening-bgm-03.m4a": (558593, "44c1d292bf8c004c43573d7adcb8371ef0f28c4b62d4099f78d841563326aa13"),
+    "opening-bgm-04.m4a": (473836, "a30bfc48359676f7fda0d06f6a2e6f648afe5940c6c6cb73ee141e866e862778"),
+    "opening-bgm-05.m4a": (284932, "09db0a9bb1c3ade1134bb6604f357b5c1809b22a0fbe00902ad38d59d94126f5"),
+    "opening-bgm-06.m4a": (537067, "3833dda5b0c32cf5905ef190f17219c9b6cc51caab354a41cadee179118847c2"),
+    "opening-bgm-07.m4a": (514366, "ad0e2febf6c5e539b3bf0dd2b7bf2872776d70ed1d9d01d2e4d4c3dbc9c81b14"),
+    "opening-bgm-08.m4a": (533558, "7bcde226867bedd1de340de2651ee720893dfecb5fa90a3b2841c920f0280bb2"),
+    "opening-bgm-09.m4a": (266903, "99651e807d0b8d7e0db1bf644b5db4a65411d5d4f26a5cc176ff61121a9c1bd6"),
+    "opening-bgm-10.m4a": (542390, "6cfea560806a8589c931960821b00ad0737b79901ab03bd08b2b1b2c22554fb4"),
+    "kiryan.m4a": (9337, "e84a018606d78e9fddddf0622990aa52ce4d73152cc53f7a5b3db54a557325bc"),
+    "pororoponponpin.m4a": (18062, "2845a6fa6f9eca46eb6e6abc66fb7235723fe5aae37b177fd005281e7da80775"),
+}
+
+
+def _verify_app_sources():
+    site = ROOT / "site"
+    js_files = sorted(site.glob("*.js"))
+    if not js_files:
+        raise ValueError("No JavaScript source files found")
+
+    # Literal backslash-n sequences previously corrupted generated edits in piano.js
+    # and multitrack.js. This project does not intentionally use them in JS source.
+    for path in js_files:
+        source = path.read_text(encoding="utf-8")
+        if "\\n" in source:
+            raise ValueError(f"Suspicious literal \\n found in JavaScript source: {path.relative_to(ROOT)}")
+        try:
+            subprocess.run(
+                ["node", "--check", str(path)],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("node is required for JavaScript syntax validation") from exc
+        except subprocess.CalledProcessError as exc:
+            detail = (exc.stderr or exc.stdout or "").strip()
+            raise ValueError(f"JavaScript syntax check failed for {path.relative_to(ROOT)}: {detail}") from exc
+
+    html = (site / "index.html").read_text(encoding="utf-8")
+    html_actions = set(re.findall(r'data-action="([^"]+)"', html))
+    referenced_actions = set()
+    for path in js_files:
+        source = path.read_text(encoding="utf-8")
+        referenced_actions.update(re.findall(r'action\([\'"]([^\'"]+)[\'"]\)', source))
+    missing_actions = sorted(referenced_actions - html_actions)
+    if missing_actions:
+        raise ValueError("JavaScript references missing data-action controls: " + ", ".join(missing_actions))
+
+    for name, (expected_size, expected_sha256) in OPENING_AUDIO_EXPECTED.items():
+        path = site / "audio" / name
+        if not path.is_file():
+            raise ValueError(f"Missing required opening audio: {name}")
+        data = path.read_bytes()
+        if len(data) != expected_size or hashlib.sha256(data).hexdigest() != expected_sha256:
+            raise ValueError(f"Opening audio checksum mismatch: {name}")
+
+    landscape_css = (site / "landscape.css").read_text(encoding="utf-8")
+    if "#hp-four88 .hp-key.hp-sharp { z-index:20;" not in landscape_css:
+        raise ValueError("Landscape black keys must stay above white keys")
+    if "#hp-four88 .hp-key.hp-sharp.hp-lit, #hp-four88 .hp-key.hp-sharp[aria-pressed=\"true\"] { z-index:30; }" not in landscape_css:
+        raise ValueError("Active black keys must stay above active white keys")
+    if "#hp-four88 .hp-settings-overlay { position:absolute; inset:0; z-index:100; }" not in landscape_css:
+        raise ValueError("Settings overlay must stay above all piano keys")
+
+    piano_source = (site / "piano.js").read_text(encoding="utf-8")
+    if "function keyAtPoint(clientX,clientY,fallbackTarget=null)" not in piano_source:
+        raise ValueError("Black-key-first hit testing is missing")
+    if "const key = keyAtPoint(event.clientX,event.clientY,event.target);" not in piano_source:
+        raise ValueError("Pointer down must use black-key-first hit testing")
+    if "const key = keyAtPoint(x,y,hit);" not in piano_source:
+        raise ValueError("Pointer move must use black-key-first hit testing")
+
+    multitrack_css = (site / "multitrack.css").read_text(encoding="utf-8")
+    if "#hp-four88 .hp-track-panel{position:absolute;top:0;right:4px;z-index:90;" not in multitrack_css:
+        raise ValueError("Recording list must start at the top and stay above piano keys")
+
+    piano_css = (site / "piano.css").read_text(encoding="utf-8")
+    if "#hp-four88 .hp-key:not(.hp-sharp) {\n  z-index:1;" not in piano_css:
+        raise ValueError("White piano keys must stay below black keys")
+    if "#hp-four88 .hp-key.hp-sharp {\n  z-index:10;" not in piano_css:
+        raise ValueError("Black piano keys must always stay above white keys")
+
+    piano_source = (site / "piano.js").read_text(encoding="utf-8")
+    if "start + recordDuration + tail" in piano_source or "start + recordDuration)" not in piano_source:
+        raise ValueError("Normal recording playback must end exactly at the stop-button duration")
+    if "markHeldCutForRecording();" not in piano_source or "event.cut ? .02" not in piano_source:
+        raise ValueError("Sound-stop must be recorded as a forced cut")
+    if "soundStopEvents.push(stopAt)" not in piano_source or "voice.release(start+globalStop,.02)" not in piano_source:
+        raise ValueError("Piano recording must preserve global sound-stop events")
+
+    if 'data-action="dynamics-test"' in html or "dynamicsGainFromEvent" in piano_source or "dynamicsStorageKey" in piano_source:
+        raise ValueError("Experimental touch dynamics must remain removed")
+
+    orientation_source = (site / "orientation.js").read_text(encoding="utf-8")
+    for marker in ["function measure()", "viewportPortrait && innerPortrait", "[80,220,500,900,1400]", "window.addEventListener('focus', settleFit)", "visibilitychange"]:
+        if marker not in orientation_source:
+            raise ValueError(f"Orientation settling guard is missing: {marker}")
+
+    multitrack_source = (site / "multitrack.js").read_text(encoding="utf-8")
+    if "return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);" not in multitrack_source:
+        raise ValueError("Multitrack playback duration must include the full scheduled release tail")
+    if "Math.min(.8,clamp(note.release,.01,10))" in multitrack_source:
+        raise ValueError("Multitrack playback must not truncate release tails to 0.8 seconds")
+    if "if(recordedStop>0)return recordedStop;" not in multitrack_source:
+        raise ValueError("Multitrack playback/export must end at the recorded stop-button position")
+    if "return Math.max(recordedStop,audibleEnd);" in multitrack_source:
+        raise ValueError("Audible release tails must not extend playback past the stop button")
+    if "const playbackLead=.12;" not in multitrack_source:
+        raise ValueError("Multitrack playback end must include the scheduling lead")
+    if "endRecordedNote(token,stoppedAt,true)" not in multitrack_source or "entry.note.release=.02;" not in multitrack_source:
+        raise ValueError("Multitrack sound-stop must be preserved as a forced cut")
+    if "recording.cuts.push(cutAt)" not in multitrack_source or "const nextGlobalCut=(track.cuts||[]).find" not in multitrack_source:
+        raise ValueError("Multitrack recording must preserve global sound-stop events")
+    if "velocityGain(" in multitrack_source or "event.detail.velocity" in multitrack_source:
+        raise ValueError("Experimental dynamics must remain removed from multitrack playback")
+
+    opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
+    for name in OPENING_AUDIO_EXPECTED:
+        if f"/audio/{name}" not in opening_source:
+            raise ValueError(f"Opening audio is not referenced by rotation-guide.js: {name}")
+    if opening_source.count("opening-bgm-") != 10:
+        raise ValueError("Expected exactly 10 opening BGM references")
+    if "fadeOutCurtainBgm(.78)" not in opening_source or "setValueCurveAtTime" not in opening_source:
+        raise ValueError("Strong Web Audio BGM fade-out is missing")
+    if "voiceSource.start(now+2.0)" not in opening_source:
+        raise ValueError("Opening voice must start 2.0 seconds after BGM")
+    if "bgmGain.gain.setValueAtTime(.80,now)" not in opening_source:
+        raise ValueError("Opening BGM gain must use the raised rhythm-game level")
+    if "voiceGain.gain.setValueAtTime(1.70,now)" not in opening_source or "voiceSource.connect(voiceGain)" not in opening_source:
+        raise ValueError("Opening voice must use the requested 1.70 gain")
+    if "voiceSource.onended=()=>{" not in opening_source or "linearRampToValueAtTime(1.00,riseAt+.35)" not in opening_source:
+        raise ValueError("BGM must rise smoothly to 1.00 after the opening voice finishes")
+    if "if(opened||!bgmPlaying||!bgmGain||!openingAudioContext)return;" not in opening_source:
+        raise ValueError("BGM post-voice boost must not run after the curtain opens")
+    if "document.addEventListener('visibilitychange'" not in opening_source or "openingAudioContext.suspend()" not in opening_source:
+        raise ValueError("Opening audio must suspend when the app goes to background")
+    if "resumeOpeningFromBackground()" not in opening_source or "window.addEventListener('pagehide'" not in opening_source or "window.addEventListener('pageshow'" not in opening_source:
+        raise ValueError("Opening audio background lifecycle handling is incomplete")
+    if "orientation.addEventListener('click'" not in opening_source or "unlockOpeningAudio()" not in opening_source:
+        raise ValueError("Opening audio must be unlocked by a real tap before swipe")
+    if "openingAudioContext.resume()" not in opening_source or "audioUnlocked=true" not in opening_source:
+        raise ValueError("Opening AudioContext unlock is missing")
+    if "hp-wave-armed" not in opening_source or "TAP TO RIPPLE" not in opening_source:
+        raise ValueError("Musical ripple unlock stage is missing")
+    if "playUnlockRipple(" not in opening_source or "playReleaseRipple(" not in opening_source:
+        raise ValueError("Musical ripple canvas effects are missing")
+    if "const unlockFade=1-smooth((elapsed-350)/320);" not in opening_source or "if(elapsed<720)" not in opening_source:
+        raise ValueError("Initial musical ripple must fade out quickly and smoothly instead of disappearing abruptly")
+    if "const cx=rippleWidth/2;" not in opening_source or "const cy=rippleHeight/2;" not in opening_source:
+        raise ValueError("Musical ripple origin must be fixed to the rendered canvas center")
+    if "new ResizeObserver(sizeRippleCanvas)" not in opening_source or "visualViewport?.addEventListener('resize',sizeRippleCanvas)" not in opening_source:
+        raise ValueError("Ripple canvas must track real viewport size on landscape launch")
+    if "opening.getBoundingClientRect()" not in opening_source:
+        raise ValueError("Ripple canvas must size from the rendered opening layer")
+    if "playUnlockRipple(event.clientX,event.clientY)" in opening_source or "playReleaseRipple(event.clientX,event.clientY)" in opening_source:
+        raise ValueError("Musical ripple origin must not follow the touch position")
+    if "particleAlpha=.08*(1-smooth" not in opening_source:
+        raise ValueError("Ripple particles must fade smoothly to zero")
+    if "beginAudibleOpening()" not in opening_source:
+        raise ValueError("Opening BGM must begin only after swipe succeeds")
+    if "createBufferSource()" not in opening_source or "createGain()" not in opening_source:
+        raise ValueError("Opening audio must use Web Audio buffers and gain control")
+    if "cancelPreparationAudio();" not in opening_source:
+        raise ValueError("A normal tap must not complete the preparation gesture")
+    if "if(distance<72)return false;" not in opening_source or "SWIPE TO START" not in opening_source:
+        raise ValueError("Swipe-only preparation gesture is missing")
+    if "held=performance.now()-gestureStartedAt" in opening_source or "LONG PRESS / SWIPE" in opening_source:
+        raise ValueError("Long-press preparation must not remain")
+    if "/audio/kiryan.m4a?v=1" not in opening_source or "/audio/pororoponponpin.m4a?v=1" not in opening_source:
+        raise ValueError("Provided tap/swipe sound effects are not wired")
+    if "playTapPianoCue()" not in opening_source or "playSwipePianoCue()" not in opening_source:
+        raise ValueError("Tap/swipe sound effect triggers are missing")
+    if "createOscillator()" in opening_source or "playPianoPluck(" in opening_source:
+        raise ValueError("Temporary synthesized piano cues must not remain")
+    if "orientation.addEventListener('pointermove'" not in opening_source:
+        raise ValueError("Swipe must complete during pointer movement")
+    if "voiceAudio.volume" in opening_source or "curtainBgm.volume" in opening_source:
+        raise ValueError("Do not use HTMLMediaElement volume for opening audio on iOS")
+    if any(line.strip() == "undefined" for line in opening_source.splitlines()):
+        raise ValueError("Unexpected undefined line in rotation-guide.js")
+
+
+def _restore_embedded_swipe_sound():
+    parts = [
+        ROOT / "scripts" / "assets" / f"pororoponponpin.b64.{index}"
+        for index in range(1, 5)
+    ]
+    encoded = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+    data = base64.b64decode(encoded, validate=True)
+    expected_size = 18062
+    expected_sha256 = "2845a6fa6f9eca46eb6e6abc66fb7235723fe5aae37b177fd005281e7da80775"
+    actual_sha256 = hashlib.sha256(data).hexdigest()
+    if len(data) != expected_size or actual_sha256 != expected_sha256:
+        raise ValueError(
+            f"Embedded swipe sound mismatch: size={len(data)}, sha256={actual_sha256}"
+        )
+    target = ROOT / "site" / "audio" / "pororoponponpin.m4a"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(data)
+
+
+_restore_embedded_swipe_sound()
+_verify_app_sources()
 
 if OUT.exists():
     shutil.rmtree(OUT)
@@ -233,6 +448,17 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(entry))
 
-if len(list((OUT / "audio").rglob("*.m4a"))) != 102:
-    raise ValueError("Expected all 102 audio samples")
+# Validate every absolute /audio/... URL referenced by JavaScript after the sample bundles
+# have been expanded into the Vercel output directory.
+for js_path in sorted(OUT.glob("*.js")):
+    source = js_path.read_text(encoding="utf-8")
+    for asset in set(re.findall(r'[\'"](/audio/[^\'"?]+)', source)):
+        target = OUT / asset.lstrip("/")
+        if not target.is_file():
+            raise ValueError(f"Missing referenced audio asset: {asset} (from {js_path.name})")
+
+instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name not in OPENING_AUDIO_EXPECTED]
+if len(instrument_samples) != 102:
+    raise ValueError(f"Expected all 102 instrument audio samples, found {len(instrument_samples)}")
+print("Verified opening audio: 3-voice call, 4 supplied tap sounds and 10 supplied full BGM tracks")
 print("Ready: Piano Dream Stage for Vercel with 102 unchanged audio samples")

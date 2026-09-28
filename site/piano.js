@@ -48,9 +48,10 @@
   const instrumentControl = root.querySelector('[data-control="instrument"]');
   const settingsOverlay = root.querySelector('.hp-settings-overlay');
   let sustain = false, showSharps = true, recording = false, playing = false;
-  let events = [], recordStart = 0, recordDuration = 0, timer = null;
+  let events = [], recordStart = 0, recordDuration = 0, timer = null, soundStopEvents = [];
   let playbackTimers = [], playbackVoices = [], playGeneration = 0, scheduler = null;
   let eventCount = 0;
+
   const pitchName = midi => noteNames[midi % 12] + (Math.floor(midi / 12) - 1);
   const say = (message, error = false) => {
     status.textContent = message; status.dataset.error = String(error);
@@ -412,7 +413,6 @@
     samplesReady=false; buttons.forEach(list=>list.forEach(button=>button.disabled=true));
     effectUI.setReady(false);
     instrumentControl.disabled=true; action('record').disabled=true; action('play').disabled=true;
-    const startButton=action('start'); startButton.disabled=true; startButton.textContent='音源を準備中…';
     say(instruments[id].name+'を準備中');
     try {
       await ctx.resume();
@@ -423,16 +423,15 @@
       build37(instruments[id].shift37); updateInstrumentUI();
       if(id!==previous)activeTopRow=instruments[id].row88;
       requestAnimationFrame(sizeRegister);
-      startButton.hidden=true; say(instruments[id].name+'で演奏できます');
+      say(instruments[id].name+'で演奏できます');
     } catch(_) {
       if(generation!==loadGeneration)return;
       currentInstrument=previous; sampleBuffers=previousBank; samplesReady=wasReady;
       updateInstrumentUI();
-      startButton.hidden=wasReady; startButton.textContent='音源を再準備';
       say(wasReady?'音源を読み込めなかったため、前の音源に戻しました。':'音源を読み込めませんでした。通信を確認して、もう一度お試しください',true);
     } finally {
       if(generation===loadGeneration) {
-        instrumentControl.disabled=false; startButton.disabled=false;
+        instrumentControl.disabled=false;
         buttons.forEach(list=>list.forEach(button=>button.disabled=!samplesReady));
         action('record').disabled=!samplesReady; action('play').disabled=!samplesReady||events.length===0;
       }
@@ -444,7 +443,7 @@
     if(!ctx) {
       currentInstrument=id; build37(instruments[id].shift37); updateInstrumentUI();
       activeTopRow=instruments[id].row88; requestAnimationFrame(sizeRegister);
-      say('演奏をはじめるボタンで'+instruments[id].name+'を準備');
+      say('幕をタップすると'+instruments[id].name+'を準備');
     } else {void prepareSamples(id);}
   });
 
@@ -523,7 +522,7 @@
     if (!samplesReady || held.has(token) || !ctx || ctx.state !== 'running') return;
     const entry = {midi, voice: synth(midi), event: null};
     if (recording) {
-      entry.event = {midi, start: Math.max(0, ctx.currentTime - recordStart), duration: .12, sustain};
+      entry.event = {midi, start: Math.max(0, ctx.currentTime - recordStart), duration: .12, sustain, cut:false};
       events.push(entry.event); eventCount++;
     }
     held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi}})); pendingSparkles.add(midi); redraw();
@@ -546,12 +545,22 @@
       playNoteNow(token,midi);
     });
   }
+
   function noteOff(token) {
     pendingNoteOns.delete(token);
     const entry = held.get(token); if (!entry) return;
     entry.voice.release();
     if (entry.event && recording) entry.event.duration = Math.max(.06, ctx.currentTime - recordStart - entry.event.start);
     root.dispatchEvent(new CustomEvent('hp-note-off',{detail:{token,midi:entry.midi}})); held.delete(token); redraw();
+  }
+  function markHeldCutForRecording() {
+    if(!recording||!ctx)return;
+    const stoppedAt=ctx.currentTime;
+    held.forEach(entry=>{
+      if(!entry.event)return;
+      entry.event.cut=true;
+      entry.event.duration=Math.max(.015,stoppedAt-recordStart-entry.event.start);
+    });
   }
   function releaseHeld() {
     pendingNoteOns.clear();
@@ -575,16 +584,29 @@
   const localPointer = event => document.documentElement.dataset.hpRotated === 'true'
     ? {x:event.clientY,y:-event.clientX}
     : {x:event.clientX,y:event.clientY};
+
+  function keyAtPoint(clientX,clientY,fallbackTarget=null){
+    // Black keys always win when their visible rectangle overlaps the touch point,
+    // even if a lit/pressed white key has its own stacking context.
+    const sharps=root.querySelectorAll('.hp-key.hp-sharp[data-midi]');
+    for(const sharp of sharps){
+      if(sharp.disabled||sharp.hidden||sharp.offsetParent===null)continue;
+      const rect=sharp.getBoundingClientRect();
+      if(clientX>=rect.left&&clientX<=rect.right&&clientY>=rect.top&&clientY<=rect.bottom){
+        return sharp;
+      }
+    }
+    return fallbackTarget?.closest?.('[data-midi]')||null;
+  }
   root.addEventListener('pointerdown', event => {
     if (!settingsOverlay.hidden || (event.pointerType === 'mouse' && event.button !== 0)) return;
-    const key = event.target.closest('[data-midi]');
+    const key = keyAtPoint(event.clientX,event.clientY,event.target);
     const scrollable = !!event.target.closest('.hp-scroll-window');
     if (!key && !scrollable) return;
     event.preventDefault();
-    try {root.setPointerCapture(event.pointerId);} catch(_) {}
     const point = localPointer(event);
     pointerStarts.set(event.pointerId,{...point,scrollable:scrollable&&!key,scrollTop:pianoScroll.scrollTop,scrolling:false,lastClientX:event.clientX,lastClientY:event.clientY});
-    if (key) noteOn('pointer:' + event.pointerId, Number(key.dataset.midi));
+    if (key) { const token='pointer:' + event.pointerId; noteOff(token); noteOn(token, Number(key.dataset.midi)); }
   });
   root.addEventListener('pointermove', event => {
     const token = 'pointer:' + event.pointerId;
@@ -607,7 +629,7 @@
       for (let step=1;step<=steps;step++) {
         const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
         const hit = document.elementFromPoint(x,y);
-        const key = hit && hit.closest('[data-midi]');
+        const key = keyAtPoint(x,y,hit);
         const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token);
         if (key && root.contains(key) && Number(key.dataset.midi) !== currentMidi) {
           noteOff(token); noteOn(token, Number(key.dataset.midi));
@@ -616,7 +638,9 @@
       origin.lastClientX=sample.clientX; origin.lastClientY=sample.clientY;
     }
   });
-  ['pointerup','pointercancel','lostpointercapture'].forEach(name => root.addEventListener(name, event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); }));
+  const releasePointer = event => { noteOff('pointer:' + event.pointerId); pointerStarts.delete(event.pointerId); };
+  ['pointerup','pointercancel'].forEach(name => window.addEventListener(name, releasePointer, true));
+  root.addEventListener('lostpointercapture', releasePointer);
   root.addEventListener('click', event => {
     const key = event.target.closest('[data-midi]');
     if (key && event.detail === 0 && !event.pointerType && !event.sourceCapabilities?.firesTouchEvents) { const token = 'accessible:' + key.dataset.midi; noteOn(token, Number(key.dataset.midi)); setTimeout(() => noteOff(token),180); }
@@ -629,10 +653,7 @@
     event.preventDefault(); noteOn('key:' + event.code, mapped.midi);
   });
   document.addEventListener('keyup', event => noteOff('key:' + event.code));
-  action('start').addEventListener('click', () => {
-    unlockAudioFromGesture();
-    void prepareSamples();
-  });
+  window.addEventListener('hp-curtain-start',()=>{ unlockAudioFromGesture(); void prepareSamples(); });
   function showSettings(open) {
     releaseHeld(); pointerStarts.clear();
     settingsOverlay.hidden = !open;
@@ -660,19 +681,25 @@
   });
   action('sustain').addEventListener('click', () => { sustain = !sustain; articulation[currentInstrument].sustain=sustain; action('sustain').setAttribute('aria-pressed', String(sustain)); action('sustain').textContent=sustain?'音を伸ばす：ON':'音を伸ばす：OFF'; if (!sustain && ctx) { const active=new Set(Array.from(held.values()).map(note=>note.voice)); allVoices.forEach(voice=>{if(!active.has(voice))voice.release(ctx.currentTime,articulation[currentInstrument].release);}); } });
   action('stop-sound').addEventListener('click', () => {
+    if(recording&&ctx){
+      const stopAt=Math.max(0,ctx.currentTime-recordStart);
+      const last=soundStopEvents[soundStopEvents.length-1];
+      if(!Number.isFinite(last)||Math.abs(last-stopAt)>.02)soundStopEvents.push(stopAt);
+    }
+    markHeldCutForRecording();
+    root.dispatchEvent(new Event('hp-stop-sound'));
     stopPlayback(); releaseHeld(); pointerStarts.clear();
     if (ctx) {
       allVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
       playingCounts.clear();
       if (reverb) { reverb.buffer=null; updateReverb(); }
     }
-    root.dispatchEvent(new Event('hp-stop-sound'));
     redraw(); say('鳴っている音と余韻を止めました');
   });
   action('record').addEventListener('click', () => {
     if (recording) { finishRecording(); return; }
     if (!ensureAudio()) return;
-    stopPlayback(); releaseHeld(); events = []; eventCount = 0; recordStart = ctx.currentTime; recording = true;
+    stopPlayback(); releaseHeld(); events = []; soundStopEvents = []; eventCount = 0; recordStart = ctx.currentTime; recording = true;
     action('record').setAttribute('aria-pressed','true'); action('record').textContent = '■ 録音停止'; action('play').disabled = true;
     say('録音中 · 0.0秒');
     timer = setInterval(() => {
@@ -696,12 +723,13 @@
       while (nextEvent < events.length && start + events[nextEvent].start < ctx.currentTime + .14) {
         const event = events[nextEvent++], when = Math.max(ctx.currentTime, start + event.start);
         const voice = synth(event.midi, when); playbackVoices.push(voice);
-        voice.release(when + event.duration, event.sustain ? Infinity : articulation[currentInstrument].release);
+        voice.release(when + event.duration, event.cut ? .02 : (event.sustain ? Infinity : articulation[currentInstrument].release));
+        const globalStop=soundStopEvents.find(value=>Number.isFinite(value)&&value>event.start+.001);
+        if(Number.isFinite(globalStop))voice.release(start+globalStop,.02);
         later(() => { playingCounts.set(event.midi, (playingCounts.get(event.midi) || 0) + 1); redraw(); sparkle(event.midi); }, when - ctx.currentTime);
         later(() => { const remaining = (playingCounts.get(event.midi) || 1) - 1; if (remaining) playingCounts.set(event.midi, remaining); else playingCounts.delete(event.midi); redraw(); }, when + event.duration - ctx.currentTime);
       }
-      const tail = Math.max(...Array.from(sampleBuffers.values()).flat().map(sample => sample.buffer.duration)) * 1.2 + Number(decayControl.value) * 1.25;
-      if (ctx.currentTime >= start + recordDuration + tail) { stopPlayback(); say('再生が終わりました'); }
+      if (ctx.currentTime >= start + recordDuration) { stopPlayback(); say('再生が終わりました'); }
     }
     schedule(); scheduler = setInterval(schedule, 25);
   });

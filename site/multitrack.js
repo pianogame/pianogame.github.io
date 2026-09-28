@@ -8,7 +8,6 @@
   const action = name => root.querySelector('[data-action="' + name + '"]');
   const recordButton = action('record');
   const playButton = action('play');
-  const startButton = action('start');
   const instrumentControl = root.querySelector('[data-control="instrument"]');
   const releaseControl = root.querySelector('[data-control="release"]');
   const sustainButton = action('sustain');
@@ -42,8 +41,10 @@
       if(!saved||!Array.isArray(saved.tracks))return;
       tracks=saved.tracks.slice(0,MAX_TRACKS).filter(t=>instruments[t.instrument]&&Array.isArray(t.notes)).map(t=>({
         id:String(t.id),instrument:t.instrument,name:String(t.name||instrumentName(t.instrument)).slice(0,64),muted:!!t.muted,
-        duration:clamp(t.duration,0,MAX_SECONDS),notes:t.notes.slice(0,MAX_NOTES).filter(n=>Number.isFinite(n.midi)&&n.midi>=18&&n.midi<=108).map(n=>({
-          midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain
+        duration:clamp(t.duration,0,MAX_SECONDS),
+        cuts:Array.isArray(t.cuts)?t.cuts.map(value=>clamp(value,0,MAX_SECONDS)).filter(Number.isFinite).sort((a,b)=>a-b):[],
+        notes:t.notes.slice(0,MAX_NOTES).filter(n=>Number.isFinite(n.midi)&&n.midi>=18&&n.midi<=108).map(n=>({
+          midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain,cut:!!n.cut
         }))
       }));
       for(const id of Object.keys(groupMutes))groupMutes[id]=!!saved.groupMutes?.[id];
@@ -56,37 +57,7 @@
   }
   loadState();
 
-  const curtain=document.createElement('div');
-  curtain.className='hp-curtain';curtain.setAttribute('aria-hidden','true');
-  curtain.innerHTML='<div class="hp-curtain-half"></div><div class="hp-curtain-half"></div><div class="hp-curtain-title"><span class="hp-dream-title-main">✦ Piano Dream Stage ✦</span><span class="hp-dream-title-kana">ピアノドリームステージ</span></div>';
-  surface.append(curtain);
-  function measureHeader(){surface.style.setProperty('--hp-stage-top',root.querySelector('.hp-header').offsetHeight+'px');}
-  measureHeader();new ResizeObserver(measureHeader).observe(root.querySelector('.hp-header'));
-  window.addEventListener('resize',measureHeader);window.addEventListener('hp-viewport-resize',measureHeader);
-  function rememberStageOpen(){try{sessionStorage.setItem(stageStateKey,'1');}catch(_){}}
-  function rememberExportResume(){
-    rememberStageOpen();
-    try{localStorage.setItem(exportResumeKey,String(Date.now()+30000));}catch(_){}
-  }
-  function restoreStage(){
-    let opened=false;
-    try{opened=sessionStorage.getItem(stageStateKey)==='1';}catch(_){}
-    try{
-      const until=Number(localStorage.getItem(exportResumeKey)||0);
-      if(until>Date.now()){opened=true;sessionStorage.setItem(stageStateKey,'1');}
-      if(until) localStorage.removeItem(exportResumeKey);
-    }catch(_){}
-    if(opened){curtain.classList.add('open');curtain.hidden=true;}
-  }
-  function openCurtainWhenReady(){
-    if(!startButton.hidden||curtain.hidden||curtain.classList.contains('open'))return;
-    rememberStageOpen();
-    curtain.classList.add('open');setTimeout(()=>{curtain.hidden=true;},1250);
-  }
-  new MutationObserver(openCurtainWhenReady).observe(startButton,{attributes:true,attributeFilter:['hidden']});
-  window.addEventListener('pageshow',restoreStage);
-  restoreStage();
-  openCurtainWhenReady();
+  // The launch curtain is owned by rotation-guide.js. Keep multitrack focused on recording UI.
 
   const trackButton=document.createElement('button');
   trackButton.type='button';trackButton.className='hp-control';trackButton.textContent='🎚 録音一覧';trackButton.setAttribute('aria-expanded','false');
@@ -193,7 +164,7 @@
     }
 
     const id=instrumentControl.value;
-    recording={id:'take-'+Date.now()+'-'+takeNumber,instrument:id,name:instrumentName(id)+' '+takeNumber+'回目',muted:false,duration:0,notes:[]};
+    recording={id:'take-'+Date.now()+'-'+takeNumber,instrument:id,name:instrumentName(id)+' '+takeNumber+'回目',muted:false,duration:0,cuts:[],notes:[]};
     takeNumber++;activeRecordedNotes.clear();
 
     const lead=selected.length?.12:0;
@@ -242,16 +213,31 @@
   function beginRecordedNote(token,midi,startedAt=now()){
     if(!recording||activeRecordedNotes.has(token)||token==='audition')return;
     if(recording.notes.length>=MAX_NOTES){finishRecording();return;}
-    const note={midi,start:clamp(startedAt-recordingStartedAt,0,MAX_SECONDS),duration:.06,release:clamp(releaseControl.value,.01,10),sustain:sustainButton.getAttribute('aria-pressed')==='true'};
+    const note={midi,start:clamp(startedAt-recordingStartedAt,0,MAX_SECONDS),duration:.06,release:clamp(releaseControl.value,.01,10),sustain:sustainButton.getAttribute('aria-pressed')==='true',cut:false};
     recording.notes.push(note);activeRecordedNotes.set(token,{note,startedAt});
   }
-  function endRecordedNote(token,endedAt=now()){
+  function endRecordedNote(token,endedAt=now(),cut=false){
     const entry=activeRecordedNotes.get(token);if(!entry)return;
-    entry.note.duration=clamp(endedAt-entry.startedAt,.015,MAX_SECONDS);activeRecordedNotes.delete(token);
+    entry.note.duration=clamp(endedAt-entry.startedAt,.015,MAX_SECONDS);
+    if(cut){
+      entry.note.cut=true;
+      entry.note.sustain=false;
+      entry.note.release=.02;
+    }
+    activeRecordedNotes.delete(token);
   }
   root.addEventListener('hp-note-on',event=>beginRecordedNote(event.detail.token,event.detail.midi));
   root.addEventListener('hp-note-off',event=>endRecordedNote(event.detail.token));
-  root.addEventListener('hp-stop-sound',()=>{stopPlayback();for(const token of [...activeRecordedNotes.keys()])endRecordedNote(token);});
+  root.addEventListener('hp-stop-sound',()=>{
+    stopPlayback();
+    const stoppedAt=now();
+    if(recording){
+      const cutAt=clamp(stoppedAt-recordingStartedAt,0,MAX_SECONDS);
+      const last=recording.cuts[recording.cuts.length-1];
+      if(!Number.isFinite(last)||Math.abs(last-cutAt)>.02)recording.cuts.push(cutAt);
+    }
+    for(const token of [...activeRecordedNotes.keys()])endRecordedNote(token,stoppedAt,true);
+  });
   instrumentControl.addEventListener('change',()=>{if(recording)finishRecording();},true);
 
   recordButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();recording?finishRecording():void beginRecording();},true);
@@ -305,22 +291,47 @@
     return note.sustain?natural:Math.min(natural,clamp(note.duration,.015,MAX_SECONDS)+clamp(note.release,.01,10)+.04);
   }
   function mixDuration(selected){
-    return Math.max(...selected.flatMap(track=>track.notes.map(note=>note.start+noteSoundLength(track,note))))+.2;
+    return Math.max(...selected.map(track=>{
+      const recordedStop=clamp(track.duration,0,MAX_SECONDS);
+      if(recordedStop>0)return recordedStop;
+      return track.notes.length
+        ? Math.max(...track.notes.map(note=>note.start+noteSoundLength(track,note)))
+        : 0;
+    }));
   }
   function scheduleNote(context,target,track,note,when,sourceList){
     const descriptor=descriptorFor(track.instrument,note.midi,'play'),buffer=sampleBuffers.get(descriptor.url);if(!buffer)return;
     const source=context.createBufferSource(),envelope=context.createGain();source.buffer=buffer;source.playbackRate.value=Math.pow(2,(note.midi-descriptor.midi)/12);
-    const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=clamp(note.release,.01,10);
+    const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=note.cut?.02:clamp(note.release,.01,10);
     const natural=buffer.duration/source.playbackRate.value;
-    envelope.gain.setValueAtTime(.00001,when);envelope.gain.linearRampToValueAtTime(level,when+.003);
+    const nextGlobalCut=(track.cuts||[]).find(value=>Number.isFinite(value)&&value>note.start+.001);
+    const globalCutAfter=Number.isFinite(nextGlobalCut)?Math.max(.001,nextGlobalCut-note.start):Infinity;
+    const noteCutAfter=note.cut?heldFor:Infinity;
+    const forcedCutAfter=Math.min(globalCutAfter,noteCutAfter);
+
+    envelope.gain.setValueAtTime(.00001,when);
+    envelope.gain.linearRampToValueAtTime(level,when+.003);
     source.connect(envelope);envelope.connect(target);
-    // Safari / iOS requires AudioBufferSourceNode.start() before stop() is scheduled.
     source.start(when);
-    if(note.sustain){
+
+    if(Number.isFinite(forcedCutAfter)&&forcedCutAfter<natural){
+      const cutTime=when+forcedCutAfter;
+      if(note.sustain||forcedCutAfter<=heldFor){
+        envelope.gain.setValueAtTime(level,Math.max(when+.003,cutTime));
+      }else{
+        const progress=Math.min(1,Math.max(0,(forcedCutAfter-heldFor)/Math.max(.001,releaseFor)));
+        const current=Math.max(.0001,level*Math.pow(.0001/Math.max(.0001,level),progress));
+        envelope.gain.setValueAtTime(level,when+heldFor);
+        envelope.gain.exponentialRampToValueAtTime(current,cutTime);
+      }
+      envelope.gain.exponentialRampToValueAtTime(.0001,cutTime+.015);
+      source.stop(cutTime+.025);
+    }else if(note.sustain){
       envelope.gain.setValueAtTime(level,when+Math.min(heldFor,natural));
       source.stop(when+natural);
     }else{
-      envelope.gain.setValueAtTime(level,when+heldFor);envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
+      envelope.gain.setValueAtTime(level,when+heldFor);
+      envelope.gain.exponentialRampToValueAtTime(.0001,when+heldFor+releaseFor);
       source.stop(Math.min(when+natural,when+heldFor+releaseFor+.04));
     }
     if(sourceList)sourceList.push(source);
@@ -337,7 +348,8 @@
       await ensureEngine();await preload(selected);await ensureEngine();const startAt=engine.currentTime+.12;playing=true;playbackSources=[];playbackBuses=[];
       for(const track of selected){const bus=engine.createGain();bus.gain.value=isAudible(track)?1:0;bus.connect(engineMaster);playbackBuses.push({track,bus});for(const note of track.notes)scheduleNote(engine,bus,track,note,startAt+note.start,playbackSources);}
       const duration=mixDuration(selected);
-      playbackEndTimer=setTimeout(()=>{stopPlayback();say('全トラックの再生が終わりました');},duration*1000);say('全トラック再生中 · '+selected.length+'トラック');updatePlayButton();
+      const playbackLead=.12;
+      playbackEndTimer=setTimeout(()=>{stopPlayback();say('全トラックの再生が終わりました');},(duration+playbackLead)*1000);say('全トラック再生中 · '+selected.length+'トラック');updatePlayButton();
     }catch(error){stopPlayback();say('再生できませんでした：'+error.message,true);}finally{busy=false;if(!panel.hidden)renderPanel();}
   }
 
@@ -408,10 +420,10 @@
   async function exportMix(format){
     const selected=audibleTracks();if(!selected.length||busy)return;readyExport=null;busy=true;renderPanel();say('ミュートされていないトラックをミックス中…');
     try{
-      await ensureEngine();await preload(selected);const duration=mixDuration(selected);
+      await ensureEngine();await preload(selected);const duration=mixDuration(selected),renderLead=.01;
       const sampleRate=44100,Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;if(!Offline)throw new Error('このブラウザでは音声書き出しを利用できません');
-      const offline=new Offline(2,Math.ceil(duration*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
-      for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,.01+note.start,null);
+      const offline=new Offline(2,Math.ceil((duration+renderLead)*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
+      for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,renderLead+note.start,null);
       const rendered=await offline.startRendering();
       let blob,extension=format;
       if(format==='wav')blob=encodeWav(rendered);
