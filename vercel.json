@@ -177,14 +177,6 @@
   ],
   "routes": [
     {
-      "src": "^/$",
-      "dest": "/maintenance.html"
-    },
-    {
-      "src": "^/index\\.html$",
-      "dest": "/maintenance.html"
-    },
-    {
       "src": "/audio/.*",
       "has": [
         {
