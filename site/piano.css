@@ -61,6 +61,7 @@
 /* Piano Dream Stage — traditional piano-key appearance */
 #hp-four88 .hp-register-section { position:relative; }
 #hp-four88 .hp-key:not(.hp-sharp) {
+  z-index:1;
   width:var(--hp-white-width,80px);
   height:var(--hp-white-height,56px);
   top:var(--hp-white-top,10px);
@@ -76,6 +77,7 @@
   padding:4px 0 9px;
 }
 #hp-four88 .hp-key.hp-sharp {
+  z-index:10;
   width:var(--hp-black-width,38px);
   height:var(--hp-black-height,40px);
   top:var(--hp-black-top,8px);

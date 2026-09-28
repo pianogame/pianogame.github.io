@@ -78,6 +78,12 @@ def _verify_app_sources():
         if len(data) != expected_size or hashlib.sha256(data).hexdigest() != expected_sha256:
             raise ValueError(f"Opening audio checksum mismatch: {name}")
 
+    piano_css = (site / "piano.css").read_text(encoding="utf-8")
+    if "#hp-four88 .hp-key:not(.hp-sharp) {\n  z-index:1;" not in piano_css:
+        raise ValueError("White piano keys must stay below black keys")
+    if "#hp-four88 .hp-key.hp-sharp {\n  z-index:10;" not in piano_css:
+        raise ValueError("Black piano keys must always stay above white keys")
+
     opening_source = (site / "rotation-guide.js").read_text(encoding="utf-8")
     for name in OPENING_AUDIO_EXPECTED:
         if f"/audio/{name}" not in opening_source:

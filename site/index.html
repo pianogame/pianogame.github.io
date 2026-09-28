@@ -23,13 +23,13 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=34', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=35', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
     }
   </script>
-  <link rel="stylesheet" href="/piano.css?v=2">
+  <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=12">
   <script src="/orientation.js?v=9"></script>
   <script defer src="/instruments.js?v=9"></script>
