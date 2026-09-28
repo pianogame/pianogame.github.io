@@ -107,6 +107,8 @@ def _verify_app_sources():
     piano_source = (site / "piano.js").read_text(encoding="utf-8")
     if "start + recordDuration + tail" in piano_source or "start + recordDuration)" not in piano_source:
         raise ValueError("Normal recording playback must end exactly at the stop-button duration")
+    if "markHeldCutForRecording();" not in piano_source or "event.cut ? .02" not in piano_source:
+        raise ValueError("Sound-stop must be recorded as a forced cut")
 
     required_dynamics = [
         "data-action=\"dynamics-test\"",
@@ -141,6 +143,8 @@ def _verify_app_sources():
         raise ValueError("Audible release tails must not extend playback past the stop button")
     if "const playbackLead=.12;" not in multitrack_source:
         raise ValueError("Multitrack playback end must include the scheduling lead")
+    if "endRecordedNote(token,now(),true)" not in multitrack_source or "entry.note.release=.02;" not in multitrack_source:
+        raise ValueError("Multitrack sound-stop must be preserved as a forced cut")
     if "velocity:velocityGain(n.velocity)" not in multitrack_source or "event.detail.velocity" not in multitrack_source:
         raise ValueError("Recorded dynamics must persist in multitrack data")
     if "gain*.65*velocityGain(note.velocity)" not in multitrack_source:
