@@ -144,7 +144,7 @@
           voiceRevealTimer=0;
           if(opened){stopOpeningVoice();return;}
           try{voiceAudio.volume=.9;}catch(_){}
-        },800);
+        },3000);
         return true;
       }catch(error){
         lastAudioError='audible:'+(error?.name||'play-failed');

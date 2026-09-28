@@ -84,8 +84,8 @@ def _verify_app_sources():
         raise ValueError("Expected exactly 10 opening BGM references")
     if "fadeOutCurtainBgm(780)" not in opening_source or "Math.pow(1-p,3.4)" not in opening_source:
         raise ValueError("Strong curtain BGM fade-out is missing")
-    if "voiceAudio.volume=0" not in opening_source or "voiceAudio.volume=.9" not in opening_source or "},800);" not in opening_source:
-        raise ValueError("Opening voice must become audible 0.8 seconds after preparation succeeds")
+    if "voiceAudio.volume=0" not in opening_source or "voiceAudio.volume=.9" not in opening_source or "},3000);" not in opening_source:
+        raise ValueError("Opening voice must become audible 3 seconds after preparation succeeds")
     if "curtainBgm.volume=0" not in opening_source or "curtainBgm.volume=.12" not in opening_source:
         raise ValueError("Opening BGM must remain silent until preparation succeeds")
     if "orientation.addEventListener('pointerdown'" not in opening_source or "primeOpeningMedia();" not in opening_source:
