@@ -1,4 +1,4 @@
-#hp-four88 .hp-track-panel{position:absolute;top:var(--hp-stage-top,70px);right:4px;z-index:9;width:min(470px,calc(100% - 8px));max-height:calc(100% - var(--hp-stage-top,70px) - 4px);overflow:auto;padding:12px;border:1px solid #bda9c5;border-radius:0 0 14px 14px;background:#fffafc;color:#544e58;box-shadow:0 8px 22px #33243b66;font:13px/1.5 system-ui,sans-serif}
+#hp-four88 .hp-track-panel{position:absolute;top:0;right:4px;z-index:90;width:min(470px,calc(100% - 8px));max-height:calc(100% - 4px);overflow:auto;padding:12px;border:1px solid #bda9c5;border-radius:0 0 14px 14px;background:#fffafc;color:#544e58;box-shadow:0 8px 22px #33243b66;font:13px/1.5 system-ui,sans-serif}
 #hp-four88 .hp-track-panel[hidden]{display:none!important}
 #hp-four88 .hp-track-panel h2{font-size:16px;margin:0 0 7px}
 #hp-four88 .hp-track-panel p{font-size:12px;margin:4px 0 10px;color:#66596b}

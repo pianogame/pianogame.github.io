@@ -94,6 +94,10 @@ def _verify_app_sources():
     if "const key = keyAtPoint(x,y,hit);" not in piano_source:
         raise ValueError("Pointer move must use black-key-first hit testing")
 
+    multitrack_css = (site / "multitrack.css").read_text(encoding="utf-8")
+    if "#hp-four88 .hp-track-panel{position:absolute;top:0;right:4px;z-index:90;" not in multitrack_css:
+        raise ValueError("Recording list must start at the top and stay above piano keys")
+
     piano_css = (site / "piano.css").read_text(encoding="utf-8")
     if "#hp-four88 .hp-key:not(.hp-sharp) {\n  z-index:1;" not in piano_css:
         raise ValueError("White piano keys must stay below black keys")
