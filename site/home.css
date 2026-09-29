@@ -16,7 +16,7 @@
   z-index:-2;
   background:
     linear-gradient(rgba(16,10,20,.38),rgba(16,10,20,.38)),
-    url("/home-stage.jpg?v=1") center/cover no-repeat;
+    url("/home-stage.jpg?v=2") center/cover no-repeat;
   filter:blur(24px) saturate(.86) brightness(.72);
   transform:scale(1.1);
 }
