@@ -15,14 +15,16 @@
   "lang": "ja",
   "icons": [
     {
-      "src": "/install/pwa-icon-192-v21.png",
+      "src": "/install/pwa-icon-192-v21.png?v=25",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/install/pwa-icon-512-v21.png",
+      "src": "/install/pwa-icon-512-v21.png?v=25",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
