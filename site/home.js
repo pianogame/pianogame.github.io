@@ -9,6 +9,26 @@
   const homeButton = piano.querySelector('[data-home-action="home"]');
   if (!pianoButton || !homeButton) return;
 
+  const homeTapAudio = new Audio('/audio/home-button-tap.mp3?v=1');
+  homeTapAudio.preload = 'auto';
+  homeTapAudio.load();
+
+  function playHomeTapSound() {
+    try {
+      homeTapAudio.pause();
+      homeTapAudio.currentTime = 0;
+      const playback = homeTapAudio.play();
+      if (playback && typeof playback.catch === 'function') playback.catch(() => {});
+    } catch (_) {}
+  }
+
+  home.querySelectorAll('button').forEach((button) => {
+    button.addEventListener('pointerdown', playHomeTapSound, { passive:true });
+    button.addEventListener('click', (event) => {
+      if (event.detail === 0) playHomeTapSound();
+    });
+  });
+
   const launchFx = document.createElement('div');
   launchFx.className = 'hp-home-launch-fx';
   launchFx.setAttribute('aria-hidden', 'true');
