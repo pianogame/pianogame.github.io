@@ -10,6 +10,7 @@ on:
       - "site/rotation-guide.js"
       - "site/assets/home/**"
       - "scripts/verify_home_layout.mjs"
+      - "scripts/build_pages.py"
       - ".github/workflows/render-home.yml"
   workflow_dispatch:
 
