@@ -1,0 +1,35 @@
+name: OCR HOME assets
+on:
+  push:
+    branches: [staging]
+    paths:
+      - ".github/workflows/home-asset-ocr.yml"
+
+jobs:
+  ocr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OCR
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-jpn
+          python -m pip install --quiet pillow pytesseract
+      - name: OCR assets
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageEnhance, ImageFilter
+          import pytesseract, glob, os
+          for p in sorted(glob.glob("site/assets/home/ui/*.png")):
+              im=Image.open(p).convert("RGB")
+              # Two passes: normal + grayscale enlarged
+              txt1=pytesseract.image_to_string(im, lang="jpn+eng", config="--psm 6")
+              g=im.convert("L")
+              g=ImageEnhance.Contrast(g).enhance(2.2)
+              g=g.resize((max(1,g.width*2),max(1,g.height*2)))
+              txt2=pytesseract.image_to_string(g, lang="jpn+eng", config="--psm 11")
+              text=(" ".join((txt1+" "+txt2).split()))[:700]
+              print(f"OCR {os.path.basename(p)} :: {text}")
+          PY
