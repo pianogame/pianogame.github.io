@@ -60,9 +60,9 @@
 #hp-home-screen .hp-home-character{
   position:absolute;
   z-index:2;
-  left:46%;
-  bottom:-18px;
-  height:850px;
+  left:46.3%;
+  bottom:-260px;
+  height:1021px;
   width:auto;
   max-width:none;
   object-fit:contain;
@@ -77,9 +77,9 @@
 #hp-home-screen .hp-home-logo{
   position:absolute;
   z-index:5;
-  left:-7px;
-  top:108px;
-  width:459px;
+  left:7px;
+  top:103px;
+  width:487px;
   height:auto;
   object-fit:contain;
   pointer-events:none;
@@ -92,11 +92,12 @@
 #hp-home-screen .hp-home-hud{
   position:absolute;
   z-index:7;
-  left:calc(50% - 7px);
-  top:-37px;
+  left:calc(50% + 7px);
+  top:-28px;
   width:496px;
   height:165px;
-  transform:translateX(-50%);
+  transform:translateX(-50%) scale(1.06);
+  transform-origin:50% 50%;
 }
 #hp-home-screen .hp-home-hud-art{
   position:absolute;
@@ -181,8 +182,6 @@
 #hp-home-screen .hp-home-mode{
   position:absolute;
   z-index:5;
-  right:-40px;
-  width:579px;
   height:auto;
   aspect-ratio:3/1;
   margin:0;
@@ -194,8 +193,16 @@
   cursor:pointer;
   touch-action:manipulation;
 }
-#hp-home-screen .hp-home-game-image{top:163px}
-#hp-home-screen .hp-home-piano-image{top:419px}
+#hp-home-screen .hp-home-game-image{
+  top:191px;
+  right:-88px;
+  width:619px;
+}
+#hp-home-screen .hp-home-piano-image{
+  top:439px;
+  right:-38px;
+  width:616px;
+}
 #hp-home-screen .hp-home-game-image[disabled]{opacity:1;cursor:default}
 #hp-home-screen .hp-home-mode>img{
   display:block;
@@ -230,9 +237,9 @@
 #hp-home-screen .hp-home-top-button{
   position:absolute;
   z-index:8;
-  top:2px;
-  width:112px;
-  height:112px;
+  top:15px;
+  width:140px;
+  height:140px;
   margin:0;
   padding:0;
   border:0;
@@ -242,8 +249,8 @@
   cursor:pointer;
   touch-action:manipulation;
 }
-#hp-home-screen .hp-home-notice-image{right:105px}
-#hp-home-screen .hp-home-settings-image{right:6px}
+#hp-home-screen .hp-home-notice-image{right:55px}
+#hp-home-screen .hp-home-settings-image{right:-85px}
 #hp-home-screen .hp-home-top-button-art{
   display:block;
   width:100%;
@@ -273,10 +280,10 @@
 #hp-home-screen .hp-home-voice-card{
   position:absolute;
   z-index:6;
-  left:397px;
-  top:301px;
-  width:238px;
-  height:140px;
+  left:380px;
+  top:305px;
+  width:255px;
+  height:135px;
   box-sizing:border-box;
   padding:45px 18px 14px;
   border:2px solid #d3b66f;
@@ -324,37 +331,60 @@
 #hp-home-screen .hp-home-campaign{
   position:absolute;
   z-index:6;
-  left:18px;
-  bottom:22px;
-  width:386px;
-  margin:0;
-  padding:0;
-  border:0;
-  background:transparent;
-  appearance:none;
-  -webkit-appearance:none;
-  cursor:pointer;
-  touch-action:manipulation;
-}
-#hp-home-screen .hp-home-campaign img{
-  display:block;
-  width:100%;
-  height:auto;
-  object-fit:contain;
+  left:28px;
+  bottom:40px;
+  width:365px;
+  height:125px;
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:118px 1fr 26px;
+  align-items:center;
+  gap:10px;
+  padding:12px 10px;
+  border:2px solid #d3b66f;
+  border-radius:17px;
+  background:linear-gradient(180deg,rgba(255,253,246,.97),rgba(243,233,213,.95));
+  box-shadow:0 6px 14px rgba(48,25,13,.22),inset 0 0 0 1px rgba(255,255,255,.75);
+  color:#263d63;
   pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-  -webkit-user-drag:none;
-  filter:drop-shadow(0 5px 7px rgba(38,20,12,.18));
 }
-#hp-home-screen .hp-home-campaign:active{transform:scale(.985)}
+#hp-home-screen .hp-home-campaign-ticket{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:92px;
+  border:2px solid #b78f4c;
+  border-radius:11px;
+  transform:rotate(-4deg);
+  background:linear-gradient(180deg,#fff7e7,#d8bd8d);
+  color:#6a4a20;
+  font:800 17px/1.05 Georgia,"Times New Roman",serif;
+  text-align:center;
+  box-shadow:inset 0 0 8px rgba(120,79,27,.12);
+}
+#hp-home-screen .hp-home-campaign-copy{
+  font-size:16px;
+  line-height:1.35;
+  font-weight:800;
+}
+#hp-home-screen .hp-home-campaign-copy strong{
+  font-size:17px;
+  color:#921c2d;
+  white-space:nowrap;
+}
+#hp-home-screen .hp-home-campaign-arrow{
+  font-size:42px;
+  line-height:1;
+  color:#6a4a28;
+  font-weight:800;
+}
 
 #hp-home-screen .hp-home-bottom{
   position:absolute;
   z-index:6;
   left:830px;
-  bottom:19px;
-  width:900px;
+  bottom:-29px;
+  width:912px;
   transform:translateX(-50%);
   display:grid;
   grid-template-columns:repeat(3,1fr);
