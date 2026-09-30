@@ -37,7 +37,7 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=30">
+  <link rel="stylesheet" href="/home.css?v=31">
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
   <script src="/orientation.js?v=11"></script>
@@ -47,7 +47,7 @@
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
   <script defer src="/piano.js?v=27"></script>
-  <script defer src="/home.js?v=13"></script>
+  <script defer src="/home.js?v=14"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
   <script defer src="/multitrack.js?v=26"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
@@ -64,10 +64,14 @@
     <div class="hp-home-canvas" data-home-canvas>
       <img class="hp-home-character" src="/assets/home/character/29613917-7E24-4C1A-8C4F-23224C24AB6B.png?v=1" alt="" aria-hidden="true" draggable="false">
 
+      <button type="button" class="hp-home-character-touch" data-home-action="character-talk" aria-label="キャラクターと話す"></button>
+
       <img class="hp-home-logo" src="/assets/home/ui/F1AB41E7-3976-4BD3-8B97-85AA4655B511.png?v=1" alt="PIANO DREAM STAGE" draggable="false">
 
-      <div class="hp-home-voice-card" role="img" aria-label="タップでボイス。こんなに美しい音楽と、すごせる毎日……ふふっ♪">
+      <div class="hp-home-voice-card" aria-label="キャラクターのメッセージ">
         <svg class="hp-home-reference-art" viewBox="364 293 282 154" aria-hidden="true" focusable="false"><defs><clipPath id="home-voice-clip"><path d="M367 373 L373 362 L374 344 L385 324 L403 319 L409 304 L431 299 L527 300 L541 296 L558 293 L574 300 L582 316 L609 321 L625 333 L635 354 L637 373 L645 389 L638 402 L637 416 L625 430 L614 434 L605 442 L598 448 L589 437 L401 438 L384 430 L374 417 L372 402 L365 391 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-voice-clip)"/></svg>
+      <div class="hp-home-voice-paper" aria-hidden="true"></div>
+        <p class="hp-home-dialogue" data-home-dialogue role="status" aria-live="polite" aria-atomic="true"><span>こんなに美しい音楽と</span><span>すごせる毎日…</span><span>……ふふっ♪</span></p>
       </div>
 
       <div class="hp-home-hud" aria-label="プレイヤー情報">
@@ -79,7 +83,7 @@
       </div>
 
       <div class="hp-home-modes">
-      <button type="button" class="hp-home-mode hp-home-game-image" aria-label="ゲームモード" disabled>
+      <button type="button" class="hp-home-mode hp-home-game-image" data-home-action="game" aria-label="ゲームモード">
         <svg class="hp-home-reference-art" viewBox="1009 170 511 235" aria-hidden="true" focusable="false"><defs><clipPath id="home-game-clip"><path d="M1012 295 L1042 247 L1057 204 Q1059 189 1071 184 L1364 181 L1381 173 L1403 181 L1425 174 L1434 185 L1473 176 L1484 171 L1491 188 L1503 181 L1512 197 L1508 229 L1511 350 L1518 365 L1512 385 L1499 385 L1492 401 L1468 398 L1454 404 L1444 397 L1102 402 L1083 396 L1066 399 L1061 384 L1054 374 L1038 343 L1026 319 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-game-clip)"/></svg>
       </button>
       <button type="button" class="hp-home-mode hp-home-piano-image" data-home-action="piano" aria-label="ピアノモードへ">

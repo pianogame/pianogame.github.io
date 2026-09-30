@@ -6,6 +6,9 @@
   if (!home || !piano) return;
 
   const pianoButton = home.querySelector('[data-home-action="piano"]');
+  const gameButton = home.querySelector('[data-home-action="game"]');
+  const characterButton = home.querySelector('[data-home-action="character-talk"]');
+  const dialogue = home.querySelector('[data-home-dialogue]');
   const homeButton = piano.querySelector('[data-home-action="home"]');
   if (!pianoButton || !homeButton) return;
 
@@ -52,6 +55,41 @@
 
   let transitioning = false;
   let launchTimer = 0;
+  let gamePreviewTimer = 0;
+  const messages = [
+    ['こんなに美しい音楽と', 'すごせる毎日…', '……ふふっ♪'],
+    ['おかえりなさい。', '今日はどんな曲を', '一緒に奏でようか？'],
+    ['あなたの音を聴くと、', '自然と笑顔になるの。', '……不思議だね♪'],
+    ['少し疲れちゃった？', 'ゆっくりで大丈夫。', '私もそばにいるよ。'],
+    ['次の一音に、', '気持ちをこめて。', '一緒に奏でよう♪'],
+  ];
+  let messageIndex = 0;
+  function talkToCharacter() {
+    if (transitioning || !dialogue) return;
+    messageIndex = (messageIndex + 1) % messages.length;
+    dialogue.replaceChildren(...messages[messageIndex].map(line => {
+      const span = document.createElement('span');
+      span.textContent = line;
+      return span;
+    }));
+    dialogue.classList.remove('hp-dialogue-changing');
+    void dialogue.offsetWidth;
+    dialogue.classList.add('hp-dialogue-changing');
+  }
+
+  function clearGamePreview() {
+    window.clearTimeout(gamePreviewTimer);
+    home.classList.remove('hp-game-previewing');
+  }
+  function previewGame() {
+    if (transitioning || !gameButton) return;
+    clearGamePreview();
+    syncModeFxCenter(gameButton);
+    void home.offsetWidth;
+    home.classList.add('hp-game-previewing');
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    gamePreviewTimer = window.setTimeout(clearGamePreview, reduced ? 140 : 800);
+  }
 
   // Measure the actual safe area, including the viewport's portrait rotation.
   // Only component dimensions use this unit; the canvas itself is never scaled.
@@ -65,6 +103,8 @@
     const widthUnit = Math.min(home.clientWidth / 1536, 1.25);
     home.style.setProperty('--home-unit', unit + 'px');
     home.style.setProperty('--home-width-unit', widthUnit + 'px');
+    // Right-side controls anchor to the screen, not to iOS's symmetric inset.
+    home.style.setProperty('--home-safe-right', Math.max(0, home.clientWidth - safeArea.offsetLeft - width) + 'px');
     home.dataset.homeCompact = String(width < 740);
     const footer = home.querySelector('.hp-home-footer');
     const topActions = home.querySelector('.hp-home-top-actions');
@@ -72,12 +112,12 @@
       const safeBottom = Math.max(0, parseFloat(getComputedStyle(safeArea).bottom) || 0);
       home.style.setProperty('--home-footer-bottom', Math.max(3, 27 * widthUnit - safeBottom) + 'px');
       const gap = Math.max(2, 2 * widthUnit);
-      const footerGap = Math.max(8, 28 * widthUnit);
+      const footerGap = Math.max(4, 8 * widthUnit);
       const footerTop = footer.offsetTop + home.querySelector('.hp-home-bottom').offsetTop;
-      const desiredWidth = Math.min(width * .355, 511 * widthUnit);
+      const desiredWidth = Math.min(home.clientWidth * .355, 511 * widthUnit);
       // Native sprite heights are 235 and 236 for a shared width of 511.
       const stackRatio = 471 / 511;
-      const earliestTop = topActions.offsetTop + topActions.offsetHeight + Math.max(8, 14 * widthUnit);
+      const earliestTop = topActions.offsetTop + topActions.offsetHeight + Math.max(3, 4 * widthUnit);
       const preferredTop = height * (170 / 864);
       const top = Math.max(earliestTop, Math.min(preferredTop, footerTop - footerGap - gap - desiredWidth * stackRatio));
       const available = Math.max(0, footerTop - footerGap - gap - top);
@@ -86,19 +126,27 @@
       home.style.setProperty('--home-mode-gap', gap + 'px');
       home.style.setProperty('--home-mode-width', modeWidth + 'px');
     }
-    syncPianoFxCenter();
+    syncModeFxCenter();
   }
   if (safeArea && 'ResizeObserver' in window) {
     new ResizeObserver(syncHomeLayout).observe(safeArea);
   }
 
-  function syncPianoFxCenter() {
+  function syncModeFxCenter(button = home.classList.contains('hp-game-previewing') ? gameButton : pianoButton) {
     if (home.hidden) return;
-    const homeRect = home.getBoundingClientRect();
-    const rect = pianoButton.getBoundingClientRect();
-    if (!homeRect.width || !homeRect.height || !rect.width || !rect.height) return;
-    home.style.setProperty('--hp-piano-center-x', (rect.left - homeRect.left + rect.width / 2) + 'px');
-    home.style.setProperty('--hp-piano-center-y', (rect.top - homeRect.top + rect.height / 2) + 'px');
+    // Use layout coordinates so portrait's rotated viewport does not move the
+    // sparkle origin away from the tapped button.
+    let x = button.offsetWidth / 2;
+    let y = button.offsetHeight / 2;
+    let node = button;
+    while (node && node !== home) {
+      x += node.offsetLeft;
+      y += node.offsetTop;
+      node = node.offsetParent;
+    }
+    if (node !== home) return;
+    home.style.setProperty('--hp-mode-center-x', x + 'px');
+    home.style.setProperty('--hp-mode-center-y', y + 'px');
   }
 
   function finishTransition() {
@@ -120,6 +168,7 @@
   function enterPiano() {
     if (transitioning) return;
     transitioning = true;
+    clearGamePreview();
 
     try {
       window.HP_AUDIO_BRIDGE?.configureSession?.();
@@ -128,7 +177,7 @@
     } catch (_) {}
 
     home.classList.remove('hp-piano-launching');
-    syncPianoFxCenter();
+    syncModeFxCenter();
     void home.offsetWidth;
     home.classList.add('hp-piano-launching');
 
@@ -142,6 +191,7 @@
     transitioning = true;
 
     window.clearTimeout(launchTimer);
+    clearGamePreview();
     home.classList.remove('hp-piano-launching');
 
     try {
@@ -178,6 +228,8 @@
   syncHomeLayout();
   requestAnimationFrame(syncHomeLayout);
 
+  gameButton?.addEventListener('click', previewGame);
+  characterButton?.addEventListener('click', talkToCharacter);
   pianoButton.addEventListener('click', enterPiano);
   homeButton.addEventListener('click', enterHome);
 })();

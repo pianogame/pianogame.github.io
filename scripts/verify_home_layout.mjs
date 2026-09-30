@@ -47,9 +47,7 @@ const referenceBounds = {
   '.hp-home-piano-image': [1009,407,511,236],
   '.hp-home-voice-card': [364,293,282,154],
   '.hp-home-campaign': [18,663,382,174],
-  '.hp-home-bottom-button:nth-child(1)': [410,682,266,151],
-  '.hp-home-bottom-button:nth-child(2)': [688,682,283,151],
-  '.hp-home-bottom-button:nth-child(3)': [972,684,281,151],
+  '.hp-home-logo': [20,88.3125,490,163.3333],
 };
 async function inspect(page) {
   return page.evaluate(() => {
@@ -69,7 +67,7 @@ async function inspect(page) {
     }
     for (const selector of ['.hp-home-voice-card','.hp-home-campaign','.hp-home-hud']) {
       const panel=home.querySelector(selector), bounds=rect(panel);
-      for (const el of panel.querySelectorAll('.hp-home-voice-line,.hp-home-campaign-copy,.hp-home-level,.hp-home-player-name,.hp-home-stamina-value')) {
+      for (const el of panel.querySelectorAll('.hp-home-dialogue span,.hp-home-voice-line,.hp-home-campaign-copy,.hp-home-level,.hp-home-player-name,.hp-home-stamina-value')) {
         if (el.scrollWidth>el.clientWidth+1) failures.push('text wider than its own column: '+el.className);
         const range=document.createRange(); range.selectNodeContents(el);
         for (const r of range.getClientRects()) {
@@ -87,6 +85,16 @@ async function inspect(page) {
       const vb=art.viewBox.baseVal;
       if (Math.abs(art.clientWidth / art.clientHeight - vb.width / vb.height)>.025) failures.push('distorted reference sprite: '+art.parentElement.getAttribute('aria-label'));
       if (!art.querySelector('image')?.href.baseVal.includes('home-reference-v1.jpg')) failures.push('reference sprite source missing');
+    }
+    const menus=[...home.querySelectorAll('.hp-home-bottom-button')];
+    const gaps=menus.slice(1).map((el,i)=>el.offsetLeft-menus[i].offsetLeft-menus[i].offsetWidth);
+    if (Math.max(...menus.map(el=>el.offsetWidth))-Math.min(...menus.map(el=>el.offsetWidth))>1 || Math.abs(gaps[0]-gaps[1])>1) failures.push('bottom menus are not equal columns with equal gaps');
+    const safe=home.querySelector('.hp-home-safe');
+    const expectedRight=16*parseFloat(home.style.getPropertyValue('--home-width-unit'));
+    for (const selector of ['.hp-home-modes','.hp-home-top-actions']) {
+      const el=home.querySelector(selector);
+      const right=home.clientWidth-safe.offsetLeft-el.offsetLeft-el.offsetWidth;
+      if (Math.abs(right-expectedRight)>1.5) failures.push('right controls are inset from the screen edge: '+selector);
     }
     if (document.documentElement.scrollWidth > innerWidth+1) failures.push('document horizontal overflow');
     return {failures,viewport:{width:innerWidth,height:innerHeight},unit:home.style.getPropertyValue('--home-unit'),panels:panels.map(({name,r})=>({name,...r}))};
@@ -136,12 +144,16 @@ try {
       }
       const typography=await page.evaluate(() => ['.hp-home-level','.hp-home-stamina-value'].map(s=> {
         const el=document.querySelector(s),r=el.getBoundingClientRect(),c=getComputedStyle(el);
-        return {selector:s,size:parseFloat(c.fontSize),weight:c.fontWeight,center:[r.x+r.width/2,r.y+r.height/2]};
+        return {selector:s,size:parseFloat(c.fontSize),weight:c.fontWeight,style:c.fontStyle,center:[r.x+r.width/2,r.y+r.height/2]};
       }));
       metrics.typography=typography;
       for (const t of typography) if (t.weight!=='400') metrics.failures.push('reference numbers too bold: '+t.selector);
-      if (typography[0].size>29 || typography[1].size>22) metrics.failures.push('reference numbers too large');
-      for (const [i,target] of [[0,[642,60]],[1,[859,69]]]) if (typography[i].center.some((v,j)=>Math.abs(v-target[j])>2)) metrics.failures.push('reference number position mismatch: '+typography[i].selector);
+      if (typography[0].size>29 || typography[1].size>23) metrics.failures.push('reference numbers too large');
+      if (typography[1].style!=='normal') metrics.failures.push('stamina should use upright reference numerals');
+      const playerCenter=await page.locator('.hp-home-player-name').evaluate(el=>el.offsetTop+el.offsetHeight/2);
+      const hudHeight=await page.locator('.hp-home-hud').evaluate(el=>el.clientHeight);
+      if (Math.abs(playerCenter-hudHeight*.36)>1) metrics.failures.push('player name not centered in upper half of HUD');
+      for (const [i,target] of [[0,[645,60]],[1,[859,69]]]) if (typography[i].center.some((v,j)=>Math.abs(v-target[j])>2)) metrics.failures.push('reference number position mismatch: '+typography[i].selector);
     }
     await page.screenshot({path:path.join(output,name+'.png')});
     metrics.failures.push(...errors);
@@ -149,6 +161,34 @@ try {
     assert.deepEqual(metrics.failures,[],name+': '+metrics.failures.join('; '));
     if (name==='iphone15pm') {
       const oldUnit=metrics.unit;
+      // Real pointer taps must reach the character and change the live text.
+      const dialogue=page.locator('[data-home-dialogue]');
+      const first=await dialogue.textContent(), messages=new Set([first]);
+      for (let i=0;i<4;i++) {
+        await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
+        messages.add(await dialogue.textContent());
+        assert.deepEqual((await inspect(page)).failures,[],'dialogue overflow');
+      }
+      assert.equal(messages.size,5,'expected five distinct character messages');
+      await dialogue.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
+      await page.screenshot({path:path.join(output,'character-message.png')});
+      await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
+      assert.equal(await dialogue.textContent(),first,'character messages should cycle');
+      const beforeUrl=page.url();
+      const game=page.getByRole('button',{name:'ゲームモード',exact:true});
+      await game.click();
+      await page.waitForFunction(()=>document.querySelector('#hp-home-screen').classList.contains('hp-game-previewing'));
+      await page.waitForTimeout(160);
+      assert.ok(await page.locator('.hp-home-launch-fx').evaluate(el=>parseFloat(getComputedStyle(el).opacity)>.1),'game effect did not become visible');
+      await page.screenshot({path:path.join(output,'game-tap-effect.png')});
+      await page.waitForFunction(()=>!document.querySelector('#hp-home-screen').classList.contains('hp-game-previewing'));
+      assert.equal(page.url(),beforeUrl,'game preview must not navigate');
+      assert.ok(await page.locator('#hp-home-screen').isVisible(),'game preview must stay on HOME');
+      assert.ok(await page.locator('#hp-four88').isHidden(),'game preview must not open PIANO');
+      assert.equal(await page.locator('.hp-home-launch-fx').evaluate(el=>getComputedStyle(el).opacity),'0','game effect did not clear');
+      // A piano tap can interrupt an in-flight game preview safely.
+      await game.click();
+      await game.click();
       await page.getByRole('button',{name:'ピアノモードへ',exact:true}).click();
       await page.locator('#hp-home-screen').waitFor({state:'hidden'});
       await page.locator('#hp-four88').waitFor({state:'visible'});
@@ -162,12 +202,25 @@ try {
       await page.evaluate(async () => { if (document.fullscreenElement) await document.exitFullscreen(); });
       await page.setViewportSize({width:430,height:932});
       await page.waitForFunction(() => document.documentElement.dataset.hpRotated==='true');
+      await game.click();
+      const rotatedOrigin=await page.evaluate(() => {
+        const home=document.querySelector('#hp-home-screen'),button=document.querySelector('[data-home-action="game"]');
+        const safe=home.querySelector('.hp-home-safe'),stack=button.offsetParent;
+        return {actual:[parseFloat(home.style.getPropertyValue('--hp-mode-center-x')),parseFloat(home.style.getPropertyValue('--hp-mode-center-y'))],expected:[safe.offsetLeft+stack.offsetLeft+button.offsetLeft+button.offsetWidth/2,safe.offsetTop+stack.offsetTop+button.offsetTop+button.offsetHeight/2]};
+      });
+      assert.deepEqual(rotatedOrigin.actual,rotatedOrigin.expected,'rotated game sparkle origin');
+      await page.waitForFunction(()=>!document.querySelector('#hp-home-screen').classList.contains('hp-game-previewing'));
       await page.setViewportSize({width:932,height:430});
       await page.waitForFunction(() => document.documentElement.dataset.hpRotated==='false');
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       assert.deepEqual((await inspect(page)).failures,[],'layout after rotation');
       assert.deepEqual(errors,[],'navigation errors');
-      console.log('PASS opening -> HOME -> PIANO -> HOME -> rotate -> HOME');
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await game.click();
+      await page.waitForFunction(()=>!document.querySelector('#hp-home-screen').classList.contains('hp-game-previewing'));
+      assert.ok(await page.locator('#hp-home-screen').isVisible(),'reduced-motion game preview changed screen');
+      assert.equal(await page.locator('.hp-home-launch-fx').evaluate(el=>getComputedStyle(el).opacity),'0');
+      console.log('PASS five dialogues; repeat game preview; reduced motion; opening -> HOME -> PIANO -> HOME -> rotate -> HOME');
     }
     console.log('PASS '+name+' '+width+'x'+height);
     await context.close();
