@@ -6,7 +6,7 @@
     const style=document.createElement('style');
     style.textContent=`
       body.hp-booting #hp-viewport{visibility:hidden!important}
-      #hp-opening-sequence{position:fixed;left:0;top:0;right:auto;bottom:auto;width:var(--hp-opening-width,100vw);height:var(--hp-opening-height,100dvh);min-width:100vw;min-height:100dvh;z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
+      #hp-opening-sequence{position:absolute;inset:0;width:100%;height:100%;z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
       #hp-opening-sequence[hidden]{display:none!important}
       .hp-opening-orientation,.hp-opening-title{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box}
       .hp-opening-orientation{z-index:3;padding:28px;background:#fff;color:#29242c;text-align:center;opacity:1;transition:opacity .28s ease;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
@@ -74,27 +74,8 @@
         <i class="hp-opening-spark s1"></i><i class="hp-opening-spark s2"></i><i class="hp-opening-spark s3"></i>
         <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span class="hp-opening-tap">Tap Curtain Start</span></div>
       </section>`;
-    document.body.append(opening);
-
-    function sizeOpeningViewport(){
-      const viewport=window.visualViewport;
-      const root=document.documentElement;
-      const width=Math.max(
-        1,
-        Math.round(window.innerWidth||0),
-        Math.round(viewport?.width||0),
-        Math.round(root.clientWidth||0)
-      );
-      const height=Math.max(
-        1,
-        Math.round(window.innerHeight||0),
-        Math.round(viewport?.height||0),
-        Math.round(root.clientHeight||0)
-      );
-      opening.style.setProperty('--hp-opening-width',width+'px');
-      opening.style.setProperty('--hp-opening-height',height+'px');
-    }
-    sizeOpeningViewport();
+    const viewportRoot=document.getElementById('hp-viewport');
+    (viewportRoot||document.body).append(opening);
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
@@ -301,7 +282,7 @@
     sizeRippleCanvas();
     const rippleResizeObserver=window.ResizeObserver?new ResizeObserver(sizeRippleCanvas):null;
     rippleResizeObserver?.observe(opening);
-    const refreshOpeningViewport=()=>{sizeOpeningViewport();sizeRippleCanvas();};
+    const refreshOpeningViewport=()=>{sizeRippleCanvas();};
     window.addEventListener('resize',refreshOpeningViewport);
     window.addEventListener('orientationchange',refreshOpeningViewport);
     window.visualViewport?.addEventListener('resize',refreshOpeningViewport);
