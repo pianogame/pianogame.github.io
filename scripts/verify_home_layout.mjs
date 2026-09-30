@@ -109,6 +109,23 @@ try {
     await page.goto(base, {waitUntil:'networkidle'});
     if (name==='iphone15pm') {
       // Exercise the actual opening flow in one case. Other cases isolate layout.
+      const viewportPolicy=await page.locator('meta[name="viewport"]').getAttribute('content');
+      assert.match(viewportPolicy,/maximum-scale=1/);
+      assert.match(viewportPolicy,/user-scalable=no/);
+      const zoomGuards=await page.evaluate(() => {
+        const gesture=new Event('gesturestart',{bubbles:true,cancelable:true});
+        document.dispatchEvent(gesture);
+        const multi=new Event('touchmove',{bubbles:true,cancelable:true});
+        Object.defineProperty(multi,'touches',{value:[{},{}]});
+        document.dispatchEvent(multi);
+        return {gesture:gesture.defaultPrevented,multi:multi.defaultPrevented};
+      });
+      assert.deepEqual(zoomGuards,{gesture:true,multi:true},'browser zoom guards');
+      const openingBounds=await page.locator('#hp-opening-sequence').evaluate(el=>{
+        const r=el.getBoundingClientRect();
+        return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight};
+      });
+      assert.ok(openingBounds.left<=.5 && openingBounds.top<=.5 && openingBounds.right>=openingBounds.width-.5 && openingBounds.bottom>=openingBounds.height-.5,'opening does not cover viewport');
       const orientation=page.locator('.hp-opening-orientation.hp-ready');
       await orientation.waitFor({state:'visible',timeout:15000});
       await orientation.click();
