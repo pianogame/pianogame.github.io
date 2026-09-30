@@ -1,13 +1,13 @@
 {
   "name": "ドリステ",
   "short_name": "ドリステ",
-  "start_url": "/?app=home&pds_install_id=24",
+  "start_url": "/?app=home&pds_install_id=26",
   "scope": "/",
   "display": "fullscreen",
   "orientation": "landscape",
   "theme_color": "#241324",
   "background_color": "#241324",
-  "id": "/?pds_app_id=24",
+  "id": "/?pds_app_id=26",
   "display_override": [
     "fullscreen",
     "standalone"
@@ -15,16 +15,28 @@
   "lang": "ja",
   "icons": [
     {
-      "src": "/install/pwa-icon-192-v21.png?v=25",
+      "src": "/install/pwa-icon-maskable-192-v26.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     },
     {
-      "src": "/install/pwa-icon-512-v21.png?v=25",
+      "src": "/install/pwa-icon-maskable-512-v26.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
+    },
+    {
+      "src": "/install/pwa-icon-any-192-v26.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/install/pwa-icon-any-512-v26.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

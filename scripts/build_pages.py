@@ -333,6 +333,19 @@ def _flatten_rgba(src, bg=(36, 19, 36)):
         out[i+3] = 255
     return bytes(out)
 
+def _crop_center_rgba(src, sw, sh, cw, ch):
+    """Return a centered RGBA crop. Used for Android maskable icons."""
+    if cw > sw or ch > sh:
+        raise ValueError("Crop larger than source")
+    x0 = (sw - cw) // 2
+    y0 = (sh - ch) // 2
+    out = bytearray(cw * ch * 4)
+    for y in range(ch):
+        src_off = ((y0 + y) * sw + x0) * 4
+        dst_off = y * cw * 4
+        out[dst_off:dst_off + cw * 4] = src[src_off:src_off + cw * 4]
+    return bytes(out)
+
 def _resize_rgba(src, sw, sh, dw, dh):
     out = bytearray(dw * dh * 4)
     for y in range(dh):
@@ -404,12 +417,24 @@ install_v23 = OUT / "install-v23"
 install_v23.mkdir(parents=True, exist_ok=True)
 (install_v23 / "piano-dream-stage-touch-v23.png").write_bytes(root180)
 
-# Standard Web App Manifest sizes.
+# Android / PWA icons.
+# "any" keeps the complete artwork, while "maskable" uses a modest center crop
+# so Android launchers do not shrink the artwork into a tiny tile inside a circle.
 for size, name in [
-    (192, "pwa-icon-192-v21.png"),
-    (512, "pwa-icon-512-v21.png"),
+    (192, "pwa-icon-any-192-v26.png"),
+    (512, "pwa-icon-any-512-v26.png"),
 ]:
     resized = _resize_rgba(opaque0, sw0, sh0, size, size)
+    png = _encode_rgba_png(size, size, resized)
+    (install_dir / name).write_bytes(png)
+
+mask_crop_size = 148
+maskable0 = _crop_center_rgba(opaque0, sw0, sh0, mask_crop_size, mask_crop_size)
+for size, name in [
+    (192, "pwa-icon-maskable-192-v26.png"),
+    (512, "pwa-icon-maskable-512-v26.png"),
+]:
+    resized = _resize_rgba(maskable0, mask_crop_size, mask_crop_size, size, size)
     png = _encode_rgba_png(size, size, resized)
     (install_dir / name).write_bytes(png)
 
@@ -431,9 +456,11 @@ for size, name in apple_icons:
 _verify_png(OUT / "apple-touch-icon.png", 180)
 _verify_png(OUT / "apple-touch-icon-precomposed.png", 180)
 _verify_png(OUT / "install-v23" / "piano-dream-stage-touch-v23.png", 180)
-_verify_png(install_dir / "pwa-icon-192-v21.png", 192)
-_verify_png(install_dir / "pwa-icon-512-v21.png", 512)
-print("Verified install icons: Apple 120/152/167/180 and PWA 192/512, opaque RGBA PNG")
+_verify_png(install_dir / "pwa-icon-any-192-v26.png", 192)
+_verify_png(install_dir / "pwa-icon-any-512-v26.png", 512)
+_verify_png(install_dir / "pwa-icon-maskable-192-v26.png", 192)
+_verify_png(install_dir / "pwa-icon-maskable-512-v26.png", 512)
+print("Verified install icons: Apple 120/152/167/180 and Android PWA any+maskable 192/512")
 
 bundles = ROOT / "sample-bundles"
 for bundle in json.loads((bundles / "parts.json").read_text()):
