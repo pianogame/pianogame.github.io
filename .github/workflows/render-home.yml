@@ -52,6 +52,17 @@ jobs:
             const page = await context.newPage();
             await page.goto('http://127.0.0.1:4173/?app=home',{waitUntil:'domcontentloaded'});
             await page.waitForTimeout(800);
+            await page.evaluate(() => {
+              document.documentElement.classList.remove('hp-install-required');
+              const gate=document.querySelector('.hp-install-gate');
+              if(gate) gate.hidden=true;
+              const viewport=document.querySelector('#hp-viewport');
+              if(viewport){viewport.style.display='block';viewport.removeAttribute('aria-hidden');}
+              const home=document.querySelector('#hp-home-screen');
+              if(home) home.hidden=false;
+              const piano=document.querySelector('#hp-four88');
+              if(piano) piano.hidden=true;
+            });
             const home = page.locator('#hp-home-screen');
             await home.screenshot({path:`/tmp/${name}.png`});
             const metrics = await page.evaluate(() => {
