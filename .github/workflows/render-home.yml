@@ -63,8 +63,23 @@ jobs:
               const piano=document.querySelector('#hp-four88');
               if(piano) piano.hidden=true;
             });
-            const home = page.locator('#hp-home-screen');
-            await home.screenshot({path:`/tmp/${name}.png`});
+            await page.evaluate(({width,height}) => {
+              document.documentElement.style.setProperty('--hp-view-width', width+'px');
+              document.documentElement.style.setProperty('--hp-view-height', height+'px');
+              const viewport=document.querySelector('#hp-viewport');
+              if(viewport){
+                viewport.style.width=width+'px';
+                viewport.style.height=height+'px';
+                viewport.style.transform='none';
+              }
+              const home=document.querySelector('#hp-home-screen');
+              if(home){
+                home.style.display='block';
+                home.style.position='absolute';
+                home.style.inset='0';
+              }
+            }, {width,height});
+            await page.screenshot({path:`/tmp/${name}.png`,fullPage:false});
             const metrics = await page.evaluate(() => {
               const q=s=>document.querySelector(s)?.getBoundingClientRect();
               const fmt=r=>r?{x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1)}:null;
