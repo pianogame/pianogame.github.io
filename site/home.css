@@ -134,9 +134,9 @@
   text-shadow:0 2px 2px rgba(0,0,0,.5);
 }
 #hp-home-screen .hp-home-player-name{
-  left:170px;
-  top:53px;
-  width:185px;
+  left:164px;
+  top:49px;
+  width:190px;
   height:35px;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -147,8 +147,8 @@
   text-shadow:0 1px 0 rgba(255,255,255,.85);
 }
 #hp-home-screen .hp-home-stamina-value{
-  left:285px;
-  top:90px;
+  left:278px;
+  top:78px;
   width:110px;
   height:34px;
   color:#102653;
@@ -234,12 +234,21 @@
 #hp-home-screen.hp-piano-launching .hp-home-piano-image{pointer-events:none}
 #hp-home-screen.hp-piano-launching .hp-home-piano-image::after{animation:hp-piano-rim-flash .72s ease-out both}
 
-#hp-home-screen .hp-home-top-button{
+#hp-home-screen .hp-home-top-actions{
   position:absolute;
   z-index:8;
-  top:15px;
-  width:140px;
-  height:140px;
+  right:22px;
+  top:8px;
+  display:grid;
+  grid-template-columns:repeat(2,105px);
+  gap:10px;
+  align-items:start;
+  pointer-events:none;
+}
+#hp-home-screen .hp-home-top-button{
+  position:relative;
+  width:105px;
+  height:105px;
   margin:0;
   padding:0;
   border:0;
@@ -248,9 +257,8 @@
   -webkit-appearance:none;
   cursor:pointer;
   touch-action:manipulation;
+  pointer-events:auto;
 }
-#hp-home-screen .hp-home-notice-image{right:55px}
-#hp-home-screen .hp-home-settings-image{right:-85px}
 #hp-home-screen .hp-home-top-button-art{
   display:block;
   width:100%;
@@ -264,26 +272,33 @@
 }
 #hp-home-screen .hp-home-notice-badge{
   position:absolute;
-  z-index:2;
-  right:-1%;
-  top:-4%;
-  width:28%;
-  aspect-ratio:1;
-  object-fit:contain;
+  z-index:3;
+  right:-4px;
+  top:-3px;
+  width:31px;
+  height:31px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  border:2px solid #fff4d1;
+  border-radius:50%;
+  background:linear-gradient(180deg,#f42c46,#b9001e);
+  color:#fff;
+  font:900 22px/1 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  text-shadow:0 1px 1px rgba(70,0,0,.5);
+  box-shadow:0 2px 5px rgba(0,0,0,.35);
   pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-  -webkit-user-drag:none;
 }
 #hp-home-screen .hp-home-top-button:active{transform:scale(.965)}
 
 #hp-home-screen .hp-home-voice-card{
   position:absolute;
   z-index:6;
-  left:380px;
-  top:305px;
+  left:364px;
+  top:332px;
   width:255px;
-  height:135px;
+  height:145px;
   box-sizing:border-box;
   padding:45px 18px 14px;
   border:2px solid #d3b66f;
@@ -383,8 +398,8 @@
   position:absolute;
   z-index:6;
   left:830px;
-  bottom:-29px;
-  width:912px;
+  bottom:-22px;
+  width:890px;
   transform:translateX(-50%);
   display:grid;
   grid-template-columns:repeat(3,1fr);
