@@ -33,7 +33,7 @@ jobs:
           sleep 2
       - name: Render viewports
         run: |
-          cat > /tmp/render.mjs <<'JS'
+          cat > render-home.mjs <<'JS'
           import { chromium } from 'playwright';
           import fs from 'fs';
           const cases = [
@@ -76,7 +76,7 @@ jobs:
           }
           await browser.close();
           JS
-          node /tmp/render.mjs
+          node render-home.mjs
       - name: Emit screenshot thumbnails
         run: |
           python3 -m pip install --quiet pillow
