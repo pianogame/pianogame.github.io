@@ -1,15 +1,17 @@
-#hp-home-screen {
+#hp-home-screen{
+  --safe-l:max(env(safe-area-inset-left),10px);
+  --safe-r:max(env(safe-area-inset-right),10px);
+  --safe-t:max(env(safe-area-inset-top),6px);
+  --safe-b:max(env(safe-area-inset-bottom),6px);
   position:absolute;
   inset:0;
   z-index:2;
   overflow:hidden;
   background:#171018;
   isolation:isolate;
-  container-type:size;
 }
 #hp-home-screen[hidden]{display:none!important}
 
-/* Full-bleed background only. No UI or character duplication. */
 #hp-home-screen .hp-home-bg{
   position:absolute;
   inset:0;
@@ -24,64 +26,59 @@
   -webkit-user-drag:none;
 }
 
-/* The approved HOME composition is never stretched or squashed. */
-#hp-home-screen .hp-home-frame{
+#hp-home-screen .hp-home-character{
   position:absolute;
   z-index:2;
-  left:50%;
-  top:50%;
-  width:min(100dvw,177.683316dvh);
-  height:min(100dvh,56.274dvw);
-  aspect-ratio:1672/941;
-  transform:translate(-50%,-50%);
-  overflow:visible;
-}
-
-#hp-home-screen .hp-home-art{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
+  left:49%;
+  bottom:-2.5dvh;
+  height:96dvh;
+  width:auto;
+  max-width:62dvw;
   object-fit:contain;
-  object-position:center;
+  transform:translateX(-50%);
+  transform-origin:center bottom;
   pointer-events:none;
   user-select:none;
   -webkit-user-select:none;
-  -webkit-user-drag:none;  /* home-top-right-cutout:
-     the baked-in old Notice / Settings buttons live in x=83.3..100%, y=0..14.2%.
-     Cut that rectangle out of the reference artwork so the clean background below shows through. */
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='black' fill-rule='evenodd' d='M0 0H100V100H0Z M83.3 0H100V14.2H83.3Z'/%3E%3C/svg%3E");
-  -webkit-mask-size:100% 100%;
-  -webkit-mask-repeat:no-repeat;
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath fill='black' fill-rule='evenodd' d='M0 0H100V100H0Z M83.3 0H100V14.2H83.3Z'/%3E%3C/svg%3E");
-  mask-size:100% 100%;
-  mask-repeat:no-repeat;
+  -webkit-user-drag:none;
 }
 
-/* Only a transparent hit target. Never redraw/crop the PIANO artwork. */
-#hp-home-screen .hp-home-piano{
+#hp-home-screen .hp-home-mode{
   position:absolute;
-  z-index:4;
-  left:65.67%;
-  top:47.93%;
-  width:31.76%;
-  height:24.55%;
+  z-index:5;
+  right:calc(var(--safe-r) + 1.7dvw);
+  width:min(31.5dvw,51dvh);
+  aspect-ratio:3/1;
   margin:0;
   padding:0;
   border:0;
-  border-radius:12px;
   background:transparent;
   appearance:none;
   -webkit-appearance:none;
+  overflow:visible;
   cursor:pointer;
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
-#hp-home-screen .hp-home-piano::after{
+#hp-home-screen .hp-home-game-image{top:21dvh}
+#hp-home-screen .hp-home-piano-image{top:48.5dvh}
+#hp-home-screen .hp-home-game-image[disabled]{opacity:1;cursor:default}
+#hp-home-screen .hp-home-mode>img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 .6dvh .7dvh rgba(0,0,0,.25));
+}
+#hp-home-screen .hp-home-piano-image::after{
   content:"";
   position:absolute;
-  inset:-1.5%;
-  border-radius:inherit;
+  inset:1%;
+  border-radius:1.1dvh;
   opacity:0;
   pointer-events:none;
   border:2px solid rgba(255,229,151,.95);
@@ -91,14 +88,59 @@
     0 0 54px rgba(55,104,255,.70),
     inset 0 0 30px rgba(255,255,255,.24);
 }
-#hp-home-screen .hp-home-piano:active::after{opacity:.85}
-#hp-home-screen.hp-piano-launching .hp-home-piano{pointer-events:none}
-#hp-home-screen.hp-piano-launching .hp-home-piano::after{animation:hp-piano-rim-flash .72s ease-out both}
+#hp-home-screen .hp-home-piano-image:active{transform:scale(.985)}
+#hp-home-screen .hp-home-piano-image:active::after{opacity:.85}
+#hp-home-screen.hp-piano-launching .hp-home-piano-image{pointer-events:none}
+#hp-home-screen.hp-piano-launching .hp-home-piano-image::after{animation:hp-piano-rim-flash .72s ease-out both}
+
+#hp-home-screen .hp-home-top-button{
+  position:absolute;
+  z-index:7;
+  top:calc(var(--safe-t) + .4dvh);
+  width:min(6.7dvw,11.3dvh);
+  aspect-ratio:1;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#hp-home-screen .hp-home-notice-image{right:calc(var(--safe-r) + 7.35dvw)}
+#hp-home-screen .hp-home-settings-image{right:calc(var(--safe-r) + .55dvw)}
+#hp-home-screen .hp-home-top-button-art{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 .25dvh .35dvh rgba(0,0,0,.18));
+}
+#hp-home-screen .hp-home-notice-badge{
+  position:absolute;
+  z-index:2;
+  right:-1%;
+  top:-4%;
+  width:31%;
+  aspect-ratio:1;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+}
+#hp-home-screen .hp-home-top-button:active{transform:scale(.965)}
 
 .hp-home-launch-fx{
   position:absolute;
   inset:0;
-  z-index:12;
+  z-index:20;
   overflow:hidden;
   pointer-events:none;
   opacity:0;
@@ -136,7 +178,6 @@
 #hp-home-screen.hp-piano-launching .hp-home-launch-fx{animation:hp-launch-layer .82s ease-out both}
 #hp-home-screen.hp-piano-launching .hp-home-launch-fx::before{animation:hp-launch-orb .82s cubic-bezier(.12,.72,.25,1) both}
 #hp-home-screen.hp-piano-launching .hp-home-launch-fx::after{animation:hp-launch-sweep .78s cubic-bezier(.2,.7,.2,1) both}
-
 .hp-home-launch-ring,.hp-home-launch-particle{
   position:absolute;
   left:var(--hp-piano-center-x,81.5%);
@@ -210,64 +251,19 @@
 }
 #hp-four88 .hp-back-home:active{transform:translateY(1px)}
 
+@media (max-aspect-ratio:1.82/1){
+  #hp-home-screen .hp-home-character{left:48%;height:93dvh}
+  #hp-home-screen .hp-home-mode{right:calc(var(--safe-r) + .6dvw);width:min(30dvw,49dvh)}
+}
+@media (min-aspect-ratio:2.05/1){
+  #hp-home-screen .hp-home-character{left:49.5%;height:100dvh;max-width:57dvw}
+  #hp-home-screen .hp-home-mode{right:calc(var(--safe-r) + 2.6dvw)}
+}
 @media (prefers-reduced-motion:reduce){
-  #hp-home-screen .hp-home-piano::after,
+  #hp-home-screen .hp-home-piano-image::after,
   #hp-home-screen .hp-home-launch-fx,
   #hp-home-screen .hp-home-launch-fx::before,
   #hp-home-screen .hp-home-launch-fx::after,
   #hp-home-screen .hp-home-launch-ring,
   #hp-home-screen .hp-home-launch-particle{animation-duration:.12s!important}
-}
-
-/* Use the approved uploaded image assets for Notice / Settings.
-   No CSS-drawn bell or gear. */
-#hp-home-screen .hp-home-top-button{
-  position:absolute;
-  z-index:6;
-  top:0.55%;
-  width:7.1%;
-  aspect-ratio:1;
-  margin:0;
-  padding:0;
-  border:0;
-  background:transparent;
-  appearance:none;
-  -webkit-appearance:none;
-  cursor:pointer;
-  touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
-}
-#hp-home-screen .hp-home-notice-image{right:8.05%}
-#hp-home-screen .hp-home-settings-image{right:1.45%}
-#hp-home-screen .hp-home-top-button-art{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-  -webkit-user-drag:none;
-  filter:drop-shadow(0 .25dvh .35dvh rgba(0,0,0,.18));
-}
-#hp-home-screen .hp-home-notice-badge{
-  position:absolute;
-  z-index:2;
-  right:-1%;
-  top:-4%;
-  width:31%;
-  aspect-ratio:1;
-  object-fit:contain;
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-  -webkit-user-drag:none;
-}
-#hp-home-screen .hp-home-top-button:active{
-  transform:scale(.965);
-}
-#hp-home-screen .hp-home-top-button:focus-visible{
-  outline:2px solid rgba(255,239,180,.95);
-  outline-offset:2px;
-  border-radius:50%;
 }
