@@ -17,6 +17,14 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=24">
   <meta name="apple-mobile-web-app-title" content="ドリステ">
   <meta name="mobile-web-app-capable" content="yes">
+  <script>
+    window.__pdsInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      window.__pdsInstallPrompt = event;
+      window.dispatchEvent(new Event('pds-install-prompt-ready'));
+    });
+  </script>
   <style>body.hp-booting{background:#fff!important}body.hp-booting #hp-viewport{visibility:hidden!important}</style>
   <link rel="manifest" href="/manifest.webmanifest?v=26">
   <script>
@@ -29,7 +37,7 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=7">
+  <link rel="stylesheet" href="/home.css?v=8">
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
   <script src="/orientation.js?v=11"></script>
@@ -43,7 +51,7 @@
   <link rel="stylesheet" href="/multitrack.css?v=13">
   <script defer src="/multitrack.js?v=26"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
-  <script defer src="/display-mode.js?v=15"></script>
+  <script defer src="/display-mode.js?v=16"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=9"></script>
 </head>

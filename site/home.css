@@ -8,30 +8,89 @@
 }
 #hp-home-screen[hidden] { display:none !important; }
 
-#hp-home-screen .hp-home-backdrop { display:none !important; }
+/* Fill only the excess screen area with the SAME source art.
+   The foreground HOME remains 16:9 and is never stretched. */
+#hp-home-screen .hp-home-backdrop {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1") center / cover no-repeat;
+}
+#hp-home-screen .hp-home-backdrop::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,
+    rgba(20,11,16,.10) 0%,
+    rgba(20,11,16,0) 12%,
+    rgba(20,11,16,0) 88%,
+    rgba(10,14,24,.10) 100%);
+}
 
 #hp-home-screen .hp-home-frame {
   position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
+  z-index:1;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:min(100dvw,177.777778dvh);
+  aspect-ratio:16/9;
+  overflow:visible;
   border:0;
   border-radius:0;
   box-shadow:none;
-  background:#120d15;
+  background:transparent;
 }
 
 #hp-home-screen .hp-home-art {
   display:block;
   width:100%;
-  height:100%;
-  object-fit:fill;
+  height:auto;
+  aspect-ratio:16/9;
+  object-fit:contain;
   object-position:center;
   user-select:none;
   -webkit-user-select:none;
   -webkit-user-drag:none;
   pointer-events:none;
+}
+
+/* Softly merge the 16:9 source into its full-screen extension; never blur it. */
+@media (min-aspect-ratio:16/9) {
+  #hp-home-screen .hp-home-art {
+    -webkit-mask-image:linear-gradient(90deg,
+      transparent 0%,
+      rgba(0,0,0,.75) 1.2%,
+      #000 2.3%,
+      #000 97.7%,
+      rgba(0,0,0,.75) 98.8%,
+      transparent 100%);
+    mask-image:linear-gradient(90deg,
+      transparent 0%,
+      rgba(0,0,0,.75) 1.2%,
+      #000 2.3%,
+      #000 97.7%,
+      rgba(0,0,0,.75) 98.8%,
+      transparent 100%);
+  }
+}
+@media (max-aspect-ratio:16/9) {
+  #hp-home-screen .hp-home-art {
+    -webkit-mask-image:linear-gradient(180deg,
+      transparent 0%,
+      rgba(0,0,0,.75) 1.2%,
+      #000 2.3%,
+      #000 97.7%,
+      rgba(0,0,0,.75) 98.8%,
+      transparent 100%);
+    mask-image:linear-gradient(180deg,
+      transparent 0%,
+      rgba(0,0,0,.75) 1.2%,
+      #000 2.3%,
+      #000 97.7%,
+      rgba(0,0,0,.75) 98.8%,
+      transparent 100%);
+  }
 }
 
 #hp-home-screen .hp-home-hit {
@@ -48,7 +107,7 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Transparent hit target only. Do not redraw the PIANO artwork. */
+/* Transparent PIANO hit target only. No duplicate artwork. */
 #hp-home-screen .hp-home-piano {
   left:65.0%;
   top:48.3%;
@@ -67,20 +126,15 @@
   box-shadow:
     0 0 10px rgba(255,245,209,.98),
     0 0 26px rgba(105,180,255,.94),
-    0 0 54px rgba(55,104,255,.7),
+    0 0 54px rgba(55,104,255,.70),
     inset 0 0 30px rgba(255,255,255,.24);
 }
-#hp-home-screen .hp-home-piano:active::before {
-  opacity:.85;
-}
+#hp-home-screen .hp-home-piano:active::before { opacity:.85; }
 #hp-home-screen .hp-home-piano:focus-visible {
   outline:3px solid #fff2bc;
   outline-offset:-4px;
 }
-
-#hp-home-screen.hp-piano-launching .hp-home-piano {
-  pointer-events:none;
-}
+#hp-home-screen.hp-piano-launching .hp-home-piano { pointer-events:none; }
 #hp-home-screen.hp-piano-launching .hp-home-piano::before {
   animation:hp-piano-rim-flash .72s ease-out both;
 }
@@ -102,26 +156,24 @@
   aspect-ratio:1;
   border-radius:50%;
   transform:translate(-50%,-50%) scale(.15);
-  background:
-    radial-gradient(circle,
-      rgba(255,255,255,.98) 0 4%,
-      rgba(204,230,255,.88) 11%,
-      rgba(102,157,255,.48) 31%,
-      rgba(255,214,126,.18) 52%,
-      transparent 70%);
+  background:radial-gradient(circle,
+    rgba(255,255,255,.98) 0 4%,
+    rgba(204,230,255,.88) 11%,
+    rgba(102,157,255,.48) 31%,
+    rgba(255,214,126,.18) 52%,
+    transparent 70%);
   mix-blend-mode:screen;
 }
 .hp-home-launch-fx::after {
   content:"";
   position:absolute;
   inset:-25%;
-  background:
-    linear-gradient(110deg,
-      transparent 35%,
-      rgba(255,255,255,0) 42%,
-      rgba(255,255,255,.82) 49%,
-      rgba(159,205,255,.42) 52%,
-      transparent 59%);
+  background:linear-gradient(110deg,
+    transparent 35%,
+    rgba(255,255,255,0) 42%,
+    rgba(255,255,255,.82) 49%,
+    rgba(159,205,255,.42) 52%,
+    transparent 59%);
   transform:translateX(-75%) skewX(-10deg);
   mix-blend-mode:screen;
 }
@@ -147,28 +199,18 @@
   aspect-ratio:1;
   border-radius:50%;
   border:2px solid rgba(216,238,255,.9);
-  box-shadow:
-    0 0 10px rgba(255,255,255,.9),
-    0 0 24px rgba(71,145,255,.8),
-    inset 0 0 10px rgba(255,225,147,.45);
+  box-shadow:0 0 10px rgba(255,255,255,.9),0 0 24px rgba(71,145,255,.8),inset 0 0 10px rgba(255,225,147,.45);
   transform:translate(-50%,-50%) scale(.18);
   opacity:0;
 }
-#hp-home-screen.hp-piano-launching .hp-home-launch-ring.ring-a {
-  animation:hp-launch-ring .65s ease-out .02s both;
-}
-#hp-home-screen.hp-piano-launching .hp-home-launch-ring.ring-b {
-  animation:hp-launch-ring .72s ease-out .12s both;
-}
+#hp-home-screen.hp-piano-launching .hp-home-launch-ring.ring-a { animation:hp-launch-ring .65s ease-out .02s both; }
+#hp-home-screen.hp-piano-launching .hp-home-launch-ring.ring-b { animation:hp-launch-ring .72s ease-out .12s both; }
 .hp-home-launch-particle {
   width:5px;
   height:5px;
   border-radius:50%;
   background:#fff;
-  box-shadow:
-    0 0 6px #fff,
-    0 0 12px rgba(109,177,255,.95),
-    0 0 18px rgba(255,210,115,.72);
+  box-shadow:0 0 6px #fff,0 0 12px rgba(109,177,255,.95),0 0 18px rgba(255,210,115,.72);
   opacity:0;
 }
 #hp-home-screen.hp-piano-launching .hp-home-launch-particle {
@@ -204,15 +246,9 @@
   100% { opacity:0; transform:translate(-50%,-50%) scale(5.2); }
 }
 @keyframes hp-launch-particle {
-  0% {
-    opacity:0;
-    transform:translate(-50%,-50%) rotate(var(--angle)) translateX(0) scale(.4);
-  }
+  0% { opacity:0; transform:translate(-50%,-50%) rotate(var(--angle)) translateX(0) scale(.4); }
   22% { opacity:1; }
-  100% {
-    opacity:0;
-    transform:translate(-50%,-50%) rotate(var(--angle)) translateX(var(--distance)) scale(1.35);
-  }
+  100% { opacity:0; transform:translate(-50%,-50%) rotate(var(--angle)) translateX(var(--distance)) scale(1.35); }
 }
 
 #hp-four88 .hp-back-home {

@@ -9,10 +9,8 @@
   const standalone=window.matchMedia('(display-mode: standalone)');
   const fullscreen=window.matchMedia('(display-mode: fullscreen)');
   const fullscreenElement=()=>document.fullscreenElement||document.webkitFullscreenElement;
-  const launchParams=new URLSearchParams(location.search);
-  const isHomeLaunch=launchParams.get('app')==='home';
-  const isApp=()=>isHomeLaunch||navigator.standalone===true||standalone.matches||(fullscreen.matches&&!fullscreenElement());
-  let installPrompt=null;
+  const isApp=()=>navigator.standalone===true||standalone.matches||(fullscreen.matches&&!fullscreenElement());
+  let installPrompt=window.__pdsInstallPrompt||null;
   const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const installParams=new URLSearchParams(location.search);
   const forceInstallGuide=installParams.get('install')==='1'||installParams.get('from')==='piano-palette';
@@ -59,10 +57,12 @@
       gateGuide.innerHTML='<p>iPhone / iPadではSafariから次の手順で追加します。</p><ol><li>Safari下部の「共有」ボタンをタップ</li><li>「ホーム画面に追加」をタップ</li><li>「Webアプリとして開く」が表示されたらON</li><li>右上の「追加」をタップ</li></ol>';
     } else if(installPrompt) {
       gateButton.hidden=false;
+      gateButton.textContent='ホーム画面に追加';
       gateGuide.innerHTML='<p>下のボタンからアプリとしてインストールできます。</p>';
     } else {
-      gateButton.hidden=true;
-      gateGuide.innerHTML='<p>ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選んでください。</p>';
+      gateButton.hidden=false;
+      gateButton.textContent='ホーム画面に追加';
+      gateGuide.innerHTML='<p>追加ボタンをタップしてください。Chromeの直接インストールがまだ準備できていない場合は、メニューの「アプリをインストール」または「ホーム画面に追加」を案内します。</p>';
     }
     styleBilingual();
   }
@@ -104,7 +104,11 @@
     } catch(_) {showGuide('全画面表示が許可されませんでした。ホーム画面からアプリとして開けます。');}
   }
   async function installFromPrompt() {
-    if(!installPrompt){renderGate();return;}
+    if(!installPrompt){
+      gateGuide.innerHTML='<p>Chrome右上の「︙」メニューを開き、「アプリをインストール」または「ホーム画面に追加」を選んでください。</p>';
+      gateButton.textContent='追加方法を表示中';
+      return;
+    }
     const prompt=installPrompt;
     installPrompt=null;
     gateButton.hidden=true;
@@ -123,7 +127,8 @@
   action('display-mode').addEventListener('click',()=>void enterFullscreen());
   action('fullscreen').addEventListener('click',()=>void enterFullscreen());
   action('install-app').addEventListener('click',()=>void installFromPrompt());
-  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;refresh();});
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();window.__pdsInstallPrompt=event;installPrompt=event;refresh();});
+  window.addEventListener('pds-install-prompt-ready',()=>{installPrompt=window.__pdsInstallPrompt||installPrompt;refresh();});
   window.addEventListener('appinstalled',()=>{installPrompt=null;refresh();status.textContent='追加したピアノドリームステージのアイコンから起動してください。';});
   document.addEventListener('fullscreenchange',refresh);
   document.addEventListener('webkitfullscreenchange',refresh);

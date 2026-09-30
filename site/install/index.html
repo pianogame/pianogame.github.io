@@ -35,6 +35,8 @@
   <img src="/install/apple-touch-icon.png?v=1" alt="">
   <h1><span class="en">Piano Dream Stage</span><span class="kana">ピアノドリームステージ</span></h1>
   <p>ホーム画面に追加してから起動してください。</p>
+  <button id="android-install-button" type="button" hidden style="width:100%;min-height:52px;margin:18px 0 0;border:0;border-radius:26px;background:linear-gradient(180deg,#f6d887,#b8832e);color:#2f1734;font:700 16px system-ui,-apple-system,sans-serif">ホーム画面に追加</button>
+  <p id="android-install-help" class="note" hidden></p>
   <ol>
     <li>Safariの「共有」をタップ</li>
     <li>「ホーム画面に追加」をタップ</li>
@@ -44,7 +46,35 @@
 </main>
 <script>
   const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-  if (isStandalone) location.replace('/?app=home');
+  if (isStandalone) {
+    location.replace('/?app=home');
+  } else {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const button = document.getElementById('android-install-button');
+    const help = document.getElementById('android-install-help');
+    let promptEvent = null;
+
+    if (!isIOS) {
+      button.hidden = false;
+      button.addEventListener('click', async () => {
+        if (!promptEvent) {
+          help.hidden = false;
+          help.textContent = 'Chrome右上の「︙」→「アプリをインストール」または「ホーム画面に追加」を選んでください。';
+          return;
+        }
+        const current = promptEvent;
+        promptEvent = null;
+        await current.prompt();
+        await current.userChoice.catch(() => null);
+      });
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        promptEvent = event;
+        help.hidden = true;
+      });
+    }
+  }
 </script>
 </body>
 </html>
