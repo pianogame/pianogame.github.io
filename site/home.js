@@ -19,13 +19,18 @@
     const rect = safeFrame.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
-    const scale = Math.min(
-      rect.width / HOME_BASE_WIDTH,
-      rect.height / HOME_BASE_HEIGHT
-    );
+    // Native-game style reference canvas:
+    // preserve the 1536-wide design size, then use top/bottom/left/right anchors
+    // instead of shrinking the whole 16:9 UI into a letterboxed rectangle.
+    // A 680px logical-height floor prevents overlap on unusually wide devices.
+    const widthScale = rect.width / HOME_BASE_WIDTH;
+    const minimumLogicalHeight = 680;
+    const scale = Math.min(widthScale, rect.height / minimumLogicalHeight);
+    const logicalHeight = rect.height / scale;
 
-    if (!Number.isFinite(scale) || scale <= 0) return;
+    if (!Number.isFinite(scale) || scale <= 0 || !Number.isFinite(logicalHeight)) return;
     homeCanvas.style.setProperty('--hp-home-scale', scale.toFixed(6));
+    homeCanvas.style.setProperty('--hp-home-logical-height', logicalHeight.toFixed(3) + 'px');
     home.classList.add('hp-home-layout-ready');
     requestAnimationFrame(syncPianoFxCenter);
   }
