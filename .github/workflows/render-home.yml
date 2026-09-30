@@ -56,6 +56,9 @@ jobs:
               document.documentElement.classList.remove('hp-install-required');
               const gate=document.querySelector('.hp-install-gate');
               if(gate) gate.hidden=true;
+              document.body.classList.remove('hp-booting');
+              const opening=document.querySelector('#hp-opening-sequence');
+              if(opening) opening.remove();
               const viewport=document.querySelector('#hp-viewport');
               if(viewport){viewport.style.display='block';viewport.removeAttribute('aria-hidden');}
               const home=document.querySelector('#hp-home-screen');
