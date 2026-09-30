@@ -6,7 +6,7 @@
     const style=document.createElement('style');
     style.textContent=`
       body.hp-booting #hp-viewport{visibility:visible!important}
-      #hp-opening-sequence{position:absolute;inset:0;width:100%;height:100%;z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
+      #hp-opening-sequence{position:fixed;left:0;top:0;right:auto;bottom:auto;width:100lvw;height:100lvh;min-width:100vw;min-height:100dvh;z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
       #hp-opening-sequence[hidden]{display:none!important}
       .hp-opening-orientation,.hp-opening-title{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box}
       .hp-opening-orientation{z-index:3;padding:28px;background:#fff;color:#29242c;text-align:center;opacity:1;transition:opacity .28s ease;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
@@ -74,8 +74,7 @@
         <i class="hp-opening-spark s1"></i><i class="hp-opening-spark s2"></i><i class="hp-opening-spark s3"></i>
         <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span class="hp-opening-tap">Tap Curtain Start</span></div>
       </section>`;
-    const viewportRoot=document.getElementById('hp-viewport');
-    (viewportRoot||document.body).append(opening);
+    document.body.append(opening);
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
@@ -500,6 +499,7 @@
       orientation.classList.add('hp-ripple-release');
       playReleaseRipple();
       setTimeout(()=>{
+        document.documentElement.classList.add('hp-opening-curtain-bg');
         orientation.hidden=true;
         title.classList.add('hp-show');
       },520);
@@ -573,7 +573,11 @@
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');
       setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
-      setTimeout(()=>{rippleResizeObserver?.disconnect();opening.remove();},1950);
+      setTimeout(()=>{
+        rippleResizeObserver?.disconnect();
+        opening.remove();
+        document.documentElement.classList.remove('hp-opening-curtain-bg');
+      },1950);
     },{once:true});
 
     window.addEventListener('resize',armPreparation);
