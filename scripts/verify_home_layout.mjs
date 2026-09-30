@@ -122,10 +122,19 @@ try {
       });
       assert.deepEqual(zoomGuards,{gesture:true,multi:true},'browser zoom guards');
       const openingBounds=await page.locator('#hp-opening-sequence').evaluate(el=>{
-        const r=el.getBoundingClientRect();
-        return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight};
+        const r=el.getBoundingClientRect(), parent=el.parentElement, p=parent.getBoundingClientRect();
+        return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,parentLeft:p.left,parentTop:p.top,parentRight:p.right,parentBottom:p.bottom,parentId:parent.id};
       });
-      assert.ok(openingBounds.left<=.5 && openingBounds.top<=.5 && openingBounds.right>=openingBounds.width-.5 && openingBounds.bottom>=openingBounds.height-.5,'opening does not cover viewport');
+      assert.equal(openingBounds.parentId,'hp-viewport','opening must share the app viewport');
+      assert.ok(
+        Math.abs(openingBounds.left-openingBounds.parentLeft)<=.5 &&
+        Math.abs(openingBounds.top-openingBounds.parentTop)<=.5 &&
+        Math.abs(openingBounds.right-openingBounds.parentRight)<=.5 &&
+        Math.abs(openingBounds.bottom-openingBounds.parentBottom)<=.5,
+        'opening does not cover hp-viewport'
+      );
+      const bootBackground=await page.evaluate(()=>getComputedStyle(document.body).backgroundColor);
+      assert.notEqual(bootBackground,'rgb(255, 255, 255)','boot background must not expose a white strip');
       const orientation=page.locator('.hp-opening-orientation.hp-ready');
       await orientation.waitFor({state:'visible',timeout:15000});
       await orientation.click();
