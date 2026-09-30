@@ -5,7 +5,6 @@
 
     const style=document.createElement('style');
     style.textContent=`
-      body.hp-booting #hp-viewport{visibility:visible!important}
       #hp-opening-sequence{position:fixed;left:0;top:0;right:auto;bottom:auto;width:100lvw;height:100lvh;min-width:100vw;min-height:100dvh;z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
       #hp-opening-sequence[hidden]{display:none!important}
       .hp-opening-orientation,.hp-opening-title{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box}
