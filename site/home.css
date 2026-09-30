@@ -230,3 +230,56 @@
   #hp-home-screen .hp-home-launch-ring,
   #hp-home-screen .hp-home-launch-particle{animation-duration:.12s!important}
 }
+
+/* Use the approved uploaded image assets for Notice / Settings.
+   No CSS-drawn bell or gear. */
+#hp-home-screen .hp-home-top-button{
+  position:absolute;
+  z-index:6;
+  top:0.55%;
+  width:7.1%;
+  aspect-ratio:1;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#hp-home-screen .hp-home-notice-image{right:8.05%}
+#hp-home-screen .hp-home-settings-image{right:1.45%}
+#hp-home-screen .hp-home-top-button-art{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 .25dvh .35dvh rgba(0,0,0,.18));
+}
+#hp-home-screen .hp-home-notice-badge{
+  position:absolute;
+  z-index:2;
+  right:-1%;
+  top:-4%;
+  width:31%;
+  aspect-ratio:1;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+}
+#hp-home-screen .hp-home-top-button:active{
+  transform:scale(.965);
+}
+#hp-home-screen .hp-home-top-button:focus-visible{
+  outline:2px solid rgba(255,239,180,.95);
+  outline-offset:2px;
+  border-radius:50%;
+}
