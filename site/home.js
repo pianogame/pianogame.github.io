@@ -33,6 +33,24 @@
   let transitioning = false;
   let launchTimer = 0;
 
+  function syncResponsiveHomeUi() {
+    if (home.hidden) return;
+    const homeRect = home.getBoundingClientRect();
+    const pianoRect = pianoButton.getBoundingClientRect();
+    if (!homeRect.width || !homeRect.height || !pianoRect.width || !pianoRect.height) return;
+
+    const centerX = pianoRect.left - homeRect.left + pianoRect.width / 2;
+    const centerY = pianoRect.top - homeRect.top + pianoRect.height / 2;
+    home.style.setProperty('--hp-piano-center-x', centerX + 'px');
+    home.style.setProperty('--hp-piano-center-y', centerY + 'px');
+  }
+
+  let homeResizeRaf = 0;
+  function scheduleResponsiveHomeUi() {
+    cancelAnimationFrame(homeResizeRaf);
+    homeResizeRaf = requestAnimationFrame(syncResponsiveHomeUi);
+  }
+
   function finishTransition() {
     requestAnimationFrame(() => {
       window.dispatchEvent(new Event('hp-viewport-resize'));
@@ -60,6 +78,7 @@
     } catch (_) {}
 
     home.classList.remove('hp-piano-launching');
+    syncResponsiveHomeUi();
     void home.offsetWidth;
     home.classList.add('hp-piano-launching');
 
@@ -90,8 +109,14 @@
     piano.hidden = true;
     home.hidden = false;
     document.body.classList.remove('hp-piano-active');
+    scheduleResponsiveHomeUi();
     finishTransition();
   }
+
+  window.addEventListener('resize', scheduleResponsiveHomeUi, { passive:true });
+  window.addEventListener('orientationchange', scheduleResponsiveHomeUi, { passive:true });
+  window.visualViewport?.addEventListener('resize', scheduleResponsiveHomeUi, { passive:true });
+  scheduleResponsiveHomeUi();
 
   pianoButton.addEventListener('click', enterPiano);
   homeButton.addEventListener('click', enterHome);

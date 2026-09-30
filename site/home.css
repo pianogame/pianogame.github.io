@@ -8,6 +8,8 @@
   container-type:size;
   background:#120d15;
   isolation:isolate;
+  --hp-piano-center-x:81.2%;
+  --hp-piano-center-y:62.8%;
 }
 #hp-home-screen[hidden] { display:none !important; }
 
@@ -15,31 +17,13 @@
    The center artwork remains undistorted; its side edges are softly feathered
    into this extension so there is no hard vertical cut. */
 #hp-home-screen .hp-home-backdrop {
-  position:absolute;
-  inset:-14px;
-  z-index:-2;
-  background:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1") center 49% / cover no-repeat;
-  filter:blur(9px) saturate(.94) brightness(.88);
-  transform:scale(1.025);
-}
-#hp-home-screen .hp-home-backdrop::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(90deg,
-      rgba(19,12,15,.18) 0%,
-      rgba(19,12,15,.02) 16%,
-      rgba(19,12,15,0) 32%,
-      rgba(19,12,15,0) 68%,
-      rgba(11,17,28,.02) 84%,
-      rgba(11,17,28,.18) 100%);
+  display:none;
 }
 
 #hp-home-screen .hp-home-frame {
   position:relative;
-  width:min(100cqw,177.778cqh);
-  max-width:100%;
+  width:max(100cqw,177.778cqh);
+  flex:none;
   aspect-ratio:16/9;
   overflow:visible;
   border:0;
@@ -59,25 +43,6 @@
   pointer-events:none;
 }
 
-/* Only wide screens need edge blending. The source art itself is never stretched. */
-@media (min-aspect-ratio:16/9) {
-  #hp-home-screen .hp-home-art {
-    -webkit-mask-image:linear-gradient(90deg,
-      transparent 0%,
-      rgba(0,0,0,.58) 1.1%,
-      #000 2.4%,
-      #000 97.6%,
-      rgba(0,0,0,.58) 98.9%,
-      transparent 100%);
-    mask-image:linear-gradient(90deg,
-      transparent 0%,
-      rgba(0,0,0,.58) 1.1%,
-      #000 2.4%,
-      #000 97.6%,
-      rgba(0,0,0,.58) 98.9%,
-      transparent 100%);
-  }
-}
 
 #hp-home-screen .hp-home-hit {
   position:absolute;
@@ -202,8 +167,8 @@
 
 .hp-home-launch-ring {
   position:absolute;
-  left:81.2%;
-  top:62.8%;
+  left:var(--hp-piano-center-x,81.2%);
+  top:var(--hp-piano-center-y,62.8%);
   width:7%;
   aspect-ratio:1;
   border-radius:50%;
@@ -224,8 +189,8 @@
 
 .hp-home-launch-particle {
   position:absolute;
-  left:81.2%;
-  top:62.8%;
+  left:var(--hp-piano-center-x,81.2%);
+  top:var(--hp-piano-center-y,62.8%);
   width:5px;
   height:5px;
   border-radius:50%;
