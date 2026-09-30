@@ -1,0 +1,32 @@
+name: Inspect HOME assets
+on:
+  push:
+    branches: [staging]
+    paths:
+      - ".github/workflows/home-asset-inspect.yml"
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet pillow ImageHash
+      - name: Inspect assets
+        run: |
+          python - <<'PY'
+          from PIL import Image, ImageStat
+          import imagehash, glob, os
+          for p in sorted(glob.glob("site/assets/home/ui/*.png")):
+              im=Image.open(p).convert("RGBA")
+              rgb=Image.new("RGB", im.size, "black")
+              rgb.paste(im, mask=im.getchannel("A"))
+              stat=ImageStat.Stat(rgb.resize((64,64)))
+              mean=tuple(round(v,1) for v in stat.mean)
+              print(f"ASSET {os.path.basename(p)} size={im.size[0]}x{im.size[1]} phash={imagehash.phash(rgb)} dhash={imagehash.dhash(rgb)} mean={mean}")
+          PY
