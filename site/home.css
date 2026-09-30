@@ -11,21 +11,29 @@
 }
 #hp-home-screen[hidden] { display:none !important; }
 
+/* Same uploaded HOME art fills the extra-wide phone area.
+   The center artwork remains undistorted; its side edges are softly feathered
+   into this extension so there is no hard vertical cut. */
 #hp-home-screen .hp-home-backdrop {
   position:absolute;
-  inset:-6%;
+  inset:-14px;
   z-index:-2;
-  background:
-    url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1")
-    center / cover no-repeat;
-  filter:blur(18px) saturate(.92) brightness(.70);
-  transform:scale(1.10);
+  background:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1") center 49% / cover no-repeat;
+  filter:blur(9px) saturate(.94) brightness(.88);
+  transform:scale(1.025);
 }
 #hp-home-screen .hp-home-backdrop::after {
   content:"";
   position:absolute;
   inset:0;
-  background:rgba(17,10,15,.10);
+  background:
+    linear-gradient(90deg,
+      rgba(19,12,15,.18) 0%,
+      rgba(19,12,15,.02) 16%,
+      rgba(19,12,15,0) 32%,
+      rgba(19,12,15,0) 68%,
+      rgba(11,17,28,.02) 84%,
+      rgba(11,17,28,.18) 100%);
 }
 
 #hp-home-screen .hp-home-frame {
@@ -33,7 +41,7 @@
   width:min(100cqw,177.778cqh);
   max-width:100%;
   aspect-ratio:16/9;
-  overflow:hidden;
+  overflow:visible;
   border:0;
   border-radius:0;
   box-shadow:none;
@@ -51,13 +59,33 @@
   pointer-events:none;
 }
 
+/* Only wide screens need edge blending. The source art itself is never stretched. */
+@media (min-aspect-ratio:16/9) {
+  #hp-home-screen .hp-home-art {
+    -webkit-mask-image:linear-gradient(90deg,
+      transparent 0%,
+      rgba(0,0,0,.58) 1.1%,
+      #000 2.4%,
+      #000 97.6%,
+      rgba(0,0,0,.58) 98.9%,
+      transparent 100%);
+    mask-image:linear-gradient(90deg,
+      transparent 0%,
+      rgba(0,0,0,.58) 1.1%,
+      #000 2.4%,
+      #000 97.6%,
+      rgba(0,0,0,.58) 98.9%,
+      transparent 100%);
+  }
+}
+
 #hp-home-screen .hp-home-hit {
   position:absolute;
-  z-index:3;
+  z-index:4;
   border:0;
   margin:0;
   padding:0;
-  overflow:hidden;
+  overflow:visible;
   background:transparent;
   appearance:none;
   -webkit-appearance:none;
@@ -66,35 +94,196 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Step 1: PIANO is a real independent layer, sampled from the exact uploaded HOME art. */
+/* PIANO is a real independent layer sampled from the exact uploaded HOME art. */
 #hp-home-screen .hp-home-piano {
   left:65.364583%;
   top:51.967593%;
   width:32.161458%;
   height:21.759259%;
   border-radius:10px;
+  isolation:isolate;
 }
 #hp-home-screen .hp-home-piano::before {
   content:"";
   position:absolute;
-  width:310.931174%;
-  height:459.574468%;
-  left:-203.238866%;
-  top:-238.829787%;
-  background:
-    url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1")
-    0 0 / 100% 100% no-repeat;
+  inset:0;
+  border-radius:inherit;
+  background:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1") 69.409% 58.334% / 310.931174% 459.574468% no-repeat;
   pointer-events:none;
+  z-index:0;
+  transition:filter .16s ease, transform .16s cubic-bezier(.2,.8,.2,1);
 }
+#hp-home-screen .hp-home-piano::after {
+  content:"";
+  position:absolute;
+  inset:-3%;
+  z-index:1;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:0;
+  border:2px solid rgba(255,226,142,.92);
+  box-shadow:
+    0 0 10px rgba(255,239,184,.95),
+    0 0 24px rgba(110,182,255,.9),
+    0 0 52px rgba(51,102,255,.68),
+    inset 0 0 22px rgba(255,255,255,.42);
+}
+
 #hp-home-screen .hp-home-piano:active::before {
-  filter:brightness(1.12) saturate(1.05);
-  transform:scale(.992);
-  transform-origin:center;
+  filter:brightness(1.10) saturate(1.08);
+  transform:scale(.985);
 }
 #hp-home-screen .hp-home-piano:focus-visible {
   outline:3px solid #fff2bc;
   outline-offset:-4px;
-  box-shadow:0 0 18px rgba(255,221,125,.78);
+}
+
+/* Premium PIANO launch animation */
+#hp-home-screen.hp-piano-launching .hp-home-piano {
+  pointer-events:none;
+}
+#hp-home-screen.hp-piano-launching .hp-home-piano::before {
+  animation:hp-piano-button-bloom .72s cubic-bezier(.2,.7,.2,1) both;
+}
+#hp-home-screen.hp-piano-launching .hp-home-piano::after {
+  animation:hp-piano-rim-flash .72s ease-out both;
+}
+
+.hp-home-launch-fx {
+  position:absolute;
+  inset:0;
+  z-index:12;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:0;
+}
+.hp-home-launch-fx::before {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:18vmax;
+  aspect-ratio:1;
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(.15);
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.98) 0 4%,
+      rgba(204,230,255,.88) 11%,
+      rgba(102,157,255,.48) 31%,
+      rgba(255,214,126,.18) 52%,
+      transparent 70%);
+  mix-blend-mode:screen;
+}
+.hp-home-launch-fx::after {
+  content:"";
+  position:absolute;
+  inset:-25%;
+  background:
+    linear-gradient(110deg,
+      transparent 35%,
+      rgba(255,255,255,.0) 42%,
+      rgba(255,255,255,.82) 49%,
+      rgba(159,205,255,.42) 52%,
+      transparent 59%);
+  transform:translateX(-75%) skewX(-10deg);
+  mix-blend-mode:screen;
+}
+
+#hp-home-screen.hp-piano-launching .hp-home-launch-fx {
+  animation:hp-launch-layer .82s ease-out both;
+}
+#hp-home-screen.hp-piano-launching .hp-home-launch-fx::before {
+  animation:hp-launch-orb .82s cubic-bezier(.12,.72,.25,1) both;
+}
+#hp-home-screen.hp-piano-launching .hp-home-launch-fx::after {
+  animation:hp-launch-sweep .78s cubic-bezier(.2,.7,.2,1) both;
+}
+
+.hp-home-launch-ring {
+  position:absolute;
+  left:81.2%;
+  top:62.8%;
+  width:7%;
+  aspect-ratio:1;
+  border-radius:50%;
+  border:2px solid rgba(216,238,255,.9);
+  box-shadow:
+    0 0 10px rgba(255,255,255,.9),
+    0 0 24px rgba(71,145,255,.8),
+    inset 0 0 10px rgba(255,225,147,.45);
+  transform:translate(-50%,-50%) scale(.18);
+  opacity:0;
+}
+#hp-home-screen.hp-piano-launching .hp-home-launch-ring.ring-a {
+  animation:hp-launch-ring .65s ease-out .02s both;
+}
+#hp-home-screen.hp-piano-launching .hp-home-launch-ring.ring-b {
+  animation:hp-launch-ring .72s ease-out .12s both;
+}
+
+.hp-home-launch-particle {
+  position:absolute;
+  left:81.2%;
+  top:62.8%;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:
+    0 0 6px #fff,
+    0 0 12px rgba(109,177,255,.95),
+    0 0 18px rgba(255,210,115,.72);
+  opacity:0;
+}
+#hp-home-screen.hp-piano-launching .hp-home-launch-particle {
+  animation:hp-launch-particle .7s cubic-bezier(.15,.74,.28,1) var(--delay,0s) both;
+}
+
+@keyframes hp-piano-button-bloom {
+  0%   { transform:scale(1); filter:brightness(1) saturate(1); }
+  18%  { transform:scale(.975); filter:brightness(1.18) saturate(1.1); }
+  44%  { transform:scale(1.025); filter:brightness(1.45) saturate(1.24); }
+  100% { transform:scale(1.055); filter:brightness(1.72) saturate(1.28) blur(.25px); }
+}
+@keyframes hp-piano-rim-flash {
+  0%   { opacity:0; transform:scale(.96); }
+  18%  { opacity:1; }
+  62%  { opacity:.92; transform:scale(1.04); }
+  100% { opacity:0; transform:scale(1.12); }
+}
+@keyframes hp-launch-layer {
+  0%   { opacity:0; background:rgba(4,9,22,0); }
+  20%  { opacity:1; }
+  68%  { opacity:1; background:rgba(10,24,60,.10); }
+  100% { opacity:1; background:rgba(246,250,255,.94); }
+}
+@keyframes hp-launch-orb {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(.12); }
+  24%  { opacity:.8; }
+  72%  { opacity:.92; transform:translate(-50%,-50%) scale(2.2); }
+  100% { opacity:.45; transform:translate(-50%,-50%) scale(4.5); }
+}
+@keyframes hp-launch-sweep {
+  0%   { opacity:0; transform:translateX(-78%) skewX(-10deg); }
+  22%  { opacity:1; }
+  100% { opacity:0; transform:translateX(82%) skewX(-10deg); }
+}
+@keyframes hp-launch-ring {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(.15); }
+  22%  { opacity:1; }
+  100% { opacity:0; transform:translate(-50%,-50%) scale(5.2); }
+}
+@keyframes hp-launch-particle {
+  0% {
+    opacity:0;
+    transform:translate(-50%,-50%) rotate(var(--angle)) translateX(0) scale(.4);
+  }
+  22% { opacity:1; }
+  100% {
+    opacity:0;
+    transform:translate(-50%,-50%) rotate(var(--angle)) translateX(var(--distance)) scale(1.35);
+  }
 }
 
 #hp-four88 .hp-back-home {
@@ -116,5 +305,13 @@
   }
 }
 @media (prefers-reduced-motion:reduce) {
-  #hp-home-screen .hp-home-piano::before { transition:none; }
+  #hp-home-screen .hp-home-piano::before,
+  #hp-home-screen .hp-home-piano::after,
+  #hp-home-screen .hp-home-launch-fx,
+  #hp-home-screen .hp-home-launch-fx::before,
+  #hp-home-screen .hp-home-launch-fx::after,
+  #hp-home-screen .hp-home-launch-ring,
+  #hp-home-screen .hp-home-launch-particle {
+    animation-duration:.12s !important;
+  }
 }

@@ -9,7 +9,29 @@
   const homeButton = piano.querySelector('[data-home-action="home"]');
   if (!pianoButton || !homeButton) return;
 
+  const launchFx = document.createElement('div');
+  launchFx.className = 'hp-home-launch-fx';
+  launchFx.setAttribute('aria-hidden', 'true');
+
+  const ringA = document.createElement('span');
+  ringA.className = 'hp-home-launch-ring ring-a';
+  const ringB = document.createElement('span');
+  ringB.className = 'hp-home-launch-ring ring-b';
+  launchFx.append(ringA, ringB);
+
+  const particleAngles = [-172,-151,-132,-111,-88,-66,-42,-19,7,29,52,74,99,123,146,166];
+  particleAngles.forEach((angle, index) => {
+    const particle = document.createElement('span');
+    particle.className = 'hp-home-launch-particle';
+    particle.style.setProperty('--angle', angle + 'deg');
+    particle.style.setProperty('--distance', (46 + (index % 5) * 13) + 'px');
+    particle.style.setProperty('--delay', ((index % 4) * 0.018) + 's');
+    launchFx.appendChild(particle);
+  });
+  home.appendChild(launchFx);
+
   let transitioning = false;
+  let launchTimer = 0;
 
   function finishTransition() {
     requestAnimationFrame(() => {
@@ -17,6 +39,14 @@
       window.dispatchEvent(new Event('resize'));
       transitioning = false;
     });
+  }
+
+  function showPiano() {
+    home.classList.remove('hp-piano-launching');
+    home.hidden = true;
+    piano.hidden = false;
+    document.body.classList.add('hp-piano-active');
+    finishTransition();
   }
 
   function enterPiano() {
@@ -29,15 +59,21 @@
       if (resume && typeof resume.catch === 'function') resume.catch(() => {});
     } catch (_) {}
 
-    home.hidden = true;
-    piano.hidden = false;
-    document.body.classList.add('hp-piano-active');
-    finishTransition();
+    home.classList.remove('hp-piano-launching');
+    void home.offsetWidth;
+    home.classList.add('hp-piano-launching');
+
+    window.clearTimeout(launchTimer);
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    launchTimer = window.setTimeout(showPiano, reduced ? 140 : 800);
   }
 
   function enterHome() {
     if (transitioning) return;
     transitioning = true;
+
+    window.clearTimeout(launchTimer);
+    home.classList.remove('hp-piano-launching');
 
     try {
       const activeRecord = piano.querySelector('[data-action="record"][aria-pressed="true"]');
