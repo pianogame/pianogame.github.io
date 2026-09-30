@@ -128,8 +128,16 @@ try {
       assert.equal(openingBounds.parent,'BODY','opening orientation must stay outside the rotated app viewport');
       assert.equal(openingBounds.position,'fixed','opening must be viewport-fixed');
       assert.ok(openingBounds.left<=.5 && openingBounds.top<=.5 && openingBounds.right>=openingBounds.width-.5 && openingBounds.bottom>=openingBounds.height-.5,'opening does not cover viewport');
-      const bootBackground=await page.evaluate(()=>getComputedStyle(document.documentElement).backgroundColor);
-      assert.equal(bootBackground,'rgb(255, 255, 255)','portrait orientation background must stay white');
+      const bootState=await page.evaluate(()=>({
+        booting:document.body.classList.contains('hp-booting'),
+        viewportVisibility:getComputedStyle(document.querySelector('#hp-viewport')).visibility,
+        openingVisibility:getComputedStyle(document.querySelector('#hp-opening-sequence')).visibility,
+        rootBackground:getComputedStyle(document.documentElement).backgroundColor
+      }));
+      assert.equal(bootState.booting,true,'boot guard must remain active before the curtain finishes');
+      assert.equal(bootState.viewportVisibility,'hidden','HOME must stay hidden behind the opening during boot');
+      assert.equal(bootState.openingVisibility,'visible','opening must remain visible while HOME is hidden');
+      assert.equal(bootState.rootBackground,'rgb(255, 255, 255)','portrait orientation background must stay white');
       const orientation=page.locator('.hp-opening-orientation.hp-ready');
       await orientation.waitFor({state:'visible',timeout:15000});
       await orientation.click();
@@ -140,6 +148,7 @@ try {
       assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('hp-opening-curtain-bg')),true,'curtain root background was not activated');
       await page.locator('.hp-opening-title').click();
       await page.waitForFunction(() => !document.body.classList.contains('hp-booting'));
+      assert.equal(await page.locator('#hp-viewport').evaluate(el=>getComputedStyle(el).visibility),'visible','HOME must become visible after boot guard is removed');
       await page.locator('#hp-opening-sequence').waitFor({state:'hidden'});
     } else {
       await page.evaluate(() => { document.body.classList.remove('hp-booting'); document.querySelector('#hp-opening-sequence')?.remove(); });
