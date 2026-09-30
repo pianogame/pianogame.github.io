@@ -49,7 +49,7 @@ jobs:
               Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true});
             });
             const page = await context.newPage();
-            await page.goto('http://127.0.0.1:4173/?app=home',{waitUntil:'networkidle'});
+            await page.goto('http://127.0.0.1:4173/?app=home',{waitUntil:'domcontentloaded'});
             await page.waitForTimeout(800);
             const home = page.locator('#hp-home-screen');
             await home.screenshot({path:`/tmp/${name}.png`});
