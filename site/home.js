@@ -33,6 +33,15 @@
   let transitioning = false;
   let launchTimer = 0;
 
+  function syncPianoFxCenter() {
+    if (home.hidden) return;
+    const homeRect = home.getBoundingClientRect();
+    const rect = pianoButton.getBoundingClientRect();
+    if (!homeRect.width || !homeRect.height || !rect.width || !rect.height) return;
+    home.style.setProperty('--hp-piano-center-x', (rect.left - homeRect.left + rect.width / 2) + 'px');
+    home.style.setProperty('--hp-piano-center-y', (rect.top - homeRect.top + rect.height / 2) + 'px');
+  }
+
   function finishTransition() {
     requestAnimationFrame(() => {
       window.dispatchEvent(new Event('hp-viewport-resize'));
@@ -60,6 +69,7 @@
     } catch (_) {}
 
     home.classList.remove('hp-piano-launching');
+    syncPianoFxCenter();
     void home.offsetWidth;
     home.classList.add('hp-piano-launching');
 
@@ -92,6 +102,10 @@
     document.body.classList.remove('hp-piano-active');
     finishTransition();
   }
+
+  window.addEventListener('resize', syncPianoFxCenter, { passive:true });
+  window.visualViewport?.addEventListener('resize', syncPianoFxCenter, { passive:true });
+  syncPianoFxCenter();
 
   pianoButton.addEventListener('click', enterPiano);
   homeButton.addEventListener('click', enterHome);
