@@ -5,9 +5,30 @@
   const piano = document.getElementById('hp-four88');
   if (!home || !piano) return;
 
+  const safeFrame = home.querySelector('.hp-home-safe');
+  const homeCanvas = home.querySelector('[data-home-canvas]');
   const pianoButton = home.querySelector('[data-home-action="piano"]');
   const homeButton = piano.querySelector('[data-home-action="home"]');
-  if (!pianoButton || !homeButton) return;
+  if (!safeFrame || !homeCanvas || !pianoButton || !homeButton) return;
+
+  const HOME_BASE_WIDTH = 1536;
+  const HOME_BASE_HEIGHT = 864;
+
+  function layoutHomeCanvas() {
+    if (home.hidden) return;
+    const rect = safeFrame.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const scale = Math.min(
+      rect.width / HOME_BASE_WIDTH,
+      rect.height / HOME_BASE_HEIGHT
+    );
+
+    if (!Number.isFinite(scale) || scale <= 0) return;
+    homeCanvas.style.setProperty('--hp-home-scale', scale.toFixed(6));
+    home.classList.add('hp-home-layout-ready');
+    requestAnimationFrame(syncPianoFxCenter);
+  }
 
   const homeTapAudio = new Audio('/audio/home-button-tap.mp3?v=1');
   homeTapAudio.preload = 'auto';
@@ -64,6 +85,7 @@
 
   function finishTransition() {
     requestAnimationFrame(() => {
+      if (!home.hidden) layoutHomeCanvas();
       window.dispatchEvent(new Event('hp-viewport-resize'));
       window.dispatchEvent(new Event('resize'));
       transitioning = false;
@@ -120,11 +142,28 @@
     piano.hidden = true;
     home.hidden = false;
     document.body.classList.remove('hp-piano-active');
+    layoutHomeCanvas();
     finishTransition();
   }
 
-  window.addEventListener('resize', syncPianoFxCenter, { passive:true });
-  window.visualViewport?.addEventListener('resize', syncPianoFxCenter, { passive:true });
+  const onViewportChange = () => {
+    layoutHomeCanvas();
+    syncPianoFxCenter();
+  };
+
+  window.addEventListener('resize', onViewportChange, { passive:true });
+  window.addEventListener('orientationchange', () => {
+    window.setTimeout(onViewportChange, 60);
+    window.setTimeout(onViewportChange, 250);
+  }, { passive:true });
+  window.visualViewport?.addEventListener('resize', onViewportChange, { passive:true });
+
+  if ('ResizeObserver' in window) {
+    const resizeObserver = new ResizeObserver(onViewportChange);
+    resizeObserver.observe(safeFrame);
+  }
+
+  layoutHomeCanvas();
   syncPianoFxCenter();
 
   pianoButton.addEventListener('click', enterPiano);
