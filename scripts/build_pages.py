@@ -172,7 +172,9 @@ def _verify_app_sources():
         raise ValueError("Initial musical ripple must fade out quickly and smoothly instead of disappearing abruptly")
     if "const cx=rippleWidth/2;" not in opening_source or "const cy=rippleHeight/2;" not in opening_source:
         raise ValueError("Musical ripple origin must be fixed to the rendered canvas center")
-    if "new ResizeObserver(sizeRippleCanvas)" not in opening_source or "visualViewport?.addEventListener('resize',sizeRippleCanvas)" not in opening_source:
+    if "new ResizeObserver(sizeRippleCanvas)" not in opening_source:
+        raise ValueError("Ripple canvas must track rendered opening size")
+    if "visualViewport?.addEventListener('resize',sizeRippleCanvas)" not in opening_source and "visualViewport?.addEventListener('resize',refreshOpeningViewport)" not in opening_source:
         raise ValueError("Ripple canvas must track real viewport size on landscape launch")
     if "opening.getBoundingClientRect()" not in opening_source:
         raise ValueError("Ripple canvas must size from the rendered opening layer")
