@@ -10,49 +10,54 @@
   isolation:isolate;
 }
 #hp-home-screen[hidden] { display:none !important; }
+
 #hp-home-screen .hp-home-backdrop {
   position:absolute;
-  inset:-7%;
+  inset:-6%;
   z-index:-2;
   background:
-    linear-gradient(rgba(16,10,20,.38),rgba(16,10,20,.38)),
-    url("/home-stage.jpg?v=3") center/cover no-repeat;
-  filter:blur(24px) saturate(.86) brightness(.72);
-  transform:scale(1.1);
+    url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1")
+    center / cover no-repeat;
+  filter:blur(18px) saturate(.92) brightness(.70);
+  transform:scale(1.10);
 }
 #hp-home-screen .hp-home-backdrop::after {
   content:"";
   position:absolute;
   inset:0;
-  background:radial-gradient(circle at 50% 44%,rgba(255,238,190,.12),transparent 52%),linear-gradient(90deg,rgba(8,4,10,.46),transparent 18%,transparent 82%,rgba(8,4,10,.46));
+  background:rgba(17,10,15,.10);
 }
+
 #hp-home-screen .hp-home-frame {
   position:relative;
   width:min(100cqw,177.778cqh);
   max-width:100%;
   aspect-ratio:16/9;
   overflow:hidden;
-  border:1px solid rgba(222,190,120,.72);
-  border-radius:4px;
-  box-shadow:0 0 0 1px rgba(42,27,18,.9),0 18px 54px rgba(0,0,0,.48);
-  background:#171018;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
 }
+
 #hp-home-screen .hp-home-art {
   display:block;
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit:fill;
   user-select:none;
   -webkit-user-select:none;
   -webkit-user-drag:none;
   pointer-events:none;
 }
+
 #hp-home-screen .hp-home-hit {
   position:absolute;
   z-index:3;
   border:0;
   margin:0;
   padding:0;
+  overflow:hidden;
   background:transparent;
   appearance:none;
   -webkit-appearance:none;
@@ -60,22 +65,38 @@
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
+
+/* Step 1: PIANO is a real independent layer, sampled from the exact uploaded HOME art. */
 #hp-home-screen .hp-home-piano {
-  left:65.0%;
-  top:48.2%;
-  width:32.1%;
-  height:26.1%;
-  border-radius:12px;
+  left:65.364583%;
+  top:51.967593%;
+  width:32.161458%;
+  height:21.759259%;
+  border-radius:10px;
 }
-#hp-home-screen .hp-home-piano:active {
-  background:rgba(255,229,151,.10);
-  box-shadow:inset 0 0 24px rgba(255,226,139,.48),0 0 18px rgba(255,208,104,.36);
+#hp-home-screen .hp-home-piano::before {
+  content:"";
+  position:absolute;
+  width:310.931174%;
+  height:459.574468%;
+  left:-203.238866%;
+  top:-238.829787%;
+  background:
+    url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1")
+    0 0 / 100% 100% no-repeat;
+  pointer-events:none;
+}
+#hp-home-screen .hp-home-piano:active::before {
+  filter:brightness(1.12) saturate(1.05);
+  transform:scale(.992);
+  transform-origin:center;
 }
 #hp-home-screen .hp-home-piano:focus-visible {
   outline:3px solid #fff2bc;
   outline-offset:-4px;
   box-shadow:0 0 18px rgba(255,221,125,.78);
 }
+
 #hp-four88 .hp-back-home {
   flex:none;
   min-width:68px;
@@ -85,6 +106,7 @@
   font-weight:700;
 }
 #hp-four88 .hp-back-home:active { transform:translateY(1px); }
+
 @container (max-width:610px) {
   #hp-four88 .hp-back-home {
     min-width:58px;
@@ -94,5 +116,5 @@
   }
 }
 @media (prefers-reduced-motion:reduce) {
-  #hp-home-screen .hp-home-piano { transition:none; }
+  #hp-home-screen .hp-home-piano::before { transition:none; }
 }
