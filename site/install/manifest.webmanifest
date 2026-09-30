@@ -1,8 +1,8 @@
 {
   "name": "ドリステ",
   "short_name": "ドリステ",
-  "id": "/install/?pds_app_id=26",
-  "start_url": "/install/?pds_install_id=26",
+  "id": "/piano-dream-stage",
+  "start_url": "/?app=home",
   "scope": "/",
   "display": "fullscreen",
   "orientation": "landscape",
@@ -10,28 +10,28 @@
   "background_color": "#241324",
   "icons": [
     {
-      "src": "/install/pwa-icon-maskable-192-v26.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/install/pwa-icon-maskable-512-v26.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/install/pwa-icon-any-192-v26.png",
+      "src": "/install/pwa-icon-round-192-v27.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/install/pwa-icon-any-512-v26.png",
+      "src": "/install/pwa-icon-round-512-v27.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/install/pwa-icon-maskable-192-v27.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/install/pwa-icon-maskable-512-v27.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

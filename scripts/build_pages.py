@@ -369,6 +369,48 @@ def _resize_rgba(src, sw, sh, dw, dh):
                 out[o + c] = round(top + (bot - top) * fy)
     return bytes(out)
 
+def _edge_average_rgb(src, width, height, band=12):
+    """Average the outer edge color for an Android icon backdrop."""
+    band = max(1, min(band, width // 4, height // 4))
+    rs = gs = bs = count = 0
+    for y in range(height):
+        for x in range(width):
+            if x < band or x >= width - band or y < band or y >= height - band:
+                i = (y * width + x) * 4
+                rs += src[i]
+                gs += src[i+1]
+                bs += src[i+2]
+                count += 1
+    return (rs // count, gs // count, bs // count)
+
+def _compose_android_icon(src, width, height, scale=0.84, circular=False):
+    """Inset the artwork so Android's round mask does not crop the piano keys."""
+    side = min(width, height)
+    inset = max(1, round(side * scale))
+    art = _resize_rgba(src, width, height, inset, inset)
+    br, bg, bb = _edge_average_rgb(src, width, height)
+    out = bytearray(width * height * 4)
+    for i in range(0, len(out), 4):
+        out[i:i+4] = bytes((br, bg, bb, 255))
+    x0 = (width - inset) // 2
+    y0 = (height - inset) // 2
+    for y in range(inset):
+        src_off = y * inset * 4
+        dst_off = ((y0 + y) * width + x0) * 4
+        out[dst_off:dst_off + inset * 4] = art[src_off:src_off + inset * 4]
+    if circular:
+        cx = (width - 1) / 2.0
+        cy = (height - 1) / 2.0
+        radius = min(width, height) * 0.495
+        r2 = radius * radius
+        for y in range(height):
+            dy = y - cy
+            for x in range(width):
+                dx = x - cx
+                if dx * dx + dy * dy > r2:
+                    out[(y * width + x) * 4 + 3] = 0
+    return bytes(out)
+
 def _png_chunk(kind, payload):
     return struct.pack(">I", len(payload)) + kind + payload + struct.pack(">I", zlib.crc32(kind + payload) & 0xffffffff)
 
@@ -418,23 +460,24 @@ install_v23.mkdir(parents=True, exist_ok=True)
 (install_v23 / "piano-dream-stage-touch-v23.png").write_bytes(root180)
 
 # Android / PWA icons.
-# "any" keeps the complete artwork, while "maskable" uses a modest center crop
-# so Android launchers do not shrink the artwork into a tiny tile inside a circle.
+# Use a dedicated Android composition: full-bleed purple stage background with
+# the piano artwork inset so circular/rounded launcher masks do not crop it.
+android_square0 = _compose_android_icon(opaque0, sw0, sh0, scale=0.84, circular=False)
+android_round0 = _compose_android_icon(opaque0, sw0, sh0, scale=0.84, circular=True)
+
 for size, name in [
-    (192, "pwa-icon-any-192-v26.png"),
-    (512, "pwa-icon-any-512-v26.png"),
+    (192, "pwa-icon-round-192-v27.png"),
+    (512, "pwa-icon-round-512-v27.png"),
 ]:
-    resized = _resize_rgba(opaque0, sw0, sh0, size, size)
+    resized = _resize_rgba(android_round0, sw0, sh0, size, size)
     png = _encode_rgba_png(size, size, resized)
     (install_dir / name).write_bytes(png)
 
-mask_crop_size = 148
-maskable0 = _crop_center_rgba(opaque0, sw0, sh0, mask_crop_size, mask_crop_size)
 for size, name in [
-    (192, "pwa-icon-maskable-192-v26.png"),
-    (512, "pwa-icon-maskable-512-v26.png"),
+    (192, "pwa-icon-maskable-192-v27.png"),
+    (512, "pwa-icon-maskable-512-v27.png"),
 ]:
-    resized = _resize_rgba(maskable0, mask_crop_size, mask_crop_size, size, size)
+    resized = _resize_rgba(android_square0, sw0, sh0, size, size)
     png = _encode_rgba_png(size, size, resized)
     (install_dir / name).write_bytes(png)
 
@@ -456,11 +499,11 @@ for size, name in apple_icons:
 _verify_png(OUT / "apple-touch-icon.png", 180)
 _verify_png(OUT / "apple-touch-icon-precomposed.png", 180)
 _verify_png(OUT / "install-v23" / "piano-dream-stage-touch-v23.png", 180)
-_verify_png(install_dir / "pwa-icon-any-192-v26.png", 192)
-_verify_png(install_dir / "pwa-icon-any-512-v26.png", 512)
-_verify_png(install_dir / "pwa-icon-maskable-192-v26.png", 192)
-_verify_png(install_dir / "pwa-icon-maskable-512-v26.png", 512)
-print("Verified install icons: Apple 120/152/167/180 and Android PWA any+maskable 192/512")
+_verify_png(install_dir / "pwa-icon-round-192-v27.png", 192)
+_verify_png(install_dir / "pwa-icon-round-512-v27.png", 512)
+_verify_png(install_dir / "pwa-icon-maskable-192-v27.png", 192)
+_verify_png(install_dir / "pwa-icon-maskable-512-v27.png", 512)
+print("Verified install icons: Apple 120/152/167/180 and Android round+maskable 192/512")
 
 bundles = ROOT / "sample-bundles"
 for bundle in json.loads((bundles / "parts.json").read_text()):

@@ -12,6 +12,11 @@
 }
 #hp-home-screen[hidden]{display:none!important}
 
+#hp-home-screen button{
+  font:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+
 #hp-home-screen .hp-home-bg{
   position:absolute;
   inset:0;
@@ -29,11 +34,11 @@
 #hp-home-screen .hp-home-character{
   position:absolute;
   z-index:2;
-  left:49%;
-  bottom:-2.5dvh;
-  height:96dvh;
+  left:48.5%;
+  bottom:-3dvh;
+  height:98dvh;
   width:auto;
-  max-width:62dvw;
+  max-width:61dvw;
   object-fit:contain;
   transform:translateX(-50%);
   transform-origin:center bottom;
@@ -43,11 +48,117 @@
   -webkit-user-drag:none;
 }
 
+#hp-home-screen .hp-home-logo{
+  position:absolute;
+  z-index:5;
+  left:calc(var(--safe-l) + 2.2dvw);
+  top:calc(var(--safe-t) + 4.8dvh);
+  width:min(29.5dvw,50dvh);
+  height:auto;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 .45dvh .55dvh rgba(0,0,0,.28));
+}
+
+#hp-home-screen .hp-home-hud{
+  position:absolute;
+  z-index:7;
+  left:50%;
+  top:calc(var(--safe-t) + .25dvh);
+  width:min(34dvw,55dvh);
+  aspect-ratio:3/1;
+  transform:translateX(-50%);
+}
+#hp-home-screen .hp-home-hud-art{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+}
+#hp-home-screen .hp-home-level,
+#hp-home-screen .hp-home-player-name,
+#hp-home-screen .hp-home-stamina-value{
+  position:absolute;
+  z-index:3;
+  line-height:1;
+  white-space:nowrap;
+}
+#hp-home-screen .hp-home-level{
+  left:18.7%;
+  top:49%;
+  transform:translate(-50%,-50%);
+  color:#fff7df;
+  font:700 clamp(16px,3.3dvh,34px)/1 Georgia,"Times New Roman",serif;
+  text-shadow:0 2px 2px rgba(0,0,0,.5);
+}
+#hp-home-screen .hp-home-player-name{
+  left:59%;
+  top:29%;
+  width:55%;
+  transform:translate(-50%,-50%);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-align:center;
+  color:#102653;
+  font-size:clamp(12px,2.35dvh,25px);
+  font-weight:800;
+  text-shadow:0 1px 0 rgba(255,255,255,.85);
+}
+#hp-home-screen .hp-home-stamina-value{
+  left:70%;
+  top:61%;
+  transform:translate(-50%,-50%);
+  color:#102653;
+  font:700 clamp(10px,2.05dvh,22px)/1 Georgia,"Times New Roman",serif;
+}
+#hp-home-screen .hp-home-stamina-fill{
+  position:absolute;
+  z-index:2;
+  left:36.6%;
+  top:70.6%;
+  width:calc(43.7% * var(--stamina,1));
+  height:5.2%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#fff2a4,#ffd127,#ffed83);
+  box-shadow:0 0 .45dvh rgba(255,218,54,.7),inset 0 1px 1px rgba(255,255,255,.9);
+}
+#hp-home-screen .hp-home-plus{
+  position:absolute;
+  z-index:4;
+  right:3.1%;
+  top:45%;
+  width:10.2%;
+  aspect-ratio:1;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+}
+#hp-home-screen .hp-home-plus img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+}
+#hp-home-screen .hp-home-plus:active{transform:scale(.95)}
+
 #hp-home-screen .hp-home-mode{
   position:absolute;
   z-index:5;
-  right:calc(var(--safe-r) + 1.7dvw);
-  width:min(31.5dvw,51dvh);
+  right:calc(var(--safe-r) + 2.1dvw);
+  width:min(32dvw,52dvh);
   aspect-ratio:3/1;
   margin:0;
   padding:0;
@@ -55,13 +166,11 @@
   background:transparent;
   appearance:none;
   -webkit-appearance:none;
-  overflow:visible;
   cursor:pointer;
   touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
 }
-#hp-home-screen .hp-home-game-image{top:21dvh}
-#hp-home-screen .hp-home-piano-image{top:48.5dvh}
+#hp-home-screen .hp-home-game-image{top:20.2dvh}
+#hp-home-screen .hp-home-piano-image{top:47.4dvh}
 #hp-home-screen .hp-home-game-image[disabled]{opacity:1;cursor:default}
 #hp-home-screen .hp-home-mode>img{
   display:block;
@@ -72,7 +181,7 @@
   user-select:none;
   -webkit-user-select:none;
   -webkit-user-drag:none;
-  filter:drop-shadow(0 .6dvh .7dvh rgba(0,0,0,.25));
+  filter:drop-shadow(0 .55dvh .65dvh rgba(0,0,0,.25));
 }
 #hp-home-screen .hp-home-piano-image::after{
   content:"";
@@ -95,9 +204,9 @@
 
 #hp-home-screen .hp-home-top-button{
   position:absolute;
-  z-index:7;
-  top:calc(var(--safe-t) + .4dvh);
-  width:min(6.7dvw,11.3dvh);
+  z-index:8;
+  top:calc(var(--safe-t) + .35dvh);
+  width:min(8.4dvw,14dvh);
   aspect-ratio:1;
   margin:0;
   padding:0;
@@ -107,10 +216,13 @@
   -webkit-appearance:none;
   cursor:pointer;
   touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
 }
-#hp-home-screen .hp-home-notice-image{right:calc(var(--safe-r) + 7.35dvw)}
-#hp-home-screen .hp-home-settings-image{right:calc(var(--safe-r) + .55dvw)}
+#hp-home-screen .hp-home-notice-image{
+  right:calc(var(--safe-r) + min(9.3dvw,15.5dvh));
+}
+#hp-home-screen .hp-home-settings-image{
+  right:calc(var(--safe-r) + .45dvw);
+}
 #hp-home-screen .hp-home-top-button-art{
   display:block;
   width:100%;
@@ -127,7 +239,7 @@
   z-index:2;
   right:-1%;
   top:-4%;
-  width:31%;
+  width:28%;
   aspect-ratio:1;
   object-fit:contain;
   pointer-events:none;
@@ -136,6 +248,43 @@
   -webkit-user-drag:none;
 }
 #hp-home-screen .hp-home-top-button:active{transform:scale(.965)}
+
+#hp-home-screen .hp-home-bottom{
+  position:absolute;
+  z-index:6;
+  left:55%;
+  bottom:calc(var(--safe-b) + .8dvh);
+  width:min(60dvw,102dvh);
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:min(1.05dvw,1.8dvh);
+  align-items:end;
+}
+#hp-home-screen .hp-home-bottom-button{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.5/1;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+}
+#hp-home-screen .hp-home-bottom-button img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  filter:drop-shadow(0 .4dvh .5dvh rgba(38,20,12,.2));
+}
+#hp-home-screen .hp-home-bottom-button:active{transform:translateY(1px) scale(.985)}
 
 .hp-home-launch-fx{
   position:absolute;
@@ -252,12 +401,18 @@
 #hp-four88 .hp-back-home:active{transform:translateY(1px)}
 
 @media (max-aspect-ratio:1.82/1){
-  #hp-home-screen .hp-home-character{left:48%;height:93dvh}
-  #hp-home-screen .hp-home-mode{right:calc(var(--safe-r) + .6dvw);width:min(30dvw,49dvh)}
+  #hp-home-screen .hp-home-character{left:47.5%;height:94dvh}
+  #hp-home-screen .hp-home-logo{width:min(28dvw,47dvh)}
+  #hp-home-screen .hp-home-hud{width:min(33dvw,52dvh)}
+  #hp-home-screen .hp-home-mode{right:calc(var(--safe-r) + .8dvw);width:min(31dvw,49dvh)}
+  #hp-home-screen .hp-home-top-button{width:min(8dvw,13dvh)}
+  #hp-home-screen .hp-home-bottom{width:min(58dvw,96dvh)}
 }
 @media (min-aspect-ratio:2.05/1){
-  #hp-home-screen .hp-home-character{left:49.5%;height:100dvh;max-width:57dvw}
-  #hp-home-screen .hp-home-mode{right:calc(var(--safe-r) + 2.6dvw)}
+  #hp-home-screen .hp-home-character{left:49%;height:102dvh;max-width:57dvw}
+  #hp-home-screen .hp-home-logo{left:calc(var(--safe-l) + 3dvw)}
+  #hp-home-screen .hp-home-mode{right:calc(var(--safe-r) + 3dvw)}
+  #hp-home-screen .hp-home-bottom{width:min(56dvw,100dvh)}
 }
 @media (prefers-reduced-motion:reduce){
   #hp-home-screen .hp-home-piano-image::after,
