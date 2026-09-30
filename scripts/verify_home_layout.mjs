@@ -122,19 +122,14 @@ try {
       });
       assert.deepEqual(zoomGuards,{gesture:true,multi:true},'browser zoom guards');
       const openingBounds=await page.locator('#hp-opening-sequence').evaluate(el=>{
-        const r=el.getBoundingClientRect(), parent=el.parentElement, p=parent.getBoundingClientRect();
-        return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,parentLeft:p.left,parentTop:p.top,parentRight:p.right,parentBottom:p.bottom,parentId:parent.id};
+        const r=el.getBoundingClientRect(), style=getComputedStyle(el);
+        return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,parent:el.parentElement?.tagName,position:style.position};
       });
-      assert.equal(openingBounds.parentId,'hp-viewport','opening must share the app viewport');
-      assert.ok(
-        Math.abs(openingBounds.left-openingBounds.parentLeft)<=.5 &&
-        Math.abs(openingBounds.top-openingBounds.parentTop)<=.5 &&
-        Math.abs(openingBounds.right-openingBounds.parentRight)<=.5 &&
-        Math.abs(openingBounds.bottom-openingBounds.parentBottom)<=.5,
-        'opening does not cover hp-viewport'
-      );
-      const bootBackground=await page.evaluate(()=>getComputedStyle(document.body).backgroundColor);
-      assert.notEqual(bootBackground,'rgb(255, 255, 255)','boot background must not expose a white strip');
+      assert.equal(openingBounds.parent,'BODY','opening orientation must stay outside the rotated app viewport');
+      assert.equal(openingBounds.position,'fixed','opening must be viewport-fixed');
+      assert.ok(openingBounds.left<=.5 && openingBounds.top<=.5 && openingBounds.right>=openingBounds.width-.5 && openingBounds.bottom>=openingBounds.height-.5,'opening does not cover viewport');
+      const bootBackground=await page.evaluate(()=>getComputedStyle(document.documentElement).backgroundColor);
+      assert.equal(bootBackground,'rgb(255, 255, 255)','portrait orientation background must stay white');
       const orientation=page.locator('.hp-opening-orientation.hp-ready');
       await orientation.waitFor({state:'visible',timeout:15000});
       await orientation.click();
@@ -142,6 +137,7 @@ try {
       await page.mouse.move(350,210); await page.mouse.down();
       await page.mouse.move(510,210,{steps:10}); await page.mouse.up();
       await page.locator('.hp-opening-title.hp-show').waitFor({state:'visible'});
+      assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('hp-opening-curtain-bg')),true,'curtain root background was not activated');
       await page.locator('.hp-opening-title').click();
       await page.waitForFunction(() => !document.body.classList.contains('hp-booting'));
       await page.locator('#hp-opening-sequence').waitFor({state:'hidden'});
