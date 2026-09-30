@@ -2,6 +2,16 @@
   const page = document.documentElement;
   let frame = 0, previous = '', forcePending = false, settleTimers = [];
 
+  // Keep the game surface at a fixed browser zoom while preserving ordinary
+  // one-finger pointer gestures (tap, flick, swipe, long-press).
+  const preventBrowserGesture = event => event.preventDefault();
+  document.addEventListener('gesturestart', preventBrowserGesture, { passive:false });
+  document.addEventListener('gesturechange', preventBrowserGesture, { passive:false });
+  document.addEventListener('gestureend', preventBrowserGesture, { passive:false });
+  document.addEventListener('touchmove', event => {
+    if (event.touches && event.touches.length > 1) event.preventDefault();
+  }, { passive:false });
+
   function measure() {
     const viewport = window.visualViewport;
     const vw = Math.max(1,Math.round(viewport?.width || window.innerWidth));
