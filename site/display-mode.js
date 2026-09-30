@@ -60,9 +60,8 @@
       gateButton.textContent='ホーム画面に追加';
       gateGuide.innerHTML='<p>下のボタンからアプリとしてインストールできます。</p>';
     } else {
-      gateButton.hidden=false;
-      gateButton.textContent='ホーム画面に追加';
-      gateGuide.innerHTML='<p>追加ボタンをタップしてください。Chromeの直接インストールがまだ準備できていない場合は、メニューの「アプリをインストール」または「ホーム画面に追加」を案内します。</p>';
+      gateButton.hidden=true;
+      gateGuide.innerHTML='<p>Chromeでインストール準備中です。ボタンが表示されない場合は、右上の「︙」→「アプリをインストール」または「ホーム画面に追加」を選んでください。</p>';
     }
     styleBilingual();
   }
@@ -105,8 +104,8 @@
   }
   async function installFromPrompt() {
     if(!installPrompt){
+      gateButton.hidden=true;
       gateGuide.innerHTML='<p>Chrome右上の「︙」メニューを開き、「アプリをインストール」または「ホーム画面に追加」を選んでください。</p>';
-      gateButton.textContent='追加方法を表示中';
       return;
     }
     const prompt=installPrompt;

@@ -1,13 +1,13 @@
 {
   "name": "ドリステ",
   "short_name": "ドリステ",
-  "start_url": "/?app=home&pds_install_id=26",
+  "start_url": "/?app=home",
   "scope": "/",
   "display": "fullscreen",
   "orientation": "landscape",
   "theme_color": "#241324",
   "background_color": "#241324",
-  "id": "/?pds_app_id=26",
+  "id": "/piano-dream-stage",
   "display_override": [
     "fullscreen",
     "standalone"

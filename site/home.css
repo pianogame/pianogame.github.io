@@ -8,23 +8,27 @@
 }
 #hp-home-screen[hidden] { display:none !important; }
 
-/* Fill only the excess screen area with the SAME source art.
-   The foreground HOME remains 16:9 and is never stretched. */
+/*
+  Responsive HOME rule:
+  - The 16:9 HOME artwork itself is NEVER stretched.
+  - Extra-wide screens extend only the OUTER EDGE SLICE, mirrored.
+  - Taller-than-16:9 screens do the same at top/bottom.
+  This avoids duplicated logos/buttons and avoids character distortion.
+*/
 #hp-home-screen .hp-home-backdrop {
   position:absolute;
   inset:0;
   z-index:0;
-  background:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1") center / cover no-repeat;
+  pointer-events:none;
+  background:none;
 }
+#hp-home-screen .hp-home-backdrop::before,
 #hp-home-screen .hp-home-backdrop::after {
   content:"";
   position:absolute;
-  inset:0;
-  background:linear-gradient(90deg,
-    rgba(20,11,16,.10) 0%,
-    rgba(20,11,16,0) 12%,
-    rgba(20,11,16,0) 88%,
-    rgba(10,14,24,.10) 100%);
+  background-image:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1");
+  background-repeat:no-repeat;
+  pointer-events:none;
 }
 
 #hp-home-screen .hp-home-frame {
@@ -34,6 +38,7 @@
   top:50%;
   transform:translate(-50%,-50%);
   width:min(100dvw,177.777778dvh);
+  height:min(100dvh,56.25dvw);
   aspect-ratio:16/9;
   overflow:visible;
   border:0;
@@ -45,8 +50,7 @@
 #hp-home-screen .hp-home-art {
   display:block;
   width:100%;
-  height:auto;
-  aspect-ratio:16/9;
+  height:100%;
   object-fit:contain;
   object-position:center;
   user-select:none;
@@ -55,41 +59,49 @@
   pointer-events:none;
 }
 
-/* Softly merge the 16:9 source into its full-screen extension; never blur it. */
+/* Wide landscape phones: mirror only the left/right edge slices. */
 @media (min-aspect-ratio:16/9) {
-  #hp-home-screen .hp-home-art {
-    -webkit-mask-image:linear-gradient(90deg,
-      transparent 0%,
-      rgba(0,0,0,.75) 1.2%,
-      #000 2.3%,
-      #000 97.7%,
-      rgba(0,0,0,.75) 98.8%,
-      transparent 100%);
-    mask-image:linear-gradient(90deg,
-      transparent 0%,
-      rgba(0,0,0,.75) 1.2%,
-      #000 2.3%,
-      #000 97.7%,
-      rgba(0,0,0,.75) 98.8%,
-      transparent 100%);
+  #hp-home-screen .hp-home-backdrop::before,
+  #hp-home-screen .hp-home-backdrop::after {
+    top:0;
+    bottom:0;
+    width:max(0px,calc((100dvw - 177.777778dvh) / 2 + 2px));
+    background-size:auto 100dvh;
+  }
+  #hp-home-screen .hp-home-backdrop::before {
+    left:0;
+    background-position:left center;
+    transform:scaleX(-1);
+    transform-origin:center;
+  }
+  #hp-home-screen .hp-home-backdrop::after {
+    right:0;
+    background-position:right center;
+    transform:scaleX(-1);
+    transform-origin:center;
   }
 }
+
+/* Tablets / squarer landscape: mirror only the top/bottom edge slices. */
 @media (max-aspect-ratio:16/9) {
-  #hp-home-screen .hp-home-art {
-    -webkit-mask-image:linear-gradient(180deg,
-      transparent 0%,
-      rgba(0,0,0,.75) 1.2%,
-      #000 2.3%,
-      #000 97.7%,
-      rgba(0,0,0,.75) 98.8%,
-      transparent 100%);
-    mask-image:linear-gradient(180deg,
-      transparent 0%,
-      rgba(0,0,0,.75) 1.2%,
-      #000 2.3%,
-      #000 97.7%,
-      rgba(0,0,0,.75) 98.8%,
-      transparent 100%);
+  #hp-home-screen .hp-home-backdrop::before,
+  #hp-home-screen .hp-home-backdrop::after {
+    left:0;
+    right:0;
+    height:max(0px,calc((100dvh - 56.25dvw) / 2 + 2px));
+    background-size:100dvw auto;
+  }
+  #hp-home-screen .hp-home-backdrop::before {
+    top:0;
+    background-position:center top;
+    transform:scaleY(-1);
+    transform-origin:center;
+  }
+  #hp-home-screen .hp-home-backdrop::after {
+    bottom:0;
+    background-position:center bottom;
+    transform:scaleY(-1);
+    transform-origin:center;
   }
 }
 
@@ -107,7 +119,7 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Transparent PIANO hit target only. No duplicate artwork. */
+/* Transparent PIANO hit target. It never redraws the source image. */
 #hp-home-screen .hp-home-piano {
   left:65.0%;
   top:48.3%;
@@ -186,7 +198,6 @@
 #hp-home-screen.hp-piano-launching .hp-home-launch-fx::after {
   animation:hp-launch-sweep .78s cubic-bezier(.2,.7,.2,1) both;
 }
-
 .hp-home-launch-ring,
 .hp-home-launch-particle {
   position:absolute;
