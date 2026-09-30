@@ -37,7 +37,7 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=10">
+  <link rel="stylesheet" href="/home.css?v=11">
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
   <script src="/orientation.js?v=11"></script>
@@ -47,7 +47,7 @@
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
   <script defer src="/piano.js?v=27"></script>
-  <script defer src="/home.js?v=5"></script>
+  <script defer src="/home.js?v=6"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
   <script defer src="/multitrack.js?v=26"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
@@ -58,11 +58,61 @@
 <body class="hp-booting">
 <main id="hp-viewport">
 <section id="hp-home-screen" aria-label="ホーム">
-  <div class="hp-home-backdrop" aria-hidden="true"></div>
-  <div class="hp-home-frame">
-    <img class="hp-home-art" src="/assets/home/reference/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1" alt="ピアノドリームステージ ホーム画面" draggable="false">
-    <button type="button" class="hp-home-hit hp-home-piano" data-home-action="piano" aria-label="ピアノモードへ"></button>
+  <img class="hp-home-bg" src="/assets/home/background/528030FF-B2C0-40B1-AA18-0B5410044B05.png?v=1" alt="" aria-hidden="true" draggable="false">
+  <div class="hp-home-shade" aria-hidden="true"></div>
+
+  <img class="hp-home-character" src="/assets/home/character/29613917-7E24-4C1A-8C4F-23224C24AB6B.png?v=1" alt="" aria-hidden="true" draggable="false">
+  <img class="hp-home-logo" src="/assets/home/ui/F1AB41E7-3976-4BD3-8B97-85AA4655B511.png?v=1" alt="PIANO DREAM STAGE" draggable="false">
+
+  <div class="hp-home-hud" aria-label="プレイヤー情報">
+    <img class="hp-home-hud-art" src="/assets/home/ui/746F1979-F40A-41B7-B3C1-8E1568577DD0.png?v=1" alt="" aria-hidden="true" draggable="false">
+    <span class="hp-home-level" data-home-level>82</span>
+    <span class="hp-home-player-name" data-home-player-name>ドリステP</span>
+    <span class="hp-home-stamina-value" data-home-stamina>25/25</span>
+    <span class="hp-home-stamina-fill" style="--stamina:1" aria-hidden="true"></span>
+    <button type="button" class="hp-home-plus" aria-label="スタミナを追加">＋</button>
   </div>
+
+  <div class="hp-home-actions" aria-label="ホームメニュー">
+    <button type="button" class="hp-home-circle-action hp-home-notice" aria-label="お知らせ">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9.7 20a2.5 2.5 0 0 0 4.6 0"/></svg>
+      <span>お知らせ</span>
+      <i class="hp-home-alert" aria-label="新着あり">!</i>
+    </button>
+    <button type="button" class="hp-home-circle-action hp-home-settings" aria-label="設定">
+      <span class="hp-home-gear" aria-hidden="true">⚙</span>
+      <span>設定</span>
+    </button>
+  </div>
+
+  <button type="button" class="hp-home-card hp-home-game" aria-label="ゲームモード" disabled>
+    <span class="hp-home-sprite" aria-hidden="true"></span>
+  </button>
+
+  <button type="button" class="hp-home-card hp-home-piano" data-home-action="piano" aria-label="ピアノモードへ">
+    <span class="hp-home-sprite" aria-hidden="true"></span>
+  </button>
+
+  <button type="button" class="hp-home-voice" aria-label="ボイスを再生">
+    <span class="hp-home-voice-label">タップでボイス</span>
+    <span class="hp-home-voice-text">こんなに美しい音楽と<br>すごせる毎日…<br>……ふふっ♪</span>
+    <span class="hp-home-voice-note" aria-hidden="true">♪</span>
+  </button>
+
+  <nav class="hp-home-bottom" aria-label="ホーム下部メニュー">
+    <button type="button" class="hp-home-bottom-item hp-home-ticket" aria-label="ガチャチケット">
+      <span class="hp-home-sprite" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="hp-home-bottom-item hp-home-mission" aria-label="ミッション">
+      <span class="hp-home-sprite" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="hp-home-bottom-item hp-home-ranking" aria-label="ランキング">
+      <span class="hp-home-sprite" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="hp-home-bottom-item hp-home-character-menu" aria-label="キャラクター">
+      <span class="hp-home-sprite" aria-hidden="true"></span>
+    </button>
+  </nav>
 </section>
 <div id="hp-four88" lang="ja" hidden>
   <div class="hp-surface" role="group" aria-label="グランドピアノ">
