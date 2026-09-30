@@ -7,6 +7,7 @@ on:
       - "site/home.css"
       - "site/home.js"
       - "site/assets/home/**"
+      - "scripts/verify_home_layout.mjs"
       - ".github/workflows/render-home.yml"
   workflow_dispatch:
 
@@ -28,96 +29,11 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install --silent playwright
           npx playwright install --with-deps chromium >/dev/null 2>&1
-      - name: Render viewports
-        run: |
-          python3 -m http.server 4173 --directory site >/tmp/home-server.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
-          sleep 1
-          cat > render-home.mjs <<'JS'
-          import { chromium } from 'playwright';
-          import fs from 'fs';
-          const cases = [
-            ['wide',1536,708],
-            ['iphone15pm',932,430],
-            ['android20x9',915,412],
-            ['iphone14',844,390],
-          ];
-          const browser = await chromium.launch({headless:true});
-          for (const [name,width,height] of cases) {
-            const context = await browser.newContext({viewport:{width,height}});
-            await context.addInitScript(() => {
-              Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true});
-            });
-            const page = await context.newPage();
-            await page.goto('http://127.0.0.1:4173/?app=home',{waitUntil:'domcontentloaded'});
-            await page.waitForTimeout(800);
-            await page.evaluate(() => {
-              document.documentElement.classList.remove('hp-install-required');
-              const gate=document.querySelector('.hp-install-gate');
-              if(gate) gate.hidden=true;
-              document.body.classList.remove('hp-booting');
-              const opening=document.querySelector('#hp-opening-sequence');
-              if(opening) opening.remove();
-              const viewport=document.querySelector('#hp-viewport');
-              if(viewport){viewport.style.display='block';viewport.removeAttribute('aria-hidden');}
-              const home=document.querySelector('#hp-home-screen');
-              if(home) home.hidden=false;
-              const piano=document.querySelector('#hp-four88');
-              if(piano) piano.hidden=true;
-            });
-            await page.evaluate(({width,height}) => {
-              document.documentElement.style.setProperty('--hp-view-width', width+'px');
-              document.documentElement.style.setProperty('--hp-view-height', height+'px');
-              const viewport=document.querySelector('#hp-viewport');
-              if(viewport){
-                viewport.style.width=width+'px';
-                viewport.style.height=height+'px';
-                viewport.style.transform='none';
-              }
-              const home=document.querySelector('#hp-home-screen');
-              if(home){
-                home.style.display='block';
-                home.style.position='absolute';
-                home.style.inset='0';
-              }
-            }, {width,height});
-            await page.screenshot({path:`/tmp/${name}.png`,fullPage:false});
-            const metrics = await page.evaluate(() => {
-              const q=s=>document.querySelector(s)?.getBoundingClientRect();
-              const fmt=r=>r?{x:+r.x.toFixed(1),y:+r.y.toFixed(1),w:+r.width.toFixed(1),h:+r.height.toFixed(1)}:null;
-              return {
-                viewport:{w:innerWidth,h:innerHeight},
-                character:fmt(q('.hp-home-character')),
-                logo:fmt(q('.hp-home-logo')),
-                hud:fmt(q('.hp-home-hud')),
-                notice:fmt(q('.hp-home-notice-image')),
-                settings:fmt(q('.hp-home-settings-image')),
-                game:fmt(q('.hp-home-game-image')),
-                piano:fmt(q('.hp-home-piano-image')),
-                bottom:fmt(q('.hp-home-bottom')),
-                level:fmt(q('.hp-home-level')),
-                player:fmt(q('.hp-home-player-name')),
-                stamina:fmt(q('.hp-home-stamina-value'))
-              };
-            });
-            console.log('METRICS '+name+' '+JSON.stringify(metrics));
-            await context.close();
-          }
-          await browser.close();
-          JS
-          node render-home.mjs
-      - name: Emit screenshot thumbnails
-        run: |
-          python3 -m pip install --quiet pillow
-          python3 - <<'PY'
-          from PIL import Image
-          import base64,io,glob,os
-          for p in sorted(glob.glob('/tmp/*.png')):
-              if os.path.basename(p) not in {'wide.png','iphone15pm.png','android20x9.png','iphone14.png'}:
-                  continue
-              im=Image.open(p).convert('RGB')
-              im.thumbnail((900,500))
-              b=io.BytesIO(); im.save(b,'JPEG',quality=65,optimize=True)
-              print('SHOT '+os.path.basename(p)+' '+base64.b64encode(b.getvalue()).decode())
-          PY
+      - name: Check layout, opening, navigation and rotation
+        run: node scripts/verify_home_layout.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-layout-qa
+          path: home-layout-qa/
+          retention-days: 7

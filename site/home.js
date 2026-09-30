@@ -53,6 +53,33 @@
   let transitioning = false;
   let launchTimer = 0;
 
+  // Measure the actual safe area, including the viewport's portrait rotation.
+  // Only component dimensions use this unit; the canvas itself is never scaled.
+  const safeArea = home.querySelector('.hp-home-safe');
+  function syncHomeLayout() {
+    if (!safeArea || home.hidden) return;
+    const width = safeArea.clientWidth;
+    const height = safeArea.clientHeight;
+    if (!width || !height) return;
+    const unit = Math.min(width / 1536, height / 864, 1.25);
+    home.style.setProperty('--home-unit', unit + 'px');
+    home.dataset.homeCompact = String(width < 740);
+    const footer = home.querySelector('.hp-home-footer');
+    if (footer) {
+      const top = height * (width < 740 ? .26 : .23);
+      const gap = Math.max(10, 26 * unit);
+      // Both images keep their native 3:1 ratio. Reserve the footer's measured
+      // space before choosing their width, especially on short/small phones.
+      const available = footer.offsetTop - top - gap - Math.max(8, 16 * unit);
+      const modeWidth = Math.max(0, Math.min(width * .39, 570 * unit, available * 1.5));
+      home.style.setProperty('--home-mode-width', modeWidth + 'px');
+    }
+    syncPianoFxCenter();
+  }
+  if (safeArea && 'ResizeObserver' in window) {
+    new ResizeObserver(syncHomeLayout).observe(safeArea);
+  }
+
   function syncPianoFxCenter() {
     if (home.hidden) return;
     const homeRect = home.getBoundingClientRect();
@@ -120,22 +147,24 @@
     piano.hidden = true;
     home.hidden = false;
     document.body.classList.remove('hp-piano-active');
-    requestAnimationFrame(syncPianoFxCenter);
+    requestAnimationFrame(syncHomeLayout);
     finishTransition();
   }
 
   const onViewportChange = () => {
-    syncPianoFxCenter();
+    syncHomeLayout();
   };
 
   window.addEventListener('resize', onViewportChange, { passive:true });
+  window.addEventListener('hp-viewport-resize', onViewportChange, { passive:true });
   window.addEventListener('orientationchange', () => {
     window.setTimeout(onViewportChange, 60);
     window.setTimeout(onViewportChange, 250);
   }, { passive:true });
   window.visualViewport?.addEventListener('resize', onViewportChange, { passive:true });
 
-  requestAnimationFrame(syncPianoFxCenter);
+  syncHomeLayout();
+  requestAnimationFrame(syncHomeLayout);
 
   pianoButton.addEventListener('click', enterPiano);
   homeButton.addEventListener('click', enterHome);

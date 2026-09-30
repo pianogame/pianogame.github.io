@@ -37,7 +37,7 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=28">
+  <link rel="stylesheet" href="/home.css?v=29">
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
   <script src="/orientation.js?v=11"></script>
@@ -47,7 +47,7 @@
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
   <script defer src="/piano.js?v=27"></script>
-  <script defer src="/home.js?v=11"></script>
+  <script defer src="/home.js?v=12"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
   <script defer src="/multitrack.js?v=26"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
@@ -67,7 +67,7 @@
       <img class="hp-home-logo" src="/assets/home/ui/F1AB41E7-3976-4BD3-8B97-85AA4655B511.png?v=1" alt="PIANO DREAM STAGE" draggable="false">
 
       <div class="hp-home-voice-card" aria-label="キャラクターボイス案内">
-        <span class="hp-home-voice-chip">タップでボイス 🔊</span>
+        <span class="hp-home-voice-chip">タップでボイス <svg class="hp-home-voice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm12-2v2a4 4 0 0 1 0 6v2a6 6 0 0 0 0-10zm3-3v2a8 8 0 0 1 0 12v2a10 10 0 0 0 0-16z"/></svg></span>
         <span class="hp-home-voice-line">こんなに美しい音楽と</span>
         <span class="hp-home-voice-line">すごせる毎日…</span>
         <span class="hp-home-voice-line hp-home-voice-last">……ふふっ♪</span>
@@ -82,12 +82,15 @@
         <span class="hp-home-stamina-fill" style="--stamina:1" aria-hidden="true"></span>
       </div>
 
+      <div class="hp-home-modes">
       <button type="button" class="hp-home-mode hp-home-game-image" aria-label="ゲームモード" disabled>
         <img src="/assets/home/ui/D19A7F2C-AB32-4716-B5E4-334AD8BF2040.png?v=1" alt="" aria-hidden="true" draggable="false">
       </button>
       <button type="button" class="hp-home-mode hp-home-piano-image" data-home-action="piano" aria-label="ピアノモードへ">
         <img src="/assets/home/ui/83AAD35A-D2BC-4689-8A9A-3F1D3FA8E943.png?v=1" alt="" aria-hidden="true" draggable="false">
       </button>
+
+      </div>
 
       <nav class="hp-home-top-actions" aria-label="ホーム上部メニュー">
         <button type="button" class="hp-home-top-button hp-home-notice-image" aria-label="お知らせ">
@@ -99,6 +102,7 @@
         </button>
       </nav>
 
+      <div class="hp-home-footer">
       <div class="hp-home-campaign" aria-label="ミッションをクリアしてガチャチケットをGET">
         <span class="hp-home-campaign-ticket">CONCERT<br>PASS</span>
         <span class="hp-home-campaign-copy">ミッションをクリアして<br><strong>ガチャチケットをGET!</strong></span>
@@ -116,6 +120,7 @@
           <img src="/assets/home/ui/65DA495E-5421-4BA0-92F1-EC6C4C222A31.png?v=1" alt="" aria-hidden="true" draggable="false">
         </button>
       </nav>
+      </div>
     </div>
   </div>
 </section>
