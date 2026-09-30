@@ -10,7 +10,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../_site');
 const output = path.resolve(process.env.HOME_QA_OUTPUT || 'home-layout-qa');
 fs.mkdirSync(output, { recursive: true });
-const types = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.png':'image/png', '.webmanifest':'application/manifest+json', '.mp3':'audio/mpeg', '.m4a':'audio/mp4', '.wav':'audio/wav' };
+const types = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.png':'image/png', '.jpg':'image/jpeg', '.webmanifest':'application/manifest+json', '.mp3':'audio/mpeg', '.m4a':'audio/mp4', '.wav':'audio/wav' };
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
   let file = path.resolve(root, '.' + pathname);
@@ -40,6 +40,17 @@ const cases = [
   ['portrait-rotation',430,932,{t:59,b:34}],
 ];
 const results = [];
+// Pixel measurements from the user-supplied 1536x864 concept, including the
+// outer ornament padding. This catches undersized 3:1 replacement artwork.
+const referenceBounds = {
+  '.hp-home-game-image': [1009,170,511,235],
+  '.hp-home-piano-image': [1009,407,511,236],
+  '.hp-home-voice-card': [364,293,282,154],
+  '.hp-home-campaign': [18,663,382,174],
+  '.hp-home-bottom-button:nth-child(1)': [410,682,266,151],
+  '.hp-home-bottom-button:nth-child(2)': [688,682,283,151],
+  '.hp-home-bottom-button:nth-child(3)': [972,684,281,151],
+};
 async function inspect(page) {
   return page.evaluate(() => {
     const home = document.querySelector('#hp-home-screen');
@@ -72,6 +83,11 @@ async function inspect(page) {
       // offset dimensions stay in layout coordinates when the viewport is rotated.
       if (Math.abs(img.clientWidth / img.clientHeight - img.naturalWidth / img.naturalHeight)>.04) failures.push('distorted image: '+img.src);
     }
+    for (const art of home.querySelectorAll('.hp-home-reference-art')) {
+      const vb=art.viewBox.baseVal;
+      if (Math.abs(art.clientWidth / art.clientHeight - vb.width / vb.height)>.025) failures.push('distorted reference sprite: '+art.parentElement.getAttribute('aria-label'));
+      if (!art.querySelector('image')?.href.baseVal.includes('home-reference-v1.jpg')) failures.push('reference sprite source missing');
+    }
     if (document.documentElement.scrollWidth > innerWidth+1) failures.push('document horizontal overflow');
     return {failures,viewport:{width:innerWidth,height:innerHeight},unit:home.style.getPropertyValue('--home-unit'),panels:panels.map(({name,r})=>({name,...r}))};
   });
@@ -102,7 +118,31 @@ try {
       for (const [side,value] of Object.entries(insets)) el.style.setProperty('--safe-'+side,value+'px');
     }, insets);
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    // SVG image loading is independent of the HTMLImageElement checks below.
+    await page.evaluate(async () => {
+      const src=document.querySelector('.hp-home-reference-art image').href.baseVal;
+      const img=new Image(); img.src=src; await img.decode();
+      if (img.naturalWidth!==1536 || img.naturalHeight!==864) throw new Error('reference atlas dimensions changed');
+    });
     const metrics=await inspect(page);
+    if (name==='reference-16x9') {
+      const measured=await page.evaluate((bounds) => Object.entries(bounds).map(([selector,target]) => {
+        const r=document.querySelector(selector).getBoundingClientRect();
+        return {selector,target,actual:[r.x,r.y,r.width,r.height]};
+      }),referenceBounds);
+      metrics.reference=measured;
+      for (const {selector,target,actual} of measured) {
+        if (actual.some((value,i)=>Math.abs(value-target[i])>1)) metrics.failures.push('reference size/position mismatch: '+selector+' '+JSON.stringify(actual));
+      }
+      const typography=await page.evaluate(() => ['.hp-home-level','.hp-home-stamina-value'].map(s=> {
+        const el=document.querySelector(s),r=el.getBoundingClientRect(),c=getComputedStyle(el);
+        return {selector:s,size:parseFloat(c.fontSize),weight:c.fontWeight,center:[r.x+r.width/2,r.y+r.height/2]};
+      }));
+      metrics.typography=typography;
+      for (const t of typography) if (t.weight!=='400') metrics.failures.push('reference numbers too bold: '+t.selector);
+      if (typography[0].size>29 || typography[1].size>22) metrics.failures.push('reference numbers too large');
+      for (const [i,target] of [[0,[642,60]],[1,[859,69]]]) if (typography[i].center.some((v,j)=>Math.abs(v-target[j])>2)) metrics.failures.push('reference number position mismatch: '+typography[i].selector);
+    }
     await page.screenshot({path:path.join(output,name+'.png')});
     metrics.failures.push(...errors);
     results.push({name,...metrics});

@@ -4,6 +4,7 @@
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
   --home-unit: 1px;
+  --home-width-unit: 1px;
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -31,8 +32,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-canvas { position: absolute; inset: 0; pointer-events: none; }
 #hp-home-screen .hp-home-canvas button { pointer-events: auto; }
 
-/* Independent anchors, with one size unit measured from the usable landscape area.
-   No transform/scale is applied to the canvas; text and hit areas keep their minima. */
+/* Reference artwork keeps its native proportions. Width sets the reference
+   scale; only the mode stack adapts to the available height on wide phones. */
+#hp-home-screen .hp-home-reference-art { display: block; width: 100%; height: auto; pointer-events: none; overflow: visible; }
 #hp-home-screen .hp-home-character {
   position: absolute; z-index: 2; left: 47%; top: 13%;
   height: 116%; width: auto; max-width: none;
@@ -48,11 +50,11 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 
 #hp-home-screen .hp-home-hud {
   position: absolute; z-index: 7; left: 50%;
-  top: calc(-22 * var(--home-unit));
-  width: clamp(245px, calc(490 * var(--home-unit)), 610px);
+  top: calc(-22 * var(--home-width-unit));
+  width: calc(490 * var(--home-width-unit));
   aspect-ratio: 3 / 1; transform: translateX(-50%);
   /* Descendants use em, so the frame and all dynamic labels share a scale. */
-  font-size: clamp(12.25px, calc(24.5 * var(--home-unit)), 30.5px);
+  font-size: calc(24.5 * var(--home-width-unit));
 }
 #hp-home-screen .hp-home-hud-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 #hp-home-screen .hp-home-level,
@@ -62,21 +64,22 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   display: flex; align-items: center; justify-content: center;
   line-height: 1; white-space: nowrap;
   font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-  color: #102653; font-weight: 800;
+  color: #102653; font-weight: 600;
 }
 #hp-home-screen .hp-home-level {
-  left: 16.1%; top: 42%; width: 16.5%; height: 24%;
-  font-size: 1.3em; color: #fff7df; font-variant-numeric: tabular-nums;
+  left: 16.1%; top: 38%; width: 16.5%; height: 24%;
+  font-family: Georgia, "Times New Roman", serif; font-weight: 400;
+  font-size: 1.15em; color: #fff7df; font-variant-numeric: tabular-nums;
   text-shadow: 0 1px 2px #0008;
 }
 #hp-home-screen .hp-home-player-name {
-  left: 34%; top: 26%; width: 46%; height: 20%;
-  display: block; overflow: hidden; text-overflow: ellipsis;
-  text-align: center; line-height: 1.32; font-size: .95em;
+  left: 34%; top: 23%; width: 42%; height: 20%;
+  overflow: hidden; text-overflow: ellipsis; text-align: center; font-size: .9em;
 }
 #hp-home-screen .hp-home-stamina-value {
-  left: 56%; top: 48%; width: 23%; height: 19%;
-  font-size: .9em; font-variant-numeric: tabular-nums;
+  left: 57%; top: 46%; width: 23%; height: 19%;
+  font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-style: italic;
+  font-size: .85em; font-variant-numeric: tabular-nums;
 }
 #hp-home-screen .hp-home-stamina-fill {
   position: absolute; z-index: 2;
@@ -90,18 +93,18 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 /* Mode buttons form a single stack: their gap cannot collapse on short screens. */
 #hp-home-screen .hp-home-modes {
   position: absolute; z-index: 5;
-  right: max(5px, calc(18 * var(--home-unit))); top: 23%;
-  width: var(--home-mode-width, min(39%, calc(570 * var(--home-unit))));
-  display: grid; gap: max(10px, calc(26 * var(--home-unit)));
+  right: calc(16 * var(--home-width-unit)); top: var(--home-mode-top, 19.676%);
+  width: var(--home-mode-width, calc(511 * var(--home-width-unit)));
+  display: grid; gap: var(--home-mode-gap, calc(2 * var(--home-width-unit)));
 }
 #hp-home-screen .hp-home-mode {
-  position: relative; width: 100%; aspect-ratio: 3 / 1;
+  position: relative; width: 100%;
   min-height: 44px; margin: 0; padding: 0; border: 0;
   background: transparent; appearance: none; -webkit-appearance: none;
   cursor: pointer; touch-action: manipulation;
 }
 #hp-home-screen .hp-home-game-image[disabled] { opacity: 1; cursor: default; }
-#hp-home-screen .hp-home-mode > img { display: block; width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 3px 5px #0004); }
+#hp-home-screen .hp-home-mode .hp-home-reference-art { filter: drop-shadow(0 3px 5px #0004); }
 #hp-home-screen .hp-home-piano-image::after {
   content: ""; position: absolute; inset: 1%; border-radius: 12px; opacity: 0; pointer-events: none;
   border: 2px solid #ffe597f2;
@@ -114,9 +117,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 
 #hp-home-screen .hp-home-top-actions {
   position: absolute; z-index: 8;
-  right: max(8px, calc(24 * var(--home-unit))); top: max(3px, calc(6 * var(--home-unit)));
-  display: grid; grid-template-columns: repeat(2, clamp(44px, calc(100 * var(--home-unit)), 125px));
-  gap: max(6px, calc(12 * var(--home-unit))); align-items: start;
+  right: max(8px, calc(16 * var(--home-width-unit))); top: max(3px, calc(10 * var(--home-width-unit)));
+  display: grid; grid-template-columns: repeat(2, max(44px, calc(94 * var(--home-width-unit))));
+  gap: max(6px, calc(10 * var(--home-width-unit))); align-items: start;
 }
 #hp-home-screen .hp-home-top-button {
   position: relative; width: 100%; aspect-ratio: 1; min-width: 44px; min-height: 44px;
@@ -135,78 +138,44 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-top-button:active { transform: scale(.965); }
 
 #hp-home-screen .hp-home-voice-card {
-  position: absolute; z-index: 6; right: 60%; top: 38%;
-  width: clamp(158px, calc(270 * var(--home-unit)), 338px);
-  padding: 1.35em 1.2em .9em;
-  border: 2px solid #c7a25d; border-radius: 1.05em;
-  background: linear-gradient(135deg, #fffdf7f7, #f3e9d5f5);
-  box-shadow: 0 3px 8px #30190d38, inset 0 0 0 2px #fffaf0;
-  font-size: clamp(11px, calc(18 * var(--home-unit)), 22.5px);
-  color: #263d63; pointer-events: none;
+  position: absolute; z-index: 6;
+  left: 23.6979%; top: 33.912%;
+  width: calc(282 * var(--home-width-unit));
+  pointer-events: none;
 }
-#hp-home-screen .hp-home-voice-card::after {
-  content: ""; position: absolute; right: 1.4em; bottom: -.38em;
-  width: .65em; height: .65em; transform: rotate(45deg);
-  border-right: 2px solid #c7a25d; border-bottom: 2px solid #c7a25d; background: #f3e9d5;
-}
-#hp-home-screen .hp-home-voice-chip {
-  position: absolute; left: .9em; top: -.85em;
-  display: inline-flex; align-items: center; gap: .5em;
-  padding: .38em .8em; border: 1px solid #e6cfa0; border-radius: 999px;
-  background: linear-gradient(#b92d4c, #8e1434); color: white;
-  font-size: .94em; font-weight: 700; line-height: 1; white-space: nowrap;
-  box-shadow: 0 2px 3px #0003;
-}
-#hp-home-screen .hp-home-voice-icon { width: 1.15em; height: 1.15em; fill: currentColor; }
-#hp-home-screen .hp-home-voice-line { display: block; font-size: 1em; line-height: 1.35; font-weight: 700; white-space: nowrap; }
-#hp-home-screen .hp-home-voice-last { margin-top: .15em; }
-#hp-home-screen .hp-home-voice-note { position: absolute; right: .55em; bottom: .3em; color: #b78a31; font-size: 1.3em; }
 
-/* Campaign and navigation occupy separate grid tracks, anchored to the bottom.
-   No negative offsets or oversized min-widths can put one card on top of another. */
+/* The supplied design's footer: campaign 382px, then 266/283/281px cards. */
 #hp-home-screen .hp-home-footer {
   position: absolute; z-index: 6;
-  left: max(6px, calc(24 * var(--home-unit))); bottom: max(8px, calc(28 * var(--home-unit)));
-  width: min(calc(100% - 12px), calc(1300 * var(--home-unit)));
-  display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 3fr);
-  align-items: center; gap: max(6px, calc(14 * var(--home-unit)));
+  left: calc(18 * var(--home-width-unit)); bottom: var(--home-footer-bottom, calc(27 * var(--home-width-unit)));
+  width: min(calc(100% - 24px), calc(1235 * var(--home-width-unit)));
+  display: grid; grid-template-columns: minmax(0, 382fr) minmax(0, 843fr);
+  align-items: end; gap: calc(10 * var(--home-width-unit));
 }
-#hp-home-screen .hp-home-campaign {
-  position: relative; min-width: 0;
-  display: grid; grid-template-columns: 22% minmax(0, 1fr) 4%;
-  align-items: center; gap: .3em;
-  min-height: max(68px, calc(128 * var(--home-unit)));
-  padding: .7em .4em;
-  border: 2px solid #c7a25d; border-radius: .9em;
-  background: linear-gradient(135deg, #fffdf7fa, #f3e9d5f5);
-  box-shadow: 0 3px 8px #30190d38, inset 0 0 0 2px #fffaf0;
-  color: #263d63;
-  font-size: clamp(10px, calc(16 * var(--home-unit)), 20px);
+#hp-home-screen .hp-home-campaign { position: relative; min-width: 0; }
+#hp-home-screen .hp-home-bottom {
+  min-width: 0; display: grid;
+  grid-template-columns: minmax(0, 266fr) minmax(0, 12fr) minmax(0, 283fr) minmax(0, 1fr) minmax(0, 281fr);
+  align-items: end;
+  padding-bottom: calc(4 * var(--home-width-unit));
 }
-#hp-home-screen .hp-home-campaign-ticket {
-  display: grid; place-content: center; aspect-ratio: 1.1;
-  border: 1px solid #b78f4c; border-radius: .35em; transform: rotate(-7deg);
-  background: linear-gradient(#fff7e7, #d8bd8d); color: #6a4a20;
-  font: 800 .8em/1.1 Georgia, "Times New Roman", serif; text-align: center;
-}
-#hp-home-screen .hp-home-campaign-copy { min-width: 0; line-height: 1.45; font-weight: 700; white-space: nowrap; }
-#hp-home-screen .hp-home-campaign-copy strong { color: #921c2d; }
-#hp-home-screen .hp-home-campaign-arrow { color: #6a4a28; font-size: 2em; line-height: 1; font-weight: 700; }
-#hp-home-screen .hp-home-bottom { min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: max(4px, calc(8 * var(--home-unit))); }
 #hp-home-screen .hp-home-bottom-button {
-  position: relative; width: 100%; min-width: 0; min-height: 44px; aspect-ratio: 1.5;
+  position: relative; width: 100%; min-width: 0; min-height: 44px;
   margin: 0; padding: 0; border: 0; background: transparent; appearance: none; -webkit-appearance: none;
   cursor: pointer; touch-action: manipulation;
 }
-#hp-home-screen .hp-home-bottom-button img { display: block; width: 100%; height: auto; object-fit: contain; filter: drop-shadow(0 3px 4px #26140c33); }
+#hp-home-screen .hp-home-bottom-button:nth-child(1) { grid-column: 1; }
+#hp-home-screen .hp-home-bottom-button:nth-child(2) { grid-column: 3; }
+#hp-home-screen .hp-home-bottom-button:nth-child(3) { grid-column: 5; transform: translateY(calc(2 * var(--home-width-unit))); }
+#hp-home-screen .hp-home-bottom-button .hp-home-reference-art { filter: drop-shadow(0 3px 4px #26140c33); }
 #hp-home-screen .hp-home-bottom-button:active { transform: translateY(1px) scale(.985); }
 #hp-home-screen button:focus-visible { outline: 2px solid #fff3bc; outline-offset: 2px; border-radius: 8px; }
 
 /* Compact sizes are based on the measured, possibly rotated, home area. */
 #hp-home-screen[data-home-compact="true"] .hp-home-footer { width: calc(100% - 12px); }
 #hp-home-screen[data-home-compact="true"] .hp-home-logo { top: 18%; width: 32%; }
-#hp-home-screen[data-home-compact="true"] .hp-home-voice-card { top: 42%; right: 61%; width: 148px; font-size: 10.5px; }
-#hp-home-screen[data-home-compact="true"] .hp-home-modes { top: 26%; }
+#hp-home-screen[data-home-compact="true"] .hp-home-voice-card { top: 40%; }
+
 
 .hp-home-launch-fx{
   position:absolute;

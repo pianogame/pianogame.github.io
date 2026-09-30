@@ -62,16 +62,28 @@
     const height = safeArea.clientHeight;
     if (!width || !height) return;
     const unit = Math.min(width / 1536, height / 864, 1.25);
+    const widthUnit = Math.min(home.clientWidth / 1536, 1.25);
     home.style.setProperty('--home-unit', unit + 'px');
+    home.style.setProperty('--home-width-unit', widthUnit + 'px');
     home.dataset.homeCompact = String(width < 740);
     const footer = home.querySelector('.hp-home-footer');
-    if (footer) {
-      const top = height * (width < 740 ? .26 : .23);
-      const gap = Math.max(10, 26 * unit);
-      // Both images keep their native 3:1 ratio. Reserve the footer's measured
-      // space before choosing their width, especially on short/small phones.
-      const available = footer.offsetTop - top - gap - Math.max(8, 16 * unit);
-      const modeWidth = Math.max(0, Math.min(width * .39, 570 * unit, available * 1.5));
+    const topActions = home.querySelector('.hp-home-top-actions');
+    if (footer && topActions) {
+      const safeBottom = Math.max(0, parseFloat(getComputedStyle(safeArea).bottom) || 0);
+      home.style.setProperty('--home-footer-bottom', Math.max(3, 27 * widthUnit - safeBottom) + 'px');
+      const gap = Math.max(2, 2 * widthUnit);
+      const footerGap = Math.max(8, 28 * widthUnit);
+      const footerTop = footer.offsetTop + home.querySelector('.hp-home-bottom').offsetTop;
+      const desiredWidth = Math.min(width * .355, 511 * widthUnit);
+      // Native sprite heights are 235 and 236 for a shared width of 511.
+      const stackRatio = 471 / 511;
+      const earliestTop = topActions.offsetTop + topActions.offsetHeight + Math.max(8, 14 * widthUnit);
+      const preferredTop = height * (170 / 864);
+      const top = Math.max(earliestTop, Math.min(preferredTop, footerTop - footerGap - gap - desiredWidth * stackRatio));
+      const available = Math.max(0, footerTop - footerGap - gap - top);
+      const modeWidth = Math.min(desiredWidth, available / stackRatio);
+      home.style.setProperty('--home-mode-top', top + 'px');
+      home.style.setProperty('--home-mode-gap', gap + 'px');
       home.style.setProperty('--home-mode-width', modeWidth + 'px');
     }
     syncPianoFxCenter();
