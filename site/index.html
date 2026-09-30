@@ -37,7 +37,7 @@
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=22">
+  <link rel="stylesheet" href="/home.css?v=23">
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
   <script src="/orientation.js?v=11"></script>
@@ -47,7 +47,7 @@
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
   <script defer src="/piano.js?v=27"></script>
-  <script defer src="/home.js?v=8"></script>
+  <script defer src="/home.js?v=9"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
   <script defer src="/multitrack.js?v=26"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
@@ -59,61 +59,66 @@
 <main id="hp-viewport">
 <section id="hp-home-screen" aria-label="ホーム">
   <img class="hp-home-bg" src="/assets/home/background/528030FF-B2C0-40B1-AA18-0B5410044B05.png?v=3" alt="" aria-hidden="true" draggable="false">
-  <img class="hp-home-character" src="/assets/home/character/29613917-7E24-4C1A-8C4F-23224C24AB6B.png?v=1" alt="" aria-hidden="true" draggable="false">
 
-  <img class="hp-home-logo" src="/assets/home/ui/F1AB41E7-3976-4BD3-8B97-85AA4655B511.png?v=1" alt="PIANO DREAM STAGE" draggable="false">
+  <div class="hp-home-safe">
+    <div class="hp-home-canvas" data-home-canvas>
+      <img class="hp-home-character" src="/assets/home/character/29613917-7E24-4C1A-8C4F-23224C24AB6B.png?v=1" alt="" aria-hidden="true" draggable="false">
 
-  <div class="hp-home-voice-card" aria-label="キャラクターボイス案内">
-    <span class="hp-home-voice-chip">タップでボイス 🔊</span>
-    <span class="hp-home-voice-line">こんなに美しい音楽と</span>
-    <span class="hp-home-voice-line">すごせる毎日…</span>
-    <span class="hp-home-voice-line hp-home-voice-last">……ふふっ♪</span>
-    <span class="hp-home-voice-note" aria-hidden="true">♪</span>
+      <img class="hp-home-logo" src="/assets/home/ui/F1AB41E7-3976-4BD3-8B97-85AA4655B511.png?v=1" alt="PIANO DREAM STAGE" draggable="false">
+
+      <div class="hp-home-voice-card" aria-label="キャラクターボイス案内">
+        <span class="hp-home-voice-chip">タップでボイス 🔊</span>
+        <span class="hp-home-voice-line">こんなに美しい音楽と</span>
+        <span class="hp-home-voice-line">すごせる毎日…</span>
+        <span class="hp-home-voice-line hp-home-voice-last">……ふふっ♪</span>
+        <span class="hp-home-voice-note" aria-hidden="true">♪</span>
+      </div>
+
+      <div class="hp-home-hud" aria-label="プレイヤー情報">
+        <img class="hp-home-hud-art" src="/assets/home/ui/746F1979-F40A-41B7-B3C1-8E1568577DD0.png?v=1" alt="" aria-hidden="true" draggable="false">
+        <span class="hp-home-level" data-home-level>82</span>
+        <span class="hp-home-player-name" data-home-player-name>ドリステP</span>
+        <span class="hp-home-stamina-value" data-home-stamina>25/25</span>
+        <span class="hp-home-stamina-fill" style="--stamina:1" aria-hidden="true"></span>
+        <button type="button" class="hp-home-plus" aria-label="スタミナを追加">
+          <img src="/assets/home/ui/4B960D6D-B576-48E8-BC69-DD4CEBF5142A.png?v=1" alt="" aria-hidden="true" draggable="false">
+        </button>
+      </div>
+
+      <button type="button" class="hp-home-mode hp-home-game-image" aria-label="ゲームモード" disabled>
+        <img src="/assets/home/ui/D19A7F2C-AB32-4716-B5E4-334AD8BF2040.png?v=1" alt="" aria-hidden="true" draggable="false">
+      </button>
+      <button type="button" class="hp-home-mode hp-home-piano-image" data-home-action="piano" aria-label="ピアノモードへ">
+        <img src="/assets/home/ui/83AAD35A-D2BC-4689-8A9A-3F1D3FA8E943.png?v=1" alt="" aria-hidden="true" draggable="false">
+      </button>
+
+      <button type="button" class="hp-home-top-button hp-home-notice-image" aria-label="お知らせ">
+        <img class="hp-home-top-button-art" src="/assets/home/ui/2938FBB1-4AD1-4CAE-9FB4-05333C9D828C.png?v=1" alt="" aria-hidden="true" draggable="false">
+        <img class="hp-home-notice-badge" src="/assets/home/ui/7473C359-B10D-446A-856D-D51929FD388B.png?v=1" alt="" aria-hidden="true" draggable="false">
+      </button>
+      <button type="button" class="hp-home-top-button hp-home-settings-image" aria-label="設定">
+        <img class="hp-home-top-button-art" src="/assets/home/ui/C3391E45-CEAD-4D81-9332-A7B1AD9F9CB5.png?v=1" alt="" aria-hidden="true" draggable="false">
+      </button>
+
+      <div class="hp-home-campaign" aria-label="ミッションをクリアしてガチャチケットをGET">
+        <span class="hp-home-campaign-ticket">CONCERT<br>PASS</span>
+        <span class="hp-home-campaign-copy">ミッションをクリアして<br><strong>ガチャチケットをGET!</strong></span>
+        <span class="hp-home-campaign-arrow" aria-hidden="true">›</span>
+      </div>
+
+      <nav class="hp-home-bottom" aria-label="ホームメニュー">
+        <button type="button" class="hp-home-bottom-button" aria-label="ミッション">
+          <img src="/assets/home/ui/F785B4C0-139A-442D-8692-E6AEA5E0BD1C.png?v=1" alt="" aria-hidden="true" draggable="false">
+        </button>
+        <button type="button" class="hp-home-bottom-button" aria-label="ランキング">
+          <img src="/assets/home/ui/98F69164-D7A5-4FB6-B5F4-D3608D33D23E.png?v=1" alt="" aria-hidden="true" draggable="false">
+        </button>
+        <button type="button" class="hp-home-bottom-button" aria-label="キャラクター">
+          <img src="/assets/home/ui/65DA495E-5421-4BA0-92F1-EC6C4C222A31.png?v=1" alt="" aria-hidden="true" draggable="false">
+        </button>
+      </nav>
+    </div>
   </div>
-
-  <div class="hp-home-hud" aria-label="プレイヤー情報">
-    <img class="hp-home-hud-art" src="/assets/home/ui/746F1979-F40A-41B7-B3C1-8E1568577DD0.png?v=1" alt="" aria-hidden="true" draggable="false">
-    <span class="hp-home-level" data-home-level>82</span>
-    <span class="hp-home-player-name" data-home-player-name>ドリステP</span>
-    <span class="hp-home-stamina-value" data-home-stamina>25/25</span>
-    <span class="hp-home-stamina-fill" style="--stamina:1" aria-hidden="true"></span>
-    <button type="button" class="hp-home-plus" aria-label="スタミナを追加">
-      <img src="/assets/home/ui/4B960D6D-B576-48E8-BC69-DD4CEBF5142A.png?v=1" alt="" aria-hidden="true" draggable="false">
-    </button>
-  </div>
-
-  <button type="button" class="hp-home-mode hp-home-game-image" aria-label="ゲームモード" disabled>
-    <img src="/assets/home/ui/D19A7F2C-AB32-4716-B5E4-334AD8BF2040.png?v=1" alt="" aria-hidden="true" draggable="false">
-  </button>
-  <button type="button" class="hp-home-mode hp-home-piano-image" data-home-action="piano" aria-label="ピアノモードへ">
-    <img src="/assets/home/ui/83AAD35A-D2BC-4689-8A9A-3F1D3FA8E943.png?v=1" alt="" aria-hidden="true" draggable="false">
-  </button>
-
-  <button type="button" class="hp-home-top-button hp-home-notice-image" aria-label="お知らせ">
-    <img class="hp-home-top-button-art" src="/assets/home/ui/2938FBB1-4AD1-4CAE-9FB4-05333C9D828C.png?v=1" alt="" aria-hidden="true" draggable="false">
-    <img class="hp-home-notice-badge" src="/assets/home/ui/7473C359-B10D-446A-856D-D51929FD388B.png?v=1" alt="" aria-hidden="true" draggable="false">
-  </button>
-  <button type="button" class="hp-home-top-button hp-home-settings-image" aria-label="設定">
-    <img class="hp-home-top-button-art" src="/assets/home/ui/C3391E45-CEAD-4D81-9332-A7B1AD9F9CB5.png?v=1" alt="" aria-hidden="true" draggable="false">
-  </button>
-
-  <div class="hp-home-campaign" aria-label="ミッションをクリアしてガチャチケットをGET">
-    <span class="hp-home-campaign-ticket">CONCERT<br>PASS</span>
-    <span class="hp-home-campaign-copy">ミッションをクリアして<br><strong>ガチャチケットをGET!</strong></span>
-    <span class="hp-home-campaign-arrow" aria-hidden="true">›</span>
-  </div>
-
-  <nav class="hp-home-bottom" aria-label="ホームメニュー">
-    <button type="button" class="hp-home-bottom-button" aria-label="ミッション">
-      <img src="/assets/home/ui/F785B4C0-139A-442D-8692-E6AEA5E0BD1C.png?v=1" alt="" aria-hidden="true" draggable="false">
-    </button>
-    <button type="button" class="hp-home-bottom-button" aria-label="ランキング">
-      <img src="/assets/home/ui/98F69164-D7A5-4FB6-B5F4-D3608D33D23E.png?v=1" alt="" aria-hidden="true" draggable="false">
-    </button>
-    <button type="button" class="hp-home-bottom-button" aria-label="キャラクター">
-      <img src="/assets/home/ui/65DA495E-5421-4BA0-92F1-EC6C4C222A31.png?v=1" alt="" aria-hidden="true" draggable="false">
-    </button>
-  </nav>
 </section>
 <div id="hp-four88" lang="ja" hidden>
   <div class="hp-surface" role="group" aria-label="グランドピアノ">
