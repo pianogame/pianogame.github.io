@@ -31,5 +31,10 @@ jobs:
               g=g.resize((max(1,g.width*2),max(1,g.height*2)))
               txt2=pytesseract.image_to_string(g, lang="jpn+eng", config="--psm 11")
               text=(" ".join((txt1+" "+txt2).split()))[:700]
+              a=Image.open(p).convert("RGBA").getchannel("A")
+              bbox=a.getbbox()
+              if bbox:
+                  x0,y0,x1,y1=bbox
+                  print(f"BBOX {os.path.basename(p)} :: x={x0/im.width:.4f}..{x1/im.width:.4f} y={y0/im.height:.4f}..{y1/im.height:.4f} w={(x1-x0)/im.width:.4f} h={(y1-y0)/im.height:.4f}")
               print(f"OCR {os.path.basename(p)} :: {text}")
           PY
