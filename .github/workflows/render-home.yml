@@ -6,6 +6,8 @@ on:
       - "site/index.html"
       - "site/home.css"
       - "site/home.js"
+      - "site/orientation.js"
+      - "site/rotation-guide.js"
       - "site/assets/home/**"
       - "scripts/verify_home_layout.mjs"
       - ".github/workflows/render-home.yml"
