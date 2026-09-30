@@ -43,30 +43,22 @@
 }
 
 #hp-home-screen .hp-home-canvas{
-  --hp-home-scale:.5;
-  --hp-home-logical-height:864px;
   position:absolute;
-  left:0;
-  top:0;
-  width:1536px;
-  height:var(--hp-home-logical-height);
-  transform:scale(var(--hp-home-scale));
-  transform-origin:left top;
-  visibility:hidden;
+  inset:0;
+  visibility:visible;
   pointer-events:none;
 }
-#hp-home-screen.hp-home-layout-ready .hp-home-canvas{visibility:visible}
 #hp-home-screen .hp-home-canvas button{pointer-events:auto}
 
+/* Main character: center anchored, never inherits a global canvas scale. */
 #hp-home-screen .hp-home-character{
   position:absolute;
   z-index:2;
-  left:46.3%;
-  top:103px;
-  bottom:auto;
-  height:1021px;
+  left:47%;
+  bottom:clamp(-175px,-16dvh,-76px);
+  height:clamp(360px,105dvh,830px);
   width:auto;
-  max-width:none;
+  max-width:66vw;
   object-fit:contain;
   transform:translateX(-50%);
   transform-origin:center bottom;
@@ -76,30 +68,32 @@
   -webkit-user-drag:none;
 }
 
+/* Top-left logo: fixed to the safe-area corner with a minimum usable size. */
 #hp-home-screen .hp-home-logo{
   position:absolute;
   z-index:5;
-  left:7px;
-  top:103px;
-  width:487px;
+  left:clamp(4px,1.1vw,18px);
+  top:clamp(38px,11dvh,92px);
+  width:clamp(225px,30.5vw,470px);
   height:auto;
   object-fit:contain;
   pointer-events:none;
   user-select:none;
   -webkit-user-select:none;
   -webkit-user-drag:none;
-  filter:drop-shadow(0 5px 7px rgba(0,0,0,.28));
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.28));
 }
 
+/* Player HUD: top-center anchor. All text is positioned inside the HUD art,
+   so resizing the HUD cannot separate the frame from its labels. */
 #hp-home-screen .hp-home-hud{
   position:absolute;
   z-index:7;
-  left:calc(50% + 7px);
-  top:-28px;
-  width:496px;
-  height:165px;
-  transform:translateX(-50%) scale(1.06);
-  transform-origin:50% 50%;
+  left:50%;
+  top:clamp(-17px,-1.1dvh,-3px);
+  width:clamp(270px,32.4vw,500px);
+  aspect-ratio:3/1;
+  transform:translateX(-50%);
 }
 #hp-home-screen .hp-home-hud-art{
   position:absolute;
@@ -125,65 +119,57 @@
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
 }
 #hp-home-screen .hp-home-level{
-  left:83px;
-  top:69px;
-  width:80px;
-  height:40px;
+  left:16.1%;
+  top:40.5%;
+  width:16.5%;
+  height:24%;
   color:#fff7df;
-  font-size:30px;
+  font-size:clamp(17px,2.05vw,31px);
   font-weight:900;
   font-variant-numeric:tabular-nums;
   text-shadow:0 2px 2px rgba(0,0,0,.5);
 }
 #hp-home-screen .hp-home-player-name{
-  left:158px;
-  top:47px;
-  width:190px;
-  height:35px;
+  left:31.2%;
+  top:25.5%;
+  width:38.5%;
+  height:21%;
   overflow:hidden;
   text-overflow:ellipsis;
   color:#102653;
-  font-size:24px;
+  font-size:clamp(13px,1.5vw,23px);
   font-weight:900;
   letter-spacing:.01em;
   text-shadow:0 1px 0 rgba(255,255,255,.85);
 }
 #hp-home-screen .hp-home-stamina-value{
-  left:282px;
-  top:84px;
-  width:110px;
-  height:34px;
+  left:55.9%;
+  top:48.5%;
+  width:23%;
+  height:21%;
   color:#102653;
-  font-size:21px;
+  font-size:clamp(12px,1.4vw,21px);
   font-weight:900;
   font-variant-numeric:tabular-nums;
 }
 #hp-home-screen .hp-home-stamina-fill{
   position:absolute;
   z-index:2;
-  left:180px;
-  top:124px;
-  width:calc(185px * var(--stamina,1));
-  height:7px;
+  left:36.3%;
+  top:75.1%;
+  width:calc(37.3% * var(--stamina,1));
+  height:4.3%;
   border-radius:999px;
   background:linear-gradient(90deg,#fff2a4,#ffd127,#ffed83);
   box-shadow:0 0 5px rgba(255,218,54,.7),inset 0 1px 1px rgba(255,255,255,.9);
 }
-#hp-home-screen .hp-home-plus{
-  display:none;
-}
-#hp-home-screen .hp-home-plus img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  pointer-events:none;
-}
-#hp-home-screen .hp-home-plus:active{transform:scale(.95)}
 
+/* Right-side mode buttons: right-edge anchors with minimum tap/visual sizes. */
 #hp-home-screen .hp-home-mode{
   position:absolute;
   z-index:5;
+  right:clamp(-44px,-2.1vw,-10px);
+  width:clamp(270px,37.5vw,575px);
   height:auto;
   aspect-ratio:3/1;
   margin:0;
@@ -196,14 +182,10 @@
   touch-action:manipulation;
 }
 #hp-home-screen .hp-home-game-image{
-  top:191px;
-  right:-88px;
-  width:619px;
+  top:clamp(88px,22.4dvh,178px);
 }
 #hp-home-screen .hp-home-piano-image{
-  top:439px;
-  right:-38px;
-  width:616px;
+  top:clamp(220px,50.5dvh,425px);
 }
 #hp-home-screen .hp-home-game-image[disabled]{opacity:1;cursor:default}
 #hp-home-screen .hp-home-mode>img{
@@ -215,7 +197,7 @@
   user-select:none;
   -webkit-user-select:none;
   -webkit-user-drag:none;
-  filter:drop-shadow(0 6px 8px rgba(0,0,0,.25));
+  filter:drop-shadow(0 5px 7px rgba(0,0,0,.25));
 }
 #hp-home-screen .hp-home-piano-image::after{
   content:"";
@@ -236,21 +218,24 @@
 #hp-home-screen.hp-piano-launching .hp-home-piano-image{pointer-events:none}
 #hp-home-screen.hp-piano-launching .hp-home-piano-image::after{animation:hp-piano-rim-flash .72s ease-out both}
 
+/* Top-right menu is one anchored group, like the bottom menu. */
 #hp-home-screen .hp-home-top-actions{
   position:absolute;
   z-index:8;
-  right:-18px;
-  top:7px;
+  right:clamp(2px,.8vw,14px);
+  top:clamp(2px,.8dvh,10px);
   display:grid;
-  grid-template-columns:repeat(2,132px);
-  gap:4px;
+  grid-template-columns:repeat(2,clamp(64px,8.4vw,118px));
+  gap:clamp(2px,.45vw,8px);
   align-items:start;
   pointer-events:none;
 }
 #hp-home-screen .hp-home-top-button{
   position:relative;
-  width:132px;
-  height:132px;
+  width:100%;
+  aspect-ratio:1;
+  min-width:64px;
+  min-height:64px;
   margin:0;
   padding:0;
   border:0;
@@ -275,10 +260,10 @@
 #hp-home-screen .hp-home-notice-badge{
   position:absolute;
   z-index:3;
-  right:-4px;
-  top:-3px;
-  width:31px;
-  height:31px;
+  right:0;
+  top:0;
+  width:clamp(22px,2.15vw,32px);
+  height:clamp(22px,2.15vw,32px);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -287,24 +272,27 @@
   border-radius:50%;
   background:linear-gradient(180deg,#f42c46,#b9001e);
   color:#fff;
-  font:900 22px/1 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  font-size:clamp(15px,1.45vw,22px);
+  font-weight:900;
+  line-height:1;
   text-shadow:0 1px 1px rgba(70,0,0,.5);
   box-shadow:0 2px 5px rgba(0,0,0,.35);
   pointer-events:none;
 }
 #hp-home-screen .hp-home-top-button:active{transform:scale(.965)}
 
+/* Voice panel: anchored to the left-center region with bounded text sizes. */
 #hp-home-screen .hp-home-voice-card{
   position:absolute;
   z-index:6;
-  left:367px;
-  top:320px;
-  width:255px;
-  height:145px;
+  left:clamp(225px,25.7vw,395px);
+  top:clamp(145px,38dvh,322px);
+  width:clamp(215px,16.7vw,255px);
+  min-height:clamp(118px,16.5dvh,145px);
   box-sizing:border-box;
-  padding:45px 18px 14px;
+  padding:clamp(34px,5.2dvh,45px) clamp(14px,1.2vw,18px) 12px;
   border:2px solid #d3b66f;
-  border-radius:17px;
+  border-radius:clamp(12px,1.1vw,17px);
   background:linear-gradient(180deg,rgba(255,253,246,.97),rgba(243,233,213,.95));
   box-shadow:0 6px 14px rgba(48,25,13,.22),inset 0 0 0 1px rgba(255,255,255,.75);
   color:#263d63;
@@ -312,17 +300,17 @@
 }
 #hp-home-screen .hp-home-voice-chip{
   position:absolute;
-  left:13px;
+  left:12px;
   top:-14px;
   display:inline-flex;
   align-items:center;
   gap:.45em;
-  padding:7px 13px;
+  padding:6px 12px;
   border:1px solid rgba(255,235,213,.85);
   border-radius:999px;
   background:linear-gradient(180deg,#c92c55,#94173b);
   color:#fff;
-  font-size:16px;
+  font-size:clamp(11px,1.05vw,16px);
   font-weight:800;
   line-height:1;
   white-space:nowrap;
@@ -331,7 +319,7 @@
 }
 #hp-home-screen .hp-home-voice-line{
   display:block;
-  font-size:20px;
+  font-size:clamp(14px,1.3vw,20px);
   line-height:1.3;
   font-weight:800;
   letter-spacing:.01em;
@@ -339,27 +327,28 @@
 #hp-home-screen .hp-home-voice-last{margin-top:3px}
 #hp-home-screen .hp-home-voice-note{
   position:absolute;
-  right:15px;
-  bottom:11px;
+  right:12px;
+  bottom:8px;
   color:#b78a31;
-  font-size:27px;
+  font-size:clamp(19px,1.75vw,27px);
 }
 
+/* Bottom-left campaign: left/bottom anchor, no inherited global scaling. */
 #hp-home-screen .hp-home-campaign{
   position:absolute;
   z-index:6;
-  left:28px;
-  bottom:36px;
-  width:380px;
-  height:130px;
+  left:clamp(7px,1.8vw,28px);
+  bottom:clamp(7px,4.2dvh,36px);
+  width:clamp(245px,24.7vw,380px);
+  min-height:clamp(86px,15.2dvh,130px);
   box-sizing:border-box;
   display:grid;
-  grid-template-columns:118px 1fr 26px;
+  grid-template-columns:31% 1fr 7%;
   align-items:center;
-  gap:10px;
-  padding:12px 10px;
+  gap:clamp(5px,.65vw,10px);
+  padding:clamp(7px,1.4dvh,12px) clamp(6px,.65vw,10px);
   border:2px solid #d3b66f;
-  border-radius:17px;
+  border-radius:clamp(12px,1.1vw,17px);
   background:linear-gradient(180deg,rgba(255,253,246,.97),rgba(243,233,213,.95));
   box-shadow:0 6px 14px rgba(48,25,13,.22),inset 0 0 0 1px rgba(255,255,255,.75);
   color:#263d63;
@@ -369,48 +358,55 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  height:92px;
+  height:78%;
+  min-height:64px;
   border:2px solid #b78f4c;
-  border-radius:11px;
+  border-radius:10px;
   transform:rotate(-4deg);
   background:linear-gradient(180deg,#fff7e7,#d8bd8d);
   color:#6a4a20;
-  font:800 17px/1.05 Georgia,"Times New Roman",serif;
+  font-size:clamp(12px,1.1vw,17px);
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:800;
+  line-height:1.05;
   text-align:center;
   box-shadow:inset 0 0 8px rgba(120,79,27,.12);
 }
 #hp-home-screen .hp-home-campaign-copy{
-  font-size:16px;
+  font-size:clamp(11px,1.05vw,16px);
   line-height:1.35;
   font-weight:800;
 }
 #hp-home-screen .hp-home-campaign-copy strong{
-  font-size:17px;
+  font-size:clamp(12px,1.1vw,17px);
   color:#921c2d;
   white-space:nowrap;
 }
 #hp-home-screen .hp-home-campaign-arrow{
-  font-size:42px;
+  font-size:clamp(28px,2.75vw,42px);
   line-height:1;
   color:#6a4a28;
   font-weight:800;
 }
 
+/* Bottom menu: bottom-center anchor. Button art keeps a practical minimum size. */
 #hp-home-screen .hp-home-bottom{
   position:absolute;
   z-index:6;
-  left:830px;
-  bottom:-24px;
-  width:912px;
+  left:54%;
+  bottom:clamp(-14px,-1.5dvh,-2px);
+  width:clamp(560px,59.4vw,912px);
+  max-width:calc(100% - 24px);
   transform:translateX(-50%);
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:12px;
+  gap:clamp(6px,.8vw,12px);
   align-items:end;
 }
 #hp-home-screen .hp-home-bottom-button{
   position:relative;
   width:100%;
+  min-width:170px;
   aspect-ratio:1.5/1;
   margin:0;
   padding:0;
@@ -432,6 +428,62 @@
   filter:drop-shadow(0 5px 6px rgba(38,20,12,.2));
 }
 #hp-home-screen .hp-home-bottom-button:active{transform:translateY(1px) scale(.985)}
+
+/* Short landscape phones: keep controls usable and make vertical spacing tighter,
+   without scaling the entire home UI as one bitmap-like canvas. */
+@media (max-height:430px) and (orientation:landscape){
+  #hp-home-screen .hp-home-logo{
+    top:clamp(34px,8.5dvh,44px);
+    width:clamp(220px,29vw,310px);
+  }
+  #hp-home-screen .hp-home-hud{
+    width:clamp(265px,31vw,335px);
+  }
+  #hp-home-screen .hp-home-mode{
+    width:clamp(265px,34.5vw,360px);
+  }
+  #hp-home-screen .hp-home-game-image{top:clamp(72px,20dvh,88px)}
+  #hp-home-screen .hp-home-piano-image{top:clamp(188px,48dvh,215px)}
+  #hp-home-screen .hp-home-top-actions{
+    grid-template-columns:repeat(2,clamp(62px,7.6vw,82px));
+  }
+  #hp-home-screen .hp-home-voice-card{
+    left:clamp(215px,25vw,285px);
+    top:clamp(128px,35dvh,150px);
+    width:clamp(205px,16vw,225px);
+  }
+  #hp-home-screen .hp-home-campaign{
+    width:clamp(235px,24vw,270px);
+    min-height:82px;
+    bottom:7px;
+  }
+  #hp-home-screen .hp-home-bottom{
+    width:clamp(520px,57vw,650px);
+    bottom:-9px;
+  }
+  #hp-home-screen .hp-home-bottom-button{min-width:150px}
+  #hp-home-screen .hp-home-character{
+    bottom:clamp(-145px,-18dvh,-78px);
+    height:clamp(350px,108dvh,470px);
+  }
+}
+
+/* Narrow landscape devices: preserve separation between left and right clusters. */
+@media (max-width:740px) and (orientation:landscape){
+  #hp-home-screen .hp-home-logo{width:clamp(200px,28vw,245px)}
+  #hp-home-screen .hp-home-hud{width:clamp(240px,30vw,280px)}
+  #hp-home-screen .hp-home-mode{width:clamp(240px,35vw,285px)}
+  #hp-home-screen .hp-home-top-actions{
+    grid-template-columns:repeat(2,clamp(58px,7.6vw,68px));
+  }
+  #hp-home-screen .hp-home-campaign{width:clamp(220px,23vw,245px)}
+  #hp-home-screen .hp-home-bottom{
+    width:clamp(495px,68vw,540px);
+    left:55%;
+  }
+  #hp-home-screen .hp-home-bottom-button{min-width:140px}
+  #hp-home-screen .hp-home-voice-card{display:none}
+}
 
 .hp-home-launch-fx{
   position:absolute;
