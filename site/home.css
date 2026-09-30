@@ -9,26 +9,29 @@
 #hp-home-screen[hidden] { display:none !important; }
 
 /*
-  Responsive HOME rule:
-  - The 16:9 HOME artwork itself is NEVER stretched.
-  - Extra-wide screens extend only the OUTER EDGE SLICE, mirrored.
-  - Taller-than-16:9 screens do the same at top/bottom.
-  This avoids duplicated logos/buttons and avoids character distortion.
+  Responsive HOME:
+  - Preserve the original 16:9 artwork with uniform scaling.
+  - Never mirror or duplicate the full HOME artwork.
+  - Extra screen area is filled only from the outermost ~1.5% edge pixels,
+    stretched and softened as ambient overscan background.
+  - Interactive UI remains inside the undistorted 16:9 reference canvas.
 */
 #hp-home-screen .hp-home-backdrop {
   position:absolute;
   inset:0;
   z-index:0;
   pointer-events:none;
-  background:none;
+  overflow:hidden;
+  background:#120d15;
 }
 #hp-home-screen .hp-home-backdrop::before,
 #hp-home-screen .hp-home-backdrop::after {
   content:"";
   position:absolute;
+  pointer-events:none;
   background-image:url("/assets/home/1D338BCC-04A5-4721-86A8-D7DBBEB208CF.png?v=1");
   background-repeat:no-repeat;
-  pointer-events:none;
+  filter:blur(7px) saturate(.92) brightness(.90);
 }
 
 #hp-home-screen .hp-home-frame {
@@ -59,49 +62,42 @@
   pointer-events:none;
 }
 
-/* Wide landscape phones: mirror only the left/right edge slices. */
+/* Ultra-wide landscape: stretch only the outermost edge pixels.
+   No reflection, no second GAME/PIANO/logo/character. */
 @media (min-aspect-ratio:16/9) {
   #hp-home-screen .hp-home-backdrop::before,
   #hp-home-screen .hp-home-backdrop::after {
-    top:0;
-    bottom:0;
-    width:max(0px,calc((100dvw - 177.777778dvh) / 2 + 2px));
-    background-size:auto 100dvh;
+    top:-10px;
+    bottom:-10px;
+    width:max(0px,calc((100dvw - 177.777778dvh) / 2 + 4px));
+    background-size:6666.6667% 100%;
   }
   #hp-home-screen .hp-home-backdrop::before {
-    left:0;
+    left:-4px;
     background-position:left center;
-    transform:scaleX(-1);
-    transform-origin:center;
   }
   #hp-home-screen .hp-home-backdrop::after {
-    right:0;
+    right:-4px;
     background-position:right center;
-    transform:scaleX(-1);
-    transform-origin:center;
   }
 }
 
-/* Tablets / squarer landscape: mirror only the top/bottom edge slices. */
+/* Squarer / tablet landscape: same technique at top and bottom. */
 @media (max-aspect-ratio:16/9) {
   #hp-home-screen .hp-home-backdrop::before,
   #hp-home-screen .hp-home-backdrop::after {
-    left:0;
-    right:0;
-    height:max(0px,calc((100dvh - 56.25dvw) / 2 + 2px));
-    background-size:100dvw auto;
+    left:-10px;
+    right:-10px;
+    height:max(0px,calc((100dvh - 56.25dvw) / 2 + 4px));
+    background-size:100% 6666.6667%;
   }
   #hp-home-screen .hp-home-backdrop::before {
-    top:0;
+    top:-4px;
     background-position:center top;
-    transform:scaleY(-1);
-    transform-origin:center;
   }
   #hp-home-screen .hp-home-backdrop::after {
-    bottom:0;
+    bottom:-4px;
     background-position:center bottom;
-    transform:scaleY(-1);
-    transform-origin:center;
   }
 }
 
