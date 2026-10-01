@@ -325,9 +325,11 @@ try {
       const dialogue=page.locator('[data-home-dialogue]');
       const first=await dialogue.textContent(), messages=new Set([first]);
       await page.evaluate(()=>{window.qaOriginalRandom=Math.random;});
-      for (const index of [4,3,1,2]) {
-        await page.evaluate(i=>{Math.random=()=>(i+.1)/5;},index);
+      for (const value of [.99,.75,.25,.25]) {
+        const previous=await dialogue.textContent();
+        await page.evaluate(random=>{Math.random=()=>random;},value);
         await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
+        assert.notEqual(await dialogue.textContent(),previous,'random dialogue must not repeat consecutively');
         messages.add(await dialogue.textContent());
         assert.deepEqual((await inspect(page)).failures,[],'dialogue overflow');
       }

@@ -250,7 +250,9 @@
 
   function talkToCharacter() {
     if (transitioning || !dialogue) return;
-    showMessage(Math.floor(Math.random() * messages.length));
+    // Choose uniformly from the other messages, including after a rare voice.
+    const choice = Math.floor(Math.random() * (messages.length - 1));
+    showMessage(choice >= messageIndex ? choice + 1 : choice);
     playMessageVoice(true);
   }
 
