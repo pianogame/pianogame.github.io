@@ -156,8 +156,6 @@
     const label = pitchName(octaveGroups[last].lo)+'–'+pitchName(octaveGroups[first].hi);
     const display = root.querySelector('[data-output="register"]');
     if (display.textContent!==label) display.textContent=label;
-    action('higher').disabled = pianoScroll.scrollTop<=1;
-    action('lower').disabled = pianoScroll.scrollTop>=pianoScroll.scrollHeight-pianoScroll.clientHeight-1;
   }
   function sizeRegister() {
     if (!root.querySelector('.hp-stage').hidden && keyboard.clientHeight > 0) {
@@ -195,14 +193,13 @@
       const frameHeight=Math.min(root.querySelector('.hp-surface').clientHeight-root.querySelector('.hp-header').offsetHeight-root.querySelector('.hp-footer').offsetHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom),root.clientWidth*.42);
       const gap=parseFloat(getComputedStyle(keyboard).rowGap)||0;
       const rackHeight=Math.max(28,(frameHeight-2*gap)/3);
-      pianoScroll.style.setProperty('--hp-row-height',rackHeight+25+'px');
+      pianoScroll.style.setProperty('--hp-register-gap',gap+'px');
+      pianoScroll.style.setProperty('--hp-row-height',rackHeight+gap+'px');
     }
     fitKeys(octaveStack,false);
     pianoScroll.scrollTop = activeTopRow*rowHeight(); showRegister();
   }
   pianoScroll.addEventListener('scroll',showRegister,{passive:true});
-  action('higher').addEventListener('click',() => { releaseHeld(); pianoScroll.scrollBy({top:-rowHeight(),behavior:'smooth'}); });
-  action('lower').addEventListener('click',() => { releaseHeld(); pianoScroll.scrollBy({top:rowHeight(),behavior:'smooth'}); });
   new ResizeObserver(sizeRegister).observe(pianoScroll);
   new ResizeObserver(sizeRegister).observe(keyboard);
   requestAnimationFrame(sizeRegister);
@@ -212,6 +209,7 @@
   layoutControl.addEventListener('change',() => {
     releaseHeld(); const enabled = layoutControl.value==='88';
     pianoView.hidden = !enabled; root.querySelector('.hp-stage').hidden = enabled;
+    root.querySelector('.hp-register-info').hidden = !enabled;
     requestAnimationFrame(sizeRegister);
   });
 

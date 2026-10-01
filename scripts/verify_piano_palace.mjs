@@ -29,8 +29,8 @@ async function inspect(page,layout='37'){
   const result=await page.evaluate(layout=>{
     const root=document.querySelector('#hp-four88'),stage=root.querySelector(layout==='37'?'.hp-stage':'.hp-scroll-window');
     const failures=[],keyData=[];
-    const rows=[...stage.querySelectorAll('.hp-register-section')].filter(row=>{const r=row.getBoundingClientRect();const s=stage.getBoundingClientRect();return Math.min(r.bottom,s.bottom)-Math.max(r.top,s.top)>5;});
     const rotated=document.documentElement.dataset.hpRotated==='true';
+    const rows=[...stage.querySelectorAll('.hp-register-section')].filter(row=>{const r=row.getBoundingClientRect();const s=stage.getBoundingClientRect();return (rotated?Math.min(r.right,s.right)-Math.max(r.left,s.left):Math.min(r.bottom,s.bottom)-Math.max(r.top,s.top))>5;});
     for(const row of rows){
       const white=[...row.querySelectorAll('.hp-key:not(.hp-sharp)')];
       if(Math.max(...white.map(k=>k.offsetWidth))-Math.min(...white.map(k=>k.offsetWidth))>1)failures.push('white key widths differ');
@@ -72,7 +72,7 @@ async function inspect(page,layout='37'){
       if(r.left<-.5||r.top<-.5||r.right>innerWidth+.5||r.bottom>innerHeight+.5)failures.push('control clipped: '+el.textContent);
       if(Math.min(r.width,r.height)<43.5)failures.push('control smaller than 44px');
     }
-    for(const el of root.querySelectorAll('.hp-header button,.hp-scroll-tools button,.hp-layout-centred')) {
+    for(const el of root.querySelectorAll('button.hp-centred-button,.hp-layout-centred')) {
       if(el.offsetParent===null)continue;
       const content=el.querySelector('.hp-control-content')||el.querySelector('.hp-layout-content');
       if(!content){failures.push('control has no centred content');continue;}
@@ -134,6 +134,9 @@ try{
     await page.locator('[data-control="layout"]').selectOption('88');
     await page.waitForTimeout(120);
     const full=await inspect(page,'88');
+    assert.equal(full.rows.length,3,'88-key window does not show three rows');
+    assert.equal(await page.locator('[data-action="higher"],[data-action="lower"],.hp-scroll-tools').count(),0,'obsolete register controls remain');
+    assert.equal(await page.locator('.hp-footer .hp-register-info').isVisible(),true,'88-key guidance is not in footer');
     for(const sharp of [false,true]) {
       const before=metrics.at(-1).keys.find(key=>key.sharp===sharp),after=full.keys.find(key=>key.sharp===sharp);
       assert.ok(Math.abs(before.w-after.w)<=1&&Math.abs(before.h-after.h)<=1,'88-key dimensions differ from 37-key dimensions');
@@ -143,15 +146,11 @@ try{
     await page.screenshot({path:path.join(output,name+'-88.png')});
     const scroll=page.locator('.hp-scroll-window');
     await scroll.evaluate(el=>el.scrollTop=el.scrollHeight);await page.waitForTimeout(80);await inspect(page,'88');
-    assert.equal(await page.locator('[data-action="lower"]').isDisabled(),true);
     const lowest=await scroll.locator('[data-midi="21"]').boundingBox(),scrollBox=await scroll.boundingBox();
     assert.ok(lowest&&lowest.x>=scrollBox.x-.5&&lowest.y>=scrollBox.y-.5&&lowest.x+lowest.width<=scrollBox.x+scrollBox.width+.5&&lowest.y+lowest.height<=scrollBox.y+scrollBox.height+.5,'lowest A0 is inaccessible');
     await scroll.evaluate(el=>el.scrollTop=0);await page.waitForTimeout(80);await inspect(page,'88');
-    assert.equal(await page.locator('[data-action="higher"]').isDisabled(),true);
     assert.ok(await scroll.locator('[data-midi="108"]').isVisible(),'highest C8 is inaccessible');
     if(name==='iphone15pm') {
-      await page.locator('[data-action="lower"]').click();await page.waitForTimeout(350);
-      assert.ok(await scroll.evaluate(el=>el.scrollTop)>0,'lower register button did not scroll');
       const cdp=await context.newCDPSession(page),box=await scroll.boundingBox();
       const before=await scroll.evaluate(el=>el.scrollTop);
       const p={x:box.x+box.width*.03,y:box.y+box.height*.8,id:70};
@@ -162,6 +161,10 @@ try{
       await page.screenshot({path:path.join(output,'88-keys.png')});
     }
     await page.locator('[data-control="layout"]').selectOption('37');
+    assert.equal(await page.locator('.hp-register-info').isVisible(),false,'88-key guidance remains in 37-key mode');
+    await page.locator('[data-action="settings"]').click();await inspect(page);
+    await page.screenshot({path:path.join(output,name+'-settings.png')});
+    await page.locator('[data-action="settings-close"]').click();
     if(name==='iphone15pm'){
       await page.evaluate(()=>{
         window.notes=[];
@@ -289,6 +292,7 @@ try{
       await page.keyboard.press('Escape');
       await page.locator('[data-action="settings"]').click();
       await page.locator('.hp-settings-overlay').waitFor({state:'visible'});
+      await inspect(page);
       assert.equal(await page.locator('.hp-stage').evaluate(el=>el.inert),true);
       await page.screenshot({path:path.join(output,'settings.png')});
       for(const id of ['guitar','bass','piano']) {
@@ -297,6 +301,7 @@ try{
         const icon=await page.locator('[data-output="instrument-label"]').evaluate(el=>({image:getComputedStyle(el,'::before').backgroundImage,width:parseFloat(getComputedStyle(el,'::before').width)}));
         assert.ok(icon.image!=='none'&&icon.width>0,'missing instrument footer icon: '+id);
         if(id!=='piano') {
+          await inspect(page);
           assert.match(icon.image,new RegExp(id+'-icon'));
           await page.locator('[data-action="settings-close"]').click();
           await inspect(page);await page.screenshot({path:path.join(output,id+'-icon.png')});

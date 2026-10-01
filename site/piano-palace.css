@@ -42,12 +42,12 @@
 #hp-four88 .hp-control:is([data-action="record"],[data-action="play"])[aria-pressed="true"] { background: linear-gradient(#8d3346, #461b2c); border-color: #f2ac98; }
 #hp-four88 .hp-control:disabled { opacity: .48; }
 #hp-four88 :is(.hp-control, select, .hp-key):focus-visible { outline: 2px solid #fff6dc; outline-offset: 3px; }
-#hp-four88 .hp-stage {
+#hp-four88 :is(.hp-stage,.hp-piano-view) {
   padding: clamp(5px, .7cqw, 11px) 0;
   justify-content: center;
   background: transparent;
 }
-#hp-four88 .hp-stage .hp-keyboard {
+#hp-four88 .hp-stage .hp-keyboard, #hp-four88 .hp-scroll-window {
   height: 100%; max-height: 42cqw; flex: 1;
   gap: clamp(10px, 1.25cqw, 19px);
 }
@@ -118,8 +118,9 @@
 #hp-four88 .hp-scroll-window { background: transparent; }
 #hp-four88 .hp-scroll-window { scrollbar-gutter: auto; scrollbar-width: none; }
 #hp-four88 .hp-scroll-window::-webkit-scrollbar { display: none; }
-#hp-four88 .hp-octave-block { padding-top: 4px; padding-bottom: 5px; border: 0; }
-#hp-four88 .hp-octave-stack .hp-register-section { height: calc(var(--hp-row-height) - 25px); }
+#hp-four88 .hp-octave-block { padding: 0 0 var(--hp-register-gap); border: 0; }
+#hp-four88 .hp-octave-title { display: none; }
+#hp-four88 .hp-octave-stack .hp-register-section { height: calc(var(--hp-row-height) - var(--hp-register-gap)); }
 #hp-four88 .hp-footer {
   position: relative; min-height: clamp(26px, 4.8cqw, 72px);
   padding: 4px max(12px, env(safe-area-inset-right)) 4px max(12px, env(safe-area-inset-left));
@@ -160,7 +161,7 @@ html[data-hp-rotated="true"] #hp-four88 .hp-footer { padding-left: max(12px, env
 }
 @container (max-height: 360px) {
   #hp-four88 .hp-header { min-height: 48px; padding-top: 2px; padding-bottom: 2px; }
-  #hp-four88 .hp-stage { padding-top: 6px; padding-bottom: 6px; }
+  #hp-four88 :is(.hp-stage,.hp-piano-view) { padding-top: 6px; padding-bottom: 6px; }
   #hp-four88 .hp-footer { min-height: 22px; padding-top: 1px; padding-bottom: 1px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -180,10 +181,14 @@ html[data-hp-rotated="true"] #hp-four88 .hp-footer {
   padding-left: clamp(24px, 6.5cqw, 100px); padding-right: clamp(24px, 6.5cqw, 100px);
 }
 #hp-four88 .hp-footer .hp-status {
-  min-width: 0; max-width: calc(50% - 3cqw);
+  min-width: 0; max-width: 100%;
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 #hp-four88 .hp-footer .hp-status { font-size: clamp(11px, 1.3cqw, 20px); }
+#hp-four88 .hp-footer-message { min-width: 0; width: calc(50% - 3cqw); display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+#hp-four88 .hp-footer .hp-register-info { display: flex; align-items: center; gap: .7em; white-space: nowrap; font-size: clamp(10px,1cqw,14px); }
+#hp-four88 .hp-footer .hp-register-info :is(.hp-range,span) { font-size: inherit; color: #edd6a7; display: inline; }
+@container (max-height: 360px) { #hp-four88 .hp-footer { min-height: 34px; } }
 #hp-four88 [data-output="instrument-label"] { font-size: clamp(12px, 1.5cqw, 23px); }
 @container (max-width: 720px) { #hp-four88 .hp-header .hp-ui-icon { display: none; } }
 @container (max-height: 360px) { #hp-four88 .hp-footer { min-height: 22px; } }
@@ -247,7 +252,7 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 #hp-four88[data-instrument="bass"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/bass-icon.svg'); }
 
 /* Centre the combined symbol and label within the painted button plate. */
-#hp-four88 :is(.hp-header,.hp-scroll-tools) .hp-control {
+#hp-four88 .hp-header .hp-control {
   display: inline-flex; align-items: center; justify-content: center; line-height: 1;
   font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
 }
@@ -255,6 +260,11 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
   display: inline-flex; align-items: center; justify-content: center; gap: .3em;
   line-height: 1; white-space: nowrap;
 }
+#hp-four88 button.hp-centred-button, .hp-install-gate-button.hp-centred-button {
+  display: inline-flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2;
+}
+#hp-four88 button.hp-centred-button:not(.hp-header button) .hp-control-content { min-width: 0; white-space: normal; }
+#hp-four88 button.hp-centred-button:not(.hp-header button) .hp-control-label { line-height: 1.2; }
 #hp-four88 .hp-control-label { display: block; line-height: 1; }
 #hp-four88 .hp-control-content .hp-ui-icon,
 #hp-four88 .hp-layout-content .hp-ui-icon {
