@@ -37,12 +37,12 @@
   const allVoices = new Set();
   const liveVoices = new Set();
   const playingCounts = new Map();
-  let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, resumePromise = null;
+  let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, violinSpace, resumePromise = null;
   let audioNeedsGestureUnlock = true;
   const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
   const ambience = {piano:{amount:35,decay:.05},bass:{amount:4,decay:.3}};
-  const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true}};
+  const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}};
   const releaseControl=root.querySelector('[data-control="release"]');
   let ambienceInstrument = 'piano';
   let samplesReady = false, sampleBuffers = new Map(), currentInstrument = 'piano', loadGeneration = 0;
@@ -244,6 +244,7 @@
         const damping = ctx.createBiquadFilter(); damping.type = 'lowpass'; damping.frequency.value = 6200;
         reverbInput.connect(reverb); reverb.connect(rumble); rumble.connect(damping); damping.connect(wet); wet.connect(master);
         effects=effectUI.attach(ctx); ambienceSend=ctx.createGain();
+        violinSpace=window.HP_VIOLIN.createSpace(ctx,effects.input);
         ambienceSend.gain.value=currentInstrument!=='piano'?0:1;
         effects.output.connect(master); effects.output.connect(ambienceSend); ambienceSend.connect(reverbInput);
         updateReverb();
@@ -414,7 +415,7 @@
             let first=0,end=Math.min(left.length,Math.floor(buffer.sampleRate*.12));
             while(first<end&&Math.max(Math.abs(left[first]),Math.abs(right[first]))<.0005)first++;
             const offset=first<end?Math.max(0,(first-32)/buffer.sampleRate):0;
-            decoded.set(descriptor.url,{buffer,offset});
+            decoded.set(descriptor.url,{...descriptor,buffer,offset});
             if(generation===loadGeneration)say(preset.name+'を読み込み中 · '+decoded.size+' / '+preset.samples.length);
           } catch(error) {failures.push(error);}
         }
@@ -475,6 +476,13 @@
   function synth(midi, when = ctx.currentTime, live = true) {
     while (allVoices.size >= 48) {
       const oldest = allVoices.values().next().value; oldest.release(ctx.currentTime,.04); allVoices.delete(oldest);
+    }
+    if(currentInstrument==='violin'){
+      const state=window.HP_VIOLIN.snapshot(),d=window.HP_VIOLIN.descriptor(instruments.violin.samples,midi,state);
+      const sample=bankCache.get('violin').get(d.url);
+      const voice=window.HP_VIOLIN.createVoice(ctx,violinSpace.input,d,sample.buffer,midi,when,state,instruments.violin.gain,voice=>{allVoices.delete(voice);liveVoices.delete(voice);});
+      const release=voice.release;voice.release=(at=ctx.currentTime,seconds=sustain?1.2:articulation.violin.release)=>release(at,seconds);
+      allVoices.add(voice);if(live)liveVoices.add(voice);return voice;
     }
     const anchor = Array.from(sampleBuffers.keys()).reduce((best,note) => Math.abs(note-midi) < Math.abs(best-midi) ? note : best);
     const variants = sampleBuffers.get(anchor), index = sampleCounters.get(anchor)||0;
@@ -745,6 +753,7 @@
     releaseHeld(); pointerStarts.clear();
     if (ctx) {
       liveVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
+      violinSpace?.clear();
       if (reverb) { reverb.buffer=null; updateReverb(); }
     }
     redraw(); say('手弾きの音と余韻を止めました');
@@ -787,6 +796,7 @@
     schedule(); scheduler = setInterval(schedule, 25);
   });
   releaseControl.addEventListener('input',()=>{articulation[currentInstrument].release=Number(releaseControl.value);root.querySelector('[data-output="release"]').textContent=Number(releaseControl.value).toFixed(2)+'秒';});
+  root.addEventListener('hp-violin-change',event=>violinSpace?.update(event.detail));
   volume.addEventListener('input', () => { root.querySelector('[data-output="volume"]').textContent = volume.value + '%'; if (master) master.gain.setTargetAtTime(Number(volume.value) / 100 * .9, ctx.currentTime, .03); });
   let auditionTimer, auditionVoice;
   root.addEventListener('hp-audition',()=>{
@@ -794,7 +804,7 @@
     clearTimeout(auditionTimer);
     auditionVoice?.release(ctx.currentTime,.06);
     noteOff('audition');
-    const midi=currentInstrument==='bass'?40:currentInstrument==='guitar'?64:60;
+    const midi=currentInstrument==='bass'?40:currentInstrument==='guitar'?64:currentInstrument==='violin'?72:60;
     noteOn('audition',midi);
     const voice=held.get('audition')?.voice; auditionVoice=voice;
     auditionTimer=setTimeout(()=>{noteOff('audition');voice?.release(ctx.currentTime,.5);},600);

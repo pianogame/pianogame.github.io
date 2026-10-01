@@ -529,8 +529,15 @@ for js_path in sorted(OUT.glob("*.js")):
         if not target.is_file():
             raise ValueError(f"Missing referenced audio asset: {asset} (from {js_path.name})")
 
-instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name not in OPENING_AUDIO_EXPECTED]
+instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name not in OPENING_AUDIO_EXPECTED and "violin" not in p.parts]
 if len(instrument_samples) != 102:
     raise ValueError(f"Expected all 102 instrument audio samples, found {len(instrument_samples)}")
 print("Verified opening audio: 3-voice call, 4 supplied tap sounds and 10 supplied full BGM tracks")
-print("Ready: Piano Dream Stage for Vercel with 102 unchanged audio samples")
+violin_sources = json.loads((OUT / "licenses/violin/source.json").read_text())
+if violin_sources["license"] != "CC0-1.0" or len(violin_sources["samples"]) != 84:
+    raise ValueError("Missing licensed violin sample provenance")
+for sample in violin_sources["samples"]:
+    asset = OUT / "audio/violin" / Path(sample["source"]).name.replace(".wav", ".m4a")
+    if not asset.is_file() or hashlib.sha256(asset.read_bytes()).hexdigest() != sample["outputSha256"]:
+        raise ValueError(f"Missing or modified violin audio: {asset.name}")
+print("Ready: Piano Dream Stage for Vercel with 102 unchanged samples and 84 CC0 violin samples")

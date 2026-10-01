@@ -48,7 +48,7 @@
       button.addEventListener('click',event=>{event.preventDefault();if(input.disabled)return;direction<0?input.stepDown():input.stepUp();emit('input');emit('change');paint();});
       direction<0?row.prepend(button):row.append(button);
     }
-    input.addEventListener('input',paint);input.addEventListener('change',paint);paint();
+    input.addEventListener('input',paint);input.addEventListener('change',paint);input.addEventListener('hp-value-refresh',paint);paint();
   });
   const wide=root.querySelector('[data-control="wide"]'),wallpaper=root.querySelector('[data-control="wallpaper"]');
   const file=root.querySelector('[data-control="photo"]'),message=root.querySelector('[data-output="photo-status"]');

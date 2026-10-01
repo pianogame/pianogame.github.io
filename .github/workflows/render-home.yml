@@ -10,6 +10,12 @@ on:
       - "site/piano-palace.css"
       - "site/piano.js"
       - "site/piano-controls.js"
+      - "site/violin.js"
+      - "site/violin-samples.js"
+      - "site/effects-ui.js"
+      - "site/multitrack.js"
+      - "sample-bundles/violin.zip.*"
+      - "scripts/verify_violin.mjs"
       - "site/key-layout.js"
       - "site/assets/piano/**"
       - "scripts/verify_piano_palace.mjs"
@@ -52,6 +58,8 @@ jobs:
         run: node scripts/verify_home_bgm.mjs
       - name: Check concert piano, pressed keys and recording
         run: node scripts/verify_piano_palace.mjs
+      - name: Check violin articulations, settings, recording and WAV export
+        run: node scripts/verify_violin.mjs
       - name: Check character voices and rare playback
         run: node scripts/verify_home_voices.mjs
       - uses: actions/upload-artifact@v4
@@ -61,4 +69,5 @@ jobs:
           path: |
             home-layout-qa/
             piano-palace-qa/
+            violin-qa/
           retention-days: 7

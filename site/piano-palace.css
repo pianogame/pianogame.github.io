@@ -250,6 +250,8 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 }
 #hp-four88[data-instrument="guitar"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/guitar-icon.svg'); }
 #hp-four88[data-instrument="bass"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/bass-icon.svg'); }
+#hp-four88[data-instrument="violin"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/violin-icon.svg'); }
+#hp-four88 .hp-violin-actions { display:flex; gap:12px; flex-wrap:wrap; margin:16px 0; }
 
 /* Centre the combined symbol and label within the painted button plate. */
 #hp-four88 .hp-header .hp-control {

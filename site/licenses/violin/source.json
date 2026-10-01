@@ -1,0 +1,683 @@
+{
+  "name": "VSCO 2 Community Edition \u2014 Solo Violin",
+  "author": "Versilian Studios / Sam Gossner",
+  "license": "CC0-1.0",
+  "source": "https://versilian-studios.com/vsco-community/",
+  "repository": "https://github.com/sgossner/VSCO-2-CE",
+  "commit": "28092772094b2d9f1148d84cea97f4545b8c687d",
+  "processing": "Leading silence trim, peak normalization, crossfade sustain loops, 320 kbps AAC",
+  "samples": [
+    {
+      "articulation": "arco",
+      "midi": 57,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A3_f.wav",
+      "sourceSha256": "76934f3a85e4ba3b6518132c2fe6effa340c33fbb02f94e88c60b00073dc722f",
+      "outputSha256": "d75988ab7b54ec96a1d538e5136ecfa9d223a9f13bf2dbbacc72d008d1bddced"
+    },
+    {
+      "articulation": "arco",
+      "midi": 69,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A4_f.wav",
+      "sourceSha256": "19e5374658351508a9e2c929e871a43caff41e62d5e3363ead6f88428a9ab863",
+      "outputSha256": "9433b0fd357f0230d284ed803ab1cfe872c61ab060803bbdd08de0a386d7b0da"
+    },
+    {
+      "articulation": "arco",
+      "midi": 81,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A5_f.wav",
+      "sourceSha256": "0558d79d23db55c710e664e6283b62619f5a582ce261a5c082700a0d01536627",
+      "outputSha256": "af26207f8471a7258bd1ea3e08fe516d1ef38c7547d5c78129adeb18034fcd00"
+    },
+    {
+      "articulation": "arco",
+      "midi": 93,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A6_f.wav",
+      "sourceSha256": "37f6cc2f12b1b443a77d3ee370178da4a002a2ac3b6529663cc7ee002728ddcf",
+      "outputSha256": "b28d207caf7a7eb31b91edb848cab292f7bca2ea8a9445f6e3299cb927495007"
+    },
+    {
+      "articulation": "arco",
+      "midi": 60,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C4_f.wav",
+      "sourceSha256": "4169605b51a72454f11bc2c34efc66c1d9993fd2b7d5f097a025ef9d3a2dbdfa",
+      "outputSha256": "77bd40ff89e5e450a31aca0b66831fb95a22f84d1423456af9738d070e0a6f18"
+    },
+    {
+      "articulation": "arco",
+      "midi": 72,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C5_f.wav",
+      "sourceSha256": "af72f852ef2892233699851dacf5f8d97d446822d8eb4ce9e0ec27d5a721b118",
+      "outputSha256": "a6689f0057603065210386bdd19272f55442459ca84e452a140f0fc39a54f2bc"
+    },
+    {
+      "articulation": "arco",
+      "midi": 84,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C6_f.wav",
+      "sourceSha256": "7ec8e0c2dde75282a4aaacccc713c84faa3e84daa9cf43df45ffc0e209964d46",
+      "outputSha256": "6b5694ae5d76dcc6a34466184a98e72a0d0c3bf0c5ccaf36efb225979f4f3756"
+    },
+    {
+      "articulation": "arco",
+      "midi": 96,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C7_f.wav",
+      "sourceSha256": "f8223aed62911ef3f6937111bf3cdcc36fc25a636d4f99480b97029c4d28f393",
+      "outputSha256": "9e8289b651c45a3c660437358a8a45d9ade43aa5b0ea5635af7c0fa0d90a409e"
+    },
+    {
+      "articulation": "arco",
+      "midi": 64,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E4_f.wav",
+      "sourceSha256": "418512905f3294a23cf999f0587bf8e04d60192fe317ea8c80c150a85670eda2",
+      "outputSha256": "d59876fecbeba9b43fb1388415535cffafbe603accbcf52f1bd942084aad72cf"
+    },
+    {
+      "articulation": "arco",
+      "midi": 76,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E5_f.wav",
+      "sourceSha256": "5c278e263fd59650190fc58294945cd291906eb1abd8293f728a96a878d1d478",
+      "outputSha256": "164df29807217b3e23818d9aa13d2695098a10359a7ccfd4478eef1c8ff118bf"
+    },
+    {
+      "articulation": "arco",
+      "midi": 88,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E6_f.wav",
+      "sourceSha256": "8d1712f5659274a83aa90807132084559633e4817027c8a5b5f40826b3d9bc84",
+      "outputSha256": "571230d47a525b72739d3ea2d2001862a598cf973e2cd2cb391fabf7dd9061f6"
+    },
+    {
+      "articulation": "arco",
+      "midi": 55,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G3_f.wav",
+      "sourceSha256": "80bae3776b0ccd3d4774f47429e829c7764f5fe6061ff844a8affc6ac68b7899",
+      "outputSha256": "6c5f51c7ca46cca974c0e096fc6e20a8696ee39e0f3a61d55151401c52386333"
+    },
+    {
+      "articulation": "arco",
+      "midi": 67,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G4_f.wav",
+      "sourceSha256": "14e3ea3d5172722d4d2686bae5da3d603800a7a474fa295d98275a9410913822",
+      "outputSha256": "6fcdfe4687af0486b6bba980aa36d82931587042b98289c9e7d3b8d4ae985b36"
+    },
+    {
+      "articulation": "arco",
+      "midi": 79,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G5_f.wav",
+      "sourceSha256": "b5bb27541d6187e6eeb20baf50625ca35fc9d44c7f113936a9369bc7ce490a68",
+      "outputSha256": "131af00f68cafdb4789d0dce6fa0bd52431667cd2e6732a99bcb1f88c5a00964"
+    },
+    {
+      "articulation": "arco",
+      "midi": 91,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G6_f.wav",
+      "sourceSha256": "68c49e55565810ea822866e3d39e51c1a5ad53cfa1a67bc25836ca7feac3fe0c",
+      "outputSha256": "72021f2ba3709f148ca467d6fd5d8d8b17d9421079325d9104ae8d6d614b34fc"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 57,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A3_f_RR1.wav",
+      "sourceSha256": "8f400b390219271d04eb9fc0247493d92089f2ca982b9a23be682bec18b7972d",
+      "outputSha256": "6cf0b34914642e2b0dcf809853d1e519bce312f165965c289181a384fa5bff3b"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 69,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A4_f_RR1.wav",
+      "sourceSha256": "bf68ed22022538e70f6b04098a03a224dc0acb7b35334bce3af0b3196bc24455",
+      "outputSha256": "e937841d755a6044977d9d76bd952ca0c3d1d2d46bd18d301e31e20763610f9e"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 81,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A5_f_RR1.wav",
+      "sourceSha256": "3eba1cba37e7bb60a879474b070a4d2bf0af03d65bee9f5f45d013c67fe0e5ae",
+      "outputSha256": "1db3fa88e2c17a5bc0709c950a566be55b93fcad02be939c209fabe542a3d246"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 93,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A6_f_RR1.wav",
+      "sourceSha256": "667b41d61ec54a033ff1f7024cff95ba6162f4d4bdb8b595740f306fd8588460",
+      "outputSha256": "ed220ea4dfcf371aff5671824c9804027d79259bc67fb4d5e3d3b9b88208d0dd"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 60,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_C4_f_RR1.wav",
+      "sourceSha256": "f2836918ed710f19d1e63a6884409f1c9138cdb525d6295d9cdb473f0d56be95",
+      "outputSha256": "a16a4bd27abba78f3e91c05bcfa14c53860a172884c5fc7ec52a5c3630da0f8d"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 72,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_C5_f_RR1.wav",
+      "sourceSha256": "df52150f00c233e6d270d7c557d90e741ef856577571f3a875b2868a5047b6a0",
+      "outputSha256": "4a5c7bec0621a3d5d425e2163d93df97e866acec1957deea56bc9766f12317ea"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 64,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_E4_f_RR1.wav",
+      "sourceSha256": "96e609d2d3ad1d01f898763ee1554ce69416238d9b2c598a89f0fad2b710eab9",
+      "outputSha256": "f16ca6d8f97b89e07a9628fcc837b370dd72b307f107950c0957304058b2a9c0"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 76,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_E5_f_RR1.wav",
+      "sourceSha256": "5704be5d372702464b44fecf10669c8181001ffc9ad29f63397f3634405d2f07",
+      "outputSha256": "a5b3207fa7bb80d4924020e1a0b925abac04b2efb4a9e1a80b2ab2164070be83"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 88,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_E6_f_RR1.wav",
+      "sourceSha256": "37a372a0a56301179b2dfc3e25ccf7b3b392617d512da57214ab8b85e66d264a",
+      "outputSha256": "e1fed47bbc98bc1aa2227b760ecb6a07246b8ce811bc6e2daf66899402eb726e"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 55,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_G3_f_RR1.wav",
+      "sourceSha256": "dc56b8193aaa29d9a0704aeee8672437a00bd12ec5e964e9a02765ead48fcdf6",
+      "outputSha256": "eb016fabadf91af758cb2a74dcfb8164e35e6fac0ce3b181b5437117be7c6402"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 67,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_G4_f_RR1.wav",
+      "sourceSha256": "006bd7c4ae323a1b2076895ca74350a3cd7e2c82acfef3fcb1fb1b6f601c40dd",
+      "outputSha256": "9c0367574c8590d5e87400b789b5da88d81d4c7e4afc31189c99d9723486b96e"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 79,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_G5_f_RR1.wav",
+      "sourceSha256": "855b7dfd084573bd84189a539ffd08ce05d701d7a2fcf7df7a87ce81e90af738",
+      "outputSha256": "29c5c2bb6b4ed8b7bc87572ddd8f43df89665ea46fbcf85374fa69a4641bf9fb"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 57,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A3_f_RR2.wav",
+      "sourceSha256": "f8aed0fad17c902ee245c556ee604f87222160f5fb273fe51caffd966cc69a0b",
+      "outputSha256": "d06c441e7ebf330dcb33bc39bee4344928506155fd0ba51439a760f39c7d0dd8"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 69,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A4_f_RR2.wav",
+      "sourceSha256": "4d74eb16c8c55e983ff86c1a9cb20b58675278132d560ac582f4f337dd191e78",
+      "outputSha256": "92ffef5af95a725b42b8385c731d74f751721534475d93d206fd734bd7e50c63"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 81,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A5_f_RR2.wav",
+      "sourceSha256": "e502977cadbe96d79910f5931885efd8a0d3e5b85d160bedb1ca3112eb2e9771",
+      "outputSha256": "6341f331188f575573b4e2314ae6f32730e8bd4b8628397de5fa4c28effbc2a8"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 93,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_A6_f_RR2.wav",
+      "sourceSha256": "f450315f1875b9054ed905c2168f4083ac961d64ebff42b24f4305c65b8e4796",
+      "outputSha256": "c2db0209b8cac4740c4d3001a79e16c7b5e89d33a2f37b50348f8701c6431d8a"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 60,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_C4_f_RR2.wav",
+      "sourceSha256": "ce9c5aef57a88446a0febeab6ce143317bacbaab3329e5f29c3cf24867b02ea0",
+      "outputSha256": "edd65e4a286148674cc6df52269105350bb70d69b02e04ed570dfc3514a86ee0"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 72,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_C5_f_RR2.wav",
+      "sourceSha256": "28046880d71a116098059dceb98c4973926a3c2134325368eddcdbbf0b66ee52",
+      "outputSha256": "fbed09c6fbb5bd7403896c015c0b314ffd43f9cdeda5b6a209ddf4f1f52c2607"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 96,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_C7_f.wav",
+      "sourceSha256": "fccd76254ab12434dd3e41958b8c9f6a5058102ed9b507e5a6e5df953dd04f02",
+      "outputSha256": "c4a4f43ea211982aaea40d0d48aca94f7e67db8e81cbb00b5b34c38690dda19b"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 64,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_E4_f_RR2.wav",
+      "sourceSha256": "b9816fe7508b46b4617bfbe47588f0b9b5bad07c7c6fa8156b1a372129a2bbf1",
+      "outputSha256": "cf230b5dc372f25772bac252f4ab2f89b85e33967405fe14299d6c9c6d20abea"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 76,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_E5_f_RR2.wav",
+      "sourceSha256": "b917c66686118628c23a997c7c25534644236d4ddf7df03ed6cbf3df9a22baae",
+      "outputSha256": "cf39ff0e3ea23e029682c871ed615eb547b461217c0e987b49c5e868b5645c2d"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 88,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_E6_f_RR2.wav",
+      "sourceSha256": "4026da1bc8ebd09c7053c7e58a5de8c7d72fc5233942c36c2fade30fb687c069",
+      "outputSha256": "dd3b51a622df2311d20901bb08c85f089c7c097114149b04e8707b16e75b93c0"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 55,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_G3_f_RR2.wav",
+      "sourceSha256": "75db2279cd1908e4187f04a1b1af43d8841d943d217e9d6b5a8a89374d122643",
+      "outputSha256": "c7713a32be96c352e32d32e75b1abc97e7cf552be4d16f359f996db1e8b29dab"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 67,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_G4_f_RR2.wav",
+      "sourceSha256": "fed514fb316eda3691b2e11dd3ca89b9f64d28ca9863762fcfa609fefce8d475",
+      "outputSha256": "0c616a514c901b1ef7e0dedc4ab0b269a40e70e2cef11648c888db233228dc83"
+    },
+    {
+      "articulation": "pizzicato",
+      "midi": 79,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Pizz/LLVln_Pizz_G5_f_RR2.wav",
+      "sourceSha256": "faeda347d3d85c5b6c90508dde61d88a2795f7caa4bc6a6ddd299e24dc9ca5c8",
+      "outputSha256": "d6b687874a35caa27b94ab5d278d6ca87144e05d16fe32fc59de05fe4ef2152d"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 57,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A2_v2_rr1.wav",
+      "sourceSha256": "4d7f9520bbde4f43324554b53bf147d2b5ea1a8c1234a7375793420f8a29f1d6",
+      "outputSha256": "c7d4d288b1f8a4d59d5e572044af85427b8219deacbadcf788a9bdc7f5b50c1b"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 69,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A3_v2_rr1.wav",
+      "sourceSha256": "cda80f0f3d2deebc97d313581f810cb1b42b516cd26d617252e62e12ea205a1b",
+      "outputSha256": "1660fc591f09620d44c28aee4778d9cd9591aa34b674611f70ec978c340c7943"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 81,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A4_v2_rr1.wav",
+      "sourceSha256": "6c506b5fccacbbbadb70993ff00d77c68a185af79febb35dc7101eb616046650",
+      "outputSha256": "47c6b0403f379eb2e79a5f64f9aa52681f5969eeb259a72f31aad0d0ed1bf04c"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 93,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A5_v2_rr1.wav",
+      "sourceSha256": "c5e2925c08a55dd4329c74bc9f0b832dac4e405d04da7a19fd790bff71f02162",
+      "outputSha256": "493e35394c62142e7bd913308965056e95c505c6c8e205c198e70614dbf25c77"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 60,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C3_v2_rr1.wav",
+      "sourceSha256": "004ab9c49db15533ee5f47d626138a5af3f044f19131827a0911ec3648c0e68e",
+      "outputSha256": "abfca3c04d406424bc17c2552511c8d432ee1dd14048387560525f6aedadb86e"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 72,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C4_v2_rr1.wav",
+      "sourceSha256": "0071c0e2cf8ee18b6502f392015dc89ed39a6320f8a430779a50c48b1cb37f42",
+      "outputSha256": "04833bda4731e531e32d4afb3e3af959eb125a7f10deb4f30c36044e134f07df"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 84,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C5_v2_rr1.wav",
+      "sourceSha256": "28788d5a97438d739403627aea0f8aa42fa6582d75c4e8f4f2431cfae1cd4738",
+      "outputSha256": "abea39ef356f48a9bb0d7e2489aa5793644665b5a8d9d0f19470e28cc52a289a"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 96,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C6_v2_rr1.wav",
+      "sourceSha256": "4e854001e15c23bb42e1f9dd8ca276e54d279423c6dd94db9bab6385cd9641c2",
+      "outputSha256": "34f7a436c1080ee191663c4c78a04b8d825602701c8810ea5bc78945c05e05c4"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 64,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_E3_v2_rr1.wav",
+      "sourceSha256": "b4a9d9a85016a0ee4db54256d3a7384288823821b866df4bd1cd226a05cf2396",
+      "outputSha256": "54a390c4654b86a80980b8fce4cbf978401d56f4f438fa0922f98b1791ffa831"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 76,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_E4_v2_rr1.wav",
+      "sourceSha256": "365e59e228e7af42d9277381d16bbd088983d99190e746da6ae81f9b10cb48fe",
+      "outputSha256": "575b711009e28704b25339a06c1c214f629b6d846b102e5b48103fee4f52297d"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 88,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_E5_v2_rr1.wav",
+      "sourceSha256": "3c440d43b09b1a152fdf9308f4773ec8c55cea05b97ed06e50dbce1a9d2a2256",
+      "outputSha256": "70e46e0ae8184d68ceef585835baefbd2de1b50e34dd0e54cfae217b7cec2f60"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 55,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G2_v2_rr1.wav",
+      "sourceSha256": "3bcd4edde6d9c9882ad16d3ba8d1999b6190581cb4af77df6b0d6606d7b4a60e",
+      "outputSha256": "39d758865625565f30d64a98d13e77a3bd561856855b4d06e0f298142a8865ef"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 67,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G3_v2_rr1.wav",
+      "sourceSha256": "af5163b8b919a07cb85abeb1fbb2f1f124889f9b0417e4f41571f6d7588f5665",
+      "outputSha256": "5ac1b14e0ac201bd454f6d17c7c58c8cb1ecc2f4ab881b925922102da79162e1"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 79,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G4_v2_rr1.wav",
+      "sourceSha256": "acfee187b8d0e781aaae2c2f68250c42e1d8f410a595673502fb96f1469a789e",
+      "outputSha256": "7b71f8884707f2b193c88159a001af2ee4e1bac02f90bc52cff68ac51d7b9439"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 91,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G5_v2_rr1.wav",
+      "sourceSha256": "f83bc69d68304da0f24d042ce01f5e8c9f824cc70fe19eea8b11e8fc6131df99",
+      "outputSha256": "cf06883e3001599f4431a02ab59b2d0ac3018fb53e6b906ecb2c70d450e2043f"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 57,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A2_v2_rr2.wav",
+      "sourceSha256": "d3579f437be1f0c713a0407fada47f75e26b18da1f4984a365356382bc6618f9",
+      "outputSha256": "c4d9a8c63a2a72d1a20b5c1fb486bede5da73fc81ba33effc1c3b46418b1e078"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 69,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A3_v2_rr2.wav",
+      "sourceSha256": "7b1025869c74c8a937ecbed90636f25c2adcfe94d3751879a4b9177a07b19fd4",
+      "outputSha256": "5356ac33bb52cd049cc27297ff43709ac43a349ce5995e57c0d16e01f7e53cee"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 81,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A4_v2_rr2.wav",
+      "sourceSha256": "c7a1418539041e1428f6aff88f66aa184e9dfff61857b725acdefff4993c1435",
+      "outputSha256": "27772c04866da8678d5a05281b8ec01a076b4e5bc91266116a6550a41e629060"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 93,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_A5_v2_rr2.wav",
+      "sourceSha256": "ed2da319deea36dc872cfb3c09828d51fc0ba02bf4626a8bc43b8075e59cfd14",
+      "outputSha256": "7fcf38f33436936e6e6fb8b35dce554cf98392ee405b1a7e1dff1713b308921a"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 60,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C3_v2_rr2.wav",
+      "sourceSha256": "0910dd0f25c3455cd8164de1037d35053164fe7b0b640be219fef281a415b2c7",
+      "outputSha256": "0b8b2d04fa9681ae9bbaad0d8c96f9ab88e293aefd07ca02c6139240204fec67"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 72,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C4_v2_rr2.wav",
+      "sourceSha256": "bde86277c2a400799bd7bd15500b10a8f9249d9fdf7929a9499977fe39d0e625",
+      "outputSha256": "7c2ddb528d0b9865c8cebfddeea15025c60628bfee7827258bfa050c076c466e"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 84,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C5_v2_rr2.wav",
+      "sourceSha256": "2c9a17f8848c55c3fd94ac8b742e5e552a9815b417ccf2ff0696accd0c566c35",
+      "outputSha256": "ef9e66559dd9d149a208aac4b553510d2408821f79242ea6c31b6e31365f5d6d"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 96,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_C6_v2_rr2.wav",
+      "sourceSha256": "46796f4235be0817e2106b9e20ec626092db29808937e0c957eb325da8893905",
+      "outputSha256": "6fc38a91f746e25fbc9676f4c8b851030fb5f629881cce559a14ec7f6a9e2eba"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 64,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_E3_v2_rr2.wav",
+      "sourceSha256": "31ec1ba3c100ff966464f532baab9303e3cfe58c27367fba912ec01a5967de90",
+      "outputSha256": "63edd16f6add7fe1a13b5a65605455ca71f39bbaf3e69e2e097d399c33798b61"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 76,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_E4_v2_rr2.wav",
+      "sourceSha256": "02a5a5b7a5f88258059d2b4af2596eb974060968a5c8033b4d53465e8f43daa8",
+      "outputSha256": "807701ca928ef7c8e4360156ab5c83860f2b440ec07f14592ee9a3d2589ff2f8"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 88,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_E5_v2_rr2.wav",
+      "sourceSha256": "76a1aff68c93f1d0607b348536967de3fb5baa2775bbc9527172ee5a99eaed73",
+      "outputSha256": "a4a1dbcf24522440c2fd60f4fc74bf5816c17783293247f9f77fc9d384da81cb"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 55,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G2_v2_rr2.wav",
+      "sourceSha256": "72b722d23d17719c85602d152bdc1b80894f3564f6b53262c953d4ec3a7d5985",
+      "outputSha256": "7baefab939ac9f3a331a32900b100a69b245d1345a25ee28b43b27cbfbba08ee"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 67,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G3_v2_rr2.wav",
+      "sourceSha256": "bada8ff79015d7d9129e205925331d3663b592e194ced971cf44c499c1cc0b7f",
+      "outputSha256": "0c09a9ebe893cd7797fdb8d1565b5219f9de125ad44f350b5cff3e1b866522c2"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 79,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G4_v2_rr2.wav",
+      "sourceSha256": "fe962a6aa6e8c01de0e5d9cf2e498d3f2f9be66f944152ca8e4e73726d71c512",
+      "outputSha256": "adc1872b3fdcab043bfbc0b5d9f946750458ce84afc00c923a2512075a493355"
+    },
+    {
+      "articulation": "spiccato",
+      "midi": 91,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/spic/LLVln_spic_G5_v2_rr2.wav",
+      "sourceSha256": "5b6a703c73566b5f3f18656902369e4434bd223dc01cb6abd2ba373361ea1db7",
+      "outputSha256": "c0633cc92c232e723816be44be0ad6a8cf8eb90c305154640ed31b632a4db9e1"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 57,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_A2_v2_rr1.wav",
+      "sourceSha256": "de42f26ee9a7ef124a63d161076d11532bbbca4fa8f6a9809b546e9d65807849",
+      "outputSha256": "a10dc57a40493636b81a04675f2e5b50c4894566cc3fc8ebcc55618c21399f7f"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 69,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_A3_v2_rr1.wav",
+      "sourceSha256": "18d686151114a52c334019694bb216f48c811faab28660d608a6a0de948093a0",
+      "outputSha256": "56285bbda3eb46e6706010ec8f8cd6cd93ee086ff6440f0e33b8aa8e8211c102"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 81,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_A4_v2_rr1.wav",
+      "sourceSha256": "8b16f91a40de749788d400b9c31ead5cb47bde6e00343138afb6b3a8582be0c5",
+      "outputSha256": "fb11d8a484a4a4e579dcb7350b044f9f7bac29f3f8e5feb9275da6c198d5f587"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 60,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_C3_v2_rr1.wav",
+      "sourceSha256": "517c2b9e2b5f46416bde88d732cd69fabe8a4cf2c3cef3873620f66a5166dfe8",
+      "outputSha256": "0ac395635502bab48986c94760585b0c46f8a0cc91ee2901cfe3386cf8cb508f"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 72,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_C4_v2_rr1.wav",
+      "sourceSha256": "e047a8a4cf8a4668cde2490ccbbc0532af2df1afb2a72a2e205dce3303c09d9a",
+      "outputSha256": "955b6a5ca743012a8b96a57dcd6d11e782f6bbd7bd5e5e784ce2dcd4f6e5f099"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 84,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_C5_v2_rr1.wav",
+      "sourceSha256": "cad9537e5a89258546021e75e3907e9359c34696b7afc4c4845e83268718f76f",
+      "outputSha256": "32a494a6fd3f3dfb17979e899d70d999e069a29df907e531d1a63ea65a695486"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 96,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_C6_v2_rr1.wav",
+      "sourceSha256": "53faf1a9b503ce710f977175eecbd15abb06d8a1ba32ca9e83eb3abc87861d16",
+      "outputSha256": "b836c166af6782ced248032a817ee409aef4ef39390b8e6da0fe5e2f153d08dd"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 64,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_E3_v2_rr1.wav",
+      "sourceSha256": "9adb581924e9502d305e573a41997f914edab8b7a56ebfa02f136d9342e6923b",
+      "outputSha256": "5d3c28400c7f31e01844383655e3af58b37a2a98440787bb0c65cbae054328ac"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 76,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_E4_v2_rr1.wav",
+      "sourceSha256": "aa1b1923f469f8718c005f4f65c91967c1c7cada96f92f9426fac3d6316c60ae",
+      "outputSha256": "e40fe1f46393c1f102445c7ed6babfdc7e1c670fb4bd62223f3b006e9cf37022"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 88,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_E5_v2_rr1.wav",
+      "sourceSha256": "49cdf4a1e96dcd7800174c7f565897fe05fe19b23e9e97be302cb594094c4791",
+      "outputSha256": "9106b94bd1782c9e371c88318c618d49e1ec8e7e7ca3bf9eaa6fc0a1fadc74f6"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 55,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_G2_v2_rr1.wav",
+      "sourceSha256": "d18c1ece6b2170cc721fec7df6e93d88605817c835ee9e64cc2bbde12a2c86b2",
+      "outputSha256": "5a4e1fa496f18b3c8c3e86544d74c1db438bca413c33181905e3e6782b04f75e"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 67,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_G3_v2_rr1.wav",
+      "sourceSha256": "c4b0206ef3bb7dd6889172e1b38ebc47ae6f8c438056523b5b556392367e9895",
+      "outputSha256": "60b973673ecc48b05282dcf103b4893438c2bc7eb3c18bc0f2bf6420f06fa57e"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 79,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_G4_v2_rr1.wav",
+      "sourceSha256": "93990f54d3a2ab64c97c35cbe81b60260681dc65a56c3aa10de723b6e1ab3dcc",
+      "outputSha256": "d9b4ed60166828610b146cbfc032fe91243a024bd1826c4e1db04997e1ff526c"
+    },
+    {
+      "articulation": "tremolo",
+      "midi": 91,
+      "tune": 0.0,
+      "source": "Strings/Solo Violin/Trem/LLVln_trem_G5_v2_rr1.wav",
+      "sourceSha256": "4bad7f2518e4b40771fc7535c3dda0ea3036304dcb2c37d2555f390e0c61301f",
+      "outputSha256": "f3c3e768d015821debbcc25c0ea666a76b71e0ea0734af1d698171bf874b30bd"
+    }
+  ]
+}
