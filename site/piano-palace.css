@@ -10,13 +10,13 @@
   background-color: #08101c;
 }
 #hp-four88[data-wallpaper="photo"] .hp-surface { background: linear-gradient(#08111b40, #050a1466), var(--hp-wallpaper) center / cover; }
-#hp-four88[data-wallpaper="night"] .hp-surface { background: radial-gradient(ellipse at top, #31324e, #090e19 78%); }
-#hp-four88[data-wallpaper="blue"] .hp-surface { background: radial-gradient(ellipse at top, #32647b, #0b1c30 78%); }
+#hp-four88[data-wallpaper="night"] .hp-surface { background: linear-gradient(#11152b45, #050a1466), url('/assets/piano/palace-hall-v1.jpg') center / cover; }
+#hp-four88[data-wallpaper="blue"] .hp-surface { background: linear-gradient(#154b653d, #050a1466), url('/assets/piano/palace-hall-v1.jpg') center / cover; }
 #hp-four88 .hp-header {
-  min-height: clamp(54px, 5.6cqw, 84px);
+  min-height: clamp(54px, 7.4cqw, 112px);
   gap: 12px;
-  padding-top: 8px; padding-bottom: 8px;
-  background: linear-gradient(#080c1833, #080c1866);
+  padding-top: clamp(5px, 2.4cqw, 36px); padding-bottom: 8px;
+  background: linear-gradient(#080c1800, #080c1833);
   border-bottom: 1px solid var(--piano-gold);
   box-shadow: 0 2px 0 #080b14, 0 3px 0 #f7dba65c;
   z-index: 2;
@@ -24,9 +24,9 @@
 #hp-four88 .hp-layout-actions, #hp-four88 .hp-toolbar { gap: clamp(4px, .65cqw, 10px); }
 #hp-four88 .hp-toolbar { background: transparent; }
 #hp-four88 .hp-control, #hp-four88 select {
-  min-height: 44px; min-width: 44px;
+  min-height: clamp(44px, 3.8cqw, 58px); min-width: 44px;
   border: 1px solid #c49a57;
-  border-radius: 10px;
+  border-radius: 12px;
   color: #f7e7c6;
   background: linear-gradient(180deg, #263147 0, #101a2b 18%, #080e19 86%, #172238);
   box-shadow: inset 0 1px 0 #fff1c55c, inset 0 -2px 0 #0008, 0 2px 4px #0007;
@@ -41,7 +41,7 @@
 #hp-four88 .hp-control[aria-pressed="true"] { color: #fff0cb; border-color: #ffe2a0; background: linear-gradient(#725423, #3b2c19); }
 #hp-four88 .hp-control[data-action="record"][aria-pressed="true"] { background: linear-gradient(#8d3346, #461b2c); border-color: #f2ac98; }
 #hp-four88 .hp-control:disabled { opacity: .48; }
-#hp-four88 :is(.hp-control, select, .hp-key):focus-visible { outline: 2px solid #ffdf99; outline-offset: 3px; }
+#hp-four88 :is(.hp-control, select, .hp-key):focus-visible { outline: 2px solid #fff6dc; outline-offset: 3px; }
 #hp-four88 .hp-stage {
   padding: clamp(8px, 1cqw, 16px) 0;
   justify-content: center;
@@ -49,7 +49,7 @@
 }
 #hp-four88 .hp-stage .hp-keyboard {
   height: 100%; max-height: 42cqw; flex: 1;
-  gap: clamp(7px, .8cqw, 12px);
+  gap: clamp(10px, 1.4cqw, 22px);
 }
 #hp-four88 .hp-register-section {
   isolation: isolate;
@@ -57,73 +57,69 @@
   --black-depth: clamp(3px, calc(var(--hp-black-height) * .13), 8px);
 }
 #hp-four88 .hp-stage .hp-register-section, #hp-four88 .hp-octave-stack .hp-register-section {
-  border: 1px solid #b58a46;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #293443 0, #070b12 10%, #111821 40%, #03070d 91%, #26313b);
-  box-shadow: inset 0 2px 0 #f8d89680, inset 0 4px 0 #000, inset 0 -2px 0 #f3ca805c, inset 0 -5px 7px #000, 0 3px 7px #0008;
+  border: 1px solid #eed398;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #313b44 0, #02060a 7%, #0e141b 17%, #05090e 83%, #000 92%, #29313a);
+  box-shadow: inset 0 3px 0 #000, inset 0 4px 0 #e5b970, inset 0 7px 0 #020508, inset 0 -2px 0 #000, inset 0 -3px 0 #f3ca80, inset 0 -6px 5px #000, 0 0 0 2px #382817, 0 0 0 3px #c38c3e, 0 5px 10px #0009;
 }
 #hp-four88 .hp-register-section::before, #hp-four88 .hp-register-section::after {
-  content: ""; position: absolute; top: -4px; width: clamp(20px, 3cqw, 46px); height: clamp(20px, 3cqw, 46px);
-  background: url('/assets/piano/gold-corner-v1.svg') center / contain no-repeat;
+  content: ""; position: absolute; top: -10px; width: clamp(25px, 4.4cqw, 68px); height: clamp(25px, 4.4cqw, 68px);
+  background: url('/assets/piano/gold-corner-v2.webp') center / contain no-repeat;
   pointer-events: none; z-index: 35;
 }
-#hp-four88 .hp-register-section::before { left: -4px; }
-#hp-four88 .hp-register-section::after { right: -4px; transform: scaleX(-1); }
+#hp-four88 .hp-register-section::before { left: -9px; }
+#hp-four88 .hp-register-section::after { right: -9px; transform: scaleX(-1); }
 #hp-four88 .hp-key:not(.hp-sharp), #hp-four88 .hp-stage .hp-key:not(.hp-sharp), #hp-four88 .hp-octave-stack .hp-key:not(.hp-sharp) {
-  --key-border: #c9c8c3;
-  border-radius: 3px 3px 4px 4px;
-  --key-surface: linear-gradient(100deg, #d9d9d5 0, #eeeeea 3%, #f6f6f1 47%, #e9e9e5 97%, #d6d6d1);
-  color: #27231e;
-  --key-shadow: inset 0 1px 0 #fff, inset 1px 0 1px #fff, inset -1px 0 1px #c9c8c455,
-    0 var(--key-depth) 0 #b6b7b3, 0 calc(var(--key-depth) + 1px) 0 #6d706d, 0 calc(var(--key-depth) + 4px) 6px #0009;
-  transform: translateX(-50%);
-  justify-content: flex-end;
-  padding: 4px 0 max(8px, calc(var(--hp-white-height) * .12));
-  transition: transform 45ms ease-out, box-shadow 45ms ease-out, background-color 90ms ease-out;
+  --key-border: #bcbcb8;
+  border-radius: 6px 6px 7px 7px;
+  --key-surface: linear-gradient(104deg, #d8d8d3 0, #f3f2ed 5%, #f4f3ee 70%, #e9e8e3 96%, #cbcbc6);
+  --key-shadow: inset 0 2px 2px #fff, inset 2px 0 2px #fff9, inset -2px 0 2px #bbb9b655, inset 0 -2px 2px #e5e4df, 0 calc(var(--key-depth) + 3px) 5px #000b;
+  --front-depth: var(--key-depth);
+  color: #171717;
 }
 #hp-four88 .hp-key:not(.hp-sharp) .hp-key-face::before {
-  content: ""; position: absolute; inset: 0;
-  border-radius: inherit; pointer-events: none;
-  background: linear-gradient(172deg, #ffffffb8 0, #ffffff00 16%),
-    radial-gradient(ellipse 8% 10% at 75% 13%, #ffffffed 45%, #ffffff00 100%),
-    linear-gradient(102deg, transparent 4%, #ffffff44 11%, transparent 16% 85%, #ffffff66 96%, transparent);
+  content: ""; position: absolute; top: 14%; right: 16%; width: 13%; height: 17%;
+  border-radius: 1px; pointer-events: none; transform: skewY(-6deg) rotate(5deg);
+  background: linear-gradient(110deg,#fff8,#fff 36% 80%,#fff9);
+  box-shadow: 0 0 5px 2px #fff7;
+}
+#hp-four88 .hp-key:not(.hp-sharp) .hp-key-face::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: calc(-1 * var(--front-depth)); height: var(--front-depth);
+  pointer-events: none; border-radius: 0 0 6px 6px;
+  background: linear-gradient(#c9c9c3,#a6a6a1);
+  clip-path: polygon(0 0,100% 0,98% 100%,2% 100%);
+  box-shadow: inset 0 -1px 1px #777b76;
 }
 #hp-four88 .hp-key.hp-sharp, #hp-four88 .hp-stage .hp-key.hp-sharp, #hp-four88 .hp-octave-stack .hp-key.hp-sharp {
-  z-index: 20;
-  --key-border: #07090c;
-  border-radius: 2px 2px 3px 3px;
-  --key-surface: linear-gradient(105deg, #15191f, #05070a 22% 72%, #262b31 99%);
-  --key-shadow: inset 1px 0 0 #6b707888, inset -1px 0 0 #8a8f9955, inset 0 2px 1px #757b8680,
-    inset 0 -7px 0 #030407, inset 0 -8px 1px #3f444a,
-    0 var(--black-depth) 0 #020305, 0 calc(var(--black-depth) + 4px) 5px #000b;
-  transform: translateX(-50%);
-  transition: transform 45ms ease-out, box-shadow 45ms ease-out;
+  z-index: 20; --key-border: #74777a;
+  border-radius: 3px 3px 5px 5px;
+  --key-surface: linear-gradient(106deg,#25282b,#080b0d 12% 72%,#191d20 94%,#080a0b);
+  --key-shadow: inset 0 1px 1px #d0d0cb88, inset 1px 0 1px #b8b8b977, inset -1px 0 1px #92959888, 0 calc(var(--black-depth) + 5px) 6px #000b;
+  --front-depth: var(--black-depth);
+}
+#hp-four88 .hp-key.hp-sharp .hp-key-face::before {
+  content: ""; position: absolute; inset: 1px 2px 0; pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(165deg,#fff2,transparent 29%), linear-gradient(94deg,#fff2,transparent 8% 89%,#fff1);
 }
 #hp-four88 .hp-key.hp-sharp .hp-key-face::after {
-  content: ""; position: absolute; inset: 2px 3px 10px;
-  pointer-events: none; border-radius: 1px;
-  background: linear-gradient(170deg, #ffffff26, transparent 23%),
-    radial-gradient(ellipse 12% 8% at 28% 6%, #ffffff66, transparent),
-    linear-gradient(100deg, transparent 80%, #ffffff14 98%);
+  content: ""; position: absolute; left: -1px; right: -1px; bottom: calc(-1 * var(--front-depth)); height: var(--front-depth);
+  pointer-events: none; border-radius: 0 0 5px 5px;
+  clip-path: polygon(0 0,100% 0,95% 100%,5% 100%);
+  background: linear-gradient(#1b1f22,#030405);
+  box-shadow: inset 0 1px 0 #75777b66;
 }
-/* Only a sounding key sinks. The short release glow does not hold it down. */
-#hp-four88 .hp-key:not(.hp-sharp)[aria-pressed="true"] {
-  z-index: 4;
-  --key-travel: var(--key-depth);
-  --key-surface: linear-gradient(100deg, #d4cbb7, #fff8e6 8% 92%, #d8cfba);
-  --key-border: #d1b676;
-  --key-shadow: inset 0 2px 3px #4a372d33, inset 0 -1px 0 #fff, 0 1px 0 #777a75, 0 3px 4px #0009;
+/* Pressing changes depth and shadows, never the key's material or border colour. */
+#hp-four88 .hp-key:not(.hp-sharp):is([data-pressed="true"],[aria-pressed="true"]) {
+  z-index: 4; --key-travel: var(--key-depth); --front-depth: 1px;
+  --key-shadow: inset 0 2px 3px #20202022, inset 0 -1px 0 #fff, 0 1px 0 #777a75, 0 3px 4px #0009;
 }
-#hp-four88 .hp-key.hp-sharp[aria-pressed="true"] {
-  z-index: 30;
-  --key-travel: var(--black-depth);
-  --key-surface: linear-gradient(105deg, #191b1c, #0c0c0c 22% 72%, #37312a);
-  --key-border: #c1a66b;
-  --key-shadow: inset 1px 0 0 #79726466, inset -1px 0 0 #8a806a55, inset 0 1px 0 #cbbf9e55,
-    inset 0 -5px 0 #050507, inset 0 -6px 0 #3b3730, 0 1px 0 #020305, 0 3px 4px #000a;
+#hp-four88 .hp-key.hp-sharp:is([data-pressed="true"],[aria-pressed="true"]) {
+  z-index: 30; --key-travel: var(--black-depth); --front-depth: 1px;
+  --key-shadow: inset 0 1px 1px #d0d0cb55, inset 1px 0 1px #b8b8b955, inset -1px 0 1px #92959866, 0 2px 3px #000a;
 }
-#hp-four88 .hp-key.hp-lit:not([aria-pressed="true"]) { z-index: 4; }
-#hp-four88 .hp-key.hp-sharp.hp-lit:not([aria-pressed="true"]) { z-index: 30; }
+#hp-four88 .hp-key.hp-lit { z-index: 4; }
+#hp-four88 .hp-key.hp-sharp.hp-lit { z-index: 30; }
 /* The face moves inside an unmoving button, keeping touch and slide pitches stable. */
 #hp-four88 .hp-key, #hp-four88 .hp-key.hp-sharp,
 #hp-four88 .hp-stage .hp-key, #hp-four88 .hp-stage .hp-key.hp-sharp,
@@ -140,12 +136,8 @@
   transition: transform 45ms ease-out, box-shadow 45ms ease-out;
 }
 #hp-four88 .hp-key.hp-sharp .hp-key-face { padding: 0; }
-#hp-four88 .hp-key[aria-pressed="true"] .hp-key-face { transform: translateY(var(--key-travel)); }
-#hp-four88 .hp-key-glow {
-  inset: 0; border: 1px solid #f1d398; border-radius: inherit;
-  box-shadow: 0 0 8px #ecc57877; opacity: 0;
-}
-#hp-four88 .hp-key:is(.hp-lit,[aria-pressed="true"]) .hp-key-glow { opacity: .7; }
+#hp-four88 .hp-key:is([data-pressed="true"],[aria-pressed="true"]) .hp-key-face { transform: translateY(var(--key-travel)); transition-duration: 0s; }
+#hp-four88 .hp-key-glow { display: none; }
 #hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(12px, calc(var(--hp-white-height) * .2), 23px); font-weight: 600; }
 #hp-four88 .hp-spark { width: 10px; height: 10px; font-size: 10px; opacity: .6; }
 #hp-four88 .hp-spark:nth-child(even) { font-size: 8px; }
@@ -155,10 +147,10 @@
 #hp-four88 .hp-scroll-window { background: transparent; }
 #hp-four88 .hp-octave-block { padding-top: 4px; padding-bottom: 5px; border: 0; }
 #hp-four88 .hp-footer {
-  min-height: clamp(26px, 2.8cqw, 42px);
+  position: relative; min-height: clamp(26px, 4.8cqw, 72px);
   padding: 4px max(12px, env(safe-area-inset-right)) 4px max(12px, env(safe-area-inset-left));
   border-top: 1px solid #c39a55;
-  background: linear-gradient(100deg, #080f1ded, #172133db 50%, #080f1ded);
+  background: linear-gradient(100deg, #080f1da8, #17213355 50%, #080f1da8);
   color: #e8d4ad;
 }
 #hp-four88 .hp-status { background: transparent; color: #e8d4ad; }
@@ -200,3 +192,31 @@ html[data-hp-rotated="true"] #hp-four88 .hp-footer { padding-left: max(12px, env
 @media (prefers-reduced-motion: reduce) {
   #hp-four88 .hp-key .hp-key-face, #hp-four88 .hp-control { transition: none; }
 }
+
+#hp-four88 .hp-ui-icon { width: 1em; height: 1em; fill: currentColor; vertical-align: -.1em; margin-right: .2em; }
+#hp-four88 .hp-header .hp-control { display: inline-flex; align-items: center; justify-content: center; gap: .2em; }
+#hp-four88 .hp-footer::before, #hp-four88 .hp-footer::after {
+  content: ""; position: absolute; top: -20px; width: clamp(30px, 5cqw, 78px); height: clamp(30px, 5cqw, 78px);
+  background: url('/assets/piano/gold-corner-v2.webp') center/contain no-repeat; pointer-events: none;
+}
+#hp-four88 .hp-footer::before { left: -8px; transform: scaleY(-1); }
+#hp-four88 .hp-footer::after { right: -8px; transform: scale(-1); }
+#hp-four88 .hp-footer { padding-left: clamp(18px, 3cqw, 46px); padding-right: clamp(18px, 3cqw, 46px); }
+#hp-four88 .hp-footer .hp-status { font-size: clamp(11px, 1.3cqw, 20px); }
+#hp-four88 [data-output="instrument-label"] { font-size: clamp(12px, 1.5cqw, 23px); }
+@container (max-width: 720px) { #hp-four88 .hp-header .hp-ui-icon { display: none; } }
+@container (max-height: 360px) { #hp-four88 .hp-footer { min-height: 22px; } }
+
+#hp-four88 .hp-keyboard { padding-left: max(18px, calc(var(--hp-key-edge,8px) + env(safe-area-inset-left))); padding-right: max(18px, calc(var(--hp-key-edge,8px) + env(safe-area-inset-right))); }
+html[data-hp-rotated="true"] #hp-four88 .hp-keyboard { padding-left: max(18px, calc(var(--hp-key-edge,8px) + env(safe-area-inset-top))); padding-right: max(18px, calc(var(--hp-key-edge,8px) + env(safe-area-inset-bottom))); }
+html[data-hp-wide="false"] #hp-four88 .hp-keyboard { padding-left: max(18px,var(--hp-key-edge,8px)); padding-right: max(18px,var(--hp-key-edge,8px)); }
+#hp-four88 .hp-header, html[data-hp-wide="true"] #hp-four88 .hp-header { padding-left: max(10px,3cqw,env(safe-area-inset-left)); padding-right: max(10px,3cqw,env(safe-area-inset-right)); }
+html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][data-hp-rotated="true"] #hp-four88 .hp-header { padding-left: max(10px,3cqw,env(safe-area-inset-bottom)); padding-right: max(10px,3cqw,env(safe-area-inset-top)); }
+@container (max-width: 720px) { #hp-four88 .hp-header, html[data-hp-wide="true"] #hp-four88 .hp-header { padding-left: max(5px,env(safe-area-inset-left)); padding-right: max(5px,env(safe-area-inset-right)); } html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][data-hp-rotated="true"] #hp-four88 .hp-header { padding-left: max(5px,env(safe-area-inset-bottom)); padding-right: max(5px,env(safe-area-inset-top)); } }
+
+#hp-four88 .hp-layout-label { position: relative; }
+#hp-four88 .hp-layout-label::after { content: ""; position: absolute; left: .65em; top: 50%; transform: translateY(-50%); width: 16px; height: 22px; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 22'%3E%3Cpath d='m4 9 4-4 4 4m-8 4 4 4 4-4' fill='none' stroke='%23f7e7c6' stroke-width='2'/%3E%3C/svg%3E") center/contain no-repeat; }
+#hp-four88 .hp-header select { appearance: none; padding-left: 2.3em; }
+@container (max-width: 720px) { #hp-four88 .hp-layout-label::after { display: none; } #hp-four88 .hp-header select { appearance: auto; padding-left: 4px; } }
+
+#hp-four88 .hp-footer .hp-status { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; }

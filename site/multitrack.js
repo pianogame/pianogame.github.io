@@ -60,7 +60,7 @@
   // The launch curtain is owned by rotation-guide.js. Keep multitrack focused on recording UI.
 
   const trackButton=document.createElement('button');
-  trackButton.type='button';trackButton.className='hp-control';trackButton.textContent='🎚 録音一覧';trackButton.setAttribute('aria-expanded','false');
+  trackButton.type='button';trackButton.className='hp-control';trackButton.innerHTML='<svg class="hp-ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h12v2H2Zm0 5h9v2H2Zm0 5h6v2H2Zm14-7v10c-1.2-.7-4-.7-5.1.7-2 2.5.9 5 3.8 3.9 1.9-.7 3.3-2.2 3.3-4.1V9l5-1.4V3Z"/></svg> 録音一覧';trackButton.setAttribute('aria-expanded','false');
   root.querySelector('.hp-toolbar').insertBefore(trackButton,action('display-mode'));
   const panel=document.createElement('section');panel.className='hp-track-panel';panel.hidden=true;panel.setAttribute('aria-label','楽器別録音と保存');surface.append(panel);
   function setTrackPanel(open){

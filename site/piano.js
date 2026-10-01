@@ -31,6 +31,8 @@
   const shortcuts = new Map();
   const held = new Map();
   const pendingNoteOns = new Map();
+  // Finger/keyboard feedback must not wait for AudioContext.resume or an audio frame.
+  const pressedTokens = new Map(), pressedSince = new Map(), pressReleaseTimers = new Map();
   const pointerStarts = new Map();
   const allVoices = new Set();
   const playingCounts = new Map();
@@ -88,8 +90,8 @@
     const row = {...sourceRow,base:sourceRow.base+shift};
     const section = document.createElement('div'); section.className = 'hp-register-section';
     section.setAttribute('role','group'); section.setAttribute('aria-label',row.name);
-    const firstX = rowIndex === 0 ? 6 : 12.3;
-    const stepX = 88 / 7;
+    const firstX = rowIndex === 0 ? 8 : 14;
+    const stepX = 12;
     naturals.forEach((semitone, index) => {
       const white = makeKey(row.base + semitone, syllables[index], row.white[index], row.wc[index]);
       white.style.left = (firstX + index * stepX) + '%'; section.append(white);
@@ -99,7 +101,7 @@
       }
     });
     if (rowIndex === 0) {
-      const top = makeKey(84+shift, '高いド', 'I', 'KeyI'); top.style.left = '94%'; section.append(top);
+      const top = makeKey(84+shift, '高いド', 'I', 'KeyI'); top.style.left = '92%'; section.append(top);
     }
     section.setAttribute('aria-label',row.name+' '+pitchName(row.base)+'から');
     section.querySelectorAll('.hp-key:not(.hp-sharp)').forEach(key=>{
@@ -133,7 +135,7 @@
       if (octave===0) x = midi===21 ? 37.5 : midi===22 ? 50 : 62.5;
       else {
         const index = midi===108 ? 7 : sharp ? naturals.indexOf(midi%12-1)+.5 : naturals.indexOf(midi%12);
-        x = (octave===7 ? 6 : 12.3) + index * (88/7);
+        x = (octave===7 ? 8 : 14) + index * 12;
       }
       key.style.left = x+'%';
       if (!sharp) key.querySelector('.hp-octave').textContent = '';
@@ -529,8 +531,33 @@
     held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi}})); pendingSparkles.add(midi); redraw();
     if (!recording && !playing && status.textContent!=='演奏中') say('演奏中');
   }
+  function paintPress(midi, pressed) {
+    (buttons.get(midi)||[]).forEach(key => key.dataset.pressed = String(pressed));
+  }
+  function pressKey(token, midi) {
+    if (pressedTokens.has(token)) return;
+    const alreadyPressed = Array.from(pressedTokens.values()).includes(midi);
+    pressedTokens.set(token,midi);
+    clearTimeout(pressReleaseTimers.get(midi)); pressReleaseTimers.delete(midi);
+    if (!alreadyPressed) pressedSince.set(midi,performance.now());
+    paintPress(midi,true);
+  }
+  function releaseKey(token) {
+    const midi = pressedTokens.get(token);
+    if (midi === undefined) return;
+    pressedTokens.delete(token);
+    if (Array.from(pressedTokens.values()).includes(midi)) return;
+    // Even a tap released within one animation frame gets a visible depression.
+    const remaining = Math.max(0,60-(performance.now()-pressedSince.get(midi)));
+    const finish = () => {
+      pressReleaseTimers.delete(midi); pressedSince.delete(midi); paintPress(midi,false);
+    };
+    if (remaining) pressReleaseTimers.set(midi,setTimeout(finish,remaining)); else finish();
+  }
   function noteOn(token, midi) {
-    if (!samplesReady || held.has(token) || pendingNoteOns.has(token) || !ensureAudio()) return;
+    if (!samplesReady || held.has(token) || pendingNoteOns.has(token)) return;
+    pressKey(token,midi);
+    if (!ensureAudio()) return;
     if (ctx.state === 'running') {
       playNoteNow(token,midi);
       return;
@@ -548,6 +575,7 @@
   }
 
   function noteOff(token) {
+    releaseKey(token);
     pendingNoteOns.delete(token);
     const entry = held.get(token); if (!entry) return;
     entry.voice.release();
@@ -566,6 +594,8 @@
   function releaseHeld() {
     pendingNoteOns.clear();
     Array.from(held.keys()).forEach(noteOff);
+    pressedTokens.clear(); pressReleaseTimers.forEach(clearTimeout); pressReleaseTimers.clear();
+    pressedSince.clear(); buttons.forEach(list=>list.forEach(key=>key.dataset.pressed="false"));
   }
   function stopPlayback() {
     playGeneration++; playbackTimers.forEach(clearTimeout); playbackTimers = [];
@@ -619,7 +649,7 @@
       pianoScroll.scrollTop = origin.scrollTop-dy;
       showRegister(); return;
     }
-    if ((!held.has(token) && !pendingNoteOns.has(token)) || origin.scrolling) return;
+    if (!pressedTokens.has(token) || origin.scrolling) return;
     const samples = typeof event.getCoalescedEvents === 'function' ? event.getCoalescedEvents() : [event];
     const points = samples.length ? samples : [event];
     for (const sample of points) {
@@ -631,7 +661,7 @@
         const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
         const hit = document.elementFromPoint(x,y);
         const key = keyAtPoint(x,y,hit);
-        const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token);
+        const currentMidi = pressedTokens.get(token);
         if (key && root.contains(key) && Number(key.dataset.midi) !== currentMidi) {
           noteOff(token); noteOn(token, Number(key.dataset.midi));
         }

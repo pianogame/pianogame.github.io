@@ -10,7 +10,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../_site');
 const output=path.resolve(process.env.PIANO_QA_OUTPUT||'piano-palace-qa');
 fs.mkdirSync(output,{recursive:true});
-const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.jpg':'image/jpeg','.png':'image/png','.mp3':'audio/mpeg','.m4a':'audio/mp4','.wav':'audio/wav','.woff':'font/woff'};
+const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.jpg':'image/jpeg','.webp':'image/webp','.png':'image/png','.mp3':'audio/mpeg','.m4a':'audio/mp4','.wav':'audio/wav','.woff':'font/woff'};
 const server=http.createServer((req,res)=>{
   let file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
   if(!file.startsWith(root+path.sep)&&file!==root){res.writeHead(403);return res.end();}
@@ -23,7 +23,7 @@ const base=`http://127.0.0.1:${server.address().port}`;
 // Software painting avoids headless SwiftShader tile artifacts in large key grids.
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--no-zygote','--disable-dev-shm-usage','--disable-gpu'],...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}: {})});
 const requested=process.env.PIANO_QA_CASES?.split(',');
-const cases=[['reference',1536,864],['wide',1536,709],['iphone15pm',932,430],['iphone14',844,390],['android',915,412],['small',667,375],['short',568,320],['rotated',430,932]].filter(([name])=>!requested||requested.includes(name));
+const cases=[['reference',1536,864],['wide',1536,709],['iphone15pm',932,430,{left:59,right:59,bottom:21}],['iphone14',844,390,{left:47,right:47,bottom:21}],['android',915,412],['small',667,375],['short',568,320],['rotated',430,932,{top:59,bottom:34}]].filter(([name])=>!requested||requested.includes(name));
 const metrics=[];
 async function inspect(page,layout='37'){
   const result=await page.evaluate(layout=>{
@@ -63,15 +63,22 @@ async function inspect(page,layout='37'){
   return result;
 }
 try{
-  for(const [name,width,height] of cases){
+  for(const [name,width,height,insets={}] of cases){
     const context=await browser.newContext({viewport:{width,height},hasTouch:true,deviceScaleFactor:1});
-    await context.addInitScript(()=>{
+    await context.addInitScript(name=>{
+      if(name==='wide')localStorage.setItem('hp-wallpaper','night');
+      if(name==='android')localStorage.setItem('hp-wallpaper','blue');
       Object.defineProperty(navigator,'standalone',{get:()=>true});
       window.sampleStarts=0;
       const start=AudioBufferSourceNode.prototype.start;
-      AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&!this.loop)window.sampleStarts++;return start.apply(this,args);};
-    });
+      AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.length>1&&!this.loop)window.sampleStarts++;return start.apply(this,args);};
+    },name);
     const page=await context.newPage(),errors=[],missing=[];
+    await page.route('**/*.css*',route=>{
+      const file=path.join(root,new URL(route.request().url()).pathname);
+      const css=fs.readFileSync(file,'utf8').replace(/env\(safe-area-inset-(top|right|bottom|left)\)/g,(_,side)=>(insets[side]||0)+'px');
+      return route.fulfill({contentType:'text/css',body:css});
+    });
     page.on('pageerror',e=>errors.push(e.message));
     page.on('response',r=>{if(r.url().includes('/assets/piano/')&&r.status()!==200)missing.push(r.url());});
     await page.goto(base,{waitUntil:'domcontentloaded'});
@@ -131,6 +138,40 @@ try{
       assert.equal(await black.getAttribute('aria-pressed'),'true');
       await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});
       await page.waitForFunction(()=>!document.querySelector('.hp-stage .hp-key[aria-pressed="true"]'));
+      // A tap down/up in the same frame is still visible; no orange touch border.
+      const fastTap=await white.evaluate(el=>{
+        const r=el.getBoundingClientRect(),face=el.querySelector('.hp-key-face');
+        const border=getComputedStyle(face).borderColor;
+        for(const type of ['pointerdown','pointerup'])el.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerId:900,pointerType:'touch',clientX:r.x+r.width*.3,clientY:r.y+r.height*.8}));
+        return {pressed:el.dataset.pressed,transform:getComputedStyle(face).transform,borderBefore:border,borderAfter:getComputedStyle(face).borderColor,glow:getComputedStyle(el.querySelector('.hp-key-glow')).display};
+      });
+      assert.equal(fastTap.pressed,'true','same-frame tap had no physical feedback');
+      assert.ok(new DOMMatrixShim(fastTap.transform).y>=3,'same-frame tap did not sink');
+      assert.equal(fastTap.borderAfter,fastTap.borderBefore,'touch changed border colour');assert.equal(fastTap.glow,'none','orange touch frame still visible');
+      await page.waitForTimeout(100);assert.equal(await white.getAttribute('data-pressed'),'false','short tap never released');
+      // Two fingers on one note: releasing either finger must leave the other held.
+      const same1={...p1,id:11},same2={...p1,x:p1.x+10,id:12};
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[same1,same2]});
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[same1]});
+      assert.equal(await white.getAttribute('data-pressed'),'true','first finger released the second');
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});await page.waitForTimeout(100);
+      assert.equal(await white.getAttribute('data-pressed'),'false');
+      // Simulate slow mobile audio resumption; visual response is immediate and a
+      // cancelled quick tap must not begin sounding after the finger has lifted.
+      await page.evaluate(async()=>{
+        const ctx=window.HP_AUDIO_BRIDGE.get().context;await ctx.suspend();
+        window.restoreResume=ctx.resume.bind(ctx);
+        ctx.resume=()=>new Promise(resolve=>setTimeout(()=>window.restoreResume().then(resolve),150));
+      });
+      const delayed=await white.evaluate(el=>{
+        const r=el.getBoundingClientRect(),before=window.sampleStarts;
+        el.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:901,pointerType:'touch',clientX:r.x+r.width*.3,clientY:r.y+r.height*.8}));
+        const result={pressed:el.dataset.pressed,transform:getComputedStyle(el.querySelector('.hp-key-face')).transform,before,after:window.sampleStarts};
+        el.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:901,pointerType:'touch'}));return result;
+      });
+      assert.equal(delayed.pressed,'true');assert.ok(new DOMMatrixShim(delayed.transform).y>=3,'audio resume blocked depression');assert.equal(delayed.before,delayed.after);
+      await page.waitForTimeout(250);assert.equal(await page.evaluate(()=>window.sampleStarts),delayed.before,'cancelled tap sounded after resume');
+      await page.evaluate(()=>{window.HP_AUDIO_BRIDGE.get().context.resume=window.restoreResume;delete window.restoreResume;});
       // Recording uses the same sampled input and retains the exact take duration.
       const record=page.locator('[data-action="record"]');await record.click();
       await page.mouse.move(point.x,point.y);await page.mouse.down();await page.waitForTimeout(160);await page.mouse.up();
@@ -157,7 +198,7 @@ try{
       await page.emulateMedia({reducedMotion:'reduce'});
       await white.click();
       assert.equal(await white.locator('.hp-key-face').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
-      console.log('PASS actual white/black sample playback; stable hit boxes; slide; independent multitouch; release/cancel; recording/playback; overlays; key sizes; reduced motion');
+      console.log('PASS actual white/black sample playback; stable hit boxes; rapid taps; slow audio resume; slide; independent multitouch; release/cancel; no orange frame; recording/playback; overlays; key sizes; reduced motion');
     }
     await page.getByRole('button',{name:'ホームへ戻る',exact:true}).click();
     await page.locator('#hp-home-screen').waitFor({state:'visible'});
