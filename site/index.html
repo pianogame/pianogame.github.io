@@ -37,7 +37,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=58', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=59', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -63,7 +63,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=10"></script>
-  <link rel="stylesheet" href="/piano-palace.css?v=9">
+  <link rel="stylesheet" href="/piano-palace.css?v=10">
   <script defer src="/piano-controls.js?v=2"></script>
 </head>
 <body class="hp-booting">

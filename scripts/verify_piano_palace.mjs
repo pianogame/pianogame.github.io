@@ -80,9 +80,14 @@ async function inspect(page,layout='37'){
       if(Math.abs((r.left+r.right)-(c.left+c.right))>1||Math.abs((r.top+r.bottom)-(c.top+c.bottom))>1)failures.push('control content is off centre: '+el.textContent);
       const label=content.querySelector('.hp-control-label'),symbol=content.querySelector('svg');
       if(symbol&&getComputedStyle(symbol).display!=='none') {
-        const a=label.getBoundingClientRect(),b=symbol.getBoundingClientRect();
-        const difference=rotated?(a.left+a.right)-(b.left+b.right):(a.top+a.bottom)-(b.top+b.bottom);
-        if(Math.abs(difference)>1)failures.push('symbol and label centres differ');
+        const b=symbol.getBoundingClientRect();
+        if(!label.textContent.trim()) {
+          if(Math.abs((r.left+r.right)-(b.left+b.right))>1||Math.abs((r.top+r.bottom)-(b.top+b.bottom))>1)failures.push('standalone symbol is off centre: '+el.getAttribute('aria-label'));
+        } else {
+          const a=label.getBoundingClientRect();
+          const difference=rotated?(a.left+a.right)-(b.left+b.right):(a.top+a.bottom)-(b.top+b.bottom);
+          if(Math.abs(difference)>1)failures.push('symbol and label centres differ');
+        }
       }
     }
     if(layout==='37'&&rows.length!==3)failures.push('not three keyboard rows');
@@ -93,6 +98,20 @@ async function inspect(page,layout='37'){
   assert.deepEqual(result.failures,[],`piano ${layout}: ${JSON.stringify(result)}`);
   return result;
 }
+async function sampleBars(page,filename) {
+  const points=await page.evaluate(()=>['.hp-header','.hp-footer'].map((s,i)=>{
+    const r=document.querySelector('#hp-four88 '+s).getBoundingClientRect();
+    return [Math.floor(r.left+r.width*(i ? .35 : .5)),Math.floor(r.top+r.height/2)];
+  }));
+  const png=await page.screenshot({path:path.join(output,filename)});
+  return page.evaluate(async({png,points})=>{
+    const img=new Image();img.src='data:image/png;base64,'+png;await img.decode();
+    const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);
+    return points.map(([x,y])=>[...ctx.getImageData(x,y,1,1).data].slice(0,3));
+  },{png:png.toString('base64'),points});
+}
+const colourDistance=(a,b)=>a.reduce((sum,c,i)=>sum+Math.abs(c-b[i]),0);
 try{
   for(const [name,width,height,insets={}] of cases){
     const context=await browser.newContext({viewport:{width,height},hasTouch:true,deviceScaleFactor:1});
@@ -164,6 +183,49 @@ try{
     assert.equal(await page.locator('.hp-register-info').isVisible(),false,'88-key guidance remains in 37-key mode');
     await page.locator('[data-action="settings"]').click();await inspect(page);
     await page.screenshot({path:path.join(output,name+'-settings.png')});
+    if(name==='iphone15pm') {
+      const volume=page.locator('[data-control="volume"]'),row=volume.locator('..');
+      const value=Number(await volume.inputValue());
+      await row.getByRole('button',{name:'音量を下げる',exact:true}).click();
+      assert.equal(Number(await volume.inputValue()),value-1,'minus step stopped working');
+      await row.getByRole('button',{name:'音量を上げる',exact:true}).click();
+      assert.equal(Number(await volume.inputValue()),value,'plus step stopped working');
+      await page.locator('[data-action="settings-close"]').click();
+      const backgrounds=new Set(),presetPixels=[];
+      for(const mode of ['default','night','blue']) {
+        await page.locator('[data-action="settings"]').click();
+        await page.locator('[data-control="wallpaper"]').selectOption(mode);
+        assert.equal(await page.evaluate(()=>localStorage.getItem('hp-wallpaper')),mode);
+        await page.locator('[data-action="settings-close"]').click();
+        backgrounds.add(await page.locator('.hp-surface').evaluate(el=>getComputedStyle(el).backgroundImage));
+        presetPixels.push((await sampleBars(page,'wallpaper-'+mode+'.png'))[0]);
+      }
+      assert.equal(backgrounds.size,3,'wallpaper presets must visibly use distinct colours');
+      for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)assert.ok(colourDistance(presetPixels[i],presetPixels[j])>30,'preset colour change must be visible in painted pixels');
+      const photos=[];
+      for(const colour of ['#ff6688','#66ccff']) {
+        await page.locator('[data-action="settings"]').click();
+        await page.locator('[data-control="photo"]').setInputFiles({name:'wallpaper.svg',mimeType:'image/svg+xml',buffer:Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600"><rect width="1200" height="600" fill="${colour}"/></svg>`)});
+        await page.waitForFunction(()=>document.querySelector('#hp-four88').dataset.wallpaper==='photo'&&localStorage.getItem('hp-wallpaper-photo')?.startsWith('data:image/jpeg'));
+        await page.locator('[data-action="settings-close"]').click();
+        await page.waitForTimeout(100);
+        photos.push(await sampleBars(page,photos.length?'wallpaper-photo-blue.png':'wallpaper-photo-pink.png'));
+      }
+      for(let bar=0;bar<2;bar++) assert.ok(colourDistance(photos[0][bar],photos[1][bar])>60,'photo must remain visible through '+(bar?'footer':'header'));
+      const savedPhoto=await page.evaluate(()=>localStorage.getItem('hp-wallpaper-photo'));
+      await page.reload({waitUntil:'domcontentloaded'});
+      await page.evaluate(()=>{document.body.classList.remove('hp-booting');document.querySelector('#hp-opening-sequence')?.remove();});
+      await page.getByRole('button',{name:'ピアノモードへ',exact:true}).click();
+      await page.locator('#hp-four88').waitFor({state:'visible'});
+      assert.equal(await page.locator('#hp-four88').getAttribute('data-wallpaper'),'photo','photo preset must survive reload');
+      assert.equal(await page.evaluate(()=>localStorage.getItem('hp-wallpaper-photo')),savedPhoto,'photo data must survive reload');
+      await page.locator('[data-action="settings"]').click();
+      await page.locator('[data-action="photo-remove"]').click();
+      assert.equal(await page.locator('#hp-four88').getAttribute('data-wallpaper'),'default');
+      assert.equal(await page.evaluate(()=>localStorage.getItem('hp-wallpaper-photo')),null);
+      assert.equal(await page.locator('.hp-footer').evaluate(el=>getComputedStyle(el,'::before').opacity),'1','default frame must return after photo removal');
+      console.log('PASS centred plus/minus and working steps; distinct night/blue; photo visible through both bars; persisted photo and removal');
+    }
     await page.locator('[data-action="settings-close"]').click();
     if(name==='iphone15pm'){
       await page.evaluate(()=>{

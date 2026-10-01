@@ -10,8 +10,14 @@
   background-color: #08101c;
 }
 #hp-four88[data-wallpaper="photo"] .hp-surface { background: linear-gradient(#08111b40, #050a1466), var(--hp-wallpaper) center / cover; }
-#hp-four88[data-wallpaper="night"] .hp-surface { background: linear-gradient(#11152b0d 0 15%, #04060a55 21% 88%, #04060a26), url('/assets/piano/palace-hall-v4.jpg') center / cover; }
-#hp-four88[data-wallpaper="blue"] .hp-surface { background: linear-gradient(#154b6514 0 15%, #04060a55 21% 88%, #04060a26), url('/assets/piano/palace-hall-v4.jpg') center / cover; }
+#hp-four88[data-wallpaper="night"] .hp-surface {
+  background: linear-gradient(#080d2526, #08081766), linear-gradient(135deg, #172449, #382753 55%, #121b3c), url('/assets/piano/palace-hall-v4.jpg') center / cover;
+  background-blend-mode: normal, color, normal;
+}
+#hp-four88[data-wallpaper="blue"] .hp-surface {
+  background: linear-gradient(#052d4826, #06142b4d), linear-gradient(135deg, #276a96, #315e9c 55%, #1b3b76), url('/assets/piano/palace-hall-v4.jpg') center / cover;
+  background-blend-mode: normal, color, normal;
+}
 #hp-four88 .hp-header {
   min-height: clamp(54px, 7.4cqw, 112px);
   gap: 12px;
@@ -268,6 +274,8 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 #hp-four88 button.hp-centred-button:not(.hp-header button) .hp-control-content { min-width: 0; white-space: normal; }
 #hp-four88 button.hp-centred-button:not(.hp-header button) .hp-control-label { line-height: 1.2; }
 #hp-four88 .hp-control-label { display: block; line-height: 1; }
+/* A symbol-only button must not reserve a flex gap for an empty label. */
+#hp-four88 .hp-control-label:empty { display: none; }
 #hp-four88 .hp-control-content .hp-ui-icon,
 #hp-four88 .hp-layout-content .hp-ui-icon {
   display: block; flex: none; width: 1em; height: 1em; margin: 0; vertical-align: initial;
@@ -285,4 +293,18 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 }
 @container (max-width: 720px) {
   #hp-four88 .hp-header .hp-layout-label .hp-layout-content { font-size: 12px; }
+}
+
+/* Keep the user's photo visible through the bars and toolbar plates. */
+#hp-four88[data-wallpaper="photo"] .hp-header {
+  background: #08111b66;
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+#hp-four88[data-wallpaper="photo"] .hp-footer { background: linear-gradient(100deg, #080f1d66, #17213333 50%, #080f1d66); }
+#hp-four88[data-wallpaper="photo"] .hp-footer::before { opacity: .35; }
+#hp-four88[data-wallpaper="photo"] .hp-header .hp-control:not([aria-pressed="true"]),
+#hp-four88[data-wallpaper="photo"] .hp-header select { background: linear-gradient(#18263f99, #0a1326b3); }
+@container (min-width: 721px) and (max-width: 1100px) {
+  #hp-four88[data-wallpaper="photo"] .hp-header .hp-control:not([aria-pressed="true"]) { background: transparent; }
+  #hp-four88[data-wallpaper="photo"] .hp-header .hp-control:not([aria-pressed="true"])::before { background: linear-gradient(#18263f99, #0a1326b3); }
 }
