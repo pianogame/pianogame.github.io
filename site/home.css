@@ -1,3 +1,4 @@
+@font-face { font-family: "PDS Mode Serif"; src: url("/assets/home/ui/home-mode-serif-v1.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
 #hp-home-screen {
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
@@ -106,6 +107,36 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 }
 
 #hp-home-screen .hp-home-mode .hp-home-reference-art { position: absolute; inset: 0; height: 100%; filter: drop-shadow(0 3px 5px #0004); }
+/* Typography is independent of the artwork and scales with either button. */
+#hp-home-screen .hp-home-mode-copy {
+  position: absolute; left: 36%; width: 50%; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center;
+  color: #fff9ef; pointer-events: none; white-space: nowrap;
+  font-family: "PDS Mode Serif", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-weight: 400; text-shadow: 0 1px 3px #0009;
+}
+#hp-home-screen .hp-home-mode-title {
+  font-size: calc(40 * var(--home-mode-unit, var(--home-width-unit))); font-weight: 600; line-height: 1.2;
+}
+#hp-home-screen .hp-home-mode-description {
+  margin-top: calc(5 * var(--home-mode-unit, var(--home-width-unit)));
+  font-size: calc(15 * var(--home-mode-unit, var(--home-width-unit))); line-height: 1.4;
+}
+#hp-home-screen .hp-home-mode-divider {
+  display: flex; align-items: center; justify-content: center; gap: .35em; width: 96%;
+  margin-top: calc(5 * var(--home-mode-unit, var(--home-width-unit)));
+  height: calc(18 * var(--home-mode-unit, var(--home-width-unit)));
+  font-family: "Times New Roman", serif; font-size: calc(18 * var(--home-mode-unit, var(--home-width-unit)));
+  line-height: 1; color: #e4c472; text-shadow: 0 0 3px #f9da8a88;
+}
+#hp-home-screen .hp-home-mode-divider::before,
+#hp-home-screen .hp-home-mode-divider::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #e4c472, transparent); }
+#hp-home-screen .hp-home-mode-english {
+  font-family: "Times New Roman", "Noto Serif", serif; font-weight: 400; font-style: italic;
+  font-size: calc(56 * var(--home-mode-unit, var(--home-width-unit))); line-height: 1.05;
+  font-variant: small-caps;
+}
+#hp-home-screen .hp-home-mode-arrow { margin-left: .25em; font-size: .85em; font-style: normal; }
 #hp-home-screen .hp-home-mode::after {
   content: ""; position: absolute; inset: 1%; border-radius: 12px; opacity: 0; pointer-events: none;
   border: 2px solid #ffe597f2;

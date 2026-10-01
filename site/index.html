@@ -43,7 +43,7 @@ html.hp-opening-curtain-bg body{background:#120713!important}
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=32">
+  <link rel="stylesheet" href="/home.css?v=33">
   <link rel="stylesheet" href="/piano.css?v=3">
   <link rel="stylesheet" href="/landscape.css?v=14">
   <script src="/orientation.js?v=12"></script>
@@ -53,11 +53,11 @@ html.hp-opening-curtain-bg body{background:#120713!important}
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=10"></script>
   <script defer src="/piano.js?v=27"></script>
-  <script defer src="/home.js?v=15"></script>
+  <script defer src="/home.js?v=16"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
   <script defer src="/multitrack.js?v=26"></script>
   <link rel="stylesheet" href="/display-mode.css?v=12">
-  <script defer src="/display-mode.js?v=17"></script>
+  <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=9"></script>
 </head>
@@ -90,10 +90,12 @@ html.hp-opening-curtain-bg body{background:#120713!important}
 
       <div class="hp-home-modes">
       <button type="button" class="hp-home-mode hp-home-game-image" data-home-action="game" aria-label="ゲームモード">
-        <svg class="hp-home-reference-art" viewBox="1009 169.5 511 236" aria-hidden="true" focusable="false"><defs><clipPath id="home-game-clip"><path d="M1012 295 L1042 247 L1057 204 Q1059 189 1071 184 L1364 181 L1381 173 L1403 181 L1425 174 L1434 185 L1473 176 L1484 171 L1491 188 L1503 181 L1512 197 L1508 229 L1511 350 L1518 365 L1512 385 L1499 385 L1492 401 L1468 398 L1454 404 L1444 397 L1102 402 L1083 396 L1066 399 L1061 384 L1054 374 L1038 343 L1026 319 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-game-clip)"/></svg>
+        <svg class="hp-home-reference-art" viewBox="1009 169.5 511 236" aria-hidden="true" focusable="false"><defs><clipPath id="home-game-clip"><path d="M1012 295 L1042 247 L1057 204 Q1059 189 1071 184 L1364 181 L1381 173 L1403 181 L1425 174 L1434 185 L1473 176 L1484 171 L1491 188 L1503 181 L1512 197 L1508 229 L1511 350 L1518 365 L1512 385 L1499 385 L1492 401 L1468 398 L1454 404 L1444 397 L1102 402 L1083 396 L1066 399 L1061 384 L1054 374 L1038 343 L1026 319 Z"/></clipPath><filter id="home-game-blend"><feGaussianBlur stdDeviation="5"/></filter><mask id="home-game-blank" maskUnits="userSpaceOnUse" x="1160" y="183" width="330" height="230"><rect x="1185" y="208" width="280" height="178" fill="white" filter="url(#home-game-blend)"/></mask></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-game-clip)"/><image href="/assets/home/ui/home-mode-clean-v1.png" width="1536" height="864" preserveAspectRatio="none" mask="url(#home-game-blank)"/></svg>
+        <span class="hp-home-mode-copy" aria-hidden="true"><span class="hp-home-mode-title">ゲームモード</span><span class="hp-home-mode-description">リズムで楽しむ音楽のステージ</span><span class="hp-home-mode-divider">♛</span><span class="hp-home-mode-english">Game<span class="hp-home-mode-arrow">→</span></span></span>
       </button>
       <button type="button" class="hp-home-mode hp-home-piano-image" data-home-action="piano" aria-label="ピアノモードへ">
-        <svg class="hp-home-reference-art" viewBox="1009 407 511 236" aria-hidden="true" focusable="false"><defs><clipPath id="home-piano-clip"><path d="M1010 534 L1032 496 L1050 446 L1067 419 L1084 415 L1362 414 L1384 410 L1415 416 L1442 409 L1475 412 L1500 407 L1510 421 L1506 443 L1509 484 L1506 573 L1515 598 L1509 620 L1494 621 L1494 635 L1461 635 L1452 641 L1390 636 L1110 641 L1088 631 L1071 632 L1057 618 L1046 593 L1028 554 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-piano-clip)"/></svg>
+        <svg class="hp-home-reference-art" viewBox="1009 407 511 236" aria-hidden="true" focusable="false"><defs><clipPath id="home-piano-clip"><path d="M1010 534 L1032 496 L1050 446 L1067 419 L1084 415 L1362 414 L1384 410 L1415 416 L1442 409 L1475 412 L1500 407 L1510 421 L1506 443 L1509 484 L1506 573 L1515 598 L1509 620 L1494 621 L1494 635 L1461 635 L1452 641 L1390 636 L1110 641 L1088 631 L1071 632 L1057 618 L1046 593 L1028 554 Z"/></clipPath><filter id="home-piano-blend"><feGaussianBlur stdDeviation="5"/></filter><mask id="home-piano-blank" maskUnits="userSpaceOnUse" x="1160" y="420" width="330" height="230"><rect x="1185" y="445" width="280" height="178" fill="white" filter="url(#home-piano-blend)"/></mask></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-piano-clip)"/><image href="/assets/home/ui/home-mode-clean-v1.png" width="1536" height="864" preserveAspectRatio="none" mask="url(#home-piano-blank)"/></svg>
+        <span class="hp-home-mode-copy" aria-hidden="true"><span class="hp-home-mode-title">ピアノモード</span><span class="hp-home-mode-description">自由に演奏して、ピアノを楽しもう</span><span class="hp-home-mode-divider"></span><span class="hp-home-mode-english">Piano<span class="hp-home-mode-arrow">→</span></span></span>
       </button>
 
       </div>

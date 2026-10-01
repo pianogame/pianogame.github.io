@@ -9,7 +9,14 @@
   const standalone=window.matchMedia('(display-mode: standalone)');
   const fullscreen=window.matchMedia('(display-mode: fullscreen)');
   const fullscreenElement=()=>document.fullscreenElement||document.webkitFullscreenElement;
-  const isApp=()=>navigator.standalone===true||standalone.matches||(fullscreen.matches&&!fullscreenElement());
+  const appDisplayMode=()=>navigator.standalone===true||standalone.matches||(fullscreen.matches&&!fullscreenElement());
+  // An installed fullscreen PWA remains an app when the curtain requests DOM
+  // fullscreen. Remember that launch state before fullscreenElement changes.
+  let appLaunchDetected=appDisplayMode();
+  const isApp=()=>{
+    if(appDisplayMode())appLaunchDetected=true;
+    return appLaunchDetected;
+  };
   let installPrompt=window.__pdsInstallPrompt||null;
   const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const installParams=new URLSearchParams(location.search);

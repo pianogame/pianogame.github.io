@@ -125,6 +125,7 @@
       home.style.setProperty('--home-mode-top', top + 'px');
       home.style.setProperty('--home-mode-gap', gap + 'px');
       home.style.setProperty('--home-mode-width', modeWidth + 'px');
+      home.style.setProperty('--home-mode-unit', modeWidth / 511 + 'px');
     }
     syncModeFxCenter();
   }

@@ -6,6 +6,7 @@ on:
       - "site/index.html"
       - "site/home.css"
       - "site/home.js"
+      - "site/display-mode.js"
       - "site/orientation.js"
       - "site/rotation-guide.js"
       - "site/assets/home/**"

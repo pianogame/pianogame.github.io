@@ -88,6 +88,13 @@ async function inspect(page) {
     }
     const modes=[...home.querySelectorAll('.hp-home-mode')];
     if (Math.abs(modes[0].offsetWidth-modes[1].offsetWidth)>0 || Math.abs(modes[0].offsetHeight-modes[1].offsetHeight)>0) failures.push('game and piano buttons have different sizes');
+    for (const mode of modes) {
+      const copy=mode.querySelector('.hp-home-mode-copy');
+      // offset coordinates remain valid when the entire app rotates.
+      if (Math.abs(copy.offsetTop-mode.clientHeight/2)>1) failures.push('mode text is not vertically centered');
+      if (copy.scrollWidth>copy.clientWidth+1) failures.push('mode text overflows its column');
+      if (copy.offsetHeight>mode.clientHeight*.83) failures.push('mode text touches the frame');
+    }
     const menus=[...home.querySelectorAll('.hp-home-bottom-button')];
     const gaps=menus.slice(1).map((el,i)=>el.offsetLeft-menus[i].offsetLeft-menus[i].offsetWidth);
     if (Math.max(...menus.map(el=>el.offsetWidth))-Math.min(...menus.map(el=>el.offsetWidth))>1 || Math.abs(gaps[0]-gaps[1])>1) failures.push('bottom menus are not equal columns with equal gaps');
@@ -105,7 +112,19 @@ async function inspect(page) {
 try {
   for (const [name,width,height,insets] of cases) {
     const context = await browser.newContext({viewport:{width,height},deviceScaleFactor:1,hasTouch:true});
-    await context.addInitScript(() => Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true}));
+    if (name==='android20x9') {
+      // Fullscreen manifest launch is different from navigator.standalone on iOS.
+      await context.addInitScript(() => {
+        const native=window.matchMedia.bind(window);
+        window.matchMedia=query=>{
+          const media=native(query);
+          if(query==='(display-mode: fullscreen)') Object.defineProperty(media,'matches',{get:()=>true});
+          return media;
+        };
+      });
+    } else {
+      await context.addInitScript(() => Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true}));
+    }
     const page=await context.newPage(), errors=[];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(base, {waitUntil:'networkidle'});
@@ -172,6 +191,18 @@ try {
       await page.locator('#hp-opening-sequence').waitFor({state:'hidden'});
     } else {
       await page.evaluate(() => { document.body.classList.remove('hp-booting'); document.querySelector('#hp-opening-sequence')?.remove(); });
+    }
+    if (name==='android20x9') {
+      assert.equal(await page.locator('.hp-install-gate').evaluate(el=>el.hidden),true,'installed Android launch must bypass install guide');
+      // The curtain's user gesture requests DOM fullscreen through piano.js.
+      await page.evaluate(() => document.documentElement.requestFullscreen());
+      await page.waitForFunction(()=>!!document.fullscreenElement);
+      await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
+      assert.equal(await page.locator('.hp-install-gate').evaluate(el=>el.hidden),true,'DOM fullscreen after curtain must not reopen install guide');
+      assert.equal(await page.locator('#hp-viewport').evaluate(el=>el.inert),false,'installed Android viewport must remain interactive');
+      await page.evaluate(() => document.exitFullscreen());
+      assert.equal(await page.locator('.hp-install-gate').evaluate(el=>el.hidden),true,'exiting fullscreen must retain installed launch');
+      console.log('PASS Android fullscreen PWA launch -> DOM fullscreen -> HOME remains interactive');
     }
     await page.locator('#hp-home-screen').evaluate((el,insets) => {
       for (const [side,value] of Object.entries(insets)) el.style.setProperty('--safe-'+side,value+'px');
@@ -276,6 +307,15 @@ try {
     console.log('PASS '+name+' '+width+'x'+height);
     await context.close();
   }
+  const browserContext=await browser.newContext({viewport:{width:915,height:412}});
+  const browserPage=await browserContext.newPage();
+  await browserPage.goto(base,{waitUntil:'networkidle'});
+  assert.equal(await browserPage.locator('.hp-install-gate').evaluate(el=>el.hidden),false,'regular browser must retain install guide');
+  await browserPage.evaluate(()=>document.documentElement.requestFullscreen());
+  await browserPage.waitForFunction(()=>!!document.fullscreenElement);
+  assert.equal(await browserPage.locator('.hp-install-gate').evaluate(el=>el.hidden),false,'DOM fullscreen alone is not an installed launch');
+  await browserContext.close();
+  console.log('PASS regular browser retains installation guidance during DOM fullscreen');
 } finally {
   fs.writeFileSync(path.join(output,'metrics.json'),JSON.stringify(results,null,2));
   await browser.close(); server.close();
