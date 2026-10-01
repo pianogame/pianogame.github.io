@@ -43,8 +43,8 @@ const results = [];
 // Pixel measurements from the user-supplied 1536x864 concept, including the
 // outer ornament padding. This catches undersized 3:1 replacement artwork.
 const referenceBounds = {
-  '.hp-home-game-image': [1009,170,511,235],
-  '.hp-home-piano-image': [1009,407,511,236],
+  '.hp-home-game-image': [1009,170,511,236],
+  '.hp-home-piano-image': [1009,408,511,236],
   '.hp-home-voice-card': [364,293,282,154],
   '.hp-home-campaign': [18,663,382,174],
   '.hp-home-logo': [20,88.3125,490,163.3333],
@@ -86,6 +86,8 @@ async function inspect(page) {
       if (Math.abs(art.clientWidth / art.clientHeight - vb.width / vb.height)>.025) failures.push('distorted reference sprite: '+art.parentElement.getAttribute('aria-label'));
       if (!art.querySelector('image')?.href.baseVal.includes('home-reference-v1.jpg')) failures.push('reference sprite source missing');
     }
+    const modes=[...home.querySelectorAll('.hp-home-mode')];
+    if (Math.abs(modes[0].offsetWidth-modes[1].offsetWidth)>0 || Math.abs(modes[0].offsetHeight-modes[1].offsetHeight)>0) failures.push('game and piano buttons have different sizes');
     const menus=[...home.querySelectorAll('.hp-home-bottom-button')];
     const gaps=menus.slice(1).map((el,i)=>el.offsetLeft-menus[i].offsetLeft-menus[i].offsetWidth);
     if (Math.max(...menus.map(el=>el.offsetWidth))-Math.min(...menus.map(el=>el.offsetWidth))>1 || Math.abs(gaps[0]-gaps[1])>1) failures.push('bottom menus are not equal columns with equal gaps');

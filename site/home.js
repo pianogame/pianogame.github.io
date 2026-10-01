@@ -115,8 +115,8 @@
       const footerGap = Math.max(4, 8 * widthUnit);
       const footerTop = footer.offsetTop + home.querySelector('.hp-home-bottom').offsetTop;
       const desiredWidth = Math.min(home.clientWidth * .355, 511 * widthUnit);
-      // Native sprite heights are 235 and 236 for a shared width of 511.
-      const stackRatio = 471 / 511;
+      // Both buttons share the same 511:236 canvas and scale together.
+      const stackRatio = 472 / 511;
       const earliestTop = topActions.offsetTop + topActions.offsetHeight + Math.max(3, 4 * widthUnit);
       const preferredTop = height * (170 / 864);
       const top = Math.max(earliestTop, Math.min(preferredTop, footerTop - footerGap - gap - desiredWidth * stackRatio));

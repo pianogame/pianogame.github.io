@@ -99,13 +99,13 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   display: grid; gap: var(--home-mode-gap, calc(2 * var(--home-width-unit)));
 }
 #hp-home-screen .hp-home-mode {
-  position: relative; width: 100%;
+  position: relative; width: 100%; aspect-ratio: 511 / 236;
   min-height: 44px; margin: 0; padding: 0; border: 0;
   background: transparent; appearance: none; -webkit-appearance: none;
   cursor: pointer; touch-action: manipulation;
 }
 
-#hp-home-screen .hp-home-mode .hp-home-reference-art { filter: drop-shadow(0 3px 5px #0004); }
+#hp-home-screen .hp-home-mode .hp-home-reference-art { position: absolute; inset: 0; height: 100%; filter: drop-shadow(0 3px 5px #0004); }
 #hp-home-screen .hp-home-mode::after {
   content: ""; position: absolute; inset: 1%; border-radius: 12px; opacity: 0; pointer-events: none;
   border: 2px solid #ffe597f2;
