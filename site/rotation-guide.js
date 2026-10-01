@@ -12,7 +12,8 @@
       .hp-opening-orientation.hp-ready{cursor:grab}
       .hp-opening-orientation.hp-gesture-active{cursor:grabbing}
       .hp-opening-orientation.hp-leave{opacity:0;pointer-events:none}
-      .hp-opening-orientation-inner{position:relative;z-index:4;max-width:620px;transition:transform .36s ease,opacity .28s ease}
+      .hp-opening-orientation-inner{position:relative;z-index:4;max-width:620px;transition:transform .36s ease,opacity .18s ease}
+      #hp-opening-sequence.hp-layout-pending .hp-opening-orientation-inner{opacity:0!important;transition:none!important}
       .hp-opening-orientation.hp-ready .hp-opening-phone{animation:none;transform:rotate(90deg)}
       .hp-opening-orientation.hp-ready .hp-opening-orientation-inner{transform:scale(1.02)}
       .hp-ready-main{display:none}
@@ -55,6 +56,7 @@
 
     const opening=document.createElement('div');
     opening.id='hp-opening-sequence';
+    opening.classList.add('hp-layout-pending');
     opening.innerHTML=`
       <section class="hp-opening-orientation" aria-label="横画面のご案内">
         <div class="hp-opening-orientation-inner">
@@ -74,6 +76,63 @@
         <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span class="hp-opening-tap">Tap Curtain Start</span></div>
       </section>`;
     document.body.append(opening);
+
+    // iOS standalone can report several transient viewport geometries during
+    // cold launch. Keep only the white cover visible until geometry is stable
+    // for several consecutive samples, then reveal the orientation content.
+    let layoutGateDone=false;
+    let layoutGateTimer=0;
+    let layoutGateStartedAt=performance.now();
+    let layoutStableCount=0;
+    let layoutLastSignature='';
+    const viewportSignature=()=>{
+      const v=window.visualViewport;
+      const values=[
+        Math.round(window.innerWidth||0),
+        Math.round(window.innerHeight||0),
+        Math.round(v?.width||0),
+        Math.round(v?.height||0),
+        Math.round(v?.offsetLeft||0),
+        Math.round(v?.offsetTop||0),
+        Math.round(document.documentElement.clientWidth||0),
+        Math.round(document.documentElement.clientHeight||0)
+      ];
+      return values.join(':');
+    };
+    const finishLayoutGate=()=>{
+      if(layoutGateDone)return;
+      layoutGateDone=true;
+      clearTimeout(layoutGateTimer);
+      opening.dataset.layoutStable='true';
+      requestAnimationFrame(()=>{
+        opening.classList.remove('hp-layout-pending');
+        maybeArmPreparation();
+      });
+    };
+    const sampleLayoutGate=()=>{
+      if(layoutGateDone)return;
+      const signature=viewportSignature();
+      if(signature===layoutLastSignature)layoutStableCount+=1;
+      else{
+        layoutLastSignature=signature;
+        layoutStableCount=0;
+      }
+      const elapsed=performance.now()-layoutGateStartedAt;
+      if((layoutStableCount>=3&&elapsed>=140)||elapsed>=900){
+        finishLayoutGate();
+        return;
+      }
+      layoutGateTimer=setTimeout(sampleLayoutGate,55);
+    };
+    const restartLayoutGate=()=>{
+      if(layoutGateDone)return;
+      layoutStableCount=0;
+      layoutLastSignature='';
+      layoutGateStartedAt=performance.now();
+      clearTimeout(layoutGateTimer);
+      layoutGateTimer=setTimeout(sampleLayoutGate,45);
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(restartLayoutGate));
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
@@ -281,11 +340,11 @@
     const rippleResizeObserver=window.ResizeObserver?new ResizeObserver(sizeRippleCanvas):null;
     rippleResizeObserver?.observe(opening);
     const refreshOpeningViewport=()=>{sizeRippleCanvas();};
-    window.addEventListener('resize',refreshOpeningViewport);
-    window.addEventListener('orientationchange',refreshOpeningViewport);
-    window.visualViewport?.addEventListener('resize',refreshOpeningViewport);
-    window.addEventListener('pageshow',refreshOpeningViewport);
-    window.addEventListener('focus',refreshOpeningViewport);
+    window.addEventListener('resize',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.addEventListener('orientationchange',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.visualViewport?.addEventListener('resize',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.addEventListener('pageshow',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.addEventListener('focus',()=>{refreshOpeningViewport();restartLayoutGate();});
     requestAnimationFrame(()=>requestAnimationFrame(refreshOpeningViewport));
     [80,220,500,900,1400].forEach(delay=>setTimeout(refreshOpeningViewport,delay));
 
@@ -472,7 +531,7 @@
 
     let gesturePointerId=null,gestureStartX=0,gestureStartY=0,landscapeReached=false;
     function maybeArmPreparation(){
-      if(started||!landscapeReached)return;
+      if(started||!landscapeReached||!layoutGateDone)return;
       orientation.classList.add('hp-loading');
       if(audioLoadFailed)return;
       if(!audioReady)return;
@@ -575,6 +634,7 @@
       setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
       setTimeout(()=>{
         rippleResizeObserver?.disconnect();
+        clearTimeout(layoutGateTimer);
         opening.remove();
         document.documentElement.classList.remove('hp-opening-orientation-bg','hp-opening-curtain-bg');
       },1950);
