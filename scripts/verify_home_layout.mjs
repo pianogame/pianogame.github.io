@@ -98,6 +98,16 @@ async function inspect(page) {
     const menus=[...home.querySelectorAll('.hp-home-bottom-button')];
     const gaps=menus.slice(1).map((el,i)=>el.offsetLeft-menus[i].offsetLeft-menus[i].offsetWidth);
     if (Math.max(...menus.map(el=>el.offsetWidth))-Math.min(...menus.map(el=>el.offsetWidth))>1 || Math.abs(gaps[0]-gaps[1])>1) failures.push('bottom menus are not equal columns with equal gaps');
+    if (Math.max(...menus.map(el=>el.offsetHeight))-Math.min(...menus.map(el=>el.offsetHeight))>1 || Math.max(...menus.map(el=>el.offsetTop))-Math.min(...menus.map(el=>el.offsetTop))>1) failures.push('bottom menus have different heights or vertical positions');
+    for (const menu of menus) {
+      const art=menu.querySelector('.hp-home-reference-art');
+      const image=art.querySelector('image');
+      const bounds=art.querySelector('clipPath path').getBBox();
+      const matrix=art.getScreenCTM().inverse().multiply(image.getScreenCTM());
+      const start=new DOMPoint(bounds.x,bounds.y).matrixTransform(matrix);
+      const end=new DOMPoint(bounds.x+bounds.width,bounds.y+bounds.height).matrixTransform(matrix);
+      if (Math.abs(start.x-3)>.01 || Math.abs(start.y-2)>.01 || Math.abs(end.x-280)>.01 || Math.abs(end.y-149)>.01) failures.push('bottom menu painted frame differs: '+menu.getAttribute('aria-label'));
+    }
     const safe=home.querySelector('.hp-home-safe');
     const expectedRight=16*parseFloat(home.style.getPropertyValue('--home-width-unit'));
     for (const selector of ['.hp-home-modes','.hp-home-top-actions']) {
@@ -136,6 +146,24 @@ try {
     const page=await context.newPage(), errors=[];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(base, {waitUntil:'networkidle'});
+    if (name==='iphone15pm' || name==='portrait-rotation') {
+      // The first white screen is outside the rotated HOME viewport.
+      await page.evaluate(()=>document.dispatchEvent(new PointerEvent('pointerdown',{clientX:80,clientY:120,button:0,bubbles:true})));
+      const openingTouch=await page.locator('.hp-opening-touch-layer .hp-home-touch-effect').last().evaluate(el=>({
+        x:parseFloat(el.style.left),y:parseFloat(el.style.top),light:el.classList.contains('hp-touch-on-light'),
+        parent:el.parentElement.parentElement.tagName,position:getComputedStyle(el.parentElement).position,
+        z:Number(getComputedStyle(el.parentElement).zIndex),openingZ:Number(getComputedStyle(document.querySelector('#hp-opening-sequence')).zIndex),
+        pointerEvents:getComputedStyle(el.parentElement).pointerEvents
+      }));
+      assert.deepEqual([openingTouch.x,openingTouch.y],[80,120],'opening ripple must follow screen coordinates');
+      assert.equal(openingTouch.light,true,'white-screen notes must use a visible gold color');
+      assert.equal(openingTouch.parent,'BODY');
+      assert.equal(openingTouch.position,'fixed');
+      assert.ok(openingTouch.z>openingTouch.openingZ,'opening ripple must appear above the white cover');
+      assert.equal(openingTouch.pointerEvents,'none','effects must not intercept the opening gesture');
+      await page.waitForTimeout(90);
+      await page.screenshot({path:path.join(output,name+'-white-touch-effect.png')});
+    }
     if (name==='iphone15pm') {
       // Exercise the actual opening flow in one case. Other cases isolate layout.
       const viewportPolicy=await page.locator('meta[name="viewport"]').getAttribute('content');

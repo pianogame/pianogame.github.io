@@ -29,21 +29,27 @@
   touchLayer.className = 'hp-home-touch-layer';
   touchLayer.setAttribute('aria-hidden', 'true');
   home.appendChild(touchLayer);
+  const openingTouchLayer = document.createElement('div');
+  openingTouchLayer.className = 'hp-home-touch-layer hp-opening-touch-layer';
+  openingTouchLayer.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(openingTouchLayer);
   let touchSequence = 0;
-  function showTouchEffect(clientX, clientY) {
-    if (home.hidden || document.body.classList.contains('hp-booting')
-      || document.documentElement.classList.contains('hp-install-required')) return;
+  function showTouchEffect(clientX, clientY, inOpening = false) {
+    if (!inOpening && (home.hidden || document.body.classList.contains('hp-booting')
+      || document.documentElement.classList.contains('hp-install-required'))) return;
     const bounds = home.getBoundingClientRect();
     const rotated = document.documentElement.dataset.hpRotated === 'true';
-    const x = rotated ? (clientY - bounds.top) * home.clientWidth / bounds.height
+    const x = inOpening ? clientX : rotated ? (clientY - bounds.top) * home.clientWidth / bounds.height
       : (clientX - bounds.left) * home.clientWidth / bounds.width;
-    const y = rotated ? (bounds.right - clientX) * home.clientHeight / bounds.width
+    const y = inOpening ? clientY : rotated ? (bounds.right - clientX) * home.clientHeight / bounds.width
       : (clientY - bounds.top) * home.clientHeight / bounds.height;
-    while (touchLayer.childElementCount >= 10) touchLayer.firstElementChild.remove();
+    const layer = inOpening ? openingTouchLayer : touchLayer;
+    while (layer.childElementCount >= 10) layer.firstElementChild.remove();
     const effect = document.createElement('span');
     effect.className = 'hp-home-touch-effect';
+    effect.classList.toggle('hp-touch-on-light', inOpening && document.documentElement.classList.contains('hp-opening-orientation-bg'));
     effect.style.left = x + 'px'; effect.style.top = y + 'px';
-    effect.style.setProperty('--touch-scale', Math.max(.65, Math.min(1, home.clientWidth / 1200)));
+    effect.style.setProperty('--touch-scale', Math.max(.65, Math.min(1, (inOpening ? innerWidth : home.clientWidth) / 1200)));
     const staff = document.createElement('span'); staff.className = 'hp-home-touch-staff';
     effect.appendChild(staff);
     ['♪', '♫', '♬'].forEach((glyph, index) => {
@@ -53,12 +59,17 @@
       note.style.setProperty('--note-delay', (index * .035) + 's'); effect.appendChild(note);
     });
     touchSequence++;
-    touchLayer.appendChild(effect);
+    layer.appendChild(effect);
     setTimeout(() => effect.remove(), 850);
   }
-  home.addEventListener('pointerdown', event => {
+  document.addEventListener('pointerdown', event => {
     if (event.button > 0) return;
-    showTouchEffect(event.clientX, event.clientY);
+    const opening = document.getElementById('hp-opening-sequence');
+    if (opening && !opening.hidden) {
+      showTouchEffect(event.clientX, event.clientY, true);
+    } else if (home.contains(event.target)) {
+      showTouchEffect(event.clientX, event.clientY);
+    }
   }, { capture:true, passive:true });
 
   home.querySelectorAll('button').forEach((button) => {

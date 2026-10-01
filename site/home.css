@@ -204,7 +204,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-dialogue.hp-dialogue-changing { animation: hp-dialogue-in .22s ease-out both; }
 @keyframes hp-dialogue-in { from { opacity: .3; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
-/* Equal menu columns and equal gaps; each artwork keeps its native ratio. */
+/* Equal menu columns and gaps, with matching painted frame bounds. */
 #hp-home-screen .hp-home-footer {
   position: absolute; z-index: 6;
   left: calc(18 * var(--home-width-unit)); bottom: var(--home-footer-bottom, calc(27 * var(--home-width-unit)));
@@ -221,12 +221,12 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   padding-bottom: calc(4 * var(--home-width-unit));
 }
 #hp-home-screen .hp-home-bottom-button {
-  position: relative; width: 100%; min-width: 0; min-height: 44px;
+  position: relative; width: 100%; min-width: 0; min-height: 44px; aspect-ratio: 283 / 151;
   display: grid; align-items: center;
   margin: 0; padding: 0; border: 0; background: transparent; appearance: none; -webkit-appearance: none;
   cursor: pointer; touch-action: manipulation;
 }
-#hp-home-screen .hp-home-bottom-button .hp-home-reference-art { filter: drop-shadow(0 3px 4px #26140c33); }
+#hp-home-screen .hp-home-bottom-button .hp-home-reference-art { position: absolute; inset: 0; height: 100%; filter: drop-shadow(0 3px 4px #26140c33); }
 #hp-home-screen .hp-home-bottom-button { transition: transform .12s ease, filter .12s ease; }
 #hp-home-screen .hp-home-bottom-button:is(:active,.hp-home-is-pressed) { transform: translateY(3px) scale(.96); filter: brightness(.84); }
 #hp-home-screen .hp-home-bottom-button::after {
@@ -240,8 +240,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 @keyframes hp-menu-sheen { 0% { opacity: 0; background-position: 120% 0; } 22% { opacity: 1; } 100% { opacity: 0; background-position: -20% 0; } }
 @keyframes hp-menu-confirm { 0% { filter: brightness(.86) drop-shadow(0 2px 3px #26140c33); } 28% { filter: brightness(1.2) drop-shadow(0 0 9px #ffe5a4); } 100% { filter: brightness(1) drop-shadow(0 3px 4px #26140c33); } }
 
-/* Lightweight musical ripples follow every HOME touch, including blank areas. */
+/* Musical ripples follow opening and HOME touches, including blank areas. */
 .hp-home-touch-layer { position: absolute; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; }
+.hp-opening-touch-layer { position: fixed; z-index: 20000; }
 .hp-home-touch-effect { position: absolute; width: 0; height: 0; pointer-events: none; }
 .hp-home-touch-effect::before {
   content: ""; position: absolute; width: 64px; height: 64px; border: 1px solid #fff0bdbf; border-radius: 50%;
@@ -250,14 +251,16 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 }
 .hp-home-touch-staff {
   position: absolute; width: 70px; height: 21px; left: -35px; top: -10px;
-  background: repeating-linear-gradient(to bottom, #fff0bd99 0 1px, transparent 1px 5px);
+  background: repeating-linear-gradient(to bottom, var(--touch-staff-color, #fff0bd99) 0 1px, transparent 1px 5px);
   animation: hp-touch-staff .58s ease-out both;
 }
 .hp-home-touch-note {
-  position: absolute; left: -10px; top: -12px; color: #fff0c3; font: 23px/1 "Times New Roman", serif;
-  text-shadow: 0 0 5px #fff6d1, 0 0 10px #edbc6b; opacity: 0;
+  position: absolute; left: -10px; top: -12px; color: var(--touch-note-color, #fff0c3); font: 23px/1 "Times New Roman", serif;
+  text-shadow: var(--touch-note-shadow, 0 0 5px #fff6d1), 0 0 10px #edbc6b; opacity: 0;
   animation: hp-touch-note .7s cubic-bezier(.2,.65,.3,1) var(--note-delay) both;
 }
+.hp-touch-on-light { --touch-note-color: #996823; --touch-staff-color: #a8793566; --touch-note-shadow: 0 0 4px #e9c58180; }
+.hp-touch-on-light::before { border-color: #ad7e3199; box-shadow: 0 0 9px #dbb56940, inset 0 0 11px #dbb56926; }
 @keyframes hp-touch-ring { 0% { opacity: .9; transform: translate(-50%,-50%) scale(calc(.2 * var(--touch-scale))); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(calc(1.5 * var(--touch-scale))); } }
 @keyframes hp-touch-staff { 0% { opacity: 0; transform: scaleX(.25) rotate(-8deg); } 25% { opacity: .7; } 100% { opacity: 0; transform: scaleX(1.25) rotate(-8deg); } }
 @keyframes hp-touch-note { 0% { opacity: 0; transform: translate(0,0) scale(.5); } 18% { opacity: .95; } 100% { opacity: 0; transform: translate(var(--note-x), calc(-1 * var(--note-rise))) scale(.8); } }
