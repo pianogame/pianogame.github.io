@@ -72,7 +72,9 @@ try {
   assert.ok(await page.evaluate(()=>window.bgmGain.gain.value<.25),'BGM must duck during voice');
   const character=page.getByRole('button',{name:'キャラクターと話す',exact:true});
   const replay=page.getByRole('button',{name:'メッセージのボイスを再生',exact:true});
-  for(const [random,file,text] of [[.99,'tuginoition','次の一音'],[0,'konnani','こんなに'],[.5,'sukositukare','少し疲れ'],[.5,'anatano','あなたの'],[.25,'okaeri','おかえり'],[0,'konnani','こんなに'],[.25,'anatano','あなたの']]){
+  // At the second tap the recent greeting has only 1/13 probability, so .08
+  // selects okaeri instead. Later, an older message recovers its weight.
+  for(const [random,file,text] of [[.99,'tuginoition','次の一音'],[.08,'okaeri','おかえり'],[.5,'anatano','あなたの'],[.5,'sukositukare','少し疲れ'],[0,'konnani','こんなに'],[.35,'anatano','あなたの'],[.5,'sukositukare','少し疲れ'],[.59,'anatano','あなたの']]){
     const previous=await page.evaluate(()=>window.voiceStarts.at(-1).file);
     await page.evaluate(value=>{Math.random=()=>value;},random);
     await character.click();await voice(file);
@@ -80,12 +82,12 @@ try {
     assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith(text),'voice and visible message must agree');
   }
   await replay.click();await voice('anatano');
-  for(let count=9;count<=41;count++){
+  for(let count=10;count<=41;count++){
     if(count%20===0){
       await page.evaluate(value=>{Math.random=()=>value;},count===20?0:.99);
       await character.click();
     }else if(count===21||count===22){
-      await page.evaluate(()=>{Math.random=()=>.5;});
+      await page.evaluate(random=>{Math.random=()=>random;},count===21?.5:.65);
       await character.click();
     }else await replay.click();
     await voice(count%20===0?'anatanorare':count===21?'sukositukare':'anatano');
@@ -125,7 +127,7 @@ try {
   await race.goto(base,{waitUntil:'networkidle'});
   await race.evaluate(()=>{document.body.classList.remove('hp-booting');document.querySelector('#hp-opening-sequence')?.remove();});
   const raceCharacter=race.getByRole('button',{name:'キャラクターと話す',exact:true});
-  for(const value of [0,.25,.5,.75,0]){
+  for(const value of [.99,0]){
     await race.evaluate(random=>{Math.random=()=>random;},value);
     await raceCharacter.click();
   }
@@ -157,7 +159,7 @@ try {
   assert.deepEqual(raceErrors,[],'cold-load voice errors');
   await context.close();
   console.log('PASS late WAV download cannot interrupt newer dialogue');
-  console.log('PASS initial HOME; five randomized matched messages without consecutive repeats; rare/return greeting excluded from next random selection; replay; hidden twentieth/fortieth rare; navigation reset; failed/cancelled downloads excluded; no overlap; natural ending; PIANO stop; return greeting; background');
+  console.log('PASS initial HOME; five weighted random messages; recent dialogue suppressed and older dialogue recovers; no consecutive repeats; rare/return greeting excluded from next random selection; replay; hidden twentieth/fortieth rare; navigation reset; failed/cancelled downloads excluded; no overlap; natural ending; PIANO stop; return greeting; background');
 } finally {
   await browser.close();server.close();
 }

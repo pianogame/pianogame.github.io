@@ -137,6 +137,7 @@
   const rareVoiceInterval = 20;
   let manualVoicePlays = 0;
   let messageIndex = 0;
+  const voiceHistory = [];
   let voiceGraph = null;
   let voiceSource = null;
   let voiceGeneration = 0;
@@ -203,7 +204,8 @@
     initialVoicePlayed = true;
     stopCharacterVoice();
     const generation = voiceGeneration;
-    const normal = voiceFiles[messageIndex];
+    const normalIndex = messageIndex;
+    const normal = voiceFiles[normalIndex];
     const file = manual && (manualVoicePlays + 1) % rareVoiceInterval === 0
       ? 'anatanorare' : normal;
     try {
@@ -227,6 +229,8 @@
         home.dataset.voiceFile = file;
         source.start();
         if (manual) manualVoicePlays++;
+        voiceHistory.unshift(file === 'anatanorare' ? 2 : normalIndex);
+        voiceHistory.length = Math.min(voiceHistory.length, messages.length);
         if (file === 'anatanorare') showMessage(2);
         voiceState(true);
       }).catch(() => {});
@@ -250,14 +254,26 @@
 
   function talkToCharacter() {
     if (transitioning || !dialogue) return;
-    // Choose uniformly from the other messages, including after a rare voice.
-    const choice = Math.floor(Math.random() * (messages.length - 1));
-    showMessage(choice >= messageIndex ? choice + 1 : choice);
+    // Successful voice starts determine recency: exclude the last, then use
+    // weights 1, 2, 3, 4 as a message ages. Unplayed messages have full weight.
+    const weights = messages.map((_, index) => {
+      const age = voiceHistory.indexOf(index);
+      return index === messageIndex ? 0 : age < 0 ? 4 : Math.min(age, 4);
+    });
+    let choice = Math.random() * weights.reduce((sum, weight) => sum + weight, 0);
+    const nextIndex = weights.findIndex(weight => {
+      choice -= weight;
+      return choice < 0;
+    });
+    showMessage(nextIndex);
     playMessageVoice(true);
   }
 
   function syncCharacterVoice() {
-    if (home.hidden) manualVoicePlays = 0;
+    if (home.hidden) {
+      manualVoicePlays = 0;
+      voiceHistory.length = 0;
+    }
     if (!canSpeak()) {
       stopCharacterVoice();
     } else if (voiceUnlocked && !initialVoicePlayed) {
@@ -277,7 +293,7 @@
   voiceObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   voiceObserver.observe(home, { attributes: true, attributeFilter: ['hidden'] });
   document.addEventListener('visibilitychange', syncCharacterVoice);
-  window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; stopCharacterVoice(); });
+  window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; voiceHistory.length = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
 
   function clearGamePreview() {

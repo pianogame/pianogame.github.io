@@ -325,10 +325,14 @@ try {
       const dialogue=page.locator('[data-home-dialogue]');
       const first=await dialogue.textContent(), messages=new Set([first]);
       await page.evaluate(()=>{window.qaOriginalRandom=Math.random;});
-      for (const value of [.99,.75,.25,.25]) {
+      for (const [value,file] of [[.99,'tuginoition'],[.9,'sukositukare'],[.3,'okaeri'],[.5,'anatano']]) {
         const previous=await dialogue.textContent();
         await page.evaluate(random=>{Math.random=()=>random;},value);
         await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
+        await page.waitForFunction(file=>{
+          const home=document.querySelector('#hp-home-screen');
+          return home.dataset.voiceFile===file && home.dataset.voicePlaying==='true';
+        },file);
         assert.notEqual(await dialogue.textContent(),previous,'random dialogue must not repeat consecutively');
         messages.add(await dialogue.textContent());
         assert.deepEqual((await inspect(page)).failures,[],'dialogue overflow');
