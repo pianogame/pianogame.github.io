@@ -10,6 +10,8 @@ on:
       - "site/audio/asabgm.mp3"
       - "site/audio/hirubgm.mp3"
       - "site/audio/yorubgm.mp3"
+      - "site/audio/*.wav"
+      - "scripts/verify_home_voices.mjs"
       - "scripts/verify_home_bgm.mjs"
       - "site/display-mode.js"
       - "site/orientation.js"
@@ -42,6 +44,8 @@ jobs:
         run: node scripts/verify_home_layout.mjs
       - name: Check HOME BGM periods, loops and screen transitions
         run: node scripts/verify_home_bgm.mjs
+      - name: Check character voices and rare playback
+        run: node scripts/verify_home_voices.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

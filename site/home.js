@@ -63,19 +63,146 @@
     ['少し疲れちゃった？', 'ゆっくりで大丈夫。', '私もそばにいるよ。'],
     ['次の一音に、', '気持ちをこめて。', '一緒に奏でよう♪'],
   ];
+  const voiceFiles = ['konnani', 'okaeri', 'anatano', 'sukositukare', 'tuginoition'];
+  const rareVoiceChance = .05;
   let messageIndex = 0;
-  function talkToCharacter() {
-    if (transitioning || !dialogue) return;
-    messageIndex = (messageIndex + 1) % messages.length;
+  let voiceGraph = null;
+  let voiceSource = null;
+  let voiceGeneration = 0;
+  let voiceUnlocked = false;
+  let initialVoicePlayed = false;
+  let pageActive = true;
+  const voiceBuffers = new Map();
+
+  function canSpeak() {
+    return pageActive && !document.hidden && !home.hidden
+      && !document.body.classList.contains('hp-booting')
+      && !document.documentElement.classList.contains('hp-install-required')
+      && !home.classList.contains('hp-piano-launching');
+  }
+
+  function ensureVoiceGraph() {
+    if (voiceGraph) return voiceGraph;
+    const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+    if (!bridge) return null;
+    const gain = bridge.context.createGain();
+    gain.gain.value = 1;
+    gain.connect(bridge.output);
+    voiceGraph = { context: bridge.context, gain };
+    return voiceGraph;
+  }
+
+  function prepareVoice(file) {
+    if (!voiceBuffers.has(file)) {
+      const graph = ensureVoiceGraph();
+      if (!graph) return Promise.reject(new Error('Audio unavailable'));
+      const task = fetch('/audio/' + file + '.wav?v=1')
+        .then(response => {
+          if (!response.ok) throw new Error('Voice download failed');
+          return response.arrayBuffer();
+        })
+        .then(data => graph.context.decodeAudioData(data))
+        .catch(error => { voiceBuffers.delete(file); throw error; });
+      voiceBuffers.set(file, task);
+    }
+    return voiceBuffers.get(file);
+  }
+
+  function voiceState(playing) {
+    home.dataset.voicePlaying = String(playing);
+    window.dispatchEvent(new CustomEvent('hp-home-voice-state', {
+      detail: { playing, file: home.dataset.voiceFile },
+    }));
+  }
+
+  function stopCharacterVoice() {
+    voiceGeneration++;
+    if (voiceSource) {
+      const source = voiceSource;
+      voiceSource = null;
+      source.onended = null;
+      try { source.stop(); source.disconnect(); } catch (_) {}
+    }
+    if (home.dataset.voicePlaying === 'true') voiceState(false);
+  }
+
+  function playMessageVoice(allowRare = false) {
+    if (!canSpeak()) return;
+    voiceUnlocked = true;
+    initialVoicePlayed = true;
+    stopCharacterVoice();
+    const generation = voiceGeneration;
+    const normal = voiceFiles[messageIndex];
+    const file = allowRare && normal === 'anatano' && Math.random() < rareVoiceChance
+      ? 'anatanorare' : normal;
+    try {
+      window.HP_AUDIO_BRIDGE?.configureSession?.();
+      window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      const graph = ensureVoiceGraph();
+      if (!graph) return;
+      void prepareVoice(file).then(buffer => {
+        // A late download must never speak an older message or play in PIANO.
+        if (generation !== voiceGeneration || !canSpeak()) return;
+        const source = graph.context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(graph.gain);
+        source.onended = () => {
+          source.disconnect();
+          if (voiceSource !== source) return;
+          voiceSource = null;
+          voiceState(false);
+        };
+        voiceSource = source;
+        home.dataset.voiceFile = file;
+        source.start();
+        voiceState(true);
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
+  function showMessage(index, animate = true) {
+    messageIndex = index;
+    if (!dialogue) return;
     dialogue.replaceChildren(...messages[messageIndex].map(line => {
       const span = document.createElement('span');
       span.textContent = line;
       return span;
     }));
     dialogue.classList.remove('hp-dialogue-changing');
-    void dialogue.offsetWidth;
-    dialogue.classList.add('hp-dialogue-changing');
+    if (animate) {
+      void dialogue.offsetWidth;
+      dialogue.classList.add('hp-dialogue-changing');
+    }
   }
+
+  function talkToCharacter() {
+    if (transitioning || !dialogue) return;
+    showMessage((messageIndex + 1) % messages.length);
+    playMessageVoice(true);
+  }
+
+  function syncCharacterVoice() {
+    if (!canSpeak()) {
+      stopCharacterVoice();
+    } else if (voiceUnlocked && !initialVoicePlayed) {
+      playMessageVoice();
+    }
+  }
+
+  window.addEventListener('hp-curtain-start', () => {
+    voiceUnlocked = true;
+    try {
+      window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      [...voiceFiles, 'anatanorare'].forEach(file => { void prepareVoice(file).catch(() => {}); });
+    } catch (_) {}
+  });
+  const voiceObserver = new MutationObserver(syncCharacterVoice);
+  voiceObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  voiceObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  voiceObserver.observe(home, { attributes: true, attributeFilter: ['hidden'] });
+  document.addEventListener('visibilitychange', syncCharacterVoice);
+  window.addEventListener('pagehide', () => { pageActive = false; stopCharacterVoice(); });
+  window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
 
   function clearGamePreview() {
     window.clearTimeout(gamePreviewTimer);
@@ -169,6 +296,7 @@
   function enterPiano() {
     if (transitioning) return;
     transitioning = true;
+    stopCharacterVoice();
     clearGamePreview();
 
     try {
@@ -210,6 +338,8 @@
     piano.hidden = true;
     home.hidden = false;
     document.body.classList.remove('hp-piano-active');
+    showMessage(1, false);
+    playMessageVoice();
     requestAnimationFrame(syncHomeLayout);
     finishTransition();
   }
@@ -231,6 +361,7 @@
 
   gameButton?.addEventListener('click', previewGame);
   characterButton?.addEventListener('click', talkToCharacter);
+  home.querySelector('[data-home-action="voice-replay"]')?.addEventListener('click', () => playMessageVoice(true));
   pianoButton.addEventListener('click', enterPiano);
   homeButton.addEventListener('click', enterHome);
 })();

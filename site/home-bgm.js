@@ -20,6 +20,9 @@
   let warmingUp = false;
   let pageActive = true;
   let boundaryTimer = 0;
+  let voiceSpeaking = false;
+
+  const homeGain = () => canPlay() ? (voiceSpeaking ? .18 : .5) : 0;
 
   function canPlay() {
     return pageActive && !document.hidden && !home.hidden
@@ -84,7 +87,7 @@
       return;
     }
     if (!ensureGraph()) return;
-    setGain(audible ? .5 : 0);
+    setGain(homeGain());
     if (music.paused) {
       try {
         const playback = music.play();
@@ -111,7 +114,11 @@
   });
   home.addEventListener('pointerdown', () => { if (canPlay()) unlock(); }, { capture: true, passive: true });
   home.addEventListener('keydown', () => { if (canPlay()) unlock(); }, { capture: true });
-  music.addEventListener('playing', () => setGain(canPlay() ? .5 : 0));
+  music.addEventListener('playing', () => setGain(homeGain()));
+  window.addEventListener('hp-home-voice-state', event => {
+    voiceSpeaking = event.detail.playing;
+    setGain(homeGain());
+  });
 
   const observer = new MutationObserver(sync);
   observer.observe(home, { attributes: true, attributeFilter: ['hidden', 'class'] });
