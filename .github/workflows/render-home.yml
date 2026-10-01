@@ -6,6 +6,11 @@ on:
       - "site/index.html"
       - "site/home.css"
       - "site/home.js"
+      - "site/home-bgm.js"
+      - "site/audio/asabgm.mp3"
+      - "site/audio/hirubgm.mp3"
+      - "site/audio/yorubgm.mp3"
+      - "scripts/verify_home_bgm.mjs"
       - "site/display-mode.js"
       - "site/orientation.js"
       - "site/rotation-guide.js"
@@ -35,6 +40,8 @@ jobs:
           npx playwright install --with-deps chromium >/dev/null 2>&1
       - name: Check layout, opening, navigation and rotation
         run: node scripts/verify_home_layout.mjs
+      - name: Check HOME BGM periods, loops and screen transitions
+        run: node scripts/verify_home_bgm.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
