@@ -121,6 +121,15 @@ try {
         return {gesture:gesture.defaultPrevented,multi:multi.defaultPrevented};
       });
       assert.deepEqual(zoomGuards,{gesture:true,multi:true},'browser zoom guards');
+      const pendingCoverRule=await page.evaluate(()=>{
+        const opening=document.querySelector('#hp-opening-sequence');
+        const inner=opening.querySelector('.hp-opening-orientation-inner');
+        opening.classList.add('hp-layout-pending');
+        const opacity=getComputedStyle(inner).opacity;
+        opening.classList.remove('hp-layout-pending');
+        return opacity;
+      });
+      assert.equal(pendingCoverRule,'0','startup white cover must hide orientation content while viewport settles');
       const openingBounds=await page.locator('#hp-opening-sequence').evaluate(el=>{
         const r=el.getBoundingClientRect(), style=getComputedStyle(el);
         return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,parent:el.parentElement?.tagName,position:style.position};
@@ -142,6 +151,8 @@ try {
       assert.equal(bootState.openingVisibility,'visible','opening must remain visible while HOME is hidden');
       assert.equal(bootState.rootBackground,'rgb(255, 255, 255)','portrait orientation root background must stay white');
       assert.equal(bootState.bodyBackground,'rgb(255, 255, 255)','portrait orientation body background must stay white');
+      await page.waitForFunction(() => document.querySelector('#hp-opening-sequence')?.dataset.layoutStable==='true',{timeout:3000});
+      assert.equal(await page.locator('#hp-opening-sequence').evaluate(el=>el.classList.contains('hp-layout-pending')),false,'startup layout gate did not release');
       const orientation=page.locator('.hp-opening-orientation.hp-ready');
       await orientation.waitFor({state:'visible',timeout:15000});
       await orientation.click();
