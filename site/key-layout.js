@@ -15,8 +15,9 @@
     // Piano Dream Stage: keep the existing note map/hit targets, but size the
     // visual keys like a conventional piano instead of square/circular pads.
     const slot=width/8;
-    const whiteMaxWidth=floorTenth(Math.min(slot*.985,is37?168:150));
-    const whiteMaxHeight=floorTenth(Math.min(height-6,whiteMaxWidth*.68,is37?82:72));
+    const whiteMaxWidth=floorTenth(Math.min(slot*.985,width*.118));
+    // Leave room for the rail, the solid front face and the pressed travel.
+    const whiteMaxHeight=floorTenth(Math.min(height-16,whiteMaxWidth*.88));
     const blackMaxWidth=floorTenth(whiteMaxWidth*.48);
     const blackMaxHeight=floorTenth(Math.min(whiteMaxHeight*.64,height*.62));
 
@@ -27,7 +28,7 @@
     const blackWidth=floorTenth(blackMaxWidth*blackFactor);
     const blackHeight=floorTenth(blackMaxHeight*blackFactor);
 
-    const baseline=Math.max(3,height-4);
+    const baseline=Math.max(3,height-9);
     const whiteTop=floorTenth(baseline-whiteHeight);
     // Black keys start at the same upper rail and overlap the upper portion of whites.
     const blackTop=floorTenth(Math.max(1,whiteTop-1));

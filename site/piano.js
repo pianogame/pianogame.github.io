@@ -63,16 +63,17 @@
     key.disabled = !samplesReady; key.type = 'button'; key.className = 'hp-key' + (sharp ? ' hp-sharp' : '');
     key.dataset.midi = midi; key.setAttribute('aria-label', text + ' ' + pitchName(midi));
     key.setAttribute('aria-pressed', 'false');
+    const face = document.createElement('span'); face.className = 'hp-key-face';
     if (!sharp) {
       const octave = document.createElement('span'); octave.className = 'hp-octave';
       octave.textContent = midi >= 84 ? '••' : midi >= 72 ? '•' : '';
       const digit = document.createElement('span'); digit.className = 'hp-digit'; digit.textContent = String(naturals.indexOf(midi % 12) + 1);
       const label = document.createElement('span'); label.className = 'hp-syllable'; label.textContent = syllables[naturals.indexOf(midi % 12)];
       if (midi < 60) key.classList.add('hp-low');
-      key.append(octave, digit, label);
+      face.append(octave, digit, label);
     }
     const glow = document.createElement('span'); glow.className = 'hp-key-glow';
-    glow.setAttribute('aria-hidden','true'); key.append(glow);
+    glow.setAttribute('aria-hidden','true'); face.append(glow); key.append(face);
     if (!buttons.has(midi)) buttons.set(midi, []);
     buttons.get(midi).push(key); if (code) shortcuts.set(code, {midi, sharp});
     return key;

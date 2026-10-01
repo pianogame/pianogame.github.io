@@ -1,0 +1,201 @@
+/* The concert-piano skin is scoped to the playing screen. */
+#hp-four88 {
+  --piano-gold: #d1a25c;
+  --piano-ink: #0a101b;
+  --piano-label: #f4dfaf;
+  color: var(--piano-label);
+}
+#hp-four88 .hp-surface {
+  background: linear-gradient(#08111b20, #050a1466), url('/assets/piano/palace-hall-v1.jpg') center / cover;
+}
+#hp-four88[data-wallpaper="photo"] .hp-surface { background: linear-gradient(#08111b40, #050a1466), var(--hp-wallpaper) center / cover; }
+#hp-four88[data-wallpaper="night"] .hp-surface { background: radial-gradient(ellipse at top, #31324e, #090e19 78%); }
+#hp-four88[data-wallpaper="blue"] .hp-surface { background: radial-gradient(ellipse at top, #32647b, #0b1c30 78%); }
+#hp-four88 .hp-header {
+  min-height: clamp(54px, 5.6cqw, 84px);
+  gap: 12px;
+  padding-top: 8px; padding-bottom: 8px;
+  background: linear-gradient(#080c1833, #080c1866);
+  border-bottom: 1px solid var(--piano-gold);
+  box-shadow: 0 2px 0 #080b14, 0 3px 0 #f7dba65c;
+  z-index: 2;
+}
+#hp-four88 .hp-layout-actions, #hp-four88 .hp-toolbar { gap: clamp(4px, .65cqw, 10px); }
+#hp-four88 .hp-toolbar { background: transparent; }
+#hp-four88 .hp-control, #hp-four88 select {
+  min-height: 44px; min-width: 44px;
+  border: 1px solid #c49a57;
+  border-radius: 10px;
+  color: #f7e7c6;
+  background: linear-gradient(180deg, #263147 0, #101a2b 18%, #080e19 86%, #172238);
+  box-shadow: inset 0 1px 0 #fff1c55c, inset 0 -2px 0 #0008, 0 2px 4px #0007;
+  font-family: "Times New Roman", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(12px, 1.6cqw, 21px);
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+#hp-four88 .hp-header .hp-control { padding: 7px clamp(7px, 1cqw, 15px); }
+#hp-four88 .hp-header select { width: clamp(112px, 16cqw, 210px); padding: 7px; }
+#hp-four88 select option { background: #111b2b; color: #f7e7c6; }
+#hp-four88 .hp-control:active { transform: translateY(2px); box-shadow: inset 0 2px 5px #0008, 0 1px 0 #f2c57b44; }
+#hp-four88 .hp-control[aria-pressed="true"] { color: #fff0cb; border-color: #ffe2a0; background: linear-gradient(#725423, #3b2c19); }
+#hp-four88 .hp-control[data-action="record"][aria-pressed="true"] { background: linear-gradient(#8d3346, #461b2c); border-color: #f2ac98; }
+#hp-four88 .hp-control:disabled { opacity: .48; }
+#hp-four88 :is(.hp-control, select, .hp-key):focus-visible { outline: 2px solid #ffdf99; outline-offset: 3px; }
+#hp-four88 .hp-stage {
+  padding: clamp(8px, 1cqw, 16px) 0;
+  justify-content: center;
+  background: transparent;
+}
+#hp-four88 .hp-stage .hp-keyboard {
+  height: 100%; max-height: 42cqw; flex: 1;
+  gap: clamp(7px, .8cqw, 12px);
+}
+#hp-four88 .hp-register-section {
+  isolation: isolate;
+  --key-depth: clamp(3px, calc(var(--hp-white-height) * .065), 8px);
+  --black-depth: clamp(3px, calc(var(--hp-black-height) * .13), 8px);
+}
+#hp-four88 .hp-stage .hp-register-section, #hp-four88 .hp-octave-stack .hp-register-section {
+  border: 1px solid #b58a46;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #293443 0, #070b12 10%, #111821 40%, #03070d 91%, #26313b);
+  box-shadow: inset 0 2px 0 #f8d89680, inset 0 4px 0 #000, inset 0 -2px 0 #f3ca805c, inset 0 -5px 7px #000, 0 3px 7px #0008;
+}
+#hp-four88 .hp-register-section::before, #hp-four88 .hp-register-section::after {
+  content: ""; position: absolute; top: -4px; width: clamp(20px, 3cqw, 46px); height: clamp(20px, 3cqw, 46px);
+  background: url('/assets/piano/gold-corner-v1.svg') center / contain no-repeat;
+  pointer-events: none; z-index: 35;
+}
+#hp-four88 .hp-register-section::before { left: -4px; }
+#hp-four88 .hp-register-section::after { right: -4px; transform: scaleX(-1); }
+#hp-four88 .hp-key:not(.hp-sharp), #hp-four88 .hp-stage .hp-key:not(.hp-sharp), #hp-four88 .hp-octave-stack .hp-key:not(.hp-sharp) {
+  --key-border: #c9c8c3;
+  border-radius: 3px 3px 4px 4px;
+  --key-surface: linear-gradient(100deg, #d9d9d5 0, #eeeeea 3%, #f6f6f1 47%, #e9e9e5 97%, #d6d6d1);
+  color: #27231e;
+  --key-shadow: inset 0 1px 0 #fff, inset 1px 0 1px #fff, inset -1px 0 1px #c9c8c455,
+    0 var(--key-depth) 0 #b6b7b3, 0 calc(var(--key-depth) + 1px) 0 #6d706d, 0 calc(var(--key-depth) + 4px) 6px #0009;
+  transform: translateX(-50%);
+  justify-content: flex-end;
+  padding: 4px 0 max(8px, calc(var(--hp-white-height) * .12));
+  transition: transform 45ms ease-out, box-shadow 45ms ease-out, background-color 90ms ease-out;
+}
+#hp-four88 .hp-key:not(.hp-sharp) .hp-key-face::before {
+  content: ""; position: absolute; inset: 0;
+  border-radius: inherit; pointer-events: none;
+  background: linear-gradient(172deg, #ffffffb8 0, #ffffff00 16%),
+    radial-gradient(ellipse 8% 10% at 75% 13%, #ffffffed 45%, #ffffff00 100%),
+    linear-gradient(102deg, transparent 4%, #ffffff44 11%, transparent 16% 85%, #ffffff66 96%, transparent);
+}
+#hp-four88 .hp-key.hp-sharp, #hp-four88 .hp-stage .hp-key.hp-sharp, #hp-four88 .hp-octave-stack .hp-key.hp-sharp {
+  z-index: 20;
+  --key-border: #07090c;
+  border-radius: 2px 2px 3px 3px;
+  --key-surface: linear-gradient(105deg, #15191f, #05070a 22% 72%, #262b31 99%);
+  --key-shadow: inset 1px 0 0 #6b707888, inset -1px 0 0 #8a8f9955, inset 0 2px 1px #757b8680,
+    inset 0 -7px 0 #030407, inset 0 -8px 1px #3f444a,
+    0 var(--black-depth) 0 #020305, 0 calc(var(--black-depth) + 4px) 5px #000b;
+  transform: translateX(-50%);
+  transition: transform 45ms ease-out, box-shadow 45ms ease-out;
+}
+#hp-four88 .hp-key.hp-sharp .hp-key-face::after {
+  content: ""; position: absolute; inset: 2px 3px 10px;
+  pointer-events: none; border-radius: 1px;
+  background: linear-gradient(170deg, #ffffff26, transparent 23%),
+    radial-gradient(ellipse 12% 8% at 28% 6%, #ffffff66, transparent),
+    linear-gradient(100deg, transparent 80%, #ffffff14 98%);
+}
+/* Only a sounding key sinks. The short release glow does not hold it down. */
+#hp-four88 .hp-key:not(.hp-sharp)[aria-pressed="true"] {
+  z-index: 4;
+  --key-travel: var(--key-depth);
+  --key-surface: linear-gradient(100deg, #d4cbb7, #fff8e6 8% 92%, #d8cfba);
+  --key-border: #d1b676;
+  --key-shadow: inset 0 2px 3px #4a372d33, inset 0 -1px 0 #fff, 0 1px 0 #777a75, 0 3px 4px #0009;
+}
+#hp-four88 .hp-key.hp-sharp[aria-pressed="true"] {
+  z-index: 30;
+  --key-travel: var(--black-depth);
+  --key-surface: linear-gradient(105deg, #191b1c, #0c0c0c 22% 72%, #37312a);
+  --key-border: #c1a66b;
+  --key-shadow: inset 1px 0 0 #79726466, inset -1px 0 0 #8a806a55, inset 0 1px 0 #cbbf9e55,
+    inset 0 -5px 0 #050507, inset 0 -6px 0 #3b3730, 0 1px 0 #020305, 0 3px 4px #000a;
+}
+#hp-four88 .hp-key.hp-lit:not([aria-pressed="true"]) { z-index: 4; }
+#hp-four88 .hp-key.hp-sharp.hp-lit:not([aria-pressed="true"]) { z-index: 30; }
+/* The face moves inside an unmoving button, keeping touch and slide pitches stable. */
+#hp-four88 .hp-key, #hp-four88 .hp-key.hp-sharp,
+#hp-four88 .hp-stage .hp-key, #hp-four88 .hp-stage .hp-key.hp-sharp,
+#hp-four88 .hp-octave-stack .hp-key, #hp-four88 .hp-octave-stack .hp-key.hp-sharp {
+  border: 0; padding: 0; background: transparent; box-shadow: none;
+  transform: translateX(-50%); transition: none;
+}
+#hp-four88 .hp-key .hp-key-face {
+  position: absolute; inset: 0; border-radius: inherit;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  padding: 4px 0 max(8px, calc(var(--hp-white-height) * .12));
+  border: 1px solid var(--key-border); background: var(--key-surface); box-shadow: var(--key-shadow);
+  transform: none;
+  transition: transform 45ms ease-out, box-shadow 45ms ease-out;
+}
+#hp-four88 .hp-key.hp-sharp .hp-key-face { padding: 0; }
+#hp-four88 .hp-key[aria-pressed="true"] .hp-key-face { transform: translateY(var(--key-travel)); }
+#hp-four88 .hp-key-glow {
+  inset: 0; border: 1px solid #f1d398; border-radius: inherit;
+  box-shadow: 0 0 8px #ecc57877; opacity: 0;
+}
+#hp-four88 .hp-key:is(.hp-lit,[aria-pressed="true"]) .hp-key-glow { opacity: .7; }
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(12px, calc(var(--hp-white-height) * .2), 23px); font-weight: 600; }
+#hp-four88 .hp-spark { width: 10px; height: 10px; font-size: 10px; opacity: .6; }
+#hp-four88 .hp-spark:nth-child(even) { font-size: 8px; }
+#hp-four88 .hp-scroll-tools { background: #091222c9; border-bottom: 1px solid #b28b47; color: #f4dfaf; }
+#hp-four88 .hp-scroll-tools .hp-control { background: #111a2bcc; border-color: #be9858; }
+#hp-four88 .hp-register-info span, #hp-four88 .hp-octave-title { color: #edd6a7; }
+#hp-four88 .hp-scroll-window { background: transparent; }
+#hp-four88 .hp-octave-block { padding-top: 4px; padding-bottom: 5px; border: 0; }
+#hp-four88 .hp-footer {
+  min-height: clamp(26px, 2.8cqw, 42px);
+  padding: 4px max(12px, env(safe-area-inset-right)) 4px max(12px, env(safe-area-inset-left));
+  border-top: 1px solid #c39a55;
+  background: linear-gradient(100deg, #080f1ded, #172133db 50%, #080f1ded);
+  color: #e8d4ad;
+}
+#hp-four88 .hp-status { background: transparent; color: #e8d4ad; }
+html[data-hp-rotated="true"] #hp-four88 .hp-footer { padding-left: max(12px, env(safe-area-inset-bottom)); padding-right: max(12px, env(safe-area-inset-top)); }
+#hp-four88 .hp-status[data-error="true"] { color: #ffc5b5; }
+#hp-four88 [data-output="instrument-label"] { font-family: "Times New Roman", "Hiragino Mincho ProN", serif; white-space: nowrap; }
+#hp-four88 .hp-settings, #hp-four88 .hp-settings-title, #hp-four88 .hp-track-panel {
+  background: #0d1625; color: #f1dfbc;
+  border-color: #c49a57;
+}
+#hp-four88 .hp-settings { border-left: 1px solid #c49a57; box-shadow: -6px 0 24px #0008; }
+#hp-four88 .hp-settings-backdrop { background: #0308129c; }
+#hp-four88 .hp-setting, #hp-four88 .hp-pedal, #hp-four88 .hp-track-row, #hp-four88 .hp-track-group, #hp-four88 .hp-export-row { border-color: #a17d443d; }
+#hp-four88 .hp-setting-help, #hp-four88 .hp-instrument-status, #hp-four88 .hp-scale-ends, #hp-four88 .hp-credit, #hp-four88 .hp-track-panel p, #hp-four88 .hp-track-row small { color: #c9bb9f; }
+#hp-four88 .hp-fx-card, #hp-four88 .hp-fx-chain, #hp-four88 .hp-install-panel { background: #172238; border-color: #b8975b66; }
+#hp-four88 .hp-fx-card[data-on="true"] { background: #30281b; border-color: #c5a368; }
+#hp-four88 .hp-fx-toggle { background: #172238; color: #f1dfbc; border-color: #b8975b; }
+#hp-four88 .hp-fx-toggle[aria-checked="true"] { background: #705027; border-color: #e1be7b; }
+#hp-four88 .hp-fx-card p, #hp-four88 .hp-fx-chain { color: #c9bb9f; }
+#hp-four88 .hp-setting output { color: #ffdfa0; }
+#hp-four88 .hp-range-step, #hp-four88 .hp-track-panel button, #hp-four88 .hp-track-panel select { color: #f4dfaf; background: #1c2940; border-color: #997944; }
+#hp-four88 input[type="range"] { accent-color: #d9ae67; }
+#hp-four88 input[type="range"]::-webkit-slider-runnable-track { background: linear-gradient(to right, #caa365 var(--range-progress,50%), #354154 var(--range-progress,50%)); }
+#hp-four88 input[type="range"]::-webkit-slider-thumb { background: #d2af71; border-color: #ffebc7; }
+#hp-four88 input[type="range"]::-moz-range-track { background: #354154; }
+#hp-four88 input[type="range"]::-moz-range-thumb { background: #d2af71; border-color: #ffebc7; }
+#hp-four88 .hp-size-panel, #hp-four88 .hp-wallpaper-panel { border-color: #99794466; }
+@container (max-width: 720px) {
+  #hp-four88 .hp-header { gap: 4px; padding-top: 5px; padding-bottom: 5px; min-height: 54px; }
+  #hp-four88 .hp-layout-actions, #hp-four88 .hp-toolbar { gap: 3px; }
+  #hp-four88 .hp-header .hp-control { font-size: 12px; padding: 5px; }
+  #hp-four88 .hp-header select { width: 106px; font-size: 12px; padding: 4px; }
+}
+@container (max-height: 360px) {
+  #hp-four88 .hp-header { min-height: 48px; padding-top: 2px; padding-bottom: 2px; }
+  #hp-four88 .hp-stage { padding-top: 6px; padding-bottom: 6px; }
+  #hp-four88 .hp-footer { min-height: 22px; padding-top: 1px; padding-bottom: 1px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #hp-four88 .hp-key .hp-key-face, #hp-four88 .hp-control { transition: none; }
+}

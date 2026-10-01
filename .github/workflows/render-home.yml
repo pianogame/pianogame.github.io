@@ -7,6 +7,11 @@ on:
       - "site/home.css"
       - "site/home.js"
       - "site/home-bgm.js"
+      - "site/piano-palace.css"
+      - "site/piano.js"
+      - "site/key-layout.js"
+      - "site/assets/piano/**"
+      - "scripts/verify_piano_palace.mjs"
       - "site/audio/asabgm.mp3"
       - "site/audio/hirubgm.mp3"
       - "site/audio/yorubgm.mp3"
@@ -44,11 +49,15 @@ jobs:
         run: node scripts/verify_home_layout.mjs
       - name: Check HOME BGM periods, loops and screen transitions
         run: node scripts/verify_home_bgm.mjs
+      - name: Check concert piano, pressed keys and recording
+        run: node scripts/verify_piano_palace.mjs
       - name: Check character voices and rare playback
         run: node scripts/verify_home_voices.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: home-layout-qa
-          path: home-layout-qa/
+          path: |
+            home-layout-qa/
+            piano-palace-qa/
           retention-days: 7

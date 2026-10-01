@@ -1,0 +1,171 @@
+/** Exercise the concert-piano skin against actual sampled notes and recording. */
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import http from 'node:http';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../_site');
+const output=path.resolve(process.env.PIANO_QA_OUTPUT||'piano-palace-qa');
+fs.mkdirSync(output,{recursive:true});
+const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.jpg':'image/jpeg','.png':'image/png','.mp3':'audio/mpeg','.m4a':'audio/mp4','.wav':'audio/wav','.woff':'font/woff'};
+const server=http.createServer((req,res)=>{
+  let file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
+  if(!file.startsWith(root+path.sep)&&file!==root){res.writeHead(403);return res.end();}
+  if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');
+  if(!fs.existsSync(file)){res.writeHead(404);return res.end();}
+  res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');fs.createReadStream(file).pipe(res);
+});
+await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+const base=`http://127.0.0.1:${server.address().port}`;
+// Software painting avoids headless SwiftShader tile artifacts in large key grids.
+const browser=await chromium.launch({headless:true,args:['--no-sandbox','--no-zygote','--disable-dev-shm-usage','--disable-gpu'],...(process.env.PLAYWRIGHT_EXECUTABLE_PATH?{executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH}: {})});
+const requested=process.env.PIANO_QA_CASES?.split(',');
+const cases=[['reference',1536,864],['wide',1536,709],['iphone15pm',932,430],['iphone14',844,390],['android',915,412],['small',667,375],['short',568,320],['rotated',430,932]].filter(([name])=>!requested||requested.includes(name));
+const metrics=[];
+async function inspect(page,layout='37'){
+  const result=await page.evaluate(layout=>{
+    const root=document.querySelector('#hp-four88'),stage=root.querySelector(layout==='37'?'.hp-stage':'.hp-scroll-window');
+    const failures=[],keyData=[];
+    const rows=[...stage.querySelectorAll('.hp-register-section')].filter(row=>{const r=row.getBoundingClientRect();const s=stage.getBoundingClientRect();return Math.min(r.bottom,s.bottom)-Math.max(r.top,s.top)>5;});
+    const rotated=document.documentElement.dataset.hpRotated==='true';
+    for(const row of rows){
+      const white=[...row.querySelectorAll('.hp-key:not(.hp-sharp)')];
+      if(Math.max(...white.map(k=>k.offsetWidth))-Math.min(...white.map(k=>k.offsetWidth))>1)failures.push('white key widths differ');
+      const mids=white.map(k=>Number(k.dataset.midi));
+      if(new Set(mids).size!==mids.length)failures.push('duplicate white notes');
+      for(const key of row.querySelectorAll('.hp-key')){
+        if(key.offsetLeft-key.offsetWidth/2<-.5||key.offsetLeft+key.offsetWidth/2>row.clientWidth+.5)failures.push('key outside row');
+        if(key.offsetTop<0||key.offsetTop+key.offsetHeight+8>row.clientHeight+1)failures.push('key depth outside row');
+        const sharp=key.classList.contains('hp-sharp');
+        const pitch=Number(key.dataset.midi)%12;
+        if(sharp&&![1,3,6,8,10].includes(pitch))failures.push('black key between E/F or B/C');
+        if(sharp&&Number(getComputedStyle(key).zIndex)<20)failures.push('black key behind white');
+        keyData.push({midi:Number(key.dataset.midi),w:key.offsetWidth,h:key.offsetHeight,sharp});
+      }
+    }
+    const header=root.querySelector('.hp-header');
+    if(header.scrollWidth>header.clientWidth+1)failures.push('header overflow');
+    for(const el of header.querySelectorAll('button,select')){
+      if(el.hidden||el.offsetParent===null)continue;
+      const r=el.getBoundingClientRect();
+      if(r.left<-.5||r.top<-.5||r.right>innerWidth+.5||r.bottom>innerHeight+.5)failures.push('control clipped: '+el.textContent);
+      if(Math.min(r.width,r.height)<43.5)failures.push('control smaller than 44px');
+    }
+    if(layout==='37'&&rows.length!==3)failures.push('not three keyboard rows');
+    if(document.documentElement.scrollWidth>innerWidth+1)failures.push('horizontal document overflow');
+    return {failures,rotated,rows:rows.map(r=>({w:r.clientWidth,h:r.clientHeight})),keys:keyData,background:getComputedStyle(root.querySelector('.hp-surface')).backgroundImage};
+  },layout);
+  if(result.failures.length)await page.screenshot({path:path.join(output,'failure.png')});
+  assert.deepEqual(result.failures,[],`piano ${layout}: ${JSON.stringify(result)}`);
+  return result;
+}
+try{
+  for(const [name,width,height] of cases){
+    const context=await browser.newContext({viewport:{width,height},hasTouch:true,deviceScaleFactor:1});
+    await context.addInitScript(()=>{
+      Object.defineProperty(navigator,'standalone',{get:()=>true});
+      window.sampleStarts=0;
+      const start=AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&!this.loop)window.sampleStarts++;return start.apply(this,args);};
+    });
+    const page=await context.newPage(),errors=[],missing=[];
+    page.on('pageerror',e=>errors.push(e.message));
+    page.on('response',r=>{if(r.url().includes('/assets/piano/')&&r.status()!==200)missing.push(r.url());});
+    await page.goto(base,{waitUntil:'domcontentloaded'});
+    await page.evaluate(()=>{document.body.classList.remove('hp-booting');document.querySelector('#hp-opening-sequence')?.remove();});
+    await page.getByRole('button',{name:'ピアノモードへ',exact:true}).click();
+    await page.locator('#hp-four88').waitFor({state:'visible'});
+    await page.evaluate(()=>document.fonts.ready);
+    await page.evaluate(async()=>{const image=new Image();image.src='/assets/piano/palace-hall-v1.jpg';await image.decode();});
+    await page.waitForTimeout(250);
+    metrics.push({name,...await inspect(page)});
+    assert.match(metrics.at(-1).background,/palace-hall-v1/);
+    await page.screenshot({path:path.join(output,name+'.png')});
+    await page.locator('[data-control="layout"]').selectOption('88');
+    await page.waitForTimeout(120);
+    await inspect(page,'88');
+    if(name==='iphone15pm')await page.screenshot({path:path.join(output,'88-keys.png')});
+    await page.locator('[data-control="layout"]').selectOption('37');
+    if(name==='iphone15pm'){
+      await page.evaluate(()=>{
+        window.notes=[];
+        document.querySelector('#hp-four88').addEventListener('hp-note-on',e=>window.notes.push(e.detail.midi));
+        window.dispatchEvent(new Event('hp-curtain-start'));
+      });
+      await page.waitForFunction(()=>!document.querySelector('.hp-stage .hp-key').disabled,null,{timeout:30000});
+      if(await page.evaluate(()=>!!document.fullscreenElement))await page.evaluate(()=>document.exitFullscreen());
+      const white=page.locator('.hp-stage [data-midi="60"]'),black=page.locator('.hp-stage [data-midi="61"]');
+      const box=await white.boundingBox();
+      const point={x:box.x+box.width*.3,y:box.y+box.height*.8};
+      const oldStarts=await page.evaluate(()=>window.sampleStarts);
+      await page.mouse.move(point.x,point.y);await page.mouse.down();
+      await page.waitForFunction(()=>document.querySelector('.hp-stage [data-midi="60"]').getAttribute('aria-pressed')==='true');
+      await page.waitForTimeout(60);
+      const depressed=await white.evaluate(el=>({face:getComputedStyle(el.querySelector('.hp-key-face')).transform,box:el.getBoundingClientRect().toJSON()}));
+      assert.ok(new DOMMatrixShim(depressed.face).y>=3,'white face did not sink');
+      assert.ok(Math.abs(depressed.box.y-box.y)<.1,'pressed hit area moved');
+      assert.equal(await page.evaluate(()=>window.notes.at(-1)),60);
+      assert.ok(await page.evaluate(()=>window.sampleStarts)>oldStarts,'actual piano sample did not start');
+      await page.screenshot({path:path.join(output,'white-pressed.png')});
+      const blackBox=await black.boundingBox();
+      await page.mouse.move(blackBox.x+blackBox.width/2,blackBox.y+blackBox.height/2);
+      await page.waitForFunction(()=>document.querySelector('.hp-stage [data-midi="61"]').getAttribute('aria-pressed')==='true');
+      assert.equal(await white.getAttribute('aria-pressed'),'false','slide did not release white key');
+      assert.equal(await page.evaluate(()=>window.notes.at(-1)),61,'black key did not win overlap');
+      await page.waitForTimeout(60);
+      assert.ok(new DOMMatrixShim(await black.locator('.hp-key-face').evaluate(el=>getComputedStyle(el).transform)).y>=3,'black face did not sink');
+      await page.screenshot({path:path.join(output,'black-pressed.png')});
+      await page.mouse.up();await page.waitForTimeout(80);
+      assert.equal(await black.getAttribute('aria-pressed'),'false');
+      assert.equal(new DOMMatrixShim(await black.locator('.hp-key-face').evaluate(el=>getComputedStyle(el).transform)).y,0,'released key stayed sunk during afterglow');
+      // Two genuine touch points must depress and release independently.
+      const cdp=await context.newCDPSession(page),b1=await white.boundingBox(),b2=await black.boundingBox();
+      const p1={x:b1.x+b1.width*.25,y:b1.y+b1.height*.85,id:1},p2={x:b2.x+b2.width*.5,y:b2.y+b2.height*.5,id:2};
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[p1,p2]});
+      await page.waitForFunction(()=>['60','61'].every(m=>document.querySelector('.hp-stage [data-midi="'+m+'"]').getAttribute('aria-pressed')==='true'));
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[p1]});
+      await page.waitForFunction(()=>document.querySelector('.hp-stage [data-midi="60"]').getAttribute('aria-pressed')==='false');
+      assert.equal(await black.getAttribute('aria-pressed'),'true');
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});
+      await page.waitForFunction(()=>!document.querySelector('.hp-stage .hp-key[aria-pressed="true"]'));
+      // Recording uses the same sampled input and retains the exact take duration.
+      const record=page.locator('[data-action="record"]');await record.click();
+      await page.mouse.move(point.x,point.y);await page.mouse.down();await page.waitForTimeout(160);await page.mouse.up();
+      await page.waitForTimeout(120);await record.click();
+      const take=await page.evaluate(()=>JSON.parse(localStorage.getItem('piano-palette-multitrack-v1')).tracks.at(-1));
+      assert.ok(take.notes.some(n=>n.midi===60),'pressed note missing from recording');
+      assert.ok(take.duration>=.2&&take.duration<3,'recorded stop duration incorrect');
+      const beforePlay=await page.evaluate(()=>window.sampleStarts);
+      await page.locator('[data-action="play"]').click();
+      await page.waitForFunction(count=>window.sampleStarts>count,beforePlay);
+      await page.waitForTimeout(500);
+      const tracks=page.getByRole('button',{name:'録音一覧',exact:false});await tracks.click();
+      await page.locator('.hp-track-panel').waitFor({state:'visible'});
+      await page.screenshot({path:path.join(output,'recordings.png')});
+      await page.keyboard.press('Escape');
+      await page.locator('[data-action="settings"]').click();
+      await page.locator('.hp-settings-overlay').waitFor({state:'visible'});
+      assert.equal(await page.locator('.hp-stage').evaluate(el=>el.inert),true);
+      await page.screenshot({path:path.join(output,'settings.png')});
+      for(const [kind,value] of [['white','60'],['black','60'],['edge','48']])await page.locator('[data-key-size="'+kind+'"]').evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
+      await page.locator('[data-action="settings-close"]').click();await inspect(page);
+      await page.locator('[data-action="settings"]').click();await page.locator('[data-action="key-size-reset"]').click();
+      await page.locator('[data-action="settings-close"]').click();await inspect(page);
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await white.click();
+      assert.equal(await white.locator('.hp-key-face').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
+      console.log('PASS actual white/black sample playback; stable hit boxes; slide; independent multitouch; release/cancel; recording/playback; overlays; key sizes; reduced motion');
+    }
+    await page.getByRole('button',{name:'ホームへ戻る',exact:true}).click();
+    await page.locator('#hp-home-screen').waitFor({state:'visible'});
+    await page.getByRole('button',{name:'ピアノモードへ',exact:true}).click();await page.locator('#hp-four88').waitFor({state:'visible'});
+    await inspect(page);
+    assert.deepEqual(errors,[],'browser errors');assert.deepEqual(missing,[],'missing piano art');
+    console.log('PASS piano '+name+' '+width+'x'+height+'; 37/88 keys; HOME round trip');
+    await context.close();
+  }
+}finally{fs.writeFileSync(path.join(output,'metrics.json'),JSON.stringify(metrics,null,2));await browser.close();server.close();}
+function DOMMatrixShim(value){this.y=value==='none'?0:Number(value.match(/^matrix\(([^)]+)\)$/)[1].split(',')[5]);}
