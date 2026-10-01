@@ -164,7 +164,14 @@ html[data-hp-rotated="true"] #hp-four88 .hp-footer { padding-left: max(12px, env
 }
 #hp-four88 .hp-footer::after { content: none; }
 #hp-four88 .hp-footer > * { position: relative; z-index: 1; }
-#hp-four88 .hp-footer { padding-left: clamp(18px, 3cqw, 46px); padding-right: clamp(18px, 3cqw, 46px); }
+#hp-four88 .hp-footer,
+html[data-hp-rotated="true"] #hp-four88 .hp-footer {
+  padding-left: clamp(24px, 6.5cqw, 100px); padding-right: clamp(24px, 6.5cqw, 100px);
+}
+#hp-four88 .hp-footer .hp-status {
+  min-width: 0; max-width: calc(50% - 3cqw);
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
 #hp-four88 .hp-footer .hp-status { font-size: clamp(11px, 1.3cqw, 20px); }
 #hp-four88 [data-output="instrument-label"] { font-size: clamp(12px, 1.5cqw, 23px); }
 @container (max-width: 720px) { #hp-four88 .hp-header .hp-ui-icon { display: none; } }

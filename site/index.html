@@ -37,7 +37,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=49', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=50', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -51,8 +51,8 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="stylesheet" href="/effects.css?v=9">
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
-  <script defer src="/key-layout.js?v=13"></script>
-  <script defer src="/piano.js?v=30"></script>
+  <script defer src="/key-layout.js?v=14"></script>
+  <script defer src="/piano.js?v=31"></script>
   <script defer src="/home.js?v=19"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
@@ -61,7 +61,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=9"></script>
-  <link rel="stylesheet" href="/piano-palace.css?v=4">
+  <link rel="stylesheet" href="/piano-palace.css?v=5">
 </head>
 <body class="hp-booting">
 <main id="hp-viewport">

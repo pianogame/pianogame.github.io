@@ -34,10 +34,10 @@ async function inspect(page,layout='37'){
     for(const row of rows){
       const white=[...row.querySelectorAll('.hp-key:not(.hp-sharp)')];
       if(Math.max(...white.map(k=>k.offsetWidth))-Math.min(...white.map(k=>k.offsetWidth))>1)failures.push('white key widths differ');
-      if(window.HP_KEY_PREFS.white===100)for(let i=1;i<white.length;i++) {
+      for(let i=1;i<white.length;i++) {
         const gap=(white[i].offsetLeft-white[i].offsetWidth/2)-(white[i-1].offsetLeft+white[i-1].offsetWidth/2);
         // offsetLeft/offsetWidth round independently to whole CSS pixels.
-        if(gap>Math.max(3,row.clientWidth*.004+1))failures.push('white key gap exceeds reference');
+        if(gap<0||gap>3.5)failures.push('white key gap exceeds reference');
       }
       const mids=white.map(k=>Number(k.dataset.midi));
       if(new Set(mids).size!==mids.length)failures.push('duplicate white notes');
@@ -52,6 +52,14 @@ async function inspect(page,layout='37'){
       }
     }
     const header=root.querySelector('.hp-header');
+    const footer=root.querySelector('.hp-footer'),footerBox=footer.getBoundingClientRect();
+    for(const el of footer.querySelectorAll('.hp-status,[data-output="instrument-label"]')) {
+      const box=el.getBoundingClientRect();
+      const start=rotated?box.top-footerBox.top:box.left-footerBox.left;
+      const end=rotated?box.bottom-footerBox.top:box.right-footerBox.left;
+      if(start<footer.clientWidth*.06||end>footer.clientWidth*.94)failures.push('footer text overlaps corner ornament');
+      if(el.classList.contains('hp-status')&&end>footer.clientWidth*.48)failures.push('footer text overlaps centre ornament');
+    }
     if(header.scrollWidth>header.clientWidth+1)failures.push('header overflow');
     for(const el of header.querySelectorAll('button,select')){
       if(el.hidden||el.offsetParent===null)continue;
@@ -96,6 +104,13 @@ try{
     metrics.push({name,...await inspect(page)});
     assert.match(metrics.at(-1).background,/palace-hall-v4/);
     await page.screenshot({path:path.join(output,name+'.png')});
+    if(name==='wide') {
+      await page.evaluate(()=>{window.HP_KEY_PREFS.white=90;window.dispatchEvent(new Event('hp-viewport-resize'));});
+      await page.waitForTimeout(100);await inspect(page);
+      await page.screenshot({path:path.join(output,'saved-white-90.png')});
+      await page.evaluate(()=>{window.HP_KEY_PREFS.white=100;window.dispatchEvent(new Event('hp-viewport-resize'));});
+      await page.waitForTimeout(100);
+    }
     await page.locator('[data-control="layout"]').selectOption('88');
     await page.waitForTimeout(120);
     await inspect(page,'88');

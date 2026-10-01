@@ -169,6 +169,19 @@
           const property='--hp-'+name.replace(/[A-Z]/g,letter=>'-'+letter.toLowerCase());
           section.style.setProperty(property,value+'px');
         }
+        // Pack the visible group using its actual key width, including saved
+        // size preferences. Black keys stay centred on the adjoining whites.
+        const whites=[...section.querySelectorAll('.hp-key:not(.hp-sharp)')];
+        const first=section.clientWidth/2-(whites.length-1)*sizes.whiteStep/2;
+        const centres=new Map();
+        whites.forEach((key,index)=>{
+          const centre=first+index*sizes.whiteStep;
+          key.style.left=centre+'px';centres.set(Number(key.dataset.midi),centre);
+        });
+        section.querySelectorAll('.hp-key.hp-sharp').forEach(key=>{
+          const midi=Number(key.dataset.midi);
+          key.style.left=(centres.get(midi-1)+centres.get(midi+1))/2+'px';
+        });
       });
     }
     if(!root.querySelector('.hp-stage').hidden)fitKeys(keyboard,true);
