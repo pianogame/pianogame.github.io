@@ -133,7 +133,9 @@
     ['次の一音に、', '気持ちをこめて。', '一緒に奏でよう♪'],
   ];
   const voiceFiles = ['konnani', 'okaeri', 'anatano', 'sukositukare', 'tuginoition'];
-  const rareVoiceChance = .05;
+  // A hidden bonus for staying on HOME: count only manual voices that start.
+  const rareVoiceInterval = 10;
+  let manualVoicePlays = 0;
   let messageIndex = 0;
   let voiceGraph = null;
   let voiceSource = null;
@@ -195,14 +197,14 @@
     if (home.dataset.voicePlaying === 'true') voiceState(false);
   }
 
-  function playMessageVoice(allowRare = false) {
+  function playMessageVoice(manual = false) {
     if (!canSpeak()) return;
     voiceUnlocked = true;
     initialVoicePlayed = true;
     stopCharacterVoice();
     const generation = voiceGeneration;
     const normal = voiceFiles[messageIndex];
-    const file = allowRare && normal === 'anatano' && Math.random() < rareVoiceChance
+    const file = manual && (manualVoicePlays + 1) % rareVoiceInterval === 0
       ? 'anatanorare' : normal;
     try {
       window.HP_AUDIO_BRIDGE?.configureSession?.();
@@ -224,6 +226,8 @@
         voiceSource = source;
         home.dataset.voiceFile = file;
         source.start();
+        if (manual) manualVoicePlays++;
+        if (file === 'anatanorare') showMessage(2);
         voiceState(true);
       }).catch(() => {});
     } catch (_) {}
@@ -251,6 +255,7 @@
   }
 
   function syncCharacterVoice() {
+    if (home.hidden) manualVoicePlays = 0;
     if (!canSpeak()) {
       stopCharacterVoice();
     } else if (voiceUnlocked && !initialVoicePlayed) {
@@ -270,7 +275,7 @@
   voiceObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   voiceObserver.observe(home, { attributes: true, attributeFilter: ['hidden'] });
   document.addEventListener('visibilitychange', syncCharacterVoice);
-  window.addEventListener('pagehide', () => { pageActive = false; stopCharacterVoice(); });
+  window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
 
   function clearGamePreview() {

@@ -79,10 +79,16 @@ try {
   await replay.click();await voice('konnani');
   await character.click();await voice('okaeri');
   await character.click();await voice('anatano');
-  await page.evaluate(()=>{Math.random=()=>.0499;});
-  await replay.click();await voice('anatanorare');
-  await page.evaluate(()=>{Math.random=()=>.05;});
+  await page.evaluate(()=>{Math.random=()=>0;});
+  await replay.click();await voice('anatano'); // Ninth manual play: no random rare.
+  await replay.click();await voice('anatanorare'); // Tenth, excluding the greeting.
+  assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith('あなたの'),'rare must use its matching dialogue');
   await replay.click();await voice('anatano');
+  for(let count=12;count<=21;count++){
+    await replay.click();await voice(count===20?'anatanorare':'anatano');
+  }
+  assert.equal(await page.evaluate(()=>window.voiceStarts.filter(v=>v.file==='anatanorare').length),2,'only every tenth manual play is rare');
+  assert.doesNotMatch(await page.locator('#hp-home-screen').textContent(),/10回|レア|rare/i,'hidden bonus must not be advertised');
   assert.equal(await page.evaluate(()=>window.maxVoices),1,'rapid taps must never overlap voices');
   await page.waitForFunction(()=>document.querySelector('#hp-home-screen').dataset.voicePlaying==='false',null,{timeout:10000});
   assert.equal(await page.evaluate(()=>window.activeVoices.size),0,'natural ending must release the voice');
@@ -94,6 +100,9 @@ try {
   await page.getByRole('button',{name:'ホームへ戻る',exact:true}).click();
   await voice('okaeri');
   assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith('おかえり'),'return HOME greeting');
+  for(let count=1;count<=10;count++){
+    await replay.click();await voice(count===10?'anatanorare':'okaeri');
+  }
   await page.evaluate(()=>{
     Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));
   });
@@ -115,10 +124,30 @@ try {
   release();await (await finished).finished();await race.waitForTimeout(400);
   assert.equal(await race.evaluate(()=>window.voiceStarts.some(v=>v.file==='tuginoition')),false,'late download must not replace a newer voice');
   assert.equal(await race.evaluate(()=>window.maxVoices),1,'cold downloads must never overlap');
+  // Cancelled downloads do not count; a failed tenth play must remain due.
+  const raceReplay=race.getByRole('button',{name:'メッセージのボイスを再生',exact:true});
+  for(let count=await race.evaluate(()=>window.voiceStarts.length);count<9;count++){
+    await raceReplay.click();
+    await race.waitForFunction(n=>window.voiceStarts.length===n,count+1);
+    assert.equal(await race.evaluate(()=>window.voiceStarts.at(-1).file),'konnani');
+  }
+  let failRare=true;
+  await race.route('**/anatanorare.wav*',route=>{
+    if(failRare){failRare=false;return route.fulfill({status:503,body:'Temporary download failure'});}
+    return route.continue();
+  });
+  const failedRare=race.waitForResponse(r=>r.url().includes('/anatanorare.wav')&&r.status()===503);
+  await raceReplay.click();await (await failedRare).finished();await race.waitForTimeout(100);
+  assert.equal(await race.evaluate(()=>window.voiceStarts.length),9,'failed voice advanced the bonus counter');
+  await raceReplay.click();
+  await race.waitForFunction(()=>window.voiceStarts.length===10&&window.voiceStarts.at(-1).file==='anatanorare');
+  assert.ok((await race.locator('[data-home-dialogue]').textContent()).startsWith('あなたの'));
+  await raceReplay.click();
+  await race.waitForFunction(()=>window.voiceStarts.length===11&&window.voiceStarts.at(-1).file==='anatano');
   assert.deepEqual(raceErrors,[],'cold-load voice errors');
   await context.close();
   console.log('PASS late WAV download cannot interrupt newer dialogue');
-  console.log('PASS initial HOME; five matched messages; replay; 5% rare threshold; no overlap; natural ending; PIANO stop; return greeting; background');
+  console.log('PASS initial HOME; five matched messages; replay; hidden tenth/twentieth rare; navigation reset; failed/cancelled downloads excluded; no overlap; natural ending; PIANO stop; return greeting; background');
 } finally {
   await browser.close();server.close();
 }
