@@ -72,23 +72,22 @@ try {
   assert.ok(await page.evaluate(()=>window.bgmGain.gain.value<.25),'BGM must duck during voice');
   const character=page.getByRole('button',{name:'キャラクターと話す',exact:true});
   const replay=page.getByRole('button',{name:'メッセージのボイスを再生',exact:true});
-  for(const [file,text] of [['okaeri','おかえり'],['anatano','あなたの'],['sukositukare','少し疲れ'],['tuginoition','次の一音'],['konnani','こんなに']]){
+  for(const [random,file,text] of [[.99,'tuginoition','次の一音'],[0,'konnani','こんなに'],[.6,'sukositukare','少し疲れ'],[.7,'sukositukare','少し疲れ'],[.4,'anatano','あなたの'],[.2,'okaeri','おかえり'],[.4,'anatano','あなたの']]){
+    await page.evaluate(value=>{Math.random=()=>value;},random);
     await character.click();await voice(file);
     assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith(text),'voice and visible message must agree');
   }
-  await replay.click();await voice('konnani');
-  await character.click();await voice('okaeri');
-  await character.click();await voice('anatano');
-  await page.evaluate(()=>{Math.random=()=>0;});
-  await replay.click();await voice('anatano'); // Ninth manual play: no random rare.
-  await replay.click();await voice('anatanorare'); // Tenth, excluding the greeting.
-  assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith('あなたの'),'rare must use its matching dialogue');
   await replay.click();await voice('anatano');
-  for(let count=12;count<=21;count++){
-    await replay.click();await voice(count===20?'anatanorare':'anatano');
+  for(let count=9;count<=41;count++){
+    if(count%20===0){
+      await page.evaluate(value=>{Math.random=()=>value;},count===20?0:.99);
+      await character.click();
+    }else await replay.click();
+    await voice(count%20===0?'anatanorare':'anatano');
+    assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith('あなたの'),'rare and replay must use their matching dialogue');
   }
-  assert.equal(await page.evaluate(()=>window.voiceStarts.filter(v=>v.file==='anatanorare').length),2,'only every tenth manual play is rare');
-  assert.doesNotMatch(await page.locator('#hp-home-screen').textContent(),/10回|レア|rare/i,'hidden bonus must not be advertised');
+  assert.deepEqual(await page.evaluate(()=>window.voiceStarts.slice(1).flatMap((v,i)=>v.file==='anatanorare'?[i+1]:[])),[20,40],'only every twentieth manual play is rare, excluding the greeting');
+  assert.doesNotMatch(await page.locator('#hp-home-screen').textContent(),/20回|レア|rare/i,'hidden bonus must not be advertised');
   assert.equal(await page.evaluate(()=>window.maxVoices),1,'rapid taps must never overlap voices');
   await page.waitForFunction(()=>document.querySelector('#hp-home-screen').dataset.voicePlaying==='false',null,{timeout:10000});
   assert.equal(await page.evaluate(()=>window.activeVoices.size),0,'natural ending must release the voice');
@@ -100,8 +99,8 @@ try {
   await page.getByRole('button',{name:'ホームへ戻る',exact:true}).click();
   await voice('okaeri');
   assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith('おかえり'),'return HOME greeting');
-  for(let count=1;count<=10;count++){
-    await replay.click();await voice(count===10?'anatanorare':'okaeri');
+  for(let count=1;count<=20;count++){
+    await replay.click();await voice(count===20?'anatanorare':'okaeri');
   }
   await page.evaluate(()=>{
     Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));
@@ -117,16 +116,18 @@ try {
   await race.goto(base,{waitUntil:'networkidle'});
   await race.evaluate(()=>{document.body.classList.remove('hp-booting');document.querySelector('#hp-opening-sequence')?.remove();});
   const raceCharacter=race.getByRole('button',{name:'キャラクターと話す',exact:true});
-  for(let i=0;i<4;i++) await raceCharacter.click();
-  await raceCharacter.click();
+  for(const value of [.2,.4,.6,.8,0]){
+    await race.evaluate(random=>{Math.random=()=>random;},value);
+    await raceCharacter.click();
+  }
   await race.waitForFunction(()=>document.querySelector('#hp-home-screen').dataset.voiceFile==='konnani' && window.activeVoices.size===1);
   const finished=race.waitForResponse(response=>response.url().includes('/tuginoition.wav'));
   release();await (await finished).finished();await race.waitForTimeout(400);
   assert.equal(await race.evaluate(()=>window.voiceStarts.some(v=>v.file==='tuginoition')),false,'late download must not replace a newer voice');
   assert.equal(await race.evaluate(()=>window.maxVoices),1,'cold downloads must never overlap');
-  // Cancelled downloads do not count; a failed tenth play must remain due.
+  // Cancelled downloads do not count; a failed twentieth play must remain due.
   const raceReplay=race.getByRole('button',{name:'メッセージのボイスを再生',exact:true});
-  for(let count=await race.evaluate(()=>window.voiceStarts.length);count<9;count++){
+  for(let count=await race.evaluate(()=>window.voiceStarts.length);count<19;count++){
     await raceReplay.click();
     await race.waitForFunction(n=>window.voiceStarts.length===n,count+1);
     assert.equal(await race.evaluate(()=>window.voiceStarts.at(-1).file),'konnani');
@@ -138,16 +139,16 @@ try {
   });
   const failedRare=race.waitForResponse(r=>r.url().includes('/anatanorare.wav')&&r.status()===503);
   await raceReplay.click();await (await failedRare).finished();await race.waitForTimeout(100);
-  assert.equal(await race.evaluate(()=>window.voiceStarts.length),9,'failed voice advanced the bonus counter');
+  assert.equal(await race.evaluate(()=>window.voiceStarts.length),19,'failed voice advanced the bonus counter');
   await raceReplay.click();
-  await race.waitForFunction(()=>window.voiceStarts.length===10&&window.voiceStarts.at(-1).file==='anatanorare');
+  await race.waitForFunction(()=>window.voiceStarts.length===20&&window.voiceStarts.at(-1).file==='anatanorare');
   assert.ok((await race.locator('[data-home-dialogue]').textContent()).startsWith('あなたの'));
   await raceReplay.click();
-  await race.waitForFunction(()=>window.voiceStarts.length===11&&window.voiceStarts.at(-1).file==='anatano');
+  await race.waitForFunction(()=>window.voiceStarts.length===21&&window.voiceStarts.at(-1).file==='anatano');
   assert.deepEqual(raceErrors,[],'cold-load voice errors');
   await context.close();
   console.log('PASS late WAV download cannot interrupt newer dialogue');
-  console.log('PASS initial HOME; five matched messages; replay; hidden tenth/twentieth rare; navigation reset; failed/cancelled downloads excluded; no overlap; natural ending; PIANO stop; return greeting; background');
+  console.log('PASS initial HOME; five randomized matched messages including repeats; replay; hidden twentieth/fortieth rare; navigation reset; failed/cancelled downloads excluded; no overlap; natural ending; PIANO stop; return greeting; background');
 } finally {
   await browser.close();server.close();
 }

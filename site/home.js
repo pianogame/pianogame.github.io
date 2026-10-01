@@ -134,7 +134,7 @@
   ];
   const voiceFiles = ['konnani', 'okaeri', 'anatano', 'sukositukare', 'tuginoition'];
   // A hidden bonus for staying on HOME: count only manual voices that start.
-  const rareVoiceInterval = 10;
+  const rareVoiceInterval = 20;
   let manualVoicePlays = 0;
   let messageIndex = 0;
   let voiceGraph = null;
@@ -250,7 +250,7 @@
 
   function talkToCharacter() {
     if (transitioning || !dialogue) return;
-    showMessage((messageIndex + 1) % messages.length);
+    showMessage(Math.floor(Math.random() * messages.length));
     playMessageVoice(true);
   }
 

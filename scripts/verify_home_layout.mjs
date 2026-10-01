@@ -324,7 +324,9 @@ try {
       // Real pointer taps must reach the character and change the live text.
       const dialogue=page.locator('[data-home-dialogue]');
       const first=await dialogue.textContent(), messages=new Set([first]);
-      for (let i=0;i<4;i++) {
+      await page.evaluate(()=>{window.qaOriginalRandom=Math.random;});
+      for (const index of [4,3,1,2]) {
+        await page.evaluate(i=>{Math.random=()=>(i+.1)/5;},index);
         await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
         messages.add(await dialogue.textContent());
         assert.deepEqual((await inspect(page)).failures,[],'dialogue overflow');
@@ -335,8 +337,10 @@ try {
       assert.equal(await page.evaluate(()=>window.homeTapPlays),soundBeforeVoice,'voice replay must have no tap sound');
       await dialogue.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
       await page.screenshot({path:path.join(output,'character-message.png')});
+      await page.evaluate(()=>{Math.random=()=>0;});
       await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
-      assert.equal(await dialogue.textContent(),first,'character messages should cycle');
+      assert.equal(await dialogue.textContent(),first,'random selection must use the chosen message');
+      await page.evaluate(()=>{Math.random=window.qaOriginalRandom;delete window.qaOriginalRandom;});
       // Blank HOME space also responds; effects must remain bounded and clear.
       await page.mouse.click(20,240);
       const touch=await page.locator('.hp-home-touch-effect').last().evaluate(el=>[parseFloat(el.style.left),parseFloat(el.style.top)]);
