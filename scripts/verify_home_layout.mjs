@@ -29,6 +29,7 @@ const browser = await chromium.launch({
     args: ['--no-sandbox', '--no-zygote', '--disable-dev-shm-usage', '--use-gl=angle', '--use-angle=swiftshader'],
   } : {}),
 });
+const requestedCases=process.env.HOME_QA_CASES?.split(',');
 const cases = [
   ['reference-16x9',1536,864,{}],
   ['supplied-wide',1536,709,{}],
@@ -38,7 +39,7 @@ const cases = [
   ['small-landscape',667,375,{}],
   ['short-landscape',568,320,{}],
   ['portrait-rotation',430,932,{t:59,b:34}],
-];
+].filter(([name])=>!requestedCases||requestedCases.includes(name));
 const results = [];
 // Pixel measurements from the user-supplied 1536x864 concept, including the
 // outer ornament padding. This catches undersized 3:1 replacement artwork.
@@ -221,6 +222,30 @@ try {
         orientation:document.documentElement.classList.contains('hp-opening-orientation-bg'),
         curtain:document.documentElement.classList.contains('hp-opening-curtain-bg')
       })),{orientation:false,curtain:true},'opening phase background did not switch to curtain');
+      // Reproduce a landscape PWA cold launch retaining the pre-launch height.
+      // The installed screen remains 932x430 while all viewport height reports
+      // briefly say 371px; the curtain must still paint the whole screen.
+      for(const staleHeight of [371,932]) {
+        const coldLaunch=await page.evaluate(staleHeight=>{
+          const opening=document.querySelector('#hp-opening-sequence');
+          const restore=[];
+          for(const [object,key] of [[window,'innerHeight'],[document.documentElement,'clientHeight'],[visualViewport,'height']]) {
+            const descriptor=Object.getOwnPropertyDescriptor(object,key);
+            Object.defineProperty(object,key,{configurable:true,get:()=>staleHeight});
+            restore.push(()=>descriptor?Object.defineProperty(object,key,descriptor):delete object[key]);
+          }
+          opening.style.setProperty('--hp-opening-height',staleHeight+'px');
+          window.dispatchEvent(new Event('pageshow'));
+          const curtain=opening.querySelector('.hp-opening-title'),bounds=curtain.getBoundingClientRect();
+          const result={bottom:bounds.bottom,cover:opening.getBoundingClientRect().bottom,
+            panelHeight:parseFloat(getComputedStyle(curtain,'::before').height),screenHeight:Math.min(screen.width,screen.height)};
+          restore.forEach(fn=>fn());window.dispatchEvent(new Event('resize'));return result;
+        },staleHeight);
+        assert.ok(coldLaunch.cover>=height-.5&&coldLaunch.bottom>=height-.5,'cold landscape launch leaves a dark bottom band');
+        assert.ok(coldLaunch.panelHeight>=height-.5,'curtain fabric does not cover the full screen');
+        assert.ok(coldLaunch.bottom<=height+.5,'stale portrait height pushed the curtain content off screen');
+      }
+      await page.screenshot({path:path.join(output,'landscape-cold-launch-curtain.png')});
       await page.locator('.hp-opening-title').click();
       await page.waitForFunction(() => !document.body.classList.contains('hp-booting'));
       assert.equal(await page.locator('#hp-viewport').evaluate(el=>getComputedStyle(el).visibility),'visible','HOME must become visible after boot guard is removed');

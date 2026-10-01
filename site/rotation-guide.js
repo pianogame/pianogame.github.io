@@ -5,7 +5,7 @@
 
     const style=document.createElement('style');
     style.textContent=`
-      #hp-opening-sequence{position:fixed;left:0;top:0;right:auto;bottom:auto;width:100lvw;height:calc(100lvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));min-width:100vw;min-height:calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
+      #hp-opening-sequence{position:fixed;left:0;top:0;right:auto;bottom:auto;width:var(--hp-opening-width,100vw);height:var(--hp-opening-height,100dvh);z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
       #hp-opening-sequence[hidden]{display:none!important}
       .hp-opening-orientation,.hp-opening-title{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box}
       .hp-opening-orientation{z-index:3;padding:28px;background:#fff;color:#29242c;text-align:center;opacity:1;transition:opacity .28s ease;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
@@ -76,6 +76,22 @@
         <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span class="hp-opening-tap">Tap Curtain Start</span></div>
       </section>`;
     document.body.append(opening);
+    function measureOpeningBounds() {
+      const v=window.visualViewport;
+      let width=Math.max(innerWidth,(v?.width||0)+(v?.offsetLeft||0));
+      let height=Math.max(innerHeight,(v?.height||0)+(v?.offsetTop||0));
+      const installed=navigator.standalone===true;
+      // iOS can keep CSS vh and the layout viewport at the pre-launch height.
+      // Only use screen dimensions when they describe this installed full screen.
+      if(installed&&screen.width&&screen.height) {
+        const shortSide=Math.min(screen.width,screen.height),longSide=Math.max(screen.width,screen.height);
+        if(Math.abs(longSide-width)<=2)height=shortSide;
+        else if(Math.abs(shortSide-width)<=2)height=longSide;
+      }
+      opening.style.setProperty('--hp-opening-width',Math.ceil(width)+'px');
+      opening.style.setProperty('--hp-opening-height',Math.ceil(height)+'px');
+    }
+    measureOpeningBounds();
 
     // iOS standalone can report several transient viewport geometries during
     // cold launch. Keep only the white cover visible until geometry is stable
@@ -339,7 +355,7 @@
     sizeRippleCanvas();
     const rippleResizeObserver=window.ResizeObserver?new ResizeObserver(sizeRippleCanvas):null;
     rippleResizeObserver?.observe(opening);
-    const refreshOpeningViewport=()=>{sizeRippleCanvas();};
+    const refreshOpeningViewport=()=>{measureOpeningBounds();sizeRippleCanvas();};
     window.addEventListener('resize',()=>{refreshOpeningViewport();restartLayoutGate();});
     window.addEventListener('orientationchange',()=>{refreshOpeningViewport();restartLayoutGate();});
     window.visualViewport?.addEventListener('resize',()=>{refreshOpeningViewport();restartLayoutGate();});

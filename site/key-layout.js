@@ -17,9 +17,9 @@
     const slot=width/8;
     const whiteMaxWidth=floorTenth(Math.min(slot*.92,width*.115));
     // Leave room for the rail, the solid front face and the pressed travel.
-    const whiteMaxHeight=floorTenth(Math.min(height-16,whiteMaxWidth*.88));
+    const whiteMaxHeight=floorTenth(Math.min(height-16,whiteMaxWidth*.78));
     const blackMaxWidth=floorTenth(whiteMaxWidth*.48);
-    const blackMaxHeight=floorTenth(Math.min(whiteMaxHeight*.58,height*.58));
+    const blackMaxHeight=floorTenth(Math.min(whiteMaxHeight*.68,height*.66));
 
     const whiteFactor=sizeFactor(prefs.white);
     const blackFactor=sizeFactor(prefs.black);

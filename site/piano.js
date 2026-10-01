@@ -91,7 +91,7 @@
     const section = document.createElement('div'); section.className = 'hp-register-section';
     section.setAttribute('role','group'); section.setAttribute('aria-label',row.name);
     const firstX = rowIndex === 0 ? 8 : 14;
-    const stepX = 12;
+    const stepX = 11.8;
     naturals.forEach((semitone, index) => {
       const white = makeKey(row.base + semitone, syllables[index], row.white[index], row.wc[index]);
       white.style.left = (firstX + index * stepX) + '%'; section.append(white);
@@ -101,7 +101,7 @@
       }
     });
     if (rowIndex === 0) {
-      const top = makeKey(84+shift, '高いド', 'I', 'KeyI'); top.style.left = '92%'; section.append(top);
+      const top = makeKey(84+shift, '高いド', 'I', 'KeyI'); top.style.left = '90.6%'; section.append(top);
     }
     section.setAttribute('aria-label',row.name+' '+pitchName(row.base)+'から');
     section.querySelectorAll('.hp-key:not(.hp-sharp)').forEach(key=>{
@@ -132,10 +132,10 @@
       const sharp = !naturals.includes(midi%12);
       const key = makeKey(midi,pitchName(midi),'',null,sharp);
       let x;
-      if (octave===0) x = midi===21 ? 37.5 : midi===22 ? 50 : 62.5;
+      if (octave===0) x = midi===21 ? 44.1 : midi===22 ? 50 : 55.9;
       else {
         const index = midi===108 ? 7 : sharp ? naturals.indexOf(midi%12-1)+.5 : naturals.indexOf(midi%12);
-        x = (octave===7 ? 8 : 14) + index * 12;
+        x = (octave===7 ? 8 : 14) + index * 11.8;
       }
       key.style.left = x+'%';
       if (!sharp) key.querySelector('.hp-octave').textContent = '';
@@ -349,6 +349,7 @@
 
   function updateInstrumentUI() {
     const preset=instruments[currentInstrument];
+    root.dataset.instrument=currentInstrument;
     sustain=articulation[currentInstrument].sustain;
     releaseControl.value=articulation[currentInstrument].release;
     releaseControl.dispatchEvent(new Event('input'));

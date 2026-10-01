@@ -34,6 +34,11 @@ async function inspect(page,layout='37'){
     for(const row of rows){
       const white=[...row.querySelectorAll('.hp-key:not(.hp-sharp)')];
       if(Math.max(...white.map(k=>k.offsetWidth))-Math.min(...white.map(k=>k.offsetWidth))>1)failures.push('white key widths differ');
+      if(window.HP_KEY_PREFS.white===100)for(let i=1;i<white.length;i++) {
+        const gap=(white[i].offsetLeft-white[i].offsetWidth/2)-(white[i-1].offsetLeft+white[i-1].offsetWidth/2);
+        // offsetLeft/offsetWidth round independently to whole CSS pixels.
+        if(gap>Math.max(3,row.clientWidth*.004+1))failures.push('white key gap exceeds reference');
+      }
       const mids=white.map(k=>Number(k.dataset.midi));
       if(new Set(mids).size!==mids.length)failures.push('duplicate white notes');
       for(const key of row.querySelectorAll('.hp-key')){
@@ -86,10 +91,10 @@ try{
     await page.getByRole('button',{name:'ピアノモードへ',exact:true}).click();
     await page.locator('#hp-four88').waitFor({state:'visible'});
     await page.evaluate(()=>document.fonts.ready);
-    await page.evaluate(async()=>{const image=new Image();image.src='/assets/piano/palace-hall-v1.jpg';await image.decode();});
+    await page.evaluate(async()=>{const image=new Image();image.src='/assets/piano/palace-hall-v4.jpg';await image.decode();});
     await page.waitForTimeout(250);
     metrics.push({name,...await inspect(page)});
-    assert.match(metrics.at(-1).background,/palace-hall-v1/);
+    assert.match(metrics.at(-1).background,/palace-hall-v4/);
     await page.screenshot({path:path.join(output,name+'.png')});
     await page.locator('[data-control="layout"]').selectOption('88');
     await page.waitForTimeout(120);

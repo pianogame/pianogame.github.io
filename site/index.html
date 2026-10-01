@@ -30,14 +30,14 @@ html.hp-opening-orientation-bg,
 html.hp-opening-orientation-bg body{background:#fff!important}
 body.hp-booting #hp-viewport{visibility:hidden!important}
 html.hp-opening-curtain-bg,
-html.hp-opening-curtain-bg body{background:#120713!important}
+html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d29 0%,#711d4b 3.5%,#4b102f 7%,#8a285c 10.5%,#45102d 14%)!important}
 </style>
   <link rel="manifest" href="/manifest.webmanifest?v=28">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=47', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=49', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -51,8 +51,8 @@ html.hp-opening-curtain-bg body{background:#120713!important}
   <link rel="stylesheet" href="/effects.css?v=9">
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
-  <script defer src="/key-layout.js?v=12"></script>
-  <script defer src="/piano.js?v=29"></script>
+  <script defer src="/key-layout.js?v=13"></script>
+  <script defer src="/piano.js?v=30"></script>
   <script defer src="/home.js?v=19"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
@@ -61,7 +61,7 @@ html.hp-opening-curtain-bg body{background:#120713!important}
   <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=9"></script>
-  <link rel="stylesheet" href="/piano-palace.css?v=3">
+  <link rel="stylesheet" href="/piano-palace.css?v=4">
 </head>
 <body class="hp-booting">
 <main id="hp-viewport">
@@ -133,7 +133,7 @@ html.hp-opening-curtain-bg body{background:#120713!important}
     </div>
   </div>
 </section>
-<div id="hp-four88" lang="ja" hidden>
+<div id="hp-four88" lang="ja" data-instrument="piano" hidden>
   <div class="hp-surface" role="group" aria-label="グランドピアノ">
     <header class="hp-header" data-settings-background>
       <div class="hp-layout-actions"><button type="button" class="hp-control hp-back-home" data-home-action="home" aria-label="ホームへ戻る"><svg class="hp-ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 11 10-9 10 9h-3v11h-6v-7h-3v7H5V11Z"/></svg> HOME</button><label class="hp-layout-label"><span>鍵盤</span><select data-control="layout" aria-label="鍵盤の並べ方"><option value="88">88鍵・4段</option><option value="37" selected>37鍵・3段</option></select></label><button type="button" class="hp-control hp-stop-sound" data-action="stop-sound" aria-label="鳴っている音を止める" title="鳴っている音を止める">■ 音停止</button></div>
@@ -210,6 +210,6 @@ html.hp-opening-curtain-bg body{background:#120713!important}
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/usage-analytics.js?v=2"></script>
-<script defer src="./rotation-guide.js?v=45"></script>
+<script defer src="./rotation-guide.js?v=46"></script>
 </body>
 </html>
