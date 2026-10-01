@@ -7,6 +7,7 @@
 }
 #hp-four88 .hp-surface {
   background: linear-gradient(#08111b20, #050a1466), url('/assets/piano/palace-hall-v1.jpg') center / cover;
+  background-color: #08101c;
 }
 #hp-four88[data-wallpaper="photo"] .hp-surface { background: linear-gradient(#08111b40, #050a1466), var(--hp-wallpaper) center / cover; }
 #hp-four88[data-wallpaper="night"] .hp-surface { background: radial-gradient(ellipse at top, #31324e, #090e19 78%); }
