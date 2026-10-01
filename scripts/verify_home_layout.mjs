@@ -125,6 +125,14 @@ try {
     } else {
       await context.addInitScript(() => Object.defineProperty(navigator,'standalone',{configurable:true,get:()=>true}));
     }
+    await context.addInitScript(() => {
+      window.homeTapPlays = 0;
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function(...args) {
+        if (this.src.includes('home-button-tap.mp3')) window.homeTapPlays++;
+        return play.apply(this,args);
+      };
+    });
     const page=await context.newPage(), errors=[];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(base, {waitUntil:'networkidle'});
@@ -243,6 +251,23 @@ try {
     assert.deepEqual(metrics.failures,[],name+': '+metrics.failures.join('; '));
     if (name==='iphone15pm') {
       const oldUnit=metrics.unit;
+      // All three menus acknowledge touch and confirmation without navigation.
+      const menuUrl=page.url();
+      for (const label of ['ミッション','ランキング','キャラクター']) {
+        const button=page.getByRole('button',{name:label,exact:true});
+        const box=await button.boundingBox();
+        await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+        await page.mouse.down();
+        assert.equal(await button.evaluate(el=>el.classList.contains('hp-home-is-pressed')),true,'menu press acknowledgement');
+        assert.notEqual(await button.evaluate(el=>getComputedStyle(el).transform),'none','menu must visibly depress');
+        await page.mouse.up();
+        assert.equal(await button.evaluate(el=>el.classList.contains('hp-home-confirmed')),true,'menu release must glow');
+        assert.equal(page.url(),menuUrl,'menu feedback must not add navigation');
+      }
+      await page.waitForTimeout(100);
+      await page.screenshot({path:path.join(output,'menu-touch-effect.png')});
+      await page.waitForFunction(()=>!document.querySelector('.hp-home-bottom-button.hp-home-confirmed'));
+      const soundBeforeVoice=await page.evaluate(()=>window.homeTapPlays);
       // Real pointer taps must reach the character and change the live text.
       const dialogue=page.locator('[data-home-dialogue]');
       const first=await dialogue.textContent(), messages=new Set([first]);
@@ -252,10 +277,25 @@ try {
         assert.deepEqual((await inspect(page)).failures,[],'dialogue overflow');
       }
       assert.equal(messages.size,5,'expected five distinct character messages');
+      assert.equal(await page.evaluate(()=>window.homeTapPlays),soundBeforeVoice,'character touches must have no tap sound');
+      await page.getByRole('button',{name:'メッセージのボイスを再生',exact:true}).click();
+      assert.equal(await page.evaluate(()=>window.homeTapPlays),soundBeforeVoice,'voice replay must have no tap sound');
       await dialogue.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
       await page.screenshot({path:path.join(output,'character-message.png')});
       await page.getByRole('button',{name:'キャラクターと話す',exact:true}).click();
       assert.equal(await dialogue.textContent(),first,'character messages should cycle');
+      // Blank HOME space also responds; effects must remain bounded and clear.
+      await page.mouse.click(20,240);
+      const touch=await page.locator('.hp-home-touch-effect').last().evaluate(el=>[parseFloat(el.style.left),parseFloat(el.style.top)]);
+      assert.deepEqual(touch,[20,240],'touch ripple must follow the finger');
+      await page.waitForTimeout(90);
+      await page.screenshot({path:path.join(output,'home-touch-notes.png')});
+      await page.evaluate(()=>{
+        const home=document.querySelector('#hp-home-screen');
+        for(let i=0;i<30;i++) home.dispatchEvent(new PointerEvent('pointerdown',{clientX:250+i,clientY:240,button:0,bubbles:true}));
+      });
+      assert.equal(await page.locator('.hp-home-touch-effect').count(),10,'rapid-touch effects must be bounded');
+      await page.waitForFunction(()=>document.querySelector('.hp-home-touch-layer').childElementCount===0);
       const beforeUrl=page.url();
       const game=page.getByRole('button',{name:'ゲームモード',exact:true});
       await game.click();
@@ -291,6 +331,8 @@ try {
         return {actual:[parseFloat(home.style.getPropertyValue('--hp-mode-center-x')),parseFloat(home.style.getPropertyValue('--hp-mode-center-y'))],expected:[safe.offsetLeft+stack.offsetLeft+button.offsetLeft+button.offsetWidth/2,safe.offsetTop+stack.offsetTop+button.offsetTop+button.offsetHeight/2]};
       });
       assert.deepEqual(rotatedOrigin.actual,rotatedOrigin.expected,'rotated game sparkle origin');
+      const rotatedTouch=await page.locator('.hp-home-touch-effect').last().evaluate(el=>[parseFloat(el.style.left),parseFloat(el.style.top)]);
+      assert.ok(rotatedTouch.every((v,i)=>Math.abs(v-rotatedOrigin.expected[i])<1.5),'rotated musical ripple must follow the button');
       await page.waitForFunction(()=>!document.querySelector('#hp-home-screen').classList.contains('hp-game-previewing'));
       await page.setViewportSize({width:932,height:430});
       await page.waitForFunction(() => document.documentElement.dataset.hpRotated==='false');

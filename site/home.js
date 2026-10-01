@@ -25,10 +25,66 @@
     } catch (_) {}
   }
 
+  const touchLayer = document.createElement('div');
+  touchLayer.className = 'hp-home-touch-layer';
+  touchLayer.setAttribute('aria-hidden', 'true');
+  home.appendChild(touchLayer);
+  let touchSequence = 0;
+  function showTouchEffect(clientX, clientY) {
+    if (home.hidden || document.body.classList.contains('hp-booting')
+      || document.documentElement.classList.contains('hp-install-required')) return;
+    const bounds = home.getBoundingClientRect();
+    const rotated = document.documentElement.dataset.hpRotated === 'true';
+    const x = rotated ? (clientY - bounds.top) * home.clientWidth / bounds.height
+      : (clientX - bounds.left) * home.clientWidth / bounds.width;
+    const y = rotated ? (bounds.right - clientX) * home.clientHeight / bounds.width
+      : (clientY - bounds.top) * home.clientHeight / bounds.height;
+    while (touchLayer.childElementCount >= 10) touchLayer.firstElementChild.remove();
+    const effect = document.createElement('span');
+    effect.className = 'hp-home-touch-effect';
+    effect.style.left = x + 'px'; effect.style.top = y + 'px';
+    effect.style.setProperty('--touch-scale', Math.max(.65, Math.min(1, home.clientWidth / 1200)));
+    const staff = document.createElement('span'); staff.className = 'hp-home-touch-staff';
+    effect.appendChild(staff);
+    ['♪', '♫', '♬'].forEach((glyph, index) => {
+      const note = document.createElement('span'); note.className = 'hp-home-touch-note';
+      note.textContent = glyph; note.style.setProperty('--note-x', ((index - 1) * 24) + 'px');
+      note.style.setProperty('--note-rise', (40 + ((index + touchSequence) % 3) * 12) + 'px');
+      note.style.setProperty('--note-delay', (index * .035) + 's'); effect.appendChild(note);
+    });
+    touchSequence++;
+    touchLayer.appendChild(effect);
+    setTimeout(() => effect.remove(), 850);
+  }
+  home.addEventListener('pointerdown', event => {
+    if (event.button > 0) return;
+    showTouchEffect(event.clientX, event.clientY);
+  }, { capture:true, passive:true });
+
   home.querySelectorAll('button').forEach((button) => {
-    button.addEventListener('pointerdown', playHomeTapSound, { passive:true });
+    // The two voice actions remain silent so their speech is unobstructed.
+    const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
+    if (!voiceAction) button.addEventListener('pointerdown', playHomeTapSound, { passive:true });
     button.addEventListener('click', (event) => {
-      if (event.detail === 0) playHomeTapSound();
+      if (event.detail === 0) {
+        if (!voiceAction) playHomeTapSound();
+        const bounds = button.getBoundingClientRect();
+        showTouchEffect(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+      }
+    });
+  });
+  const menuTimers = new WeakMap();
+  home.querySelectorAll('.hp-home-bottom-button').forEach(button => {
+    button.addEventListener('pointerdown', () => button.classList.add('hp-home-is-pressed'), { passive:true });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(name => {
+      button.addEventListener(name, () => button.classList.remove('hp-home-is-pressed'));
+    });
+    button.addEventListener('click', () => {
+      clearTimeout(menuTimers.get(button));
+      button.classList.remove('hp-home-confirmed');
+      void button.offsetWidth;
+      button.classList.add('hp-home-confirmed');
+      menuTimers.set(button, setTimeout(() => button.classList.remove('hp-home-confirmed'), 560));
     });
   });
 
@@ -42,14 +98,16 @@
   ringB.className = 'hp-home-launch-ring ring-b';
   launchFx.append(ringA, ringB);
 
-  const particleAngles = [-172,-151,-132,-111,-88,-66,-42,-19,7,29,52,74,99,123,146,166];
-  particleAngles.forEach((angle, index) => {
-    const particle = document.createElement('span');
-    particle.className = 'hp-home-launch-particle';
-    particle.style.setProperty('--angle', angle + 'deg');
-    particle.style.setProperty('--distance', (46 + (index % 5) * 13) + 'px');
-    particle.style.setProperty('--delay', ((index % 4) * 0.018) + 's');
-    launchFx.appendChild(particle);
+  const score = document.createElement('span');
+  score.className = 'hp-home-launch-score';
+  launchFx.appendChild(score);
+  ['♪', '♫', '♬', '♪', '♫', '♪', '♬'].forEach((glyph, index) => {
+    const note = document.createElement('span');
+    note.className = 'hp-home-launch-particle'; note.textContent = glyph;
+    note.style.setProperty('--angle', (-164 + index * 23) + 'deg');
+    note.style.setProperty('--distance', (62 + index % 3 * 24) + 'px');
+    note.style.setProperty('--delay', (index * .024) + 's');
+    launchFx.appendChild(note);
   });
   home.appendChild(launchFx);
 
