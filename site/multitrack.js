@@ -80,6 +80,7 @@
   const isAudible=track=>!track.muted&&!groupMutes[track.instrument];
   const audibleTracks=()=>tracks.filter(track=>track.notes.length&&isAudible(track));
   function updatePlayButton(){
+    playButton.setAttribute('aria-pressed',String(playing&&!recording));
     if(recording){
       playButton.disabled=true;
       playButton.textContent=playing?'♪ 伴奏再生中':'▶ 全再生';
@@ -229,7 +230,6 @@
   root.addEventListener('hp-note-on',event=>beginRecordedNote(event.detail.token,event.detail.midi));
   root.addEventListener('hp-note-off',event=>endRecordedNote(event.detail.token));
   root.addEventListener('hp-stop-sound',()=>{
-    stopPlayback();
     const stoppedAt=now();
     if(recording){
       const cutAt=clamp(stoppedAt-recordingStartedAt,0,MAX_SECONDS);

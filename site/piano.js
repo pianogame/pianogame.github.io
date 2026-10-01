@@ -35,6 +35,7 @@
   const pressedTokens = new Map(), pressedSince = new Map(), pressReleaseTimers = new Map();
   const pointerStarts = new Map();
   const allVoices = new Set();
+  const liveVoices = new Set();
   const playingCounts = new Map();
   let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, resumePromise = null;
   let audioNeedsGestureUnlock = true;
@@ -464,7 +465,7 @@
     } else {void prepareSamples(id);}
   });
 
-  function synth(midi, when = ctx.currentTime) {
+  function synth(midi, when = ctx.currentTime, live = true) {
     while (allVoices.size >= 48) {
       const oldest = allVoices.values().next().value; oldest.release(ctx.currentTime,.04); allVoices.delete(oldest);
     }
@@ -498,8 +499,8 @@
       releaseAt = time; releaseEnd = time+seconds; releaseLevel = current;
       try { source.stop(time+seconds+.04); } catch (_) {}
     }};
-    source.onended = () => { ended = true; source.disconnect(); fade.disconnect(); bus.disconnect(); allVoices.delete(voice); };
-    source.start(when,sample.offset); allVoices.add(voice); return voice;
+    source.onended = () => { ended = true; source.disconnect(); fade.disconnect(); bus.disconnect(); allVoices.delete(voice); liveVoices.delete(voice); };
+    source.start(when,sample.offset); allVoices.add(voice); if(live)liveVoices.add(voice); return voice;
   }
 
   function sparkle(midi) {
@@ -616,6 +617,7 @@
     clearInterval(scheduler); scheduler = null;
     if (ctx) playbackVoices.forEach(voice => voice.release(ctx.currentTime, .08));
     playbackVoices = []; playingCounts.clear(); playing = false;
+    action('play').setAttribute('aria-pressed','false');
     action('play').textContent = '▶ 再生'; redraw();
   }
   function finishRecording() {
@@ -733,13 +735,12 @@
     }
     markHeldCutForRecording();
     root.dispatchEvent(new Event('hp-stop-sound'));
-    stopPlayback(); releaseHeld(); pointerStarts.clear();
+    releaseHeld(); pointerStarts.clear();
     if (ctx) {
-      allVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
-      playingCounts.clear();
+      liveVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
       if (reverb) { reverb.buffer=null; updateReverb(); }
     }
-    redraw(); say('鳴っている音と余韻を止めました');
+    redraw(); say('手弾きの音と余韻を止めました');
   });
   action('record').addEventListener('click', () => {
     if (recording) { finishRecording(); return; }
@@ -756,7 +757,7 @@
   action('play').addEventListener('click', async () => {
     if (playing) { stopPlayback(); say('再生を停止'); return; }
     if (!events.length || !ensureAudio()) return;
-    releaseHeld(); playing = true; action('play').textContent = '■ 停止'; say('再生中');
+    releaseHeld(); playing = true; action('play').setAttribute('aria-pressed','true'); action('play').textContent = '■ 停止'; say('再生中');
     const generation = ++playGeneration;
     try { await ctx.resume(); } catch (_) { stopPlayback(); say('鍵盤をタップしてから再生してください', true); return; }
     if (generation !== playGeneration) return;
@@ -767,7 +768,7 @@
       if (generation !== playGeneration) return;
       while (nextEvent < events.length && start + events[nextEvent].start < ctx.currentTime + .14) {
         const event = events[nextEvent++], when = Math.max(ctx.currentTime, start + event.start);
-        const voice = synth(event.midi, when); playbackVoices.push(voice);
+        const voice = synth(event.midi, when, false); playbackVoices.push(voice);
         voice.release(when + event.duration, event.cut ? .02 : (event.sustain ? Infinity : articulation[currentInstrument].release));
         const globalStop=soundStopEvents.find(value=>Number.isFinite(value)&&value>event.start+.001);
         if(Number.isFinite(globalStop))voice.release(start+globalStop,.02);

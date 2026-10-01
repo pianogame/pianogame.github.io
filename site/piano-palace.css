@@ -39,7 +39,7 @@
 #hp-four88 select option { background: #111b2b; color: #f7e7c6; }
 #hp-four88 .hp-control:active { transform: translateY(2px); box-shadow: inset 0 2px 5px #0008, 0 1px 0 #f2c57b44; }
 #hp-four88 .hp-control[aria-pressed="true"] { color: #fff0cb; border-color: #ffe2a0; background: linear-gradient(#725423, #3b2c19); }
-#hp-four88 .hp-control[data-action="record"][aria-pressed="true"] { background: linear-gradient(#8d3346, #461b2c); border-color: #f2ac98; }
+#hp-four88 .hp-control:is([data-action="record"],[data-action="play"])[aria-pressed="true"] { background: linear-gradient(#8d3346, #461b2c); border-color: #f2ac98; }
 #hp-four88 .hp-control:disabled { opacity: .48; }
 #hp-four88 :is(.hp-control, select, .hp-key):focus-visible { outline: 2px solid #fff6dc; outline-offset: 3px; }
 #hp-four88 .hp-stage {
@@ -72,7 +72,7 @@
 #hp-four88 .hp-key:not(.hp-sharp), #hp-four88 .hp-stage .hp-key:not(.hp-sharp), #hp-four88 .hp-octave-stack .hp-key:not(.hp-sharp) {
   border-radius: 4px; color: #141414;
   --key-art: url('/assets/piano/white-key-v4.webp');
-  --key-art-size: 110% 140%; --key-art-position: 50% 50%;
+  --key-art-size: 125% 140%; --key-art-position: 50% 50%;
 }
 #hp-four88 .hp-key.hp-sharp, #hp-four88 .hp-stage .hp-key.hp-sharp, #hp-four88 .hp-octave-stack .hp-key.hp-sharp {
   z-index: 20; border-radius: 3px;
@@ -99,6 +99,14 @@
   transition: transform 45ms ease-out, box-shadow 45ms ease-out;
 }
 #hp-four88 .hp-key.hp-sharp .hp-key-face { padding: 0; }
+#hp-four88 .hp-key:not(.hp-sharp) .hp-key-face {
+  /* Crop the sprite's perspective side edges inside a straight rectangular
+     silhouette, retaining its gloss and front thickness. */
+  overflow: hidden; background-color: #bbb9b2;
+  box-shadow: inset 1px 0 #f7f6f1, inset -1px 0 #c4c2bb;
+}
+#hp-four88 .hp-key:not(.hp-sharp) :is(.hp-digit,.hp-octave) { display: none; }
+#hp-four88 .hp-octave-stack .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(10px,calc(var(--hp-white-height) * .21),16px); line-height: 1; margin: 0; }
 #hp-four88 .hp-key:is([data-pressed="true"],[aria-pressed="true"]) .hp-key-face { transform: translateY(var(--key-travel)); transition-duration: 0s; }
 #hp-four88 .hp-key-glow { display: none; }
 #hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(12px, calc(var(--hp-white-height) * .21), 26px); font-weight: 600; }
@@ -209,7 +217,8 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
     box-shadow: inset 0 1px 0 #fff1c55c,0 2px 4px #0007;
   }
   #hp-four88 .hp-header .hp-control:disabled { opacity: .48; }
-  #hp-four88 .hp-header .hp-control[data-action="record"][aria-pressed="true"]::before { background: linear-gradient(#8d3346,#461b2c); }
+  #hp-four88 .hp-header .hp-control:is([data-action="record"],[data-action="play"])[aria-pressed="true"] { background: transparent; border: 0; box-shadow: none; }
+  #hp-four88 .hp-header .hp-control:is([data-action="record"],[data-action="play"])[aria-pressed="true"]::before { background: linear-gradient(#8d3346,#461b2c); border-color: #f2ac98; }
 }
 
 @container (min-width: 721px) {
@@ -221,7 +230,12 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
   #hp-four88 .hp-header .hp-control[aria-expanded] { min-width: clamp(95px,10.2cqw,156px); }
   #hp-four88 .hp-header [data-action="settings"] { min-width: clamp(70px,7.5cqw,115px); }
 }
-#hp-four88[data-instrument="piano"] [data-output="instrument-label"]::before {
+#hp-four88[data-instrument] [data-output="instrument-label"]::before {
   content: ""; display: inline-block; width: 1.6em; height: 1em; margin-right: .35em; vertical-align: -.08em;
+  background-position: center; background-size: contain; background-repeat: no-repeat;
+}
+#hp-four88[data-instrument="piano"] [data-output="instrument-label"]::before {
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Cpath fill='%23d1a25c' d='M3 19h39v5H3zm4-3L31 2l11 14zm2 9h3v7H9zm25 0h3v7h-3zM7 20v3h4v-3zm6 0v3h4v-3zm6 0v3h4v-3zm6 0v3h4v-3z'/%3E%3C/svg%3E") center/contain no-repeat;
 }
+#hp-four88[data-instrument="guitar"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/guitar-icon.svg'); }
+#hp-four88[data-instrument="bass"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/bass-icon.svg'); }

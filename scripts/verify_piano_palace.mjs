@@ -48,6 +48,11 @@ async function inspect(page,layout='37'){
         const pitch=Number(key.dataset.midi)%12;
         if(sharp&&![1,3,6,8,10].includes(pitch))failures.push('black key between E/F or B/C');
         if(sharp&&Number(getComputedStyle(key).zIndex)<20)failures.push('black key behind white');
+        if(!sharp) {
+          const face=key.querySelector('.hp-key-face');
+          if(getComputedStyle(face).overflow!=='hidden'||getComputedStyle(face).backgroundColor==='rgba(0, 0, 0, 0)')failures.push('white key silhouette is not rectangular');
+          if(getComputedStyle(key.querySelector('.hp-digit')).display!=='none')failures.push('numeric label outside white key');
+        }
         keyData.push({midi:Number(key.dataset.midi),w:key.offsetWidth,h:key.offsetHeight,sharp});
       }
     }
@@ -82,9 +87,11 @@ try{
       if(name==='wide')localStorage.setItem('hp-wallpaper','night');
       if(name==='android')localStorage.setItem('hp-wallpaper','blue');
       Object.defineProperty(navigator,'standalone',{get:()=>true});
-      window.sampleStarts=0;
+      window.sampleStarts=0;window.sampleSources=[];
       const start=AudioBufferSourceNode.prototype.start;
-      AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.length>1&&!this.loop)window.sampleStarts++;return start.apply(this,args);};
+      const stop=AudioBufferSourceNode.prototype.stop;
+      AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.length>1&&!this.loop){window.sampleStarts++;window.sampleSources.push(this);}return start.apply(this,args);};
+      AudioBufferSourceNode.prototype.stop=function(...args){this.qaStops=(this.qaStops||0)+1;return stop.apply(this,args);};
     },name);
     const page=await context.newPage(),errors=[],missing=[];
     await page.route('**/*.css*',route=>{
@@ -193,16 +200,50 @@ try{
       await page.waitForTimeout(250);assert.equal(await page.evaluate(()=>window.sampleStarts),delayed.before,'cancelled tap sounded after resume');
       await page.evaluate(()=>{window.HP_AUDIO_BRIDGE.get().context.resume=window.restoreResume;delete window.restoreResume;});
       // Recording uses the same sampled input and retains the exact take duration.
-      const record=page.locator('[data-action="record"]');await record.click();
-      await page.mouse.move(point.x,point.y);await page.mouse.down();await page.waitForTimeout(160);await page.mouse.up();
-      await page.waitForTimeout(120);await record.click();
+      const record=page.locator('[data-action="record"]'),play=page.locator('[data-action="play"]');await record.click();
+      const checkRedPlate=async button=>{
+        const paint=await button.evaluate(el=>({body:getComputedStyle(el).backgroundColor,plate:getComputedStyle(el,'::before').backgroundImage}));
+        assert.equal(paint.body,'rgba(0, 0, 0, 0)','red paint escaped the mobile plate');
+        assert.match(paint.plate,/141, 51, 70/,'stop plate did not turn red');
+      };
+      await checkRedPlate(record);
+      await page.screenshot({path:path.join(output,'recording-red.png')});
+      await page.mouse.move(point.x,point.y);await page.mouse.down();await page.waitForTimeout(450);await page.mouse.up();
+      await page.waitForTimeout(250);await page.mouse.down();await page.waitForTimeout(450);await page.mouse.up();
+      await page.waitForTimeout(200);await record.click();
       const take=await page.evaluate(()=>JSON.parse(localStorage.getItem('piano-palette-multitrack-v1')).tracks.at(-1));
       assert.ok(take.notes.some(n=>n.midi===60),'pressed note missing from recording');
       assert.ok(take.duration>=.2&&take.duration<3,'recorded stop duration incorrect');
       const beforePlay=await page.evaluate(()=>window.sampleStarts);
-      await page.locator('[data-action="play"]').click();
+      await play.click();
       await page.waitForFunction(count=>window.sampleStarts>count,beforePlay);
-      await page.waitForTimeout(500);
+      assert.equal(await play.getAttribute('aria-pressed'),'true');await checkRedPlate(play);
+      await page.screenshot({path:path.join(output,'playback-stop-red.png')});
+      // Check actual source.stop() calls, rather than only the playback label:
+      // live notes must be cut without cancelling current or scheduled backing.
+      const checkLiveStop=async (sourceStart,pointerId)=>{
+        await page.evaluate(sourceStart=>{window.qaBacking=window.sampleSources.slice(sourceStart).map(source=>({source,stops:source.qaStops||0}));},sourceStart);
+        await white.evaluate((el,pointerId)=>{const r=el.getBoundingClientRect();el.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId,pointerType:'touch',clientX:r.x+r.width*.3,clientY:r.y+r.height*.8}));},pointerId);
+        await page.evaluate(()=>{window.qaLive=window.sampleSources.at(-1);window.qaLiveStops=window.qaLive.qaStops||0;});
+        await page.locator('[data-action="stop-sound"]').click();
+        const result=await page.evaluate(()=>({backingCount:window.qaBacking.length,backingUntouched:window.qaBacking.every(item=>(item.source.qaStops||0)===item.stops),liveCut:(window.qaLive.qaStops||0)>window.qaLiveStops}));
+        assert.ok(result.backingCount>=2&&result.backingUntouched,'音停止 cancelled current or scheduled backing sources');
+        assert.ok(result.liveCut,'音停止 did not silence the live note');
+        assert.equal(await white.getAttribute('data-pressed'),'false');
+      };
+      await checkLiveStop(beforePlay,910);
+      assert.equal(await play.getAttribute('aria-pressed'),'true','音停止 changed playback state');
+      await play.click();assert.equal(await play.getAttribute('aria-pressed'),'false');
+      const beforeBacking=await page.evaluate(()=>window.sampleStarts);
+      await record.click();await page.waitForFunction(count=>window.sampleStarts>count,beforeBacking);
+      await checkRedPlate(record);await checkLiveStop(beforeBacking,911);
+      assert.equal(await record.getAttribute('aria-pressed'),'true','音停止 ended recording');
+      assert.match(await play.textContent(),/伴奏再生中/,'音停止 stopped recording accompaniment');
+      await page.mouse.move(point.x,point.y);await page.mouse.down();await page.waitForTimeout(160);await page.mouse.up();
+      await record.click();
+      const overdub=await page.evaluate(()=>JSON.parse(localStorage.getItem('piano-palette-multitrack-v1')).tracks.at(-1));
+      assert.ok(overdub.cuts.length===1&&overdub.notes.some(n=>n.cut),'live cut missing from the recorded take');
+      assert.ok(overdub.notes.some(n=>!n.cut),'recording did not continue after 音停止');
       const tracks=page.getByRole('button',{name:'録音一覧',exact:false});await tracks.click();
       await page.locator('.hp-track-panel').waitFor({state:'visible'});
       await page.screenshot({path:path.join(output,'recordings.png')});
@@ -211,6 +252,18 @@ try{
       await page.locator('.hp-settings-overlay').waitFor({state:'visible'});
       assert.equal(await page.locator('.hp-stage').evaluate(el=>el.inert),true);
       await page.screenshot({path:path.join(output,'settings.png')});
+      for(const id of ['guitar','bass','piano']) {
+        await page.locator('[data-control="instrument"]').selectOption(id);
+        await page.waitForFunction(id=>document.querySelector('#hp-four88').dataset.instrument===id&&!document.querySelector('.hp-stage .hp-key').disabled,id);
+        const icon=await page.locator('[data-output="instrument-label"]').evaluate(el=>({image:getComputedStyle(el,'::before').backgroundImage,width:parseFloat(getComputedStyle(el,'::before').width)}));
+        assert.ok(icon.image!=='none'&&icon.width>0,'missing instrument footer icon: '+id);
+        if(id!=='piano') {
+          assert.match(icon.image,new RegExp(id+'-icon'));
+          await page.locator('[data-action="settings-close"]').click();
+          await inspect(page);await page.screenshot({path:path.join(output,id+'-icon.png')});
+          await page.locator('[data-action="settings"]').click();
+        }
+      }
       for(const [kind,value] of [['white','60'],['black','60'],['edge','48']])await page.locator('[data-key-size="'+kind+'"]').evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
       await page.locator('[data-action="settings-close"]').click();await inspect(page);
       await page.locator('[data-action="settings"]').click();await page.locator('[data-action="key-size-reset"]').click();
@@ -218,7 +271,7 @@ try{
       await page.emulateMedia({reducedMotion:'reduce'});
       await white.click();
       assert.equal(await white.locator('.hp-key-face').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
-      console.log('PASS actual white/black sample playback; stable hit boxes; rapid taps; slow audio resume; slide; independent multitouch; release/cancel; no orange frame; recording/playback; overlays; key sizes; reduced motion');
+      console.log('PASS actual white/black samples; stable rapid taps/slide/multitouch; live-only 音停止 during playback and overdub; red stop plates; all instrument icons; recording/playback; overlays; key sizes; reduced motion');
     }
     await page.getByRole('button',{name:'ホームへ戻る',exact:true}).click();
     await page.locator('#hp-home-screen').waitFor({state:'visible'});
