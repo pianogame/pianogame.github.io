@@ -37,7 +37,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=51', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=52', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -52,7 +52,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=9"></script>
   <script defer src="/key-layout.js?v=14"></script>
-  <script defer src="/piano.js?v=32"></script>
+  <script defer src="/piano.js?v=33"></script>
   <script defer src="/home.js?v=19"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=13">
@@ -61,7 +61,8 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=9">
   <script defer src="/playability.js?v=9"></script>
-  <link rel="stylesheet" href="/piano-palace.css?v=6">
+  <link rel="stylesheet" href="/piano-palace.css?v=7">
+  <script defer src="/piano-controls.js?v=1"></script>
 </head>
 <body class="hp-booting">
 <main id="hp-viewport">
@@ -136,7 +137,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
 <div id="hp-four88" lang="ja" data-instrument="piano" hidden>
   <div class="hp-surface" role="group" aria-label="グランドピアノ">
     <header class="hp-header" data-settings-background>
-      <div class="hp-layout-actions"><button type="button" class="hp-control hp-back-home" data-home-action="home" aria-label="ホームへ戻る"><svg class="hp-ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 11 10-9 10 9h-3v11h-6v-7h-3v7H5V11Z"/></svg> HOME</button><label class="hp-layout-label"><span>鍵盤</span><select data-control="layout" aria-label="鍵盤の並べ方"><option value="88">88鍵・4段</option><option value="37" selected>37鍵・3段</option></select></label><button type="button" class="hp-control hp-stop-sound" data-action="stop-sound" aria-label="手弾きの音を止める" title="手弾きの音を止める（録音の再生は続けます）">■ 音停止</button></div>
+      <div class="hp-layout-actions"><button type="button" class="hp-control hp-back-home" data-home-action="home" aria-label="ホームへ戻る"><svg class="hp-ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 11 10-9 10 9h-3v11h-6v-7h-3v7H5V11Z"/></svg> HOME</button><label class="hp-layout-label"><span>鍵盤</span><select data-control="layout" aria-label="鍵盤の並べ方"><option value="88">88鍵</option><option value="37" selected>37鍵・3段</option></select></label><button type="button" class="hp-control hp-stop-sound" data-action="stop-sound" aria-label="手弾きの音を止める" title="手弾きの音を止める（録音の再生は続けます）">■ 音停止</button></div>
       <div class="hp-toolbar" aria-label="演奏の操作">
         <button type="button" class="hp-control" data-action="record" aria-pressed="false" disabled>● 録音</button>
         <button type="button" class="hp-control" data-action="play" disabled>▶ 再生</button>
@@ -151,7 +152,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <div class="hp-register-info"><output class="hp-range" data-output="register">C3–B6</output><span>余白を上下にスワイプ</span></div>
         <button class="hp-control" type="button" data-action="lower">↓ 低い音へ</button>
       </div>
-      <div class="hp-scroll-window" role="region" aria-label="88鍵の鍵盤。4段表示。上下にスクロールできます"><div class="hp-octave-stack"></div></div>
+      <div class="hp-scroll-window" role="region" aria-label="88鍵の鍵盤。37鍵と同じ大きさで、上下にスクロールできます"><div class="hp-octave-stack"></div></div>
     </div>
     <div class="hp-footer" data-settings-background><span class="hp-status" role="status" aria-live="polite">幕をタップすると音源を準備</span><span data-output="instrument-label">グランドピアノ</span></div>
     <span data-output="notes" hidden></span>

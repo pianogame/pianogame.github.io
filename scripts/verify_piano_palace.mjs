@@ -53,7 +53,7 @@ async function inspect(page,layout='37'){
           if(getComputedStyle(face).overflow!=='hidden'||getComputedStyle(face).backgroundColor==='rgba(0, 0, 0, 0)')failures.push('white key silhouette is not rectangular');
           if(getComputedStyle(key.querySelector('.hp-digit')).display!=='none')failures.push('numeric label outside white key');
         }
-        keyData.push({midi:Number(key.dataset.midi),w:key.offsetWidth,h:key.offsetHeight,sharp});
+        keyData.push({midi:Number(key.dataset.midi),w:key.offsetWidth,h:key.offsetHeight,sharp,labelSize:sharp?null:getComputedStyle(key.querySelector('.hp-syllable')).fontSize});
       }
     }
     const header=root.querySelector('.hp-header');
@@ -71,6 +71,19 @@ async function inspect(page,layout='37'){
       const r=el.getBoundingClientRect();
       if(r.left<-.5||r.top<-.5||r.right>innerWidth+.5||r.bottom>innerHeight+.5)failures.push('control clipped: '+el.textContent);
       if(Math.min(r.width,r.height)<43.5)failures.push('control smaller than 44px');
+    }
+    for(const el of root.querySelectorAll('.hp-header button,.hp-scroll-tools button,.hp-layout-centred')) {
+      if(el.offsetParent===null)continue;
+      const content=el.querySelector('.hp-control-content')||el.querySelector('.hp-layout-content');
+      if(!content){failures.push('control has no centred content');continue;}
+      const r=el.getBoundingClientRect(),c=content.getBoundingClientRect();
+      if(Math.abs((r.left+r.right)-(c.left+c.right))>1||Math.abs((r.top+r.bottom)-(c.top+c.bottom))>1)failures.push('control content is off centre: '+el.textContent);
+      const label=content.querySelector('.hp-control-label'),symbol=content.querySelector('svg');
+      if(symbol&&getComputedStyle(symbol).display!=='none') {
+        const a=label.getBoundingClientRect(),b=symbol.getBoundingClientRect();
+        const difference=rotated?(a.left+a.right)-(b.left+b.right):(a.top+a.bottom)-(b.top+b.bottom);
+        if(Math.abs(difference)>1)failures.push('symbol and label centres differ');
+      }
     }
     if(layout==='37'&&rows.length!==3)failures.push('not three keyboard rows');
     if(document.documentElement.scrollWidth>innerWidth+1)failures.push('horizontal document overflow');
@@ -120,8 +133,34 @@ try{
     }
     await page.locator('[data-control="layout"]').selectOption('88');
     await page.waitForTimeout(120);
-    await inspect(page,'88');
-    if(name==='iphone15pm')await page.screenshot({path:path.join(output,'88-keys.png')});
+    const full=await inspect(page,'88');
+    for(const sharp of [false,true]) {
+      const before=metrics.at(-1).keys.find(key=>key.sharp===sharp),after=full.keys.find(key=>key.sharp===sharp);
+      assert.ok(Math.abs(before.w-after.w)<=1&&Math.abs(before.h-after.h)<=1,'88-key dimensions differ from 37-key dimensions');
+      if(!sharp)assert.equal(after.labelSize,before.labelSize,'88-key label size differs from 37-key label size');
+      assert.ok(after.h/after.w>.65,'88-key image is vertically squashed');
+    }
+    await page.screenshot({path:path.join(output,name+'-88.png')});
+    const scroll=page.locator('.hp-scroll-window');
+    await scroll.evaluate(el=>el.scrollTop=el.scrollHeight);await page.waitForTimeout(80);await inspect(page,'88');
+    assert.equal(await page.locator('[data-action="lower"]').isDisabled(),true);
+    const lowest=await scroll.locator('[data-midi="21"]').boundingBox(),scrollBox=await scroll.boundingBox();
+    assert.ok(lowest&&lowest.x>=scrollBox.x-.5&&lowest.y>=scrollBox.y-.5&&lowest.x+lowest.width<=scrollBox.x+scrollBox.width+.5&&lowest.y+lowest.height<=scrollBox.y+scrollBox.height+.5,'lowest A0 is inaccessible');
+    await scroll.evaluate(el=>el.scrollTop=0);await page.waitForTimeout(80);await inspect(page,'88');
+    assert.equal(await page.locator('[data-action="higher"]').isDisabled(),true);
+    assert.ok(await scroll.locator('[data-midi="108"]').isVisible(),'highest C8 is inaccessible');
+    if(name==='iphone15pm') {
+      await page.locator('[data-action="lower"]').click();await page.waitForTimeout(350);
+      assert.ok(await scroll.evaluate(el=>el.scrollTop)>0,'lower register button did not scroll');
+      const cdp=await context.newCDPSession(page),box=await scroll.boundingBox();
+      const before=await scroll.evaluate(el=>el.scrollTop);
+      const p={x:box.x+box.width*.03,y:box.y+box.height*.8,id:70};
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[p]});
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...p,y:p.y-80}]});
+      await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+      assert.ok(await scroll.evaluate(el=>el.scrollTop)>before,'88-key blank-space swipe did not scroll');
+      await page.screenshot({path:path.join(output,'88-keys.png')});
+    }
     await page.locator('[data-control="layout"]').selectOption('37');
     if(name==='iphone15pm'){
       await page.evaluate(()=>{

@@ -144,13 +144,14 @@
     }
     block.append(heading,row); octaveStack.append(block); octaveGroups.push({lo,hi,block});
   }
-  let activeTopRow = 1;
+  const defaultTopRow=id=>octaveGroups.findIndex(group=>group.lo<=60+instruments[id].shift37&&group.hi>=60+instruments[id].shift37);
+  let activeTopRow = defaultTopRow(currentInstrument);
   const rowHeight = () => parseFloat(pianoScroll.style.getPropertyValue('--hp-row-height')) || 70;
   function showRegister() {
     if (pianoView.hidden) return;
     const height = rowHeight();
-    const first = Math.max(0,Math.min(4,Math.floor(pianoScroll.scrollTop/height+.02)));
-    const last = Math.min(octaveGroups.length-1,first+3);
+    const first = Math.max(0,Math.min(octaveGroups.length-1,Math.floor(pianoScroll.scrollTop/height+.02)));
+    const last = Math.min(octaveGroups.length-1,Math.ceil((pianoScroll.scrollTop+pianoScroll.clientHeight)/height-.02)-1);
     activeTopRow = first;
     const label = pitchName(octaveGroups[last].lo)+'–'+pitchName(octaveGroups[first].hi);
     const display = root.querySelector('[data-output="register"]');
@@ -187,7 +188,15 @@
     }
     if(!root.querySelector('.hp-stage').hidden)fitKeys(keyboard,true);
     if (pianoView.hidden) return;
-    if (pianoScroll.clientHeight > 0) pianoScroll.style.setProperty('--hp-row-height', pianoScroll.clientHeight / 4 + 'px');
+    if (pianoScroll.clientHeight > 0) {
+      // Use the same rack geometry as 37 keys. The 88-key window scrolls through
+      // full-size rows instead of vertically squeezing four octaves to fit.
+      const stage=root.querySelector('.hp-stage'),style=getComputedStyle(stage);
+      const frameHeight=Math.min(root.querySelector('.hp-surface').clientHeight-root.querySelector('.hp-header').offsetHeight-root.querySelector('.hp-footer').offsetHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom),root.clientWidth*.42);
+      const gap=parseFloat(getComputedStyle(keyboard).rowGap)||0;
+      const rackHeight=Math.max(28,(frameHeight-2*gap)/3);
+      pianoScroll.style.setProperty('--hp-row-height',rackHeight+25+'px');
+    }
     fitKeys(octaveStack,false);
     pianoScroll.scrollTop = activeTopRow*rowHeight(); showRegister();
   }
@@ -439,7 +448,7 @@
       await effectUI.setInstrument(id);
       currentInstrument=id; sampleBuffers=bank; sampleCounters.clear(); samplesReady=true;
       build37(instruments[id].shift37); updateInstrumentUI();
-      if(id!==previous)activeTopRow=instruments[id].row88;
+      if(id!==previous)activeTopRow=defaultTopRow(id);
       requestAnimationFrame(sizeRegister);
       say(instruments[id].name+'で演奏できます');
     } catch(_) {
@@ -460,7 +469,7 @@
     if(!instruments[id])return;
     if(!ctx) {
       currentInstrument=id; build37(instruments[id].shift37); updateInstrumentUI();
-      activeTopRow=instruments[id].row88; requestAnimationFrame(sizeRegister);
+      activeTopRow=defaultTopRow(id); requestAnimationFrame(sizeRegister);
       say('幕をタップすると'+instruments[id].name+'を準備');
     } else {void prepareSamples(id);}
   });

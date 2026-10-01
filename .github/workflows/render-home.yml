@@ -9,6 +9,7 @@ on:
       - "site/home-bgm.js"
       - "site/piano-palace.css"
       - "site/piano.js"
+      - "site/piano-controls.js"
       - "site/key-layout.js"
       - "site/assets/piano/**"
       - "scripts/verify_piano_palace.mjs"

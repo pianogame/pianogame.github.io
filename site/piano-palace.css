@@ -106,17 +106,20 @@
   box-shadow: inset 1px 0 #f7f6f1, inset -1px 0 #c4c2bb;
 }
 #hp-four88 .hp-key:not(.hp-sharp) :is(.hp-digit,.hp-octave) { display: none; }
-#hp-four88 .hp-octave-stack .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(10px,calc(var(--hp-white-height) * .21),16px); line-height: 1; margin: 0; }
 #hp-four88 .hp-key:is([data-pressed="true"],[aria-pressed="true"]) .hp-key-face { transform: translateY(var(--key-travel)); transition-duration: 0s; }
 #hp-four88 .hp-key-glow { display: none; }
-#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(12px, calc(var(--hp-white-height) * .21), 26px); font-weight: 600; }
+#hp-four88 .hp-stage .hp-key:not(.hp-sharp) .hp-syllable,
+#hp-four88 .hp-octave-stack .hp-key:not(.hp-sharp) .hp-syllable { font-size: clamp(12px, calc(var(--hp-white-height) * .21), 26px); font-weight: 600; line-height: 1; margin: 0; }
 #hp-four88 .hp-spark { width: 10px; height: 10px; font-size: 10px; opacity: .6; }
 #hp-four88 .hp-spark:nth-child(even) { font-size: 8px; }
 #hp-four88 .hp-scroll-tools { background: #091222c9; border-bottom: 1px solid #b28b47; color: #f4dfaf; }
 #hp-four88 .hp-scroll-tools .hp-control { background: #111a2bcc; border-color: #be9858; }
 #hp-four88 .hp-register-info span, #hp-four88 .hp-octave-title { color: #edd6a7; }
 #hp-four88 .hp-scroll-window { background: transparent; }
+#hp-four88 .hp-scroll-window { scrollbar-gutter: auto; scrollbar-width: none; }
+#hp-four88 .hp-scroll-window::-webkit-scrollbar { display: none; }
 #hp-four88 .hp-octave-block { padding-top: 4px; padding-bottom: 5px; border: 0; }
+#hp-four88 .hp-octave-stack .hp-register-section { height: calc(var(--hp-row-height) - 25px); }
 #hp-four88 .hp-footer {
   position: relative; min-height: clamp(26px, 4.8cqw, 72px);
   padding: 4px max(12px, env(safe-area-inset-right)) 4px max(12px, env(safe-area-inset-left));
@@ -188,8 +191,11 @@ html[data-hp-rotated="true"] #hp-four88 .hp-footer {
 /* Artwork extends behind the OS side insets; key centres remain clear of
    the notch. Reserve the user's gesture edge without narrowing every key. */
 #hp-four88 .hp-keyboard,
+#hp-four88 .hp-scroll-window,
 html[data-hp-rotated="true"] #hp-four88 .hp-keyboard,
-html[data-hp-wide="false"] #hp-four88 .hp-keyboard {
+html[data-hp-rotated="true"] #hp-four88 .hp-scroll-window,
+html[data-hp-wide="false"] #hp-four88 .hp-keyboard,
+html[data-hp-wide="false"] #hp-four88 .hp-scroll-window {
   padding-left: max(clamp(12px,1.55cqw,24px),var(--hp-key-edge,8px));
   padding-right: max(clamp(12px,1.55cqw,24px),var(--hp-key-edge,8px));
 }
@@ -239,3 +245,32 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 }
 #hp-four88[data-instrument="guitar"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/guitar-icon.svg'); }
 #hp-four88[data-instrument="bass"] [data-output="instrument-label"]::before { background-image: url('/assets/piano/bass-icon.svg'); }
+
+/* Centre the combined symbol and label within the painted button plate. */
+#hp-four88 :is(.hp-header,.hp-scroll-tools) .hp-control {
+  display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+  font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+}
+#hp-four88 .hp-control-content {
+  display: inline-flex; align-items: center; justify-content: center; gap: .3em;
+  line-height: 1; white-space: nowrap;
+}
+#hp-four88 .hp-control-label { display: block; line-height: 1; }
+#hp-four88 .hp-control-content .hp-ui-icon,
+#hp-four88 .hp-layout-content .hp-ui-icon {
+  display: block; flex: none; width: 1em; height: 1em; margin: 0; vertical-align: initial;
+}
+#hp-four88 .hp-control-original-mark { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#hp-four88 .hp-layout-centred::after { content: none; }
+#hp-four88 .hp-header .hp-layout-centred select {
+  color: transparent; padding-left: 7px; padding-right: 7px; appearance: none;
+}
+#hp-four88 .hp-header .hp-layout-label .hp-layout-content {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: .3em;
+  pointer-events: none; color: #f7e7c6;
+  font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  font-size: clamp(12px,1.45cqw,21px);
+}
+@container (max-width: 720px) {
+  #hp-four88 .hp-header .hp-layout-label .hp-layout-content { font-size: 12px; }
+}
