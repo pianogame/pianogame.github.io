@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "planned-screens",
+      "tag": "追加予定",
+      "title": "ミッション・ランキング・\nキャラクター画面の追加"
+    },
+    {
+      "id": "planned-characters",
+      "tag": "追加予定",
+      "title": "キャラ追加",
+      "body": "初期選択の2人のみ\n（男女1名ずつ）"
+    },
+    {
+      "id": "planned-game",
+      "tag": "追加予定",
+      "title": "ゲームモード追加"
+    }
+  ]
+}
