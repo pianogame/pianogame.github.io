@@ -11,6 +11,7 @@
   inset: 0;
   z-index: 2;
   overflow: hidden;
+  overflow: clip;
   background: #171018;
   isolation: isolate;
   -webkit-text-size-adjust: 100%;
@@ -59,23 +60,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   /* Descendants use em, so the frame and all dynamic labels share a scale. */
   font-size: calc(24.5 * var(--home-width-unit));
 }
-#hp-home-screen .hp-home-hud::before {
-  content: "PLv";
-  position: absolute; z-index: 4;
-  left: var(--home-level-orb-center-x); top: 8.2%;
-  width: 11.2%; height: 14.6%;
-  transform: translateX(-50%);
-  display: grid; place-items: center;
-  border: 1px solid #e0b76b; border-radius: 999px;
-  background: linear-gradient(180deg,#c9415d 0%,#8b1732 100%);
-  color: #fff3dd;
-  font-family: "Times New Roman","Noto Serif",serif;
-  font-size: .52em; font-weight: 700; line-height: 1;
-  text-align: center;
-  text-shadow: 0 1px 1px #5b0e1d;
-  box-shadow: inset 0 0 0 1px #6f1027, 0 1px 2px #0005;
-  pointer-events: none;
-}
+/* PLv is already centred in the frame artwork. Only the number is dynamic. */
 #hp-home-screen .hp-home-hud-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 #hp-home-screen .hp-home-level,
 #hp-home-screen .hp-home-player-name,
@@ -252,6 +237,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-bottom-button .hp-home-reference-art { position: absolute; inset: 0; height: 100%; filter: drop-shadow(0 3px 4px #26140c33); }
 #hp-home-screen .hp-home-bottom-button { transition: transform .12s ease, filter .12s ease; }
 #hp-home-screen .hp-home-bottom-button:is(:active,.hp-home-is-pressed) { transform: translateY(3px) scale(.96); filter: brightness(.84); }
+#hp-home-screen .hp-home-bottom-button.hp-home-is-pressed { transition-duration: 0s; }
 #hp-home-screen .hp-home-bottom-button::after {
   content: ""; position: absolute; inset: 9% 6%; border-radius: 10px; pointer-events: none; opacity: 0;
   border: 1px solid #ffefb4; box-shadow: 0 0 14px #ffd77d99, inset 0 0 13px #ffdf8899;
@@ -288,6 +274,16 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 @keyframes hp-touch-staff { 0% { opacity: 0; transform: scaleX(.25) rotate(-8deg); } 25% { opacity: .7; } 100% { opacity: 0; transform: scaleX(1.25) rotate(-8deg); } }
 @keyframes hp-touch-note { 0% { opacity: 0; transform: translate(0,0) scale(.5); } 18% { opacity: .95; } 100% { opacity: 0; transform: translate(var(--note-x), calc(-1 * var(--note-rise))) scale(.8); } }
 #hp-home-screen button:focus-visible { outline: 2px solid #fff3bc; outline-offset: 2px; border-radius: 8px; }
+
+#hp-home-screen .hp-home-dialog-overlay { position: absolute; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px max(20px, var(--safe-l), var(--safe-r)); }
+#hp-home-screen [hidden] { display: none !important; }
+#hp-home-screen .hp-home-dialog-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #0c07179c; }
+#hp-home-screen .hp-home-dialog { position: relative; width: min(440px, 100%); max-height: 100%; overflow: auto; padding: 20px; border: 1px solid #d4b372; border-radius: 16px; background: linear-gradient(135deg,#fff7e6,#f0e0c7); color: #263853; box-shadow: 0 12px 40px #0008; font: 16px/1.5 "Hiragino Sans","Yu Gothic",sans-serif; }
+#hp-home-screen .hp-home-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+#hp-home-screen .hp-home-dialog h2 { margin: 0; font-size: 21px; }
+#hp-home-screen .hp-home-dialog-button { display: inline-flex; justify-content: center; align-items: center; text-align: center; min-height: 44px; min-width: 72px; padding: 8px 14px; border: 1px solid #b28a49; border-radius: 9px; background: #10213a; color: #fff3dc; line-height: 1.2; cursor: pointer; touch-action: manipulation; }
+#hp-home-screen .hp-home-volume-label { display: flex; justify-content: space-between; margin-top: 20px; }
+#hp-home-screen [data-home-volume] { width: 100%; min-height: 44px; accent-color: #9a234a; }
 
 /* Compact sizes are based on the measured, possibly rotated, home area. */
 #hp-home-screen[data-home-compact="true"] .hp-home-footer { width: calc(100% - 12px); }

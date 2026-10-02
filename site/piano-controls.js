@@ -36,7 +36,7 @@
     label.textContent=symbol?text.slice(symbol.length).trim():text;content.append(label);
     button.replaceChildren(content);
   }
-  const selector='button.hp-control,button.hp-range-step,button.hp-fx-toggle,.hp-track-panel button';
+  const selector='button:not(.hp-key)';
   function centreButtons(){root.querySelectorAll(selector).forEach(centreButton);}
   centreButtons();
   // Recording/playback replace button text as their state changes. Rewrap only

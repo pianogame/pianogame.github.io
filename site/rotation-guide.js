@@ -77,9 +77,10 @@
       </section>`;
     document.body.append(opening);
     function measureOpeningBounds() {
+      const bounds=window.HP_VIEWPORT_BOUNDS?.();
       const v=window.visualViewport;
-      let width=Math.max(innerWidth,(v?.width||0)+(v?.offsetLeft||0));
-      let height=Math.max(innerHeight,(v?.height||0)+(v?.offsetTop||0));
+      let width=bounds?.width||Math.max(innerWidth,(v?.width||0)+(v?.offsetLeft||0));
+      let height=bounds?.height||Math.max(innerHeight,(v?.height||0)+(v?.offsetTop||0));
       const installed=navigator.standalone===true;
       // iOS can keep CSS vh and the layout viewport at the pre-launch height.
       // Only use screen dimensions when they describe this installed full screen.
@@ -575,6 +576,7 @@
       setTimeout(()=>{
         document.documentElement.classList.remove('hp-opening-orientation-bg');
         document.documentElement.classList.add('hp-opening-curtain-bg');
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#45102d');
         orientation.hidden=true;
         title.classList.add('hp-show');
       },520);
@@ -653,6 +655,7 @@
         clearTimeout(layoutGateTimer);
         opening.remove();
         document.documentElement.classList.remove('hp-opening-orientation-bg','hp-opening-curtain-bg');
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#241324');
       },1950);
     },{once:true});
 

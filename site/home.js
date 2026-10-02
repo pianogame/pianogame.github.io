@@ -85,18 +85,82 @@
     });
   });
   const menuTimers = new WeakMap();
+  const pressTimers = new WeakMap();
   home.querySelectorAll('.hp-home-bottom-button').forEach(button => {
-    button.addEventListener('pointerdown', () => button.classList.add('hp-home-is-pressed'), { passive:true });
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(name => {
-      button.addEventListener(name, () => button.classList.remove('hp-home-is-pressed'));
+    let pressedAt = 0;
+    const press = () => {
+      clearTimeout(pressTimers.get(button));
+      pressedAt = performance.now();
+      button.classList.add('hp-home-is-pressed');
+    };
+    const release = () => {
+      clearTimeout(pressTimers.get(button));
+      // A quick, light tap must still paint a visible depression for 160ms.
+      pressTimers.set(button, setTimeout(() => button.classList.remove('hp-home-is-pressed'),
+        Math.max(0, 160 - (performance.now() - pressedAt))));
+    };
+    button.addEventListener('pointerdown', event => {
+      if (event.button > 0) return;
+      press();
+      try { button.setPointerCapture(event.pointerId); } catch (_) {}
+    }, { passive:true });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(name => {
+      button.addEventListener(name, release);
     });
     button.addEventListener('click', () => {
+      if (!button.classList.contains('hp-home-is-pressed')) { press(); release(); }
       clearTimeout(menuTimers.get(button));
       button.classList.remove('hp-home-confirmed');
       void button.offsetWidth;
       button.classList.add('hp-home-confirmed');
       menuTimers.set(button, setTimeout(() => button.classList.remove('hp-home-confirmed'), 560));
     });
+  });
+
+  const dialogOverlay = home.querySelector('.hp-home-dialog-overlay');
+  const canvas = home.querySelector('[data-home-canvas]');
+  const homeVolume = home.querySelector('[data-home-volume]');
+  const pianoVolume = piano.querySelector('[data-control="volume"]');
+  let dialogOpener = null;
+  const syncHomeVolume = () => {
+    homeVolume.value = pianoVolume.value;
+    home.querySelector('[data-home-volume-output]').textContent = pianoVolume.value + '%';
+  };
+  function closeHomeDialog() {
+    if (dialogOverlay.hidden) return;
+    dialogOverlay.hidden = true;
+    canvas.inert = false;
+    dialogOpener?.focus({ preventScroll:true });
+    dialogOpener = null;
+  }
+  for (const action of ['notice', 'settings']) {
+    const button = home.querySelector('[data-home-action="' + action + '"]');
+    button.addEventListener('click', () => {
+      dialogOpener = button;
+      home.querySelector('#hp-home-dialog-title').textContent = action === 'notice' ? 'お知らせ' : '設定';
+      home.querySelector('[data-home-notices]').hidden = action !== 'notice';
+      home.querySelector('[data-home-settings]').hidden = action !== 'settings';
+      syncHomeVolume();
+      canvas.inert = true;
+      dialogOverlay.hidden = false;
+      dialogOverlay.querySelector('.hp-home-dialog-button').focus({ preventScroll:true });
+    });
+  }
+  home.querySelectorAll('[data-home-action="dialog-close"]').forEach(button => button.addEventListener('click', closeHomeDialog));
+  homeVolume.addEventListener('input', () => {
+    pianoVolume.value = homeVolume.value;
+    pianoVolume.dispatchEvent(new Event('input', { bubbles:true }));
+  });
+  pianoVolume.addEventListener('input', syncHomeVolume);
+  home.addEventListener('keydown', event => {
+    if (dialogOverlay.hidden) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeHomeDialog(); }
+    if (event.key === 'Tab') {
+      const controls = [...dialogOverlay.querySelectorAll('button,input')].filter(el => el.offsetParent !== null);
+      const first = controls[0], last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
   });
 
   const launchFx = document.createElement('div');

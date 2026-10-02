@@ -226,7 +226,7 @@ try {
       // The installed screen remains 932x430 while all viewport height reports
       // briefly say 371px; the curtain must still paint the whole screen.
       for(const staleHeight of [371,932]) {
-        const coldLaunch=await page.evaluate(staleHeight=>{
+        const coldLaunch=await page.evaluate(async staleHeight=>{
           const opening=document.querySelector('#hp-opening-sequence');
           const restore=[];
           for(const [object,key] of [[window,'innerHeight'],[document.documentElement,'clientHeight'],[visualViewport,'height']]) {
@@ -236,14 +236,21 @@ try {
           }
           opening.style.setProperty('--hp-opening-height',staleHeight+'px');
           window.dispatchEvent(new Event('pageshow'));
+          await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
           const curtain=opening.querySelector('.hp-opening-title'),bounds=curtain.getBoundingClientRect();
           const result={bottom:bounds.bottom,cover:opening.getBoundingClientRect().bottom,
-            panelHeight:parseFloat(getComputedStyle(curtain,'::before').height),screenHeight:Math.min(screen.width,screen.height)};
+            panelHeight:parseFloat(getComputedStyle(curtain,'::before').height),screenHeight:Math.min(screen.width,screen.height),
+            appBottom:document.querySelector('#hp-viewport').getBoundingClientRect().bottom,
+            bodyHeight:document.body.getBoundingClientRect().height,
+            rotated:document.documentElement.dataset.hpRotated};
           restore.forEach(fn=>fn());window.dispatchEvent(new Event('resize'));return result;
         },staleHeight);
         assert.ok(coldLaunch.cover>=height-.5&&coldLaunch.bottom>=height-.5,'cold landscape launch leaves a dark bottom band');
         assert.ok(coldLaunch.panelHeight>=height-.5,'curtain fabric does not cover the full screen');
         assert.ok(coldLaunch.bottom<=height+.5,'stale portrait height pushed the curtain content off screen');
+        assert.ok(Math.abs(coldLaunch.appBottom-height)<.5,'cold launch app height must match the installed screen');
+        assert.ok(Math.abs(coldLaunch.bodyHeight-height)<.5,'body must paint the whole installed screen');
+        assert.equal(coldLaunch.rotated,'false','stale portrait height must not rotate a landscape launch');
       }
       await page.screenshot({path:path.join(output,'landscape-cold-launch-curtain.png')});
       await page.locator('.hp-opening-title').click();
@@ -276,6 +283,28 @@ try {
       if (img.naturalWidth!==1536 || img.naturalHeight!==864) throw new Error('reference atlas dimensions changed');
     });
     const metrics=await inspect(page);
+    assert.ok(['none','normal'].includes(await page.locator('.hp-home-hud').evaluate(el=>getComputedStyle(el,'::before').content)), 'PLv is already in the artwork; no duplicate label');
+    // Hit actual touch targets in every viewport, including the rotated layout.
+    const notice=page.locator('[data-home-action="notice"]');
+    await notice.tap();
+    const homeDialog=page.locator('.hp-home-dialog');
+    await homeDialog.waitFor({state:'visible'});
+    assert.equal(await homeDialog.locator('h2').textContent(),'お知らせ');
+    assert.equal(await page.locator('[data-home-canvas]').evaluate(el=>el.inert),true);
+    await homeDialog.getByRole('button',{name:'閉じる',exact:true}).tap();
+    assert.equal(await notice.evaluate(el=>el===document.activeElement),true,'dialog focus returns to opener');
+    await page.locator('[data-home-action="settings"]').tap();
+    assert.equal(await homeDialog.locator('h2').textContent(),'設定');
+    await page.locator('[data-home-volume]').fill('42');
+    assert.equal(await page.locator('#hp-four88 [data-control="volume"]').inputValue(),'42','HOME volume must control the shared audio volume');
+    assert.equal(await page.locator('[data-home-volume-output]').textContent(),'42%');
+    await page.locator('[data-home-volume]').fill('75');
+    assert.deepEqual(await homeDialog.getByRole('button',{name:'閉じる',exact:true}).evaluate(el=>{
+      const a=el.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(el);const b=range.getBoundingClientRect();
+      return [Math.abs(a.left+a.right-b.left-b.right)<1.5,Math.abs(a.top+a.bottom-b.top-b.bottom)<1.5];
+    }),[true,true],'HOME dialog button text must be centred');
+    await homeDialog.getByRole('button',{name:'閉じる',exact:true}).tap();
+    assert.equal(await page.locator('[data-home-canvas]').evaluate(el=>el.inert),false);
     if (name==='reference-16x9') {
       const measured=await page.evaluate((bounds) => Object.entries(bounds).map(([selector,target]) => {
         const r=document.querySelector(selector).getBoundingClientRect();
@@ -329,6 +358,12 @@ try {
         await page.mouse.up();
         assert.equal(await button.evaluate(el=>el.classList.contains('hp-home-confirmed')),true,'menu release must glow');
         assert.equal(page.url(),menuUrl,'menu feedback must not add navigation');
+        await page.waitForFunction(()=>!document.querySelector('.hp-home-bottom-button.hp-home-is-pressed'));
+        await button.tap();
+        assert.equal(await button.evaluate(el=>el.classList.contains('hp-home-is-pressed')),true,'quick light tap must retain its depression');
+        await page.waitForTimeout(60);
+        assert.notEqual(await button.evaluate(el=>getComputedStyle(el).transform),'none','short taps must visibly paint a depression');
+        await page.waitForFunction(()=>!document.querySelector('.hp-home-bottom-button.hp-home-is-pressed'));
       }
       await page.waitForTimeout(100);
       await page.screenshot({path:path.join(output,'menu-touch-effect.png')});
@@ -348,7 +383,9 @@ try {
         },file);
         assert.notEqual(await dialogue.textContent(),previous,'random dialogue must not repeat consecutively');
         messages.add(await dialogue.textContent());
-        assert.deepEqual((await inspect(page)).failures,[],'dialogue overflow');
+        const current=await inspect(page);
+        if(current.failures.length)console.log(JSON.stringify({current,geometry:await page.evaluate(()=>({iw:innerWidth,ih:innerHeight,vw:visualViewport.width,vh:visualViewport.height,screen:[screen.width,screen.height],body:document.body.getBoundingClientRect().toJSON(),view:document.querySelector('#hp-viewport').getBoundingClientRect().toJSON(),scroll:[scrollX,scrollY],rotated:document.documentElement.dataset.hpRotated}))}));
+        assert.deepEqual(current.failures,[],'dialogue overflow');
       }
       assert.equal(messages.size,5,'expected five distinct character messages');
       assert.equal(await page.evaluate(()=>window.homeTapPlays),soundBeforeVoice,'character touches must have no tap sound');
