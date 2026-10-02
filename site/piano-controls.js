@@ -20,7 +20,7 @@
   }
   function centreButton(button){
     if(button.querySelector(':scope > .hp-control-content'))return;
-    if(button.dataset.align==='left'||getComputedStyle(button).textAlign==='left')return;
+    if(button.dataset.align==='left')return;
     button.classList.add('hp-centred-button');
     const text=button.textContent.trim(),first=[...text][0],symbol=shapes[first]?first:'';
     const svg=symbol?icon(shapes[symbol]):button.querySelector('svg')?.cloneNode(true);
