@@ -291,18 +291,18 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-dialog h2 { margin: 4px 0 0; font: 26px/1.2 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif; letter-spacing: .12em; }
 #hp-home-screen .hp-home-dialog-button { display: inline-flex; justify-content: center; align-items: center; text-align: center; min-height: 44px; min-width: 82px; padding: 8px 16px; border: 1px solid #d6b674; border-radius: 9px; background: linear-gradient(#28354b,#0a1424); color: #fff0d2; box-shadow: inset 0 1px 0 #fff1b94d,0 3px 7px #0006; line-height: 1.2; cursor: pointer; touch-action: manipulation; }
 #hp-home-screen .hp-home-notices { display: grid; gap: 12px; }
-#hp-home-screen .hp-home-notice-card,#hp-home-screen .hp-home-sound-card { border: 1px solid #b89a6266; border-radius: 12px; background: linear-gradient(110deg,#29365099,#18223799); box-shadow: inset 0 1px 0 #ffedc51a; }
+#hp-home-screen .hp-home-notice-card,#hp-home-screen .hp-home-sound-card { color: #253044; border: 1px solid #ad915b; border-radius: 12px; background: linear-gradient(110deg,#ffffff66,transparent 30%,#ffffff55 49%,transparent 72%),linear-gradient(180deg,#eef2f7 0%,#c8ced8 18%,#f4f6f9 40%,#bac1cc 66%,#dfe4eb 100%); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 #7a849766, 0 3px 8px #0003; }
 #hp-home-screen .hp-home-notice-card { display: flex; align-items: center; gap: 18px; padding: 16px 20px; }
 #hp-home-screen .hp-home-notice-number { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 1px solid #d5b470; border-radius: 50%; color: #edd192; font: 20px/1 "Times New Roman",serif; background: radial-gradient(#44405b,#121a2d); }
-#hp-home-screen .hp-home-notice-tag { color: #c8ad7a; font-size: 11px; letter-spacing: .1em; }
+#hp-home-screen .hp-home-notice-tag { color: #70542c; font-size: 11px; letter-spacing: .1em; }
 #hp-home-screen .hp-home-notice-card h3 { margin: 3px 0 0; font-size: 18px; line-height: 1.4; font-weight: 500; white-space: pre-line; }
-#hp-home-screen .hp-home-notice-card p { margin: 6px 0 0; color: #d5ccba; font-size: 14px; white-space: pre-line; }
+#hp-home-screen .hp-home-notice-card p { margin: 6px 0 0; color: #3e495a; font-size: 14px; white-space: pre-line; }
 #hp-home-screen .hp-home-sound-intro { margin: 0 0 14px; color: #d7c49f; font-size: 13px; }
 #hp-home-screen .hp-home-sound-card { margin-top: 12px; padding: 12px 18px; }
 #hp-home-screen .hp-home-volume-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-#hp-home-screen .hp-home-volume-label output { color: #eed190; font: 18px/1 "Times New Roman",serif; font-variant-numeric: tabular-nums; }
+#hp-home-screen .hp-home-volume-label output { color: #65481f; font: 18px/1 "Times New Roman",serif; font-variant-numeric: tabular-nums; }
 #hp-home-screen .hp-home-dialog input[type="range"] { width: 100%; min-height: 44px; margin: 0; accent-color: #ddbd7c; touch-action: none; }
-#hp-home-screen .hp-home-sound-card p { margin: 0; color: #c5bdac; font-size: 12px; }
+#hp-home-screen .hp-home-sound-card p { margin: 0; color: #3e495a; font-size: 12px; }
 @container (max-height: 480px) {
   #hp-home-screen .hp-home-dialog { padding: 12px 22px; }
   #hp-home-screen .hp-home-dialog header { top: -12px; margin-bottom: 10px; padding: 5px 0 10px; }
@@ -388,3 +388,13 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   #hp-home-screen .hp-home-launch-ring,
   #hp-home-screen .hp-home-launch-particle{animation-duration:.12s!important}
 }
+
+#hp-home-screen .hp-home-transition-message { position: absolute; z-index: 20; bottom: 4%; left: 50%; transform: translateX(-50%); width: min(80%,600px); margin: 0; padding: 12px 18px; border: 1px solid #d6b674; border-radius: 10px; color: #fff0d2; background: #121d31ed; font: 14px/1.5 "Hiragino Sans","Yu Gothic",sans-serif; text-align: center; }
+#hp-home-screen .hp-home-piano-loading { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; color: #f6dfb0; background: radial-gradient(ellipse at center,#26314bef,#09111bf5); backdrop-filter: blur(12px); }
+#hp-home-screen .hp-home-piano-loading p { margin: 0; padding: 0 24px; font: 18px/1.5 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif; letter-spacing: .12em; text-align: center; }
+#hp-home-screen .hp-loading-keys { display: flex; gap: 5px; padding: 9px; border: 1px solid #bd995d; border-radius: 8px; box-shadow: 0 0 25px #ddba7026; }
+#hp-home-screen .hp-loading-keys i { position: relative; display: block; width: 21px; height: 52px; border-radius: 3px; background: linear-gradient(100deg,#bfc6d2,#fffdf6 50%,#ced3dc); box-shadow: 0 3px 0 #999ea7; animation: hp-piano-loading-key 1.1s ease-in-out infinite; }
+#hp-home-screen .hp-loading-keys i:nth-child(2) { animation-delay: .15s; }
+#hp-home-screen .hp-loading-keys i:nth-child(3) { animation-delay: .3s; }
+@keyframes hp-piano-loading-key { 0%,70%,100% { transform: translateY(0); opacity: .65; } 30% { transform: translateY(3px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #hp-home-screen .hp-loading-keys i { animation: none; opacity: 1; } }

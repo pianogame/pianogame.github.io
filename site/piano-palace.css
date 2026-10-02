@@ -1,4 +1,5 @@
 /* The concert-piano skin is scoped to the playing screen. */
+#hp-four88.hp-piano-preparing { visibility: hidden; pointer-events: none; }
 #hp-four88 {
   --piano-gold: #d1a25c;
   --piano-ink: #0a101b;

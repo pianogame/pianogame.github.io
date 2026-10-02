@@ -208,6 +208,8 @@
   new ResizeObserver(sizeRegister).observe(pianoScroll);
   new ResizeObserver(sizeRegister).observe(keyboard);
   requestAnimationFrame(sizeRegister);
+  // HOME prepares the revealed layout under its cover before the first paint.
+  window.addEventListener('hp-piano-prepare', sizeRegister);
   window.addEventListener('hp-viewport-resize', () => {
     releaseHeld(); pointerStarts.clear(); requestAnimationFrame(sizeRegister);
   });

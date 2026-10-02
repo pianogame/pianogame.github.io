@@ -520,10 +520,71 @@
     });
   }
 
-  function showPiano() {
+  const pianoArtworkUrls = ['palace-hall-v4.jpg','rack-v4.webp','white-key-v4.webp','black-key-v4.webp','footer-v4.webp'];
+  let pianoArtworkTask = null;
+  // Retain the decoded images, rather than letting hidden CSS backgrounds begin
+  // downloading only when the player first enters the piano screen.
+  let pianoArtwork = [];
+  function preparePianoArtwork() {
+    if (pianoArtwork.length === pianoArtworkUrls.length) return Promise.resolve();
+    if (pianoArtworkTask) return pianoArtworkTask;
+    pianoArtworkTask = Promise.all(pianoArtworkUrls.map(file => new Promise((resolve,reject) => {
+      const image = new Image();
+      const timeout = setTimeout(() => { image.src = ''; reject(new Error('Piano artwork timed out')); },20000);
+      const fail = error => { clearTimeout(timeout); reject(error); };
+      image.onerror = fail;
+      image.onload = () => {
+        const decoded = image.decode ? image.decode() : Promise.resolve();
+        decoded.then(() => { clearTimeout(timeout); resolve(image); },fail);
+      };
+      image.src = '/assets/piano/' + file;
+    }))).then(images => { pianoArtwork = images; }).finally(() => { pianoArtworkTask = null; });
+    return pianoArtworkTask;
+  }
+  void preparePianoArtwork().catch(() => {});
+  const transitionMessage = document.createElement('p');
+  transitionMessage.className = 'hp-home-transition-message';
+  transitionMessage.setAttribute('role','status'); transitionMessage.hidden = true;
+  home.appendChild(transitionMessage);
+  const pianoLoading = document.createElement('div');
+  pianoLoading.className = 'hp-home-piano-loading'; pianoLoading.hidden = true;
+  pianoLoading.setAttribute('role','status'); pianoLoading.setAttribute('aria-live','polite');
+  const loadingKeys = document.createElement('span'); loadingKeys.className = 'hp-loading-keys'; loadingKeys.setAttribute('aria-hidden','true');
+  for (let index=0; index<3; index++) loadingKeys.appendChild(document.createElement('i'));
+  const loadingText = document.createElement('p'); loadingText.textContent = 'ピアノを準備しています';
+  pianoLoading.append(loadingKeys,loadingText); home.appendChild(pianoLoading);
+  const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
+
+  async function showPiano() {
+    pianoLoading.hidden = pianoArtwork.length === pianoArtworkUrls.length;
+    try { await preparePianoArtwork(); }
+    catch (_) {
+      pianoLoading.hidden = true;
+      canvas.inert = false;
+      home.classList.remove('hp-piano-launching');
+      transitioning = false;
+      transitionMessage.textContent = '画像を読み込めませんでした。もう一度ピアノモードをタップしてください。';
+      transitionMessage.hidden = false;
+      return;
+    }
+    piano.classList.add('hp-piano-preparing');
+    piano.inert = true;
+    piano.setAttribute('aria-hidden','true');
+    piano.hidden = false;
+    window.dispatchEvent(new Event('hp-viewport-resize'));
+    window.dispatchEvent(new Event('hp-piano-prepare'));
+    // Allow container layout and the browser's image paint resources to settle
+    // under HOME. No frame may expose untextured whites or missing black keys.
+    await nextFrame();
+    window.dispatchEvent(new Event('hp-piano-prepare'));
+    await nextFrame();
+    piano.classList.remove('hp-piano-preparing');
+    piano.inert = false;
+    piano.removeAttribute('aria-hidden');
+    pianoLoading.hidden = true;
+    canvas.inert = false;
     home.classList.remove('hp-piano-launching');
     home.hidden = true;
-    piano.hidden = false;
     document.body.classList.add('hp-piano-active');
     finishTransition();
   }
@@ -531,6 +592,9 @@
   function enterPiano() {
     if (transitioning) return;
     transitioning = true;
+    canvas.inert = true;
+    transitionMessage.hidden = true;
+    void preparePianoArtwork().catch(() => {});
     stopCharacterVoice();
     clearGamePreview();
 

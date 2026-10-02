@@ -37,13 +37,18 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=62', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=63', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
     }
   </script>
-  <link rel="stylesheet" href="/home.css?v=40">
+  <link rel="preload" as="image" href="/assets/piano/palace-hall-v4.jpg">
+  <link rel="preload" as="image" href="/assets/piano/rack-v4.webp">
+  <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
+  <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
+  <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
+  <link rel="stylesheet" href="/home.css?v=41">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -55,9 +60,9 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/violin-samples.js?v=1"></script>
   <script defer src="/violin.js?v=1"></script>
   <script defer src="/key-layout.js?v=14"></script>
-  <script defer src="/piano.js?v=36"></script>
+  <script defer src="/piano.js?v=37"></script>
   <script defer src="/home-news.js?v=1"></script>
-  <script defer src="/home.js?v=26"></script>
+  <script defer src="/home.js?v=27"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -65,7 +70,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=10">
   <script defer src="/playability.js?v=10"></script>
-  <link rel="stylesheet" href="/piano-palace.css?v=13">
+  <link rel="stylesheet" href="/piano-palace.css?v=14">
   <script defer src="/piano-controls.js?v=4"></script>
 </head>
 <body class="hp-booting">

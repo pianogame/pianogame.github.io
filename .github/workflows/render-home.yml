@@ -9,6 +9,7 @@ on:
       - "site/home-news.js"
       - "site/sound-settings.js"
       - "scripts/verify_home_news.mjs"
+      - "scripts/verify_piano_transition.mjs"
       - "site/home-bgm.js"
       - "site/piano-palace.css"
       - "site/piano.js"
@@ -63,6 +64,8 @@ jobs:
         run: node scripts/verify_piano_palace.mjs
       - name: Check violin articulations, settings, recording and WAV export
         run: node scripts/verify_violin.mjs
+      - name: Check cold piano transition and silver HOME dialogs
+        run: node scripts/verify_piano_transition.mjs
       - name: Check external news and rapid touch audio
         run: node scripts/verify_home_news.mjs
       - name: Check character voices and rare playback
