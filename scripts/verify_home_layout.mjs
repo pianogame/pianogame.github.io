@@ -285,6 +285,19 @@ try {
       for (const {selector,target,actual} of measured) {
         if (actual.some((value,i)=>Math.abs(value-target[i])>1)) metrics.failures.push('reference size/position mismatch: '+selector+' '+JSON.stringify(actual));
       }
+      const homeCentering=await page.evaluate(() => {
+        const hud=document.querySelector('.hp-home-hud').getBoundingClientRect();
+        const level=document.querySelector('.hp-home-level').getBoundingClientRect();
+        const check=selector=>{const c=getComputedStyle(document.querySelector(selector));return {display:c.display,align:c.alignItems,justify:c.justifyItems};};
+        return {
+          mode:check('.hp-home-mode'),
+          top:check('.hp-home-top-button'),
+          bottom:check('.hp-home-bottom-button'),
+          orbLevelCenterX:(level.left+level.width/2-hud.left)/hud.width
+        };
+      });
+      metrics.homeCentering=homeCentering;
+      if(Math.abs(homeCentering.orbLevelCenterX-.2495)>.002) metrics.failures.push('PLv/82 orb axis is not centred');
       const typography=await page.evaluate(() => ['.hp-home-level','.hp-home-stamina-value'].map(s=> {
         const el=document.querySelector(s),r=el.getBoundingClientRect(),c=getComputedStyle(el);
         return {selector:s,size:parseFloat(c.fontSize),weight:c.fontWeight,style:c.fontStyle,center:[r.x+r.width/2,r.y+r.height/2]};
@@ -377,6 +390,21 @@ try {
       await page.getByRole('button',{name:'ピアノモードへ',exact:true}).click();
       await page.locator('#hp-home-screen').waitFor({state:'hidden'});
       await page.locator('#hp-four88').waitFor({state:'visible'});
+      const pianoCentering=await page.evaluate(() => {
+        const selectors=['#hp-four88 [data-home-action="home"]','#hp-four88 [data-action="settings"]','#hp-four88 .hp-range-step'];
+        return selectors.map(selector=>{
+          const el=document.querySelector(selector);
+          if(!el)return {selector,missing:true};
+          const c=getComputedStyle(el);
+          return {selector,display:c.display,align:c.alignItems,justify:c.justifyContent,textAlign:c.textAlign};
+        });
+      });
+      for(const button of pianoCentering){
+        if(button.missing)continue;
+        if(!['flex','inline-flex','grid','inline-grid'].includes(button.display))throw new Error('piano button is not a centred layout: '+button.selector);
+        assert.equal(button.align,'center','piano button vertical centring: '+button.selector);
+        assert.equal(button.justify,'center','piano button horizontal centring: '+button.selector);
+      }
       await page.getByRole('button',{name:'ホームへ戻る',exact:true}).click();
       await page.locator('#hp-home-screen').waitFor({state:'visible'});
       const returned=await inspect(page);
