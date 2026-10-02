@@ -138,10 +138,10 @@ try {
     }
     await context.addInitScript(() => {
       window.homeTapPlays = 0;
-      const play = HTMLMediaElement.prototype.play;
-      HTMLMediaElement.prototype.play = function(...args) {
-        if (this.src.includes('home-button-tap.mp3')) window.homeTapPlays++;
-        return play.apply(this,args);
+      const start = AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start = function(...args) {
+        if (this.buffer?.duration > .5 && this.buffer.duration < .7) window.homeTapPlays++;
+        return start.apply(this,args);
       };
     });
     const page=await context.newPage(), errors=[];
@@ -315,7 +315,7 @@ try {
     await page.locator('[data-home-volume]').fill('75');
     for(const category of ['effects','voice']) {
       await homeDialog.locator('[data-sound-control="'+category+'"]').fill('30');
-      assert.equal(await page.locator('#hp-four88 [data-sound-control="'+category+'"]').inputValue(),'30','HOME/PIANO sound settings agree');
+      assert.equal(await page.locator('#hp-four88 [data-sound-control="'+category+'"]').count(),0,'piano settings must not contain HOME sound controls');
       assert.equal(await page.evaluate(key=>localStorage.getItem('hp-sound-'+key),category),'0.3','sound setting persisted');
       await homeDialog.locator('[data-sound-control="'+category+'"]').fill('100');
     }

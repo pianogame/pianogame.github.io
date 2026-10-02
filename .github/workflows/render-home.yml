@@ -6,6 +6,9 @@ on:
       - "site/index.html"
       - "site/home.css"
       - "site/home.js"
+      - "site/home-news.js"
+      - "site/sound-settings.js"
+      - "scripts/verify_home_news.mjs"
       - "site/home-bgm.js"
       - "site/piano-palace.css"
       - "site/piano.js"
@@ -60,6 +63,8 @@ jobs:
         run: node scripts/verify_piano_palace.mjs
       - name: Check violin articulations, settings, recording and WAV export
         run: node scripts/verify_violin.mjs
+      - name: Check external news and rapid touch audio
+        run: node scripts/verify_home_news.mjs
       - name: Check character voices and rare playback
         run: node scripts/verify_home_voices.mjs
       - uses: actions/upload-artifact@v4

@@ -303,7 +303,7 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 }
 #hp-four88 .hp-settings-title { background: #142035f5; border-bottom: 1px solid #c3a367; padding: 14px 0; }
 #hp-four88 .hp-settings-title h1 { font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif; font-size: 24px; letter-spacing: .1em; }
-#hp-four88 .hp-settings :is(.hp-size-panel,.hp-wallpaper-panel,.hp-home-sound-panel,.hp-install-panel) { padding: 16px; margin-top: 18px; border: 1px solid #b99a6359; border-radius: 12px; background: linear-gradient(135deg,#2b36504d,#111b2a66); box-shadow: inset 0 1px 0 #fff1d11a; }
+#hp-four88 .hp-settings :is(.hp-size-panel,.hp-wallpaper-panel,.hp-install-panel) { padding: 16px; margin-top: 18px; border: 1px solid #b99a6359; border-radius: 12px; background: linear-gradient(135deg,#2b36504d,#111b2a66); box-shadow: inset 0 1px 0 #fff1d11a; }
 #hp-four88 .hp-settings h2 { color: #e8cc92; font-size: 17px; font-weight: 500; }
 #hp-four88 .hp-settings .hp-setting { border-bottom-color: #d1ae6326; }
 #hp-four88 .hp-settings .hp-credit { padding: 12px; background: #09122266; border-left: 2px solid #a88a5259; color: #c6bea9; }

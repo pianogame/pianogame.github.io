@@ -35,6 +35,8 @@ try {
         if(this.mediaElement.src.includes('home-button-tap'))window.effectsGain=destination;
         else window.bgmGain=destination;
       }
+      if(this instanceof AudioBufferSourceNode && this.buffer?.duration>.5 && this.buffer.duration<.7)window.tapVoiceGain=destination;
+      if(this===window.tapVoiceGain)window.effectsGain=destination;
       if(this instanceof AudioBufferSourceNode && this.buffer?.duration>=4 && this.buffer.duration<9 && !document.querySelector('#hp-home-screen')?.hidden) window.characterGain=destination;
       return connect.call(this,destination,...rest);
     };

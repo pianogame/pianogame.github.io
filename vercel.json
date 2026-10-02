@@ -203,5 +203,10 @@
         "action": "deny"
       }
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "news-feed": false
+    }
+  }
 }

@@ -12,28 +12,70 @@
   const homeButton = piano.querySelector('[data-home-action="home"]');
   if (!pianoButton || !homeButton) return;
 
-  const homeTapAudio = new Audio('/audio/home-button-tap.mp3?v=1');
-  homeTapAudio.preload = 'auto';
-  homeTapAudio.load();
   let homeTapGraph = null;
+  let homeTapBuffer = null;
+  let homeTapLoading = null;
+  let homeTapCurrent = null;
+
+  function prepareHomeTapSound() {
+    if (homeTapBuffer) return Promise.resolve();
+    if (homeTapLoading) return homeTapLoading;
+    try {
+      const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+      if (!bridge) return Promise.resolve();
+      if (!homeTapGraph) {
+        const gain = bridge.context.createGain();
+        window.HP_SOUND_SETTINGS.bind('effects', gain);
+        gain.connect(bridge.output);
+        homeTapGraph = { context: bridge.context, gain };
+      }
+      homeTapLoading = fetch('/audio/home-button-tap.mp3?v=1')
+        .then(response => {
+          if (!response.ok) throw new Error('Tap sound unavailable');
+          return response.arrayBuffer();
+        })
+        .then(data => homeTapGraph.context.decodeAudioData(data))
+        .then(buffer => { homeTapBuffer = buffer; })
+        .catch(() => {})
+        .finally(() => { homeTapLoading = null; });
+      return homeTapLoading;
+    } catch (_) { return Promise.resolve(); }
+  }
+
+  function stopHomeTapSound() {
+    const current = homeTapCurrent;
+    homeTapCurrent = null;
+    if (!current) return;
+    const now = homeTapGraph.context.currentTime;
+    // A tiny crossfade avoids clicks without accumulating overlapping effects.
+    current.gain.gain.setValueAtTime(current.gain.gain.value, now);
+    current.gain.gain.linearRampToValueAtTime(0, now + .008);
+    try { current.source.stop(now + .008); } catch (_) {}
+  }
 
   function playHomeTapSound() {
     try {
-      if (!homeTapGraph) {
-        const bridge = window.HP_AUDIO_BRIDGE?.get?.();
-        if (!bridge) return;
-        const source = bridge.context.createMediaElementSource(homeTapAudio);
-        const gain = bridge.context.createGain();
-        window.HP_SOUND_SETTINGS.bind('effects', gain);
-        source.connect(gain); gain.connect(bridge.output);
-        homeTapGraph = { source, gain };
-      }
-      homeTapAudio.pause();
-      homeTapAudio.currentTime = 0;
-      const playback = homeTapAudio.play();
-      if (playback && typeof playback.catch === 'function') playback.catch(() => {});
+      if (!homeTapBuffer) { void prepareHomeTapSound(); return; }
+      window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      stopHomeTapSound();
+      const { context } = homeTapGraph;
+      const source = context.createBufferSource(), gain = context.createGain();
+      source.buffer = homeTapBuffer;
+      source.connect(gain); gain.connect(homeTapGraph.gain);
+      const current = { source, gain };
+      homeTapCurrent = current;
+      source.onended = () => {
+        source.disconnect(); gain.disconnect();
+        if (homeTapCurrent === current) homeTapCurrent = null;
+      };
+      // Start in the gesture itself: no asynchronous play/seek queue on rapid taps.
+      source.start();
     } catch (_) {}
   }
+  void prepareHomeTapSound();
+  window.addEventListener('hp-curtain-start', () => { void prepareHomeTapSound(); });
+  window.addEventListener('pagehide', stopHomeTapSound);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopHomeTapSound(); });
 
   const touchLayer = document.createElement('div');
   touchLayer.className = 'hp-home-touch-layer';
@@ -85,7 +127,9 @@
   home.querySelectorAll('button').forEach((button) => {
     // The two voice actions remain silent so their speech is unobstructed.
     const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
-    if (!voiceAction) button.addEventListener('pointerdown', playHomeTapSound, { passive:true });
+    if (!voiceAction) button.addEventListener('pointerdown', event => {
+      if (event.button === 0) playHomeTapSound();
+    }, { passive:true });
     button.addEventListener('click', (event) => {
       if (event.detail === 0) {
         if (!voiceAction) playHomeTapSound();

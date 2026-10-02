@@ -295,8 +295,8 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-notice-card { display: flex; align-items: center; gap: 18px; padding: 16px 20px; }
 #hp-home-screen .hp-home-notice-number { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 1px solid #d5b470; border-radius: 50%; color: #edd192; font: 20px/1 "Times New Roman",serif; background: radial-gradient(#44405b,#121a2d); }
 #hp-home-screen .hp-home-notice-tag { color: #c8ad7a; font-size: 11px; letter-spacing: .1em; }
-#hp-home-screen .hp-home-notice-card h3 { margin: 3px 0 0; font-size: 18px; line-height: 1.4; font-weight: 500; }
-#hp-home-screen .hp-home-notice-card p { margin: 6px 0 0; color: #d5ccba; font-size: 14px; }
+#hp-home-screen .hp-home-notice-card h3 { margin: 3px 0 0; font-size: 18px; line-height: 1.4; font-weight: 500; white-space: pre-line; }
+#hp-home-screen .hp-home-notice-card p { margin: 6px 0 0; color: #d5ccba; font-size: 14px; white-space: pre-line; }
 #hp-home-screen .hp-home-sound-intro { margin: 0 0 14px; color: #d7c49f; font-size: 13px; }
 #hp-home-screen .hp-home-sound-card { margin-top: 12px; padding: 12px 18px; }
 #hp-home-screen .hp-home-volume-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
