@@ -6,6 +6,7 @@
 #hp-four88 .hp-track-row>span{display:flex;min-width:150px;flex:1;flex-direction:column}
 #hp-four88 .hp-track-row small{font-size:11px;color:#76687c}
 #hp-four88 .hp-track-panel button,#hp-four88 .hp-track-panel select{border:1px solid #bba8c4;border-radius:9px;background:#fff;color:#544e58;padding:6px 8px;min-height:36px;width:auto;font:inherit}
+#hp-four88 .hp-track-panel button{display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.2}
 #hp-four88 .hp-track-panel button[aria-pressed="true"]{background:#705e80;color:#fff}
 #hp-four88 .hp-track-panel button:disabled{opacity:.5}
 #hp-four88 .hp-track-panel select{min-width:120px}
