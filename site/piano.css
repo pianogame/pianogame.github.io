@@ -26,7 +26,7 @@
 #hp-four88 .hp-scroll-window .hp-key { touch-action:pan-y; }
 #hp-four88 .hp-scroll-hint { margin:0; padding:7px 12px; background:#e5d8e8; text-align:center; font-size:12px; color:#63546b; }
 #hp-four88 .hp-toolbar { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; padding:12px; background:#f4edf3; }
-#hp-four88 .hp-control { min-height:44px; padding:8px 13px; border:1px solid #cabecb; border-radius:22px; background:#fffcfa; color:#615769; }
+#hp-four88 .hp-control { min-height:44px; padding:8px 13px; border:1px solid #cabecb; border-radius:22px; background:#fffcfa; color:#615769; display:inline-flex; align-items:center; justify-content:center; text-align:center; line-height:1.2; }
 #hp-four88 .hp-control[aria-pressed="true"] { background:#72647b; color:#fffefa; border-color:#72647b; }
 #hp-four88 .hp-control[data-action="record"][aria-pressed="true"] { background:#a65066; border-color:#a65066; }
 #hp-four88 .hp-control[data-action="start"] { background:#665670; border-color:#665670; color:#fffefa; }
