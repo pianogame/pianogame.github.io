@@ -15,9 +15,19 @@
   const homeTapAudio = new Audio('/audio/home-button-tap.mp3?v=1');
   homeTapAudio.preload = 'auto';
   homeTapAudio.load();
+  let homeTapGraph = null;
 
   function playHomeTapSound() {
     try {
+      if (!homeTapGraph) {
+        const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+        if (!bridge) return;
+        const source = bridge.context.createMediaElementSource(homeTapAudio);
+        const gain = bridge.context.createGain();
+        window.HP_SOUND_SETTINGS.bind('effects', gain);
+        source.connect(gain); gain.connect(bridge.output);
+        homeTapGraph = { source, gain };
+      }
       homeTapAudio.pause();
       homeTapAudio.currentTime = 0;
       const playback = homeTapAudio.play();
@@ -138,6 +148,7 @@
     button.addEventListener('click', () => {
       dialogOpener = button;
       home.querySelector('#hp-home-dialog-title').textContent = action === 'notice' ? 'お知らせ' : '設定';
+      home.querySelector('[data-home-dialog-kicker]').textContent = action === 'notice' ? 'INFORMATION' : 'SOUND SETTINGS';
       home.querySelector('[data-home-notices]').hidden = action !== 'notice';
       home.querySelector('[data-home-settings]').hidden = action !== 'settings';
       syncHomeVolume();
@@ -152,6 +163,30 @@
     pianoVolume.dispatchEvent(new Event('input', { bubbles:true }));
   });
   pianoVolume.addEventListener('input', syncHomeVolume);
+  home.querySelectorAll('input[type="range"]').forEach(input => {
+    let pointer = null, bounds, rotated;
+    const update = event => {
+      const length = rotated ? bounds.height : bounds.width;
+      const position = rotated ? event.clientY - bounds.top : event.clientX - bounds.left;
+      const ratio = Math.max(0, Math.min(1, (position - 16) / Math.max(1, length - 32)));
+      input.value = Math.round(Number(input.min) + ratio * (Number(input.max) - Number(input.min)));
+      input.dispatchEvent(new Event('input', { bubbles:true }));
+    };
+    input.addEventListener('pointerdown', event => {
+      if (event.button > 0 || pointer !== null) return;
+      event.preventDefault();
+      pointer = event.pointerId; bounds = input.getBoundingClientRect();
+      rotated = document.documentElement.dataset.hpRotated === 'true';
+      input.focus({ preventScroll:true }); input.setPointerCapture(pointer); update(event);
+    }, { passive:false });
+    input.addEventListener('pointermove', event => { if (event.pointerId === pointer) { event.preventDefault(); update(event); } }, { passive:false });
+    const finish = event => {
+      if (event.pointerId !== pointer) return;
+      if (event.type === 'pointerup') update(event);
+      pointer = null; input.dispatchEvent(new Event('change', { bubbles:true }));
+    };
+    ['pointerup','pointercancel','lostpointercapture'].forEach(name => input.addEventListener(name, finish));
+  });
   home.addEventListener('keydown', event => {
     if (dialogOverlay.hidden) return;
     if (event.key === 'Escape') { event.preventDefault(); closeHomeDialog(); }
@@ -222,7 +257,7 @@
     const bridge = window.HP_AUDIO_BRIDGE?.get?.();
     if (!bridge) return null;
     const gain = bridge.context.createGain();
-    gain.gain.value = 1;
+    window.HP_SOUND_SETTINGS.bind('voice', gain);
     gain.connect(bridge.output);
     voiceGraph = { context: bridge.context, gain };
     return voiceGraph;

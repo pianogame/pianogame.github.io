@@ -164,6 +164,7 @@
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
     let bgmBuffer=null,voiceBuffer=null,tapSeBuffer=null,swipeSeBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,voiceGain=null;
+    let releaseVoiceVolume=()=>{};
 
     async function decodeAudio(url){
       if(!openingAudioContext)return null;
@@ -193,12 +194,14 @@
       try{
         const source=openingAudioContext.createBufferSource();
         const gain=openingAudioContext.createGain();
+        const volume=openingAudioContext.createGain();
+        const unbind=window.HP_SOUND_SETTINGS.bind('effects',volume);
         gain.gain.setValueAtTime(level,openingAudioContext.currentTime);
         source.buffer=buffer;
         source.connect(gain);
-        gain.connect(openingAudioContext.destination);
+        gain.connect(volume);volume.connect(openingAudioContext.destination);
         source.start();
-        source.onended=()=>{try{source.disconnect();gain.disconnect();}catch(_){}};
+        source.onended=()=>{unbind();try{source.disconnect();gain.disconnect();volume.disconnect();}catch(_){}};
       }catch(_){}
     }
 
@@ -254,7 +257,10 @@
 
         voiceGain=openingAudioContext.createGain();
         voiceGain.gain.setValueAtTime(1.70,now);
-        voiceGain.connect(openingAudioContext.destination);
+        const voiceVolume=openingAudioContext.createGain();
+        const unbindVoice=window.HP_SOUND_SETTINGS.bind('voice',voiceVolume);
+        voiceGain.connect(voiceVolume);voiceVolume.connect(openingAudioContext.destination);
+        releaseVoiceVolume=()=>{unbindVoice();voiceVolume.disconnect();};
 
         voiceSource=openingAudioContext.createBufferSource();
         voiceSource.buffer=voiceBuffer;
@@ -287,7 +293,8 @@
     function stopOpeningVoice(){
       try{voiceSource?.stop();}catch(_){}
       try{voiceSource?.disconnect();}catch(_){}
-      try{voiceGain?.disconnect();}catch(_){}
+      try{releaseVoiceVolume();voiceGain?.disconnect();}catch(_){}
+      releaseVoiceVolume=()=>{};
       voiceSource=null;
       voiceGain=null;
     }
@@ -321,6 +328,7 @@
 
     function chime(){
       const audio=tapAudios[Math.floor(Math.random()*tapAudios.length)];
+      audio.volume=.9*window.HP_SOUND_SETTINGS.get('effects');
       try{audio.currentTime=0;const p=audio.play();p?.catch(()=>{});}catch(_){}
     }
 

@@ -6,6 +6,11 @@
   const status = root.querySelector('.hp-status');
   const output = root.querySelector('[data-output="notes"]');
   const volume = root.querySelector('[data-control="volume"]');
+  try {
+    const stored = localStorage.getItem('hp-master-volume');
+    if (stored !== null && Number.isFinite(Number(stored))) volume.value = Math.max(0, Math.min(100, Number(stored)));
+  } catch (_) {}
+  root.querySelector('[data-output="volume"]').textContent = volume.value + '%';
   const reverbControl = root.querySelector('[data-control="reverb"]');
   const decayControl = root.querySelector('[data-control="decay"]');
   function configureAudioSession() {
@@ -797,7 +802,7 @@
   });
   releaseControl.addEventListener('input',()=>{articulation[currentInstrument].release=Number(releaseControl.value);root.querySelector('[data-output="release"]').textContent=Number(releaseControl.value).toFixed(2)+'秒';});
   root.addEventListener('hp-violin-change',event=>violinSpace?.update(event.detail));
-  volume.addEventListener('input', () => { root.querySelector('[data-output="volume"]').textContent = volume.value + '%'; if (master) master.gain.setTargetAtTime(Number(volume.value) / 100 * .9, ctx.currentTime, .03); });
+  volume.addEventListener('input', () => { try { localStorage.setItem('hp-master-volume',volume.value); } catch (_) {} root.querySelector('[data-output="volume"]').textContent = volume.value + '%'; if (master) master.gain.setTargetAtTime(Number(volume.value) / 100 * .9, ctx.currentTime, .03); });
   let auditionTimer, auditionVoice;
   root.addEventListener('hp-audition',()=>{
     if(!samplesReady||!ensureAudio())return;

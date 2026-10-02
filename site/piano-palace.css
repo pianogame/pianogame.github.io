@@ -297,6 +297,16 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 }
 
 /* Keep the user's photo visible through the bars and toolbar plates. */
+#hp-four88 .hp-settings {
+  background: radial-gradient(ellipse at 100% 0,#38345080,transparent 60%),linear-gradient(120deg,#17243b,#0d1628 65%,#1c2134);
+  border-left: 3px double #d0ad69; box-shadow: inset 5px 0 0 #d0ad6926,-12px 0 42px #0009;
+}
+#hp-four88 .hp-settings-title { background: #142035f5; border-bottom: 1px solid #c3a367; padding: 14px 0; }
+#hp-four88 .hp-settings-title h1 { font-family: "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif; font-size: 24px; letter-spacing: .1em; }
+#hp-four88 .hp-settings :is(.hp-size-panel,.hp-wallpaper-panel,.hp-home-sound-panel,.hp-install-panel) { padding: 16px; margin-top: 18px; border: 1px solid #b99a6359; border-radius: 12px; background: linear-gradient(135deg,#2b36504d,#111b2a66); box-shadow: inset 0 1px 0 #fff1d11a; }
+#hp-four88 .hp-settings h2 { color: #e8cc92; font-size: 17px; font-weight: 500; }
+#hp-four88 .hp-settings .hp-setting { border-bottom-color: #d1ae6326; }
+#hp-four88 .hp-settings .hp-credit { padding: 12px; background: #09122266; border-left: 2px solid #a88a5259; color: #c6bea9; }
 #hp-four88[data-wallpaper="photo"] .hp-header {
   background: #08111b66;
   -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);

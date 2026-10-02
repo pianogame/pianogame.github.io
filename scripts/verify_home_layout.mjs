@@ -282,6 +282,15 @@ try {
       const img=new Image(); img.src=src; await img.decode();
       if (img.naturalWidth!==1536 || img.naturalHeight!==864) throw new Error('reference atlas dimensions changed');
     });
+    const orbAlignment=await page.evaluate(()=>{
+      const orb=document.querySelector('.hp-home-level-orb').getBoundingClientRect();
+      const copy=document.querySelector('.hp-home-level-copy').getBoundingClientRect();
+      const level=document.querySelector('.hp-home-level').getBoundingClientRect();
+      const label=document.querySelector('.hp-home-level-label').getBoundingClientRect();
+      const rotated=document.documentElement.dataset.hpRotated==='true';
+      return {centre:[Math.abs(orb.left+orb.right-copy.left-copy.right),Math.abs(orb.top+orb.bottom-copy.top-copy.bottom)],labelAxis:Math.abs(rotated?level.top+level.bottom-label.top-label.bottom:level.left+level.right-label.left-label.right),contained:copy.left>=orb.left-.5&&copy.right<=orb.right+.5&&copy.top>=orb.top-.5&&copy.bottom<=orb.bottom+.5};
+    });
+    assert.ok(orbAlignment.centre.every(value=>value<1.1)&&orbAlignment.labelAxis<1.1&&orbAlignment.contained,'PLv and value as one centred group inside the orb');
     const metrics=await inspect(page);
     assert.ok(['none','normal'].includes(await page.locator('.hp-home-hud').evaluate(el=>getComputedStyle(el,'::before').content)), 'PLv is already in the artwork; no duplicate label');
     // Hit actual touch targets in every viewport, including the rotated layout.
@@ -290,6 +299,11 @@ try {
     const homeDialog=page.locator('.hp-home-dialog');
     await homeDialog.waitFor({state:'visible'});
     assert.equal(await homeDialog.locator('h2').textContent(),'お知らせ');
+    assert.equal(await homeDialog.locator('article').count(),3,'three separate notice cards');
+    assert.match(await homeDialog.textContent(),/ミッション・ランキング・.*キャラクター画面の追加/s);
+    assert.match(await homeDialog.textContent(),/初期選択の2人のみ.*男女1名ずつ/s);
+    assert.match(await homeDialog.textContent(),/ゲームモード追加/);
+    await page.screenshot({path:path.join(output,name+'-notices.png')});
     assert.equal(await page.locator('[data-home-canvas]').evaluate(el=>el.inert),true);
     await homeDialog.getByRole('button',{name:'閉じる',exact:true}).tap();
     assert.equal(await notice.evaluate(el=>el===document.activeElement),true,'dialog focus returns to opener');
@@ -299,6 +313,13 @@ try {
     assert.equal(await page.locator('#hp-four88 [data-control="volume"]').inputValue(),'42','HOME volume must control the shared audio volume');
     assert.equal(await page.locator('[data-home-volume-output]').textContent(),'42%');
     await page.locator('[data-home-volume]').fill('75');
+    for(const category of ['effects','voice']) {
+      await homeDialog.locator('[data-sound-control="'+category+'"]').fill('30');
+      assert.equal(await page.locator('#hp-four88 [data-sound-control="'+category+'"]').inputValue(),'30','HOME/PIANO sound settings agree');
+      assert.equal(await page.evaluate(key=>localStorage.getItem('hp-sound-'+key),category),'0.3','sound setting persisted');
+      await homeDialog.locator('[data-sound-control="'+category+'"]').fill('100');
+    }
+    await page.screenshot({path:path.join(output,name+'-home-settings.png')});
     assert.deepEqual(await homeDialog.getByRole('button',{name:'閉じる',exact:true}).evaluate(el=>{
       const a=el.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(el);const b=range.getBoundingClientRect();
       return [Math.abs(a.left+a.right-b.left-b.right)<1.5,Math.abs(a.top+a.bottom-b.top-b.bottom)<1.5];
@@ -338,7 +359,7 @@ try {
       const playerCenter=await page.locator('.hp-home-player-name').evaluate(el=>el.offsetTop+el.offsetHeight/2);
       const hudHeight=await page.locator('.hp-home-hud').evaluate(el=>el.clientHeight);
       if (Math.abs(playerCenter-hudHeight*.36)>1) metrics.failures.push('player name not centered in upper half of HUD');
-      for (const [i,target] of [[0,[645,60]],[1,[859,69]]]) if (typography[i].center.some((v,j)=>Math.abs(v-target[j])>2)) metrics.failures.push('reference number position mismatch: '+typography[i].selector);
+      for (const [i,target] of [[1,[859,69]]]) if (typography[i].center.some((v,j)=>Math.abs(v-target[j])>2)) metrics.failures.push('reference number position mismatch: '+typography[i].selector);
     }
     await page.screenshot({path:path.join(output,name+'.png')});
     metrics.failures.push(...errors);
