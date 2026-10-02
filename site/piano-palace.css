@@ -266,10 +266,11 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
 }
 #hp-four88 .hp-control-content {
   display: inline-flex; align-items: center; justify-content: center; gap: .3em;
+  max-width: 100%; margin: auto;
   line-height: 1; white-space: nowrap;
 }
 #hp-four88 button.hp-centred-button, .hp-install-gate-button.hp-centred-button {
-  display: inline-flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2;
+  display: inline-flex; align-items: center; justify-content: center; text-align: center; vertical-align: middle; line-height: 1.2;
 }
 #hp-four88 button.hp-centred-button:not(.hp-header button) .hp-control-content { min-width: 0; white-space: normal; }
 #hp-four88 button.hp-centred-button:not(.hp-header button) .hp-control-label { line-height: 1.2; }
