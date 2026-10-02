@@ -26,10 +26,22 @@ const browser = await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_
 try {
   const context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,timezoneId:'Asia/Tokyo'});
   await context.addInitScript(()=>Object.defineProperty(navigator,'standalone',{get:()=>true}));
+  // Chromium cannot emulate the physical iPhone silent switch. Capture session
+  // requests to verify every real audio/navigation flow keeps WebKit's ambient
+  // policy instead of requesting playback, which overrides that switch.
+  await context.addInitScript(()=>{
+    let type='auto';
+    window.testAudioSessionRequests=[];
+    Object.defineProperty(navigator,'audioSession',{configurable:true,value:{
+      get type(){return type;},
+      set type(value){type=value;window.testAudioSessionRequests.push(value);}
+    }});
+  });
   const page=await context.newPage(),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.clock.install({time:new Date('2026-10-01T06:00:00+09:00')});
   await page.goto(base,{waitUntil:'networkidle'});
+  assert.equal(await page.evaluate(()=>navigator.audioSession.type),'transient','initial opening audio must obey the silent switch');
   const music=page.locator('[data-home-bgm]');
   assert.equal(await music.evaluate(el=>el.paused),true,'BGM must not play before opening');
   await page.locator('.hp-opening-orientation.hp-ready').waitFor({state:'visible',timeout:15000});
@@ -100,16 +112,28 @@ try {
   await page.clock.setSystemTime(new Date('2026-10-02T19:00:00+09:00'));
   await page.evaluate(()=>{window.testBackground=false;document.dispatchEvent(new Event('visibilitychange'));});
   await checkTrack('yorubgm');
+  assert.ok(await page.evaluate(()=>window.testAudioSessionRequests.length>0));
+  assert.ok(await page.evaluate(()=>window.testAudioSessionRequests.every(type=>type==='transient')),
+    'opening, HOME BGM, voice and PIANO must never request playback policy');
+  // A restored page must reassert the policy even if the browser changed it.
+  await page.evaluate(()=>{
+    navigator.audioSession.type='auto';
+    window.dispatchEvent(new Event('pageshow'));
+  });
+  assert.equal(await page.evaluate(()=>navigator.audioSession.type),'transient','restored page must obey the silent switch');
   assert.deepEqual(errors,[],'audio and opening script errors');
   await context.close();
 
   const blocked=await browser.newContext({viewport:{width:932,height:430}});
   const blockedPage=await blocked.newPage();
+  await blocked.addInitScript(()=>Object.defineProperty(navigator,'audioSession',{value:undefined}));
   await blockedPage.goto(base,{waitUntil:'networkidle'});
+  assert.equal(await blockedPage.evaluate(()=>window.HP_AUDIO_BRIDGE.configureSession()),'unsupported',
+    'browsers without Audio Session API must keep their native audio policy');
   await blockedPage.evaluate(()=>window.dispatchEvent(new Event('hp-curtain-start')));
   assert.equal(await blockedPage.locator('[data-home-bgm]').evaluate(el=>el.paused),true,'install guide must stay silent');
   await blocked.close();
-  console.log('PASS curtain -> HOME; shared volume/mute; automatic time changes; HOME/PIANO; background/resume; install gate');
+  console.log('PASS curtain -> HOME; shared volume/mute; automatic time changes; HOME/PIANO; background/resume; install gate; silent-switch session policy and unsupported API');
 } finally {
   await browser.close();server.close();
 }

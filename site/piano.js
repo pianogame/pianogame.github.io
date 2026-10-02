@@ -15,8 +15,10 @@
   const decayControl = root.querySelector('[data-control="decay"]');
   function configureAudioSession() {
     try {
-      if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
-        navigator.audioSession.type = 'playback';
+      // WebKit maps transient to the native ambient category: both Web Audio
+      // and media-element BGM obey the iPhone silent switch. Playback bypasses it.
+      if (navigator.audioSession && navigator.audioSession.type !== 'transient') {
+        navigator.audioSession.type = 'transient';
       }
       return navigator.audioSession?.type || 'unsupported';
     } catch (_) {

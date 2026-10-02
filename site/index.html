@@ -37,7 +37,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=63', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=64', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -60,7 +60,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/violin-samples.js?v=1"></script>
   <script defer src="/violin.js?v=1"></script>
   <script defer src="/key-layout.js?v=14"></script>
-  <script defer src="/piano.js?v=37"></script>
+  <script defer src="/piano.js?v=38"></script>
   <script defer src="/home-news.js?v=1"></script>
   <script defer src="/home.js?v=27"></script>
   <script defer src="/home-bgm.js?v=2"></script>
