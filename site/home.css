@@ -997,3 +997,118 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
     grid-template-columns: minmax(72px, max-content) minmax(0, 1fr);
   }
 }
+
+
+/* Bright pianist-skill modal */
+.hp-character-skill-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(7,12,27,.56);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+.hp-character-skill-modal-card {
+  position: relative;
+  width: min(440px, 88vw);
+  max-height: min(78vh, 440px);
+  overflow-y: auto;
+  padding: 25px 26px 22px;
+  border: 1px solid #d4ad5f;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 84% 10%, rgba(255,255,255,.94) 0 2%, transparent 22%),
+    radial-gradient(circle at 12% 0%, rgba(228,214,255,.88), transparent 35%),
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(243,236,255,.97) 50%, rgba(229,238,255,.98));
+  color: #28304a;
+  box-shadow:
+    inset 0 0 0 4px rgba(255,255,255,.62),
+    inset 0 0 0 5px rgba(184,145,70,.24),
+    0 18px 55px rgba(5,8,25,.48),
+    0 0 30px rgba(198,168,255,.24);
+  text-align: center;
+}
+.hp-character-skill-modal-card::before,
+.hp-character-skill-modal-card::after {
+  content: "✦";
+  position: absolute;
+  color: #b58a3e;
+  font-size: 15px;
+  text-shadow: 0 0 9px #fff;
+}
+.hp-character-skill-modal-card::before { top: 10px; left: 13px; }
+.hp-character-skill-modal-card::after { right: 13px; bottom: 10px; }
+.hp-character-skill-sparkle {
+  margin-bottom: 5px;
+  color: #b78c42;
+  font-size: 12px;
+  letter-spacing: .5em;
+}
+.hp-character-skill-modal-eyebrow {
+  display: block;
+  color: #8b6c35;
+  font: 10px/1.2 "Times New Roman", serif;
+  letter-spacing: .22em;
+}
+.hp-character-skill-modal-card h3 {
+  margin: 8px 0 7px;
+  color: #382b5d;
+  font-size: clamp(20px, 4vw, 28px);
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-shadow: 0 1px 0 #fff;
+}
+.hp-character-skill-modal-divider {
+  width: min(250px, 74%);
+  height: 1px;
+  margin: 11px auto 13px;
+  background: linear-gradient(90deg, transparent, #b8904d, transparent);
+}
+.hp-character-skill-modal-label {
+  display: inline-block;
+  margin-bottom: 7px;
+  padding: 3px 12px;
+  border: 1px solid #b9935066;
+  border-radius: 999px;
+  background: rgba(255,255,255,.7);
+  color: #80612e;
+  font-size: 9px;
+  letter-spacing: .14em;
+}
+.hp-character-skill-modal-card p {
+  margin: 0 auto;
+  max-width: 36em;
+  color: #3f465d;
+  font-size: 13px;
+  line-height: 1.75;
+  text-align: left;
+}
+.hp-character-skill-modal-close {
+  min-width: 132px;
+  margin-top: 19px;
+  padding: 9px 22px;
+  border: 1px solid #a9803e;
+  border-radius: 999px;
+  background: linear-gradient(180deg,#fffdf8,#eadfc9);
+  color: #4a3a25;
+  box-shadow: inset 0 1px 0 #fff, 0 3px 9px #604b2726;
+  font: inherit;
+  font-weight: 600;
+}
+.hp-character-skill-modal-close:active {
+  transform: translateY(1px);
+  filter: brightness(.98);
+}
+@media (max-height: 500px) {
+  .hp-character-skill-modal-card {
+    width: min(480px, 82vw);
+    padding: 16px 22px 14px;
+  }
+  .hp-character-skill-modal-card h3 { margin: 5px 0; font-size: 20px; }
+  .hp-character-skill-modal-divider { margin: 7px auto 9px; }
+  .hp-character-skill-modal-card p { font-size: 11px; line-height: 1.55; }
+  .hp-character-skill-modal-close { margin-top: 10px; padding: 6px 20px; }
+}
