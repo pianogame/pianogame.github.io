@@ -200,6 +200,7 @@
       home.querySelector('[data-home-characters]').hidden = action !== 'characters';
       dialogOverlay.dataset.screen = action;
       if (action === 'characters') renderCharacterScreen();
+      if (action === 'settings') renderGlobalCharacterCredits();
       syncHomeVolume();
       canvas.inert = true;
       dialogOverlay.hidden = false;
@@ -458,6 +459,54 @@
   const ownedCharacters = () => registry.ownedList
     ? registry.ownedList()
     : registry.list().filter(character => character.available === true);
+
+  function createCharacterCreditNode(entry, { showCharacter = false } = {}) {
+    const article = document.createElement('article');
+    article.className = 'hp-character-credit-entry';
+    if (showCharacter && entry.characterName) {
+      const characterName = document.createElement('small');
+      characterName.className = 'hp-character-credit-character';
+      characterName.textContent = entry.characterName;
+      article.appendChild(characterName);
+    }
+    const label = document.createElement('span');
+    label.className = 'hp-character-credit-label';
+    label.textContent = entry.label || '協力';
+    const name = document.createElement(entry.url && /^https?:\/\//i.test(entry.url) ? 'a' : 'strong');
+    name.className = 'hp-character-credit-name';
+    name.textContent = entry.name;
+    if (name.tagName === 'A') {
+      name.href = entry.url;
+      name.target = '_blank';
+      name.rel = 'noopener noreferrer';
+    }
+    article.append(label, name);
+    if (entry.note) {
+      const note = document.createElement('p');
+      note.textContent = entry.note;
+      article.appendChild(note);
+    }
+    return article;
+  }
+
+  function renderGlobalCharacterCredits() {
+    const panel = home.querySelector('[data-home-character-credits]');
+    const list = home.querySelector('[data-home-character-credit-list]');
+    if (!panel || !list) return;
+    const entries = registry.globalCredits?.() || [];
+    list.replaceChildren(...entries.map(entry => createCharacterCreditNode(entry, { showCharacter: true })));
+    panel.hidden = entries.length === 0;
+  }
+
+  function renderCharacterCredits(character) {
+    const panel = home.querySelector('[data-character-credits]');
+    const list = home.querySelector('[data-character-credit-list]');
+    if (!panel || !list) return;
+    const entries = (registry.creditsFor?.(character) || []).filter(entry => entry.detail !== false);
+    list.replaceChildren(...entries.map(entry => createCharacterCreditNode(entry)));
+    panel.hidden = entries.length === 0;
+  }
+
   const characterLayout = home.querySelector('.hp-character-layout');
   const characterListScreen = home.querySelector('[data-character-screen="list"]');
   const characterDetailScreen = home.querySelector('[data-character-screen="detail"]');
@@ -506,6 +555,7 @@
         return row;
       }));
     }
+    renderCharacterCredits(selected);
     const characterPreview = home.querySelector('[data-character-preview]');
     if (characterPreview) {
       if (selected.profileBackground) {
