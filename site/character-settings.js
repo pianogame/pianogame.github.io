@@ -3,7 +3,7 @@
   const key = 'hp-home-character-v1';
   const registry = window.HP_CHARACTERS;
   const listeners = new Set();
-  const valid = id => registry.get(id)?.available === true;
+  const valid = id => registry.isOwned ? registry.isOwned(registry.get(id)) : registry.get(id)?.available === true;
   const read = () => {
     try {
       const stored = JSON.parse(localStorage.getItem(key) || 'null');
