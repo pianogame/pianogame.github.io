@@ -86,6 +86,7 @@
         technique: 'アルペジオ・ペダリング・内声表現',
         selfIntroduction: '「音で、まだ見ぬ景色を一緒に見に行きましょう。」',
         skill: 'ノヴァ・アルペジオ',
+        skillEffect: '一定時間、アルペジオ系ノーツの判定をサポートし、PERFECT時のスコアを上昇させる。※数値・発動条件はゲームバランス調整時に確定予定。',
       },
       voiceSetId: 'home-original',
       owned: true,
