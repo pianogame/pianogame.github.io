@@ -327,6 +327,73 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-volume-label output { color: #65481f; font: 18px/1 "Times New Roman",serif; font-variant-numeric: tabular-nums; }
 #hp-home-screen .hp-home-dialog input[type="range"] { width: 100%; min-height: 44px; margin: 0; accent-color: #ddbd7c; touch-action: none; }
 #hp-home-screen .hp-home-sound-card p { margin: 0; color: #3e495a; font-size: 12px; }
+
+#hp-home-screen .hp-home-credit-panel {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #ad915b;
+  border-radius: 12px;
+  background:
+    linear-gradient(110deg,#ffffff66,transparent 30%,#ffffff55 49%,transparent 72%),
+    linear-gradient(180deg,#eef2f7 0%,#c8ced8 18%,#f4f6f9 40%,#bac1cc 66%,#dfe4eb 100%);
+  color: #253044;
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 #7a849766, 0 3px 8px #0003;
+}
+#hp-home-screen .hp-home-credit-panel[hidden] { display: none !important; }
+#hp-home-screen .hp-home-credit-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #9b845c55;
+}
+#hp-home-screen .hp-home-credit-heading span {
+  color: #765728;
+  font: 10px/1 "Times New Roman",serif;
+  letter-spacing: .16em;
+}
+#hp-home-screen .hp-home-credit-heading strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+#hp-home-screen .hp-home-credit-list,
+#hp-home-screen .hp-character-credit-list {
+  display: grid;
+  gap: 8px;
+}
+#hp-home-screen .hp-character-credit-entry {
+  display: grid;
+  grid-template-columns: minmax(86px,auto) minmax(0,1fr);
+  gap: 3px 9px;
+  align-items: baseline;
+}
+#hp-home-screen .hp-character-credit-character {
+  grid-column: 1 / -1;
+  color: #7b6848;
+  font-size: 10px;
+  letter-spacing: .06em;
+}
+#hp-home-screen .hp-character-credit-label {
+  color: #70542c;
+  font-size: 10px;
+  letter-spacing: .04em;
+}
+#hp-home-screen .hp-character-credit-name {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+#hp-home-screen a.hp-character-credit-name { text-decoration: underline; text-underline-offset: 2px; }
+#hp-home-screen .hp-character-credit-entry p {
+  grid-column: 2;
+  margin: 1px 0 0;
+  color: #465164;
+  font-size: 10px;
+  line-height: 1.5;
+}
 @container (max-height: 480px) {
   #hp-home-screen .hp-home-dialog { padding: 12px 22px; }
   #hp-home-screen .hp-home-dialog header { top: -12px; margin-bottom: 10px; padding: 5px 0 10px; }
@@ -606,6 +673,22 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-character-future-note[hidden] {
   display: none !important;
 }
+#hp-home-screen .hp-character-credits {
+  margin: 0 0 12px;
+  padding: 9px 10px;
+  border: 1px solid #8f784f55;
+  border-radius: 9px;
+  background: linear-gradient(135deg,#121d31cc,#0a1222b8);
+  box-shadow: inset 0 1px 0 #fff1c814;
+}
+#hp-home-screen .hp-character-credits[hidden] { display: none !important; }
+#hp-home-screen .hp-character-credits > .hp-character-detail-label {
+  display: block;
+  margin-bottom: 7px;
+}
+#hp-home-screen .hp-character-credits .hp-character-credit-label { color: #c9ab70; }
+#hp-home-screen .hp-character-credits .hp-character-credit-name { color: #f1e5ce; }
+#hp-home-screen .hp-character-credits .hp-character-credit-entry p { color: #c9c0b2; }
 
 @container (max-width: 700px) {
   #hp-home-screen .hp-character-list {
