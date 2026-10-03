@@ -562,7 +562,8 @@
           value.append(hint);
           const openSkill = () => {
             const effect = profile.skillEffect || 'スキル効果は準備中です。';
-            window.alert('【' + profileValue + '】\n\n' + effect);
+            const lineBreak = String.fromCharCode(10);
+            window.alert('【' + profileValue + '】' + lineBreak + lineBreak + effect);
           };
           row.addEventListener('click', openSkill);
           row.addEventListener('keydown', event => {
