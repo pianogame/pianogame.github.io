@@ -498,6 +498,58 @@
     panel.hidden = entries.length === 0;
   }
 
+  function openCharacterSkillPopup(skillName, effect) {
+    const existing = document.querySelector('.hp-character-skill-modal');
+    if (existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.className = 'hp-character-skill-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'スキル効果');
+
+    const card = document.createElement('div');
+    card.className = 'hp-character-skill-modal-card';
+    const sparkle = document.createElement('div');
+    sparkle.className = 'hp-character-skill-sparkle';
+    sparkle.setAttribute('aria-hidden', 'true');
+    sparkle.textContent = '✦  ✧  ✦';
+
+    const eyebrow = document.createElement('span');
+    eyebrow.className = 'hp-character-skill-modal-eyebrow';
+    eyebrow.textContent = 'PIANIST SKILL';
+    const title = document.createElement('h3');
+    title.textContent = skillName;
+    const divider = document.createElement('div');
+    divider.className = 'hp-character-skill-modal-divider';
+    const effectLabel = document.createElement('span');
+    effectLabel.className = 'hp-character-skill-modal-label';
+    effectLabel.textContent = 'SKILL EFFECT';
+    const body = document.createElement('p');
+    body.textContent = effect;
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'hp-character-skill-modal-close';
+    close.textContent = '閉じる';
+
+    card.append(sparkle, eyebrow, title, divider, effectLabel, body, close);
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+
+    const dismiss = () => modal.remove();
+    close.addEventListener('click', dismiss);
+    modal.addEventListener('click', event => {
+      if (event.target === modal) dismiss();
+    });
+    const onKey = event => {
+      if (event.key === 'Escape') {
+        document.removeEventListener('keydown', onKey);
+        dismiss();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    close.focus();
+  }
+
   function renderCharacterCredits(character) {
     const panel = home.querySelector('[data-character-credits]');
     const list = home.querySelector('[data-character-credit-list]');
@@ -562,8 +614,7 @@
           value.append(hint);
           const openSkill = () => {
             const effect = profile.skillEffect || 'スキル効果は準備中です。';
-            const lineBreak = String.fromCharCode(10);
-            window.alert('【' + profileValue + '】' + lineBreak + lineBreak + effect);
+            openCharacterSkillPopup(profileValue, effect);
           };
           row.addEventListener('click', openSkill);
           row.addEventListener('keydown', event => {
