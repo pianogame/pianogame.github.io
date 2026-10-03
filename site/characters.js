@@ -39,7 +39,7 @@
   ];
   const defaultId = 'character01';
   const get = id => characters.find(character => character.id === id) || null;
-  const isOwned = character => Boolean(character && character.owned !== false && character.available !== false);
+  const isOwned = character => Boolean(character && character.owned === true && character.available !== false);
   const ownedList = () => characters.filter(isOwned);
   window.HP_CHARACTERS = Object.freeze({
     list: () => characters.slice(),
