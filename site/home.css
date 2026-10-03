@@ -662,3 +662,66 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
     margin-bottom: 10px;
   }
 }
+
+
+/* Character list uses a static crop from the profile artwork; detail remains the live MotionCharacter. */
+#hp-home-screen .hp-character-choice img {
+  object-fit: cover;
+  object-position: 50% 28%;
+  border: 1px solid #c8ae72;
+  border-radius: 9px;
+  background: #15142a;
+  box-shadow: inset 0 0 0 1px #fff6d944, 0 3px 8px #11152b55;
+}
+#hp-home-screen .hp-character-reading {
+  display: block;
+  margin-top: 2px;
+  color: #c9ab70;
+  font: 11px/1.35 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  letter-spacing: .08em;
+}
+#hp-home-screen .hp-character-info > .hp-character-role {
+  margin: 5px 0 10px !important;
+  color: #d9c9aa !important;
+  font-size: 11px !important;
+  letter-spacing: .04em;
+}
+#hp-home-screen .hp-character-profile {
+  display: grid;
+  gap: 0;
+  margin: 0 0 12px;
+  border-top: 1px solid #b6965d66;
+  border-bottom: 1px solid #b6965d66;
+}
+#hp-home-screen .hp-character-profile-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0,1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 7px 2px;
+  border-top: 1px solid #8f784f44;
+}
+#hp-home-screen .hp-character-profile-row:first-child { border-top: 0; }
+#hp-home-screen .hp-character-profile-row dt {
+  margin: 0;
+  padding: 3px 7px;
+  border: 1px solid #9e824f;
+  border-radius: 999px;
+  color: #ead39e;
+  background: linear-gradient(180deg,#26304b,#111a2d);
+  font: 10px/1.15 "Hiragino Sans","Yu Gothic",sans-serif;
+  text-align: center;
+  white-space: nowrap;
+}
+#hp-home-screen .hp-character-profile-row dd {
+  margin: 0;
+  color: #eee3cf;
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+@container (max-height: 480px) {
+  #hp-home-screen .hp-character-profile-row { padding: 4px 2px; }
+  #hp-home-screen .hp-character-profile-row dd { font-size: 10px; line-height: 1.35; }
+  #hp-home-screen .hp-character-profile-row dt { font-size: 9px; }
+}

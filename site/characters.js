@@ -20,10 +20,20 @@
   const characters = [
     {
       id: 'character01',
-      name: 'キャラクター01',
-      description: 'ピアニスト',
+      name: '神代 透花',
+      reading: 'かみしろ とうか',
+      description: 'テクニカル・ドラマティックピアニスト',
       motionDataPath: '/characters/character01',
       previewImage: '/characters/character01/reference/full-body.png',
+      // The owned-character list uses the profile artwork crop; detail/HOME keep MotionCharacter.
+      listImage: '/characters/character01/list-art.jpg',
+      profile: {
+        age: '20歳',
+        personality: '冷静で努力家、実は面倒見がいい',
+        style: 'テクニカル・ドラマティックピアニスト',
+        story: '精密な指さばきと情熱的な表現を両立させる、舞台映えする実力派。',
+        skill: 'ノヴァ・アルペジオ',
+      },
       voiceSetId: 'home-original',
       // Only owned characters appear in the character screen or can be selected for HOME.
       // Acquisition can later update this flag from account/save data without changing the UI.

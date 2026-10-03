@@ -487,7 +487,21 @@
     if (!selected || !owned) return;
     previewCharacterId = id;
     home.querySelector('[data-character-name]').textContent = selected.name;
+    home.querySelector('[data-character-reading]').textContent = selected.reading ? '（' + selected.reading + '）' : '';
     home.querySelector('[data-character-description]').textContent = selected.description || '';
+    const profile = selected.profile || {};
+    for (const [key, value] of Object.entries({
+      age: profile.age,
+      personality: profile.personality,
+      style: profile.style || selected.description,
+      story: profile.story,
+      skill: profile.skill,
+    })) {
+      const output = home.querySelector('[data-character-profile="' + key + '"]');
+      const row = output?.closest('.hp-character-profile-row');
+      if (output) output.textContent = value || '—';
+      if (row) row.hidden = !value;
+    }
     home.querySelector('[data-character-status]').textContent = '';
     characterLayout.dataset.characterView = 'detail';
     characterListScreen.hidden = true;
@@ -506,7 +520,7 @@
     list.replaceChildren(...characters.map(character => {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'hp-character-choice';
       button.dataset.characterChoice = character.id; button.setAttribute('aria-label', character.name + 'の詳細を見る');
-      const image = document.createElement('img'); image.src = character.previewImage; image.alt = ''; image.loading = 'lazy';
+      const image = document.createElement('img'); image.src = character.listImage || character.previewImage; image.alt = ''; image.loading = 'lazy';
       const copy = document.createElement('span'); copy.className = 'hp-character-choice-copy';
       const name = document.createElement('strong'); name.textContent = character.name;
       const description = document.createElement('span'); description.textContent = character.description || '';
