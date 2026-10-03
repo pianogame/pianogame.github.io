@@ -422,3 +422,243 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-loading-keys i:nth-child(3) { animation-delay: .3s; }
 @keyframes hp-piano-loading-key { 0%,70%,100% { transform: translateY(0); opacity: .65; } 30% { transform: translateY(3px); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { #hp-home-screen .hp-loading-keys i { animation: none; opacity: 1; } }
+
+
+/* Character browser: owned-only list -> detail. Affinity UI stays hidden until the future system exists. */
+#hp-home-screen .hp-home-dialog-overlay[data-screen="characters"] .hp-home-dialog {
+  width: min(760px, 100%);
+}
+#hp-home-screen .hp-character-layout {
+  display: block;
+  min-width: 0;
+}
+#hp-home-screen .hp-character-list-screen,
+#hp-home-screen .hp-character-detail {
+  min-width: 0;
+}
+#hp-home-screen .hp-character-list-heading,
+#hp-home-screen .hp-character-detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+#hp-home-screen .hp-character-list-heading > div {
+  min-width: 0;
+}
+#hp-home-screen .hp-character-list-heading span,
+#hp-home-screen .hp-character-detail-toolbar > span,
+#hp-home-screen .hp-character-detail-label {
+  display: block;
+  color: #c9ab70;
+  font: 10px/1.2 "Times New Roman", serif;
+  letter-spacing: .18em;
+}
+#hp-home-screen .hp-character-list-heading strong {
+  display: block;
+  margin-top: 3px;
+  font: 20px/1.25 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  letter-spacing: .06em;
+}
+#hp-home-screen .hp-character-list-heading > b {
+  flex: 0 0 auto;
+  min-width: 54px;
+  padding: 7px 10px;
+  border: 1px solid #b99858;
+  border-radius: 999px;
+  color: #f6e7ca;
+  background: #0d1728aa;
+  text-align: center;
+  font: 13px/1 "Hiragino Sans","Yu Gothic",sans-serif;
+}
+#hp-home-screen .hp-character-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+#hp-home-screen .hp-character-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(86px, .8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 142px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid #9f895f;
+  border-radius: 12px;
+  background:
+    linear-gradient(130deg,#ffffff70,transparent 32%,#ffffff38 50%,transparent 74%),
+    linear-gradient(180deg,#eef2f7 0%,#c8ced8 22%,#f1f3f7 48%,#b9c1cd 100%);
+  color: #253044;
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 #7a849766, 0 4px 10px #0003;
+  text-align: left;
+}
+#hp-home-screen .hp-character-choice[aria-pressed="true"] {
+  border-color: #f3cb72;
+  box-shadow: inset 0 0 0 2px #b48b3d, inset 0 1px 0 #fff, 0 0 15px #dfbf6b55;
+}
+#hp-home-screen .hp-character-choice img {
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 5px #0003);
+}
+#hp-home-screen .hp-character-choice-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+#hp-home-screen .hp-character-choice-copy strong {
+  color: #20304a;
+  font-size: 15px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+#hp-home-screen .hp-character-choice-copy > span {
+  color: #5b6575;
+  font-size: 11px;
+  line-height: 1.45;
+}
+#hp-home-screen .hp-character-choice small {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  max-width: calc(100% - 16px);
+  margin: 0;
+  padding: 3px 7px;
+  border: 1px solid #b48b3d;
+  border-radius: 999px;
+  color: #694b1f;
+  background: #fff4cfdd;
+  font-size: 9px;
+  line-height: 1.2;
+}
+#hp-home-screen .hp-character-empty {
+  margin: 24px 0 8px;
+  padding: 20px;
+  border: 1px solid #8d7956;
+  border-radius: 12px;
+  color: #d8c7a7;
+  background: #0d172877;
+  text-align: center;
+}
+#hp-home-screen .hp-character-detail {
+  display: block;
+}
+#hp-home-screen .hp-character-detail-toolbar {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #9f845466;
+}
+#hp-home-screen .hp-character-back {
+  min-width: 96px;
+}
+#hp-home-screen .hp-character-detail-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(190px, .85fr);
+  align-items: center;
+  gap: 18px;
+}
+#hp-home-screen .hp-character-preview {
+  width: 100%;
+  height: clamp(220px, 48cqh, 390px);
+  min-width: 0;
+  border: 1px solid #8f784f66;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 40%, #ebdbb51c, transparent 52%),
+    linear-gradient(180deg,#0b1423aa,#10182766);
+  overflow: hidden;
+}
+#hp-home-screen .hp-character-info {
+  min-width: 0;
+  padding: 6px 0;
+}
+#hp-home-screen .hp-character-info h3 {
+  margin: 6px 0 0;
+  color: #fff2d8;
+  font: clamp(20px, 2.6cqw, 28px)/1.25 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  overflow-wrap: anywhere;
+}
+#hp-home-screen .hp-character-info > p:not(.hp-character-status) {
+  margin: 8px 0 18px;
+  color: #cfc2aa;
+  font-size: 13px;
+  line-height: 1.65;
+}
+#hp-home-screen .hp-character-home-button {
+  width: 100%;
+  min-height: 48px;
+}
+#hp-home-screen .hp-character-home-button[aria-pressed="true"] {
+  background: linear-gradient(#d4b778,#846633);
+  color: #fffaf0;
+}
+#hp-home-screen .hp-character-status {
+  min-height: 1.5em;
+  margin: 9px 0 0;
+  color: #edd192;
+  font-size: 12px;
+  line-height: 1.5;
+}
+#hp-home-screen .hp-character-future-note[hidden] {
+  display: none !important;
+}
+
+@container (max-width: 700px) {
+  #hp-home-screen .hp-character-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  #hp-home-screen .hp-character-choice {
+    grid-template-columns: 74px minmax(0, 1fr);
+    min-height: 112px;
+    padding: 7px;
+    gap: 7px;
+  }
+  #hp-home-screen .hp-character-choice img {
+    height: 94px;
+  }
+  #hp-home-screen .hp-character-choice-copy strong {
+    font-size: 13px;
+  }
+  #hp-home-screen .hp-character-choice-copy > span {
+    font-size: 10px;
+  }
+  #hp-home-screen .hp-character-detail-main {
+    grid-template-columns: minmax(0, 1fr) minmax(160px, .9fr);
+    gap: 10px;
+  }
+  #hp-home-screen .hp-character-preview {
+    height: min(46cqh, 300px);
+  }
+  #hp-home-screen .hp-character-info h3 {
+    font-size: 18px;
+  }
+}
+@container (max-height: 480px) {
+  #hp-home-screen .hp-character-list-heading {
+    margin-bottom: 7px;
+  }
+  #hp-home-screen .hp-character-list-heading strong {
+    font-size: 17px;
+  }
+  #hp-home-screen .hp-character-choice {
+    min-height: 96px;
+  }
+  #hp-home-screen .hp-character-choice img {
+    height: 80px;
+  }
+  #hp-home-screen .hp-character-detail-toolbar {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+  }
+  #hp-home-screen .hp-character-preview {
+    height: min(42cqh, 230px);
+  }
+  #hp-home-screen .hp-character-info > p:not(.hp-character-status) {
+    margin-bottom: 10px;
+  }
+}
