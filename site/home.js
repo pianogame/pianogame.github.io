@@ -186,18 +186,25 @@
     canvas.inert = false;
     dialogOpener?.focus({ preventScroll:true });
     dialogOpener = null;
+    previewMotion.setActive(false);
+    syncCharacterVoice();
   }
-  for (const action of ['notice', 'settings']) {
+  for (const action of ['notice', 'settings', 'characters']) {
     const button = home.querySelector('[data-home-action="' + action + '"]');
     button.addEventListener('click', () => {
       dialogOpener = button;
-      home.querySelector('#hp-home-dialog-title').textContent = action === 'notice' ? 'お知らせ' : '設定';
-      home.querySelector('[data-home-dialog-kicker]').textContent = action === 'notice' ? 'INFORMATION' : 'SOUND SETTINGS';
+      home.querySelector('#hp-home-dialog-title').textContent = { notice: 'お知らせ', settings: '設定', characters: 'キャラクター' }[action];
+      home.querySelector('[data-home-dialog-kicker]').textContent = { notice: 'INFORMATION', settings: 'SOUND SETTINGS', characters: 'CHARACTERS' }[action];
       home.querySelector('[data-home-notices]').hidden = action !== 'notice';
       home.querySelector('[data-home-settings]').hidden = action !== 'settings';
+      home.querySelector('[data-home-characters]').hidden = action !== 'characters';
+      dialogOverlay.dataset.screen = action;
+      if (action === 'characters') renderCharacterScreen();
       syncHomeVolume();
       canvas.inert = true;
       dialogOverlay.hidden = false;
+      syncCharacterVoice();
+      previewMotion.setActive(action === 'characters');
       dialogOverlay.querySelector('.hp-home-dialog-button').focus({ preventScroll:true });
     });
   }
@@ -235,7 +242,7 @@
     if (dialogOverlay.hidden) return;
     if (event.key === 'Escape') { event.preventDefault(); closeHomeDialog(); }
     if (event.key === 'Tab') {
-      const controls = [...dialogOverlay.querySelectorAll('button,input')].filter(el => el.offsetParent !== null);
+      const controls = [...dialogOverlay.querySelectorAll('button,input')].filter(el => el.offsetParent !== null && !el.disabled);
       const first = controls[0], last = controls.at(-1);
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -268,16 +275,16 @@
   let transitioning = false;
   let launchTimer = 0;
   let gamePreviewTimer = 0;
-  const messages = [
-    ['こんなに美しい音楽と', 'すごせる毎日…', '……ふふっ♪'],
-    ['おかえりなさい。', '今日はどんな曲を', '一緒に奏でようか？'],
-    ['あなたの音を聴くと、', '自然と笑顔になるの。', '……不思議だね♪'],
-    ['少し疲れちゃった？', 'ゆっくりで大丈夫。', '私もそばにいるよ。'],
-    ['次の一音に、', '気持ちをこめて。', '一緒に奏でよう♪'],
-  ];
-  const voiceFiles = ['konnani', 'okaeri', 'anatano', 'sukositukare', 'tuginoition'];
-  // A hidden bonus for staying on HOME: count only manual voices that start.
-  const rareVoiceInterval = 20;
+  const registry = window.HP_CHARACTERS;
+  const characterSettings = window.HP_CHARACTER_SETTINGS;
+  let homeCharacter = characterSettings.getHomeCharacter();
+  let voiceSet = registry.voiceSet(homeCharacter);
+  let messages = voiceSet.entries.map(entry => entry.lines);
+  let voiceFiles = voiceSet.entries.map(entry => entry.file);
+  const homeMotion = new window.HP_MOTION_CHARACTER.MotionCharacter(home.querySelector('[data-home-motion]'));
+  const previewMotion = new window.HP_MOTION_CHARACTER.MotionCharacter(home.querySelector('[data-character-preview]'));
+  void homeMotion.setCharacter(homeCharacter);
+  let previewCharacterId = homeCharacter.id;
   let manualVoicePlays = 0;
   let messageIndex = 0;
   const voiceHistory = [];
@@ -293,7 +300,7 @@
     return pageActive && !document.hidden && !home.hidden
       && !document.body.classList.contains('hp-booting')
       && !document.documentElement.classList.contains('hp-install-required')
-      && !home.classList.contains('hp-piano-launching');
+      && dialogOverlay.hidden && !home.classList.contains('hp-piano-launching');
   }
 
   function ensureVoiceGraph() {
@@ -307,26 +314,29 @@
     return voiceGraph;
   }
 
-  function prepareVoice(file) {
-    if (!voiceBuffers.has(file)) {
+  function prepareVoice(file, set = voiceSet) {
+    const entry = set.entries.find(entry => entry.file === file) || (set.rare?.file === file ? set.rare : null);
+    if (!entry) return Promise.reject(new Error('Voice not configured'));
+    const url = entry.audioPath || set.audioBasePath + '/' + file + '.wav?v=1';
+    if (!voiceBuffers.has(url)) {
       const graph = ensureVoiceGraph();
       if (!graph) return Promise.reject(new Error('Audio unavailable'));
-      const task = fetch('/audio/' + file + '.wav?v=1')
+      const task = fetch(url)
         .then(response => {
           if (!response.ok) throw new Error('Voice download failed');
           return response.arrayBuffer();
         })
         .then(data => graph.context.decodeAudioData(data))
-        .catch(error => { voiceBuffers.delete(file); throw error; });
-      voiceBuffers.set(file, task);
+        .catch(error => { voiceBuffers.delete(url); throw error; });
+      voiceBuffers.set(url, task);
     }
-    return voiceBuffers.get(file);
+    return voiceBuffers.get(url);
   }
 
-  function voiceState(playing) {
+  function voiceState(playing, speech = {}) {
     home.dataset.voicePlaying = String(playing);
     window.dispatchEvent(new CustomEvent('hp-home-voice-state', {
-      detail: { playing, file: home.dataset.voiceFile },
+      detail: { playing, file: home.dataset.voiceFile, characterId: homeCharacter.id, ...speech },
     }));
   }
 
@@ -348,17 +358,20 @@
     stopCharacterVoice();
     const generation = voiceGeneration;
     const normalIndex = messageIndex;
-    const normal = voiceFiles[normalIndex];
-    const file = manual && (manualVoicePlays + 1) % rareVoiceInterval === 0
-      ? 'anatanorare' : normal;
+    const selectedCharacter = homeCharacter, selectedSet = voiceSet;
+    const rare = selectedSet.rare;
+    const isRare = manual && rare?.interval > 0 && (manualVoicePlays + 1) % rare.interval === 0;
+    const entry = isRare ? rare : selectedSet.entries[normalIndex];
+    if (!entry?.file) return;
+    const file = entry.file;
     try {
       window.HP_AUDIO_BRIDGE?.configureSession?.();
       window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
       const graph = ensureVoiceGraph();
       if (!graph) return;
-      void prepareVoice(file).then(buffer => {
+      void prepareVoice(file, selectedSet).then(buffer => {
         // A late download must never speak an older message or play in PIANO.
-        if (generation !== voiceGeneration || !canSpeak()) return;
+        if (generation !== voiceGeneration || selectedCharacter.id !== homeCharacter.id || !canSpeak()) return;
         const source = graph.context.createBufferSource();
         source.buffer = buffer;
         source.connect(graph.gain);
@@ -370,20 +383,22 @@
         };
         voiceSource = source;
         home.dataset.voiceFile = file;
-        source.start();
+        const startedAt = graph.context.currentTime;
+        source.start(startedAt);
         if (manual) manualVoicePlays++;
-        voiceHistory.unshift(file === 'anatanorare' ? 2 : normalIndex);
+        voiceHistory.unshift(isRare ? rare.messageIndex : normalIndex);
         voiceHistory.length = Math.min(voiceHistory.length, messages.length);
-        if (file === 'anatanorare') showMessage(2);
-        voiceState(true);
+        if (isRare) showMessage(rare.messageIndex);
+        voiceState(true, { characterId: selectedCharacter.id, buffer, context: graph.context, startedAt,
+          reading: entry.reading, message: messages[messageIndex]?.join('') });
       }).catch(() => {});
     } catch (_) {}
   }
 
   function showMessage(index, animate = true) {
-    messageIndex = index;
+    messageIndex = Math.max(0, Math.min(messages.length - 1, index));
     if (!dialogue) return;
-    dialogue.replaceChildren(...messages[messageIndex].map(line => {
+    dialogue.replaceChildren(...(messages[messageIndex] || []).map(line => {
       const span = document.createElement('span');
       span.textContent = line;
       return span;
@@ -396,7 +411,7 @@
   }
 
   function talkToCharacter() {
-    if (transitioning || !dialogue) return;
+    if (transitioning || !dialogue || !messages.length) return;
     // Successful voice starts determine recency: exclude the last, then use
     // weights 1, 2, 3, 4 as a message ages. Unplayed messages have full weight.
     const weights = messages.map((_, index) => {
@@ -408,7 +423,7 @@
       choice -= weight;
       return choice < 0;
     });
-    showMessage(nextIndex);
+    showMessage(nextIndex < 0 ? 0 : nextIndex);
     playMessageVoice(true);
   }
 
@@ -417,6 +432,7 @@
       manualVoicePlays = 0;
       voiceHistory.length = 0;
     }
+    homeMotion.setActive(canSpeak());
     if (!canSpeak()) {
       stopCharacterVoice();
     } else if (voiceUnlocked && !initialVoicePlayed) {
@@ -428,7 +444,7 @@
     voiceUnlocked = true;
     try {
       window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
-      [...voiceFiles, 'anatanorare'].forEach(file => { void prepareVoice(file).catch(() => {}); });
+      [...voiceFiles, voiceSet.rare?.file].filter(Boolean).forEach(file => { void prepareVoice(file).catch(() => {}); });
     } catch (_) {}
   });
   const voiceObserver = new MutationObserver(syncCharacterVoice);
@@ -438,6 +454,58 @@
   document.addEventListener('visibilitychange', syncCharacterVoice);
   window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; voiceHistory.length = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
+
+  function syncCharacterSelection() {
+    const current = characterSettings.getHomeCharacterId();
+    const selected = registry.get(previewCharacterId);
+    const button = home.querySelector('[data-home-action="set-home-character"]');
+    button.textContent = current === previewCharacterId ? 'ホームに設定中' : 'ホームに設定';
+    button.setAttribute('aria-pressed', String(current === previewCharacterId));
+    button.disabled = !selected?.available;
+    home.querySelectorAll('[data-character-choice]').forEach(card => {
+      card.setAttribute('aria-pressed', String(card.dataset.characterChoice === previewCharacterId));
+      card.querySelector('[data-character-home-badge]').hidden = card.dataset.characterChoice !== current;
+    });
+  }
+  function showCharacterPreview(id) {
+    const selected = registry.get(id); if (!selected) return;
+    previewCharacterId = id;
+    home.querySelector('[data-character-name]').textContent = selected.name;
+    home.querySelector('[data-character-description]').textContent = selected.description || '';
+    home.querySelector('[data-character-status]').textContent = '';
+    void previewMotion.setCharacter(selected);
+    syncCharacterSelection();
+  }
+  function renderCharacterScreen() {
+    const list = home.querySelector('[data-character-list]');
+    list.replaceChildren(...registry.list().map(character => {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'hp-character-choice';
+      button.dataset.characterChoice = character.id; button.setAttribute('aria-label', character.name);
+      const image = document.createElement('img'); image.src = character.previewImage; image.alt = ''; image.loading = 'lazy';
+      const name = document.createElement('span'); name.textContent = character.name;
+      const badge = document.createElement('small'); badge.dataset.characterHomeBadge = ''; badge.textContent = 'ホームに設定中';
+      button.append(image, name, badge);
+      button.addEventListener('pointerdown', event => { if (event.button === 0) playHomeTapSound(); }, { passive: true });
+      button.addEventListener('click', event => { if (event.detail === 0) playHomeTapSound(); showCharacterPreview(character.id); });
+      return button;
+    }));
+    showCharacterPreview(registry.get(previewCharacterId) ? previewCharacterId : homeCharacter.id);
+  }
+  home.querySelector('[data-home-action="set-home-character"]').addEventListener('click', () => {
+    const result = characterSettings.setHomeCharacter(previewCharacterId);
+    home.querySelector('[data-character-status]').textContent = result.ok ? 'ホームキャラクターを設定しました。' : result.reason;
+    syncCharacterSelection();
+  });
+  characterSettings.subscribe(character => {
+    stopCharacterVoice();
+    homeCharacter = character; voiceSet = registry.voiceSet(character);
+    messages = voiceSet.entries.map(entry => entry.lines); voiceFiles = voiceSet.entries.map(entry => entry.file);
+    manualVoicePlays = 0; voiceHistory.length = 0; initialVoicePlayed = false;
+    void homeMotion.setCharacter(character);
+    showMessage(0, false); syncCharacterSelection(); syncCharacterVoice();
+  });
+  showMessage(0, false);
+  syncCharacterVoice();
 
   function clearGamePreview() {
     window.clearTimeout(gamePreviewTimer);
@@ -637,7 +705,7 @@
     piano.hidden = true;
     home.hidden = false;
     document.body.classList.remove('hp-piano-active');
-    showMessage(1, false);
+    showMessage(voiceSet.greetingIndex ?? 0, false);
     playMessageVoice();
     requestAnimationFrame(syncHomeLayout);
     finishTransition();

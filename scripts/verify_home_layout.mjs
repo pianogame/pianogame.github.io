@@ -367,7 +367,7 @@ try {
     assert.deepEqual(metrics.failures,[],name+': '+metrics.failures.join('; '));
     if (name==='iphone15pm') {
       const oldUnit=metrics.unit;
-      // All three menus acknowledge touch and confirmation without navigation.
+      // Menus acknowledge touch; character selection now opens its shared dialog.
       const menuUrl=page.url();
       for (const label of ['ミッション','ランキング','キャラクター']) {
         const button=page.getByRole('button',{name:label,exact:true});
@@ -380,11 +380,13 @@ try {
         assert.equal(await button.evaluate(el=>el.classList.contains('hp-home-confirmed')),true,'menu release must glow');
         assert.equal(page.url(),menuUrl,'menu feedback must not add navigation');
         await page.waitForFunction(()=>!document.querySelector('.hp-home-bottom-button.hp-home-is-pressed'));
+        if (label==='キャラクター') await page.getByRole('button',{name:'閉じる',exact:true}).click();
         await button.tap();
         assert.equal(await button.evaluate(el=>el.classList.contains('hp-home-is-pressed')),true,'quick light tap must retain its depression');
         await page.waitForTimeout(60);
         assert.notEqual(await button.evaluate(el=>getComputedStyle(el).transform),'none','short taps must visibly paint a depression');
         await page.waitForFunction(()=>!document.querySelector('.hp-home-bottom-button.hp-home-is-pressed'));
+        if (label==='キャラクター') await page.getByRole('button',{name:'閉じる',exact:true}).click();
       }
       await page.waitForTimeout(100);
       await page.screenshot({path:path.join(output,'menu-touch-effect.png')});

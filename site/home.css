@@ -42,7 +42,31 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-home-character {
   position: absolute; z-index: 2; left: 47%; top: 13%;
   height: 116%; width: auto; max-width: none;
-  object-fit: contain; transform: translateX(-50%);
+  aspect-ratio: var(--motion-aspect, 2 / 3); transform: translateX(-50%);
+}
+#hp-home-screen [data-home-motion] canvas,
+#hp-home-screen [data-home-motion] img,
+#hp-home-screen [data-character-preview] canvas,
+#hp-home-screen [data-character-preview] img { display: block; width: 100%; height: 100%; object-fit: contain; }
+#hp-home-screen .hp-character-layout { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr); gap: 16px; }
+#hp-home-screen .hp-character-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); align-content: start; gap: 10px; }
+#hp-home-screen .hp-character-choice { min-height: 44px; min-width: 0; padding: 8px; border: 1px solid #9f895f; border-radius: 10px; background: linear-gradient(120deg,#eef2f7,#bfc7d2 50%,#e8ecf2); color: #253044; cursor: pointer; touch-action: manipulation; }
+#hp-home-screen .hp-character-choice[aria-pressed="true"] { border-color: #f8d47e; box-shadow: inset 0 0 0 2px #b59143,0 0 12px #dec28455; }
+#hp-home-screen .hp-character-choice img { width: 100%; height: 110px; object-fit: contain; }
+#hp-home-screen .hp-character-choice span { display: block; font-size: 14px; overflow-wrap: anywhere; }
+#hp-home-screen .hp-character-choice small { display: block; margin-top: 4px; color: #65481f; font-size: 11px; }
+#hp-home-screen .hp-character-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(110px, 1fr); align-items: center; gap: 12px; min-width: 0; }
+#hp-home-screen .hp-character-preview { height: clamp(150px, 40cqh, 360px); width: 100%; min-width: 0; }
+#hp-home-screen .hp-character-info { min-width: 0; }
+#hp-home-screen .hp-character-info h3 { margin: 0; font-size: clamp(16px, 2cqw, 22px); overflow-wrap: anywhere; }
+#hp-home-screen .hp-character-info p { margin: 8px 0 12px; font-size: 13px; }
+#hp-home-screen .hp-character-status { color: #edd192; font-size: 12px; overflow-wrap: anywhere; }
+#hp-home-screen [data-home-action="set-home-character"][aria-pressed="true"] { background: linear-gradient(#d4b778,#846633); color: #fffaf0; }
+@container (max-width: 650px) {
+  #hp-home-screen .hp-character-layout { grid-template-columns: 110px minmax(0, 1fr); gap: 10px; }
+  #hp-home-screen .hp-character-detail { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  #hp-home-screen .hp-character-preview { height: 145px; }
+  #hp-home-screen .hp-character-info h3 { font-size: 16px; }
 }
 #hp-home-screen .hp-home-logo {
   position: absolute; z-index: 5;

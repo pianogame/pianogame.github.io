@@ -71,10 +71,10 @@ try {
       const css=await card.evaluate(el=>({background:getComputedStyle(el).backgroundImage,color:getComputedStyle(el).color}));
       assert.match(css.background,/238, 242, 247/);assert.equal(css.color,'rgb(37, 48, 68)');
     }
-    await page.locator('.hp-home-dialog-button').tap();await page.locator('[data-home-action="settings"]').tap();
+    await page.locator('[data-home-action="dialog-close"]').filter({ hasText: '閉じる' }).tap();await page.locator('[data-home-action="settings"]').tap();
     if(output)await page.screenshot({path:path.join(output,name+'-silver-settings.png')});
     assert.equal(await page.locator('.hp-home-sound-card').count(),3);
-    await page.locator('.hp-home-dialog-button').tap();
+    await page.locator('[data-home-action="dialog-close"]').filter({ hasText: '閉じる' }).tap();
     await page.evaluate(()=>{window.visibleFrames=[];window.warmLoadingShown=false;window.watchWarm=true;const watch=()=>{if(window.watchWarm&&!document.querySelector('.hp-home-piano-loading').hidden)window.warmLoadingShown=true;requestAnimationFrame(watch);};requestAnimationFrame(watch);});
     await page.getByRole('button',{name:'ピアノモードへ',exact:true}).tap();
     await page.waitForFunction(()=>document.querySelector('#hp-home-screen').hidden);

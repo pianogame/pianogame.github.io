@@ -205,7 +205,7 @@ try {
       await sound.touchscreen.tap(rotated?box.x+box.width/2:end?box.x+box.width-3:box.x+3,rotated?(end?box.y+box.height-3:box.y+3):box.y+box.height/2);
       assert.equal(await control.inputValue(),end?'100':'0','touch volume endpoint, including CSS-rotated layout');
     }
-    await sound.locator('.hp-home-dialog-button').click();
+    await sound.locator('[data-home-action="dialog-close"]').filter({ hasText: '閉じる' }).click();
   }
   await sound.evaluate(()=>{HP_SOUND_SETTINGS.set('effects',1);HP_SOUND_SETTINGS.set('voice',1);localStorage.removeItem('hp-master-volume');});
   console.log('PASS separate live effects/voice gains, actual voice mute, unaffected BGM, and volume persistence');

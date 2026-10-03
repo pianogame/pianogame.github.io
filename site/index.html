@@ -37,7 +37,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=64', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=65', { scope: '/', updateViaCache: 'none' })
           .then((registration) => registration.update())
           .catch(() => {});
       });
@@ -48,7 +48,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=41">
+  <link rel="stylesheet" href="/home.css?v=42">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -62,7 +62,11 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/key-layout.js?v=14"></script>
   <script defer src="/piano.js?v=38"></script>
   <script defer src="/home-news.js?v=1"></script>
-  <script defer src="/home.js?v=27"></script>
+  <script defer src="/characters.js?v=1"></script>
+  <script defer src="/character-settings.js?v=1"></script>
+  <script defer src="/character-lipsync.js?v=1"></script>
+  <script defer src="/motion-character.js?v=1"></script>
+  <script defer src="/home.js?v=28"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -80,7 +84,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
 
   <div class="hp-home-safe">
     <div class="hp-home-canvas" data-home-canvas>
-      <img class="hp-home-character" src="/assets/home/character/29613917-7E24-4C1A-8C4F-23224C24AB6B.png?v=1" alt="" aria-hidden="true" draggable="false">
+      <div class="hp-home-character" data-home-motion aria-hidden="true"></div>
 
       <button type="button" class="hp-home-character-touch" data-home-action="character-talk" aria-label="キャラクターと話す"></button>
 
@@ -152,7 +156,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <button type="button" class="hp-home-bottom-button" aria-label="ランキング">
           <svg class="hp-home-reference-art" viewBox="0 0 283 151" aria-hidden="true" focusable="false"><svg data-home-menu-frame x="3" y="2" width="277" height="147" viewBox="690 682 280 147" preserveAspectRatio="none"><defs><clipPath id="home-ranking-clip"><path d="M690 717 L696 702 L708 696 L712 688 L731 689 L747 684 L931 686 L947 682 L956 696 L967 705 L970 793 L965 818 L948 829 L713 829 L695 819 L690 799 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-ranking-clip)"/></svg></svg>
         </button>
-        <button type="button" class="hp-home-bottom-button" aria-label="キャラクター">
+        <button type="button" class="hp-home-bottom-button" data-home-action="characters" aria-label="キャラクター">
           <svg class="hp-home-reference-art" viewBox="0 0 283 151" aria-hidden="true" focusable="false"><svg data-home-menu-frame x="3" y="2" width="277" height="147" viewBox="975 686 277 145" preserveAspectRatio="none"><defs><clipPath id="home-character-clip"><path d="M978 710 L987 696 L1004 687 L1026 686 L1205 687 L1224 692 L1241 705 L1247 725 L1246 792 L1252 809 L1240 821 L1224 830 L998 831 L982 820 L975 801 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-character-clip)"/></svg></svg>
         </button>
       </nav>
@@ -173,6 +177,19 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-volume">全体音量 <output data-home-volume-output>75%</output></label><input id="hp-home-volume" type="range" data-home-volume min="0" max="100" value="75" aria-label="ホームの音量"><p>BGM・ボイス・効果音・楽器の全体バランス</p></div>
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-effects">効果音 <output data-sound-output="effects">100%</output></label><input id="hp-home-effects" type="range" data-sound-control="effects" min="0" max="100" value="100" aria-label="ホームの効果音量"><p>ボタンのタッチ音・起動時の効果音</p></div>
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-voice">ボイス <output data-sound-output="voice">100%</output></label><input id="hp-home-voice" type="range" data-sound-control="voice" min="0" max="100" value="100" aria-label="ホームのボイス音量"><p>キャラクター・起動時のボイス</p></div>
+      </div>
+      <div data-home-characters hidden>
+        <div class="hp-character-layout">
+          <nav class="hp-character-list" data-character-list aria-label="キャラクター一覧"></nav>
+          <section class="hp-character-detail" aria-label="キャラクターのプレビュー">
+            <div class="hp-character-preview" data-character-preview aria-hidden="true"></div>
+            <div class="hp-character-info">
+              <h3 data-character-name></h3><p data-character-description></p>
+              <button type="button" class="hp-home-dialog-button" data-home-action="set-home-character">ホームに設定</button>
+              <p class="hp-character-status" data-character-status role="status" aria-live="polite"></p>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
   </div>

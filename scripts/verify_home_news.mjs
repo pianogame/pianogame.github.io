@@ -48,7 +48,7 @@ try{
   await page.goto(base,{waitUntil:'networkidle'});
   await page.evaluate(()=>{document.querySelector('#hp-opening-sequence')?.remove();document.body.classList.remove('hp-booting');});
   await page.waitForFunction(()=>document.querySelector('[data-home-notices] h3')?.textContent==='外部お知らせ1');
-  const badge=page.locator('.hp-home-notice-badge'), notice=page.locator('[data-home-action="notice"]'), close=page.locator('.hp-home-dialog-button');
+  const badge=page.locator('.hp-home-notice-badge'), notice=page.locator('[data-home-action="notice"]'), close=page.locator('[data-home-action="dialog-close"]').filter({ hasText: '閉じる' });
   assert.equal(await badge.isVisible(),true,'new external item is unread');
   await notice.tap();await page.waitForFunction(()=>document.querySelector('.hp-home-notice-badge').hidden);
   assert.equal(await page.locator('[data-home-notices] p').textContent(),'詳細\n2行目');
