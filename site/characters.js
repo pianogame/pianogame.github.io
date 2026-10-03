@@ -25,14 +25,29 @@
       motionDataPath: '/characters/character01',
       previewImage: '/characters/character01/reference/full-body.png',
       voiceSetId: 'home-original',
-      // Acquisition can later be resolved separately, without changing the renderer.
+      // Only owned characters appear in the character screen or can be selected for HOME.
+      // Acquisition can later update this flag from account/save data without changing the UI.
+      owned: true,
       available: true,
+      // Reserved for the future affinity system. It is intentionally disabled for now.
+      // Later, voice unlock requirements can live here without changing MotionCharacter.
+      progression: {
+        affinity: { enabled: false },
+        voiceUnlocks: [],
+      },
     },
   ];
   const defaultId = 'character01';
   const get = id => characters.find(character => character.id === id) || null;
+  const isOwned = character => Boolean(character && character.owned !== false && character.available !== false);
+  const ownedList = () => characters.filter(isOwned);
   window.HP_CHARACTERS = Object.freeze({
-    list: () => characters.slice(), get, defaultId,
+    list: () => characters.slice(),
+    ownedList: () => ownedList().slice(),
+    get,
+    defaultId,
+    isOwned,
+    progression: character => character?.progression || { affinity: { enabled: false }, voiceUnlocks: [] },
     voiceSet: character => voiceSets[character?.voiceSetId] || { entries: [] },
   });
 })();
