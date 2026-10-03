@@ -551,6 +551,27 @@
         const profileValue = profile[field.key] || (field.key === 'style' ? selected.description : '');
         value.textContent = profileValue || (field.required ? '未設定' : '—');
         if (field.required && !profileValue) row.dataset.profileMissing = 'true';
+        if (field.key === 'skill' && profileValue) {
+          row.classList.add('is-skill');
+          row.tabIndex = 0;
+          row.setAttribute('role', 'button');
+          row.setAttribute('aria-label', 'スキル「' + profileValue + '」の効果を見る');
+          const hint = document.createElement('span');
+          hint.className = 'hp-character-skill-hint';
+          hint.textContent = '効果を見る';
+          value.append(hint);
+          const openSkill = () => {
+            const effect = profile.skillEffect || 'スキル効果は準備中です。';
+            window.alert('【' + profileValue + '】\n\n' + effect);
+          };
+          row.addEventListener('click', openSkill);
+          row.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openSkill();
+            }
+          });
+        }
         row.append(label, value);
         return row;
       }));
