@@ -70,12 +70,32 @@
         affinity: { enabled: false },
         voiceUnlocks: [],
       },
+      // Public credits are opt-in. Add an entry only after the credited person has
+      // approved the display name/text. Entries can appear in both character detail
+      // and the global Settings > Credits section.
+      credits: [],
     },
   ];
   const defaultId = 'character01';
   const get = id => characters.find(character => character.id === id) || null;
   const isOwned = character => Boolean(character && character.owned === true && character.available !== false);
   const ownedList = () => characters.filter(isOwned);
+  const creditsFor = character => (Array.isArray(character?.credits) ? character.credits : [])
+    .filter(entry => entry && entry.enabled !== false && String(entry.name || '').trim())
+    .map(entry => ({
+      type: String(entry.type || 'contributor'),
+      label: String(entry.label || '協力'),
+      name: String(entry.name).trim(),
+      note: String(entry.note || '').trim(),
+      url: String(entry.url || '').trim(),
+      detail: entry.detail !== false,
+      global: entry.global !== false,
+    }));
+  const globalCredits = () => characters
+    .filter(character => character.available !== false)
+    .flatMap(character => creditsFor(character)
+      .filter(entry => entry.global)
+      .map(entry => ({ ...entry, characterId: character.id, characterName: character.name })));
   window.HP_CHARACTERS = Object.freeze({
     list: () => characters.slice(),
     ownedList: () => ownedList().slice(),
@@ -85,5 +105,7 @@
     progression: character => character?.progression || { affinity: { enabled: false }, voiceUnlocks: [] },
     voiceSet: character => voiceSets[character?.voiceSetId] || { entries: [] },
     profileFields: () => profileFields.slice(),
+    creditsFor,
+    globalCredits,
   });
 })();
