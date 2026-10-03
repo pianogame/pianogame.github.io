@@ -725,3 +725,59 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   #hp-home-screen .hp-character-profile-row dd { font-size: 10px; line-height: 1.35; }
   #hp-home-screen .hp-character-profile-row dt { font-size: 9px; }
 }
+
+
+/* Rich character profile v3 */
+#hp-home-screen .hp-character-preview {
+  position: relative;
+  background-image:
+    linear-gradient(180deg, #09122b16, #070d1f55),
+    var(--character-profile-bg, none),
+    radial-gradient(circle at 50% 40%, #ebdbb51c, transparent 52%),
+    linear-gradient(180deg,#0b1423aa,#10182766);
+  background-size: cover, cover, auto, auto;
+  background-position: center, center, center, center;
+  background-repeat: no-repeat;
+}
+#hp-home-screen .hp-character-preview[data-has-profile-background="true"] {
+  box-shadow: inset 0 0 28px #08101f55, 0 5px 16px #03071155;
+}
+#hp-home-screen .hp-character-profile {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 6px;
+  margin: 0 0 12px;
+  border: 0;
+}
+#hp-home-screen .hp-character-profile-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0,1fr);
+  gap: 7px;
+  align-items: start;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid #8f784f55;
+  border-radius: 9px;
+  background: linear-gradient(135deg,#121d31cc,#0a1222b8);
+  box-shadow: inset 0 1px 0 #fff1c814;
+}
+#hp-home-screen .hp-character-profile-row.is-wide { grid-column: 1 / -1; }
+#hp-home-screen .hp-character-profile-row[data-profile-missing="true"] dd {
+  color: #cfb783;
+  font-style: italic;
+}
+#hp-home-screen .hp-character-profile-row dt {
+  align-self: start;
+  white-space: nowrap;
+}
+#hp-home-screen .hp-character-profile-row dd {
+  min-width: 0;
+}
+@container (max-width: 900px) {
+  #hp-home-screen .hp-character-profile { grid-template-columns: minmax(0,1fr); }
+  #hp-home-screen .hp-character-profile-row.is-wide { grid-column: auto; }
+}
+@container (max-height: 480px) {
+  #hp-home-screen .hp-character-profile { gap: 4px; }
+  #hp-home-screen .hp-character-profile-row { padding: 4px 5px; grid-template-columns: 66px minmax(0,1fr); }
+}
