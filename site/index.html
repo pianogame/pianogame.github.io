@@ -177,6 +177,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-volume">全体音量 <output data-home-volume-output>75%</output></label><input id="hp-home-volume" type="range" data-home-volume min="0" max="100" value="75" aria-label="ホームの音量"><p>BGM・ボイス・効果音・楽器の全体バランス</p></div>
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-effects">効果音 <output data-sound-output="effects">100%</output></label><input id="hp-home-effects" type="range" data-sound-control="effects" min="0" max="100" value="100" aria-label="ホームの効果音量"><p>ボタンのタッチ音・起動時の効果音</p></div>
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-voice">ボイス <output data-sound-output="voice">100%</output></label><input id="hp-home-voice" type="range" data-sound-control="voice" min="0" max="100" value="100" aria-label="ホームのボイス音量"><p>キャラクター・起動時のボイス</p></div>
+        <section class="hp-home-credit-panel" data-home-character-credits hidden aria-label="キャラクタークレジット">
+          <div class="hp-home-credit-heading"><span>CREDITS</span><strong>キャラクタークレジット</strong></div>
+          <div class="hp-home-credit-list" data-home-character-credit-list></div>
+        </section>
       </div>
       <div data-home-characters hidden>
         <div class="hp-character-layout" data-character-view="list">
@@ -201,6 +205,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
                 <span class="hp-character-reading" data-character-reading></span>
                 <p class="hp-character-role" data-character-description></p>
                 <dl class="hp-character-profile" data-character-profile-list aria-label="キャラクタープロフィール"></dl>
+                <section class="hp-character-credits" data-character-credits hidden aria-label="キャラクタークレジット">
+                  <span class="hp-character-detail-label">CREDITS</span>
+                  <div class="hp-character-credit-list" data-character-credit-list></div>
+                </section>
                 <div class="hp-character-future-note" aria-label="今後追加予定の機能" hidden>
                   <span>今後追加予定</span>
                   <p>親密度に応じたボイス解放に対応できる構造で管理します。</p>
