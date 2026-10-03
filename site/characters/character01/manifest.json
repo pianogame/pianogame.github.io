@@ -1,7 +1,7 @@
 {
   "format": "layer-motion-complete",
   "version": 1,
-  "exportedAt": "2026-10-02T23:12:48.197Z",
+  "exportedAt": "2026-10-03T05:26:13.279Z",
   "canvas": {
     "width": 1024,
     "height": 1536
@@ -26,55 +26,13 @@
     "front_hair": "layers/front_hair.png"
   },
   "transforms": {
-    "back_hair": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    },
-    "body": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    },
-    "bust": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    },
-    "face_base": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    },
-    "eyes": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    },
-    "mouth": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    },
-    "front_hair": {
-      "x": 0,
-      "y": 0,
-      "scaleX": 100,
-      "scaleY": 100,
-      "rotation": 0
-    }
+    "back_hair": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0},
+    "body": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0},
+    "bust": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0},
+    "face_base": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0},
+    "eyes": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0},
+    "mouth": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0},
+    "front_hair": {"x": 0, "y": 0, "scaleX": 100, "scaleY": 100, "rotation": 0}
   },
   "visibility": {
     "back_hair": true,
@@ -86,40 +44,22 @@
     "front_hair": true
   },
   "motion": {
-    "intensity": 73,
+    "intensity": 10,
     "blink": true,
     "mouthMotion": true,
     "mouthShape": "closed",
     "hairMotion": true,
     "bustMotion": true,
-    "bustStrength": 100,
-    "bustSpeed": 1,
+    "bustStrength": 28,
+    "bustSpeed": 42,
     "mouthAutoAlign": true,
     "mouthOffsets": {
-      "closed": {
-        "x": 0,
-        "y": 0
-      },
-      "a": {
-        "x": 0,
-        "y": 0
-      },
-      "i": {
-        "x": 0,
-        "y": 0
-      },
-      "u": {
-        "x": 0,
-        "y": 0
-      },
-      "e": {
-        "x": 0,
-        "y": 0
-      },
-      "o": {
-        "x": 0,
-        "y": 0
-      }
+      "closed": {"x": 0, "y": 0},
+      "a": {"x": 0, "y": 0},
+      "i": {"x": 0, "y": 0},
+      "u": {"x": 0, "y": 0},
+      "e": {"x": 0, "y": 0},
+      "o": {"x": 0, "y": 0}
     }
   }
 }
