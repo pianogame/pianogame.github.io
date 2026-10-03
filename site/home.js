@@ -535,19 +535,23 @@
     modal.appendChild(card);
     document.body.appendChild(modal);
 
-    const dismiss = () => modal.remove();
+    // This overlay is UI only. It must not be treated as a home/voice state
+    // transition; keep the existing HOME BGM/audio graph untouched.
+    const dismiss = () => {
+      document.removeEventListener('keydown', onKey);
+      modal.remove();
+    };
     close.addEventListener('click', dismiss);
     modal.addEventListener('click', event => {
       if (event.target === modal) dismiss();
     });
-    const onKey = event => {
-      if (event.key === 'Escape') {
-        document.removeEventListener('keydown', onKey);
-        dismiss();
-      }
-    };
+    function onKey(event) {
+      if (event.key === 'Escape') dismiss();
+    }
     document.addEventListener('keydown', onKey);
-    close.focus();
+    // Avoid programmatic focus here. On iOS/PWA this can briefly disturb the
+    // shared audio session while the character screen is already active.
+    requestAnimationFrame(() => card.classList.add('is-open'));
   }
 
   function renderCharacterCredits(character) {
