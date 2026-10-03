@@ -204,7 +204,7 @@
       canvas.inert = true;
       dialogOverlay.hidden = false;
       syncCharacterVoice();
-      previewMotion.setActive(action === 'characters');
+      previewMotion.setActive(action === 'characters' && home.querySelector('[data-character-screen="detail"]')?.hidden === false);
       dialogOverlay.querySelector('.hp-home-dialog-button').focus({ preventScroll:true });
     });
   }
@@ -455,42 +455,79 @@
   window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; voiceHistory.length = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
 
+  const ownedCharacters = () => registry.ownedList
+    ? registry.ownedList()
+    : registry.list().filter(character => character.available === true);
+  const characterLayout = home.querySelector('.hp-character-layout');
+  const characterListScreen = home.querySelector('[data-character-screen="list"]');
+  const characterDetailScreen = home.querySelector('[data-character-screen="detail"]');
+
   function syncCharacterSelection() {
     const current = characterSettings.getHomeCharacterId();
     const selected = registry.get(previewCharacterId);
     const button = home.querySelector('[data-home-action="set-home-character"]');
     button.textContent = current === previewCharacterId ? 'ホームに設定中' : 'ホームに設定';
     button.setAttribute('aria-pressed', String(current === previewCharacterId));
-    button.disabled = !selected?.available;
+    button.disabled = registry.isOwned ? !registry.isOwned(selected) : !selected?.available;
     home.querySelectorAll('[data-character-choice]').forEach(card => {
       card.setAttribute('aria-pressed', String(card.dataset.characterChoice === previewCharacterId));
       card.querySelector('[data-character-home-badge]').hidden = card.dataset.characterChoice !== current;
     });
   }
-  function showCharacterPreview(id) {
-    const selected = registry.get(id); if (!selected) return;
+  function showCharacterList({ focus = false } = {}) {
+    characterLayout.dataset.characterView = 'list';
+    characterListScreen.hidden = false;
+    characterDetailScreen.hidden = true;
+    previewMotion.setActive(false);
+    if (focus) home.querySelector('[data-character-choice]')?.focus({ preventScroll:true });
+  }
+  function showCharacterDetail(id) {
+    const selected = registry.get(id);
+    const owned = registry.isOwned ? registry.isOwned(selected) : selected?.available === true;
+    if (!selected || !owned) return;
     previewCharacterId = id;
     home.querySelector('[data-character-name]').textContent = selected.name;
     home.querySelector('[data-character-description]').textContent = selected.description || '';
     home.querySelector('[data-character-status]').textContent = '';
+    characterLayout.dataset.characterView = 'detail';
+    characterListScreen.hidden = true;
+    characterDetailScreen.hidden = false;
     void previewMotion.setCharacter(selected);
+    previewMotion.setActive(true);
     syncCharacterSelection();
+    home.querySelector('[data-home-action="character-list-back"]')?.focus({ preventScroll:true });
   }
   function renderCharacterScreen() {
     const list = home.querySelector('[data-character-list]');
-    list.replaceChildren(...registry.list().map(character => {
+    const characters = ownedCharacters();
+    home.querySelector('[data-character-owned-count]').textContent = characters.length + '人';
+    home.querySelector('[data-character-empty]').hidden = characters.length !== 0;
+    list.hidden = characters.length === 0;
+    list.replaceChildren(...characters.map(character => {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'hp-character-choice';
-      button.dataset.characterChoice = character.id; button.setAttribute('aria-label', character.name);
+      button.dataset.characterChoice = character.id; button.setAttribute('aria-label', character.name + 'の詳細を見る');
       const image = document.createElement('img'); image.src = character.previewImage; image.alt = ''; image.loading = 'lazy';
-      const name = document.createElement('span'); name.textContent = character.name;
+      const copy = document.createElement('span'); copy.className = 'hp-character-choice-copy';
+      const name = document.createElement('strong'); name.textContent = character.name;
+      const description = document.createElement('span'); description.textContent = character.description || '';
+      copy.append(name, description);
       const badge = document.createElement('small'); badge.dataset.characterHomeBadge = ''; badge.textContent = 'ホームに設定中';
-      button.append(image, name, badge);
+      button.append(image, copy, badge);
       button.addEventListener('pointerdown', event => { if (event.button === 0) playHomeTapSound(); }, { passive: true });
-      button.addEventListener('click', event => { if (event.detail === 0) playHomeTapSound(); showCharacterPreview(character.id); });
+      button.addEventListener('click', event => { if (event.detail === 0) playHomeTapSound(); showCharacterDetail(character.id); });
       return button;
     }));
-    showCharacterPreview(registry.get(previewCharacterId) ? previewCharacterId : homeCharacter.id);
+    const fallback = characters.some(character => character.id === previewCharacterId)
+      ? previewCharacterId
+      : characters.find(character => character.id === homeCharacter.id)?.id || characters[0]?.id;
+    if (fallback) previewCharacterId = fallback;
+    showCharacterList();
+    syncCharacterSelection();
   }
+  home.querySelector('[data-home-action="character-list-back"]').addEventListener('click', () => {
+    playHomeTapSound();
+    showCharacterList({ focus: true });
+  });
   home.querySelector('[data-home-action="set-home-character"]').addEventListener('click', () => {
     const result = characterSettings.setHomeCharacter(previewCharacterId);
     home.querySelector('[data-character-status]').textContent = result.ok ? 'ホームキャラクターを設定しました。' : result.reason;
