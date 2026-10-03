@@ -864,3 +864,83 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   #hp-home-screen .hp-character-profile { gap: 4px; }
   #hp-home-screen .hp-character-profile-row { padding: 4px 5px; grid-template-columns: 66px minmax(0,1fr); }
 }
+
+
+/* Profile panel: keep the character artwork prominent and scroll only the right profile card. */
+#hp-home-screen .hp-character-detail-main {
+  align-items: stretch;
+}
+#hp-home-screen .hp-character-info {
+  position: relative;
+  align-self: stretch;
+  max-height: clamp(220px, 48cqh, 390px);
+  padding: 14px 13px 12px;
+  border: 1px solid #b99a5f;
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, #1b2740f2, #091224f2 58%, #15172cf2);
+  box-shadow:
+    inset 0 0 0 1px #fff2c81f,
+    inset 0 0 28px #b9944820,
+    0 7px 20px #02071366;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #b99a5f #111a2b;
+}
+#hp-home-screen .hp-character-info::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid #d9bf8452;
+  border-radius: 10px;
+  pointer-events: none;
+}
+#hp-home-screen .hp-character-info::-webkit-scrollbar { width: 6px; }
+#hp-home-screen .hp-character-info::-webkit-scrollbar-track {
+  background: #111a2b;
+  border-radius: 999px;
+}
+#hp-home-screen .hp-character-info::-webkit-scrollbar-thumb {
+  background: linear-gradient(#ddc58f,#8d6d38);
+  border-radius: 999px;
+}
+#hp-home-screen .hp-character-info > * {
+  position: relative;
+  z-index: 1;
+}
+#hp-home-screen .hp-character-info > .hp-character-detail-label {
+  display: inline-flex;
+  padding: 3px 12px;
+  border: 1px solid #b99a5f88;
+  border-radius: 999px;
+  background: #0a1427d9;
+  box-shadow: inset 0 1px 0 #fff2c824;
+  letter-spacing: .16em;
+}
+#hp-home-screen .hp-character-info h3 {
+  text-shadow: 0 1px 8px #0009;
+}
+#hp-home-screen .hp-character-info > .hp-character-role {
+  padding-bottom: 9px;
+  border-bottom: 1px solid #b99a5f55;
+}
+#hp-home-screen .hp-character-profile {
+  padding: 2px;
+}
+#hp-home-screen .hp-character-home-button {
+  margin-top: 2px;
+}
+@container (max-width: 700px) {
+  #hp-home-screen .hp-character-info {
+    max-height: min(46cqh, 300px);
+    padding: 11px 10px 10px;
+  }
+}
+@container (max-height: 480px) {
+  #hp-home-screen .hp-character-info {
+    max-height: min(42cqh, 230px);
+    padding: 9px 9px 8px;
+  }
+}
