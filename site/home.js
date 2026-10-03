@@ -490,17 +490,31 @@
     home.querySelector('[data-character-reading]').textContent = selected.reading ? '（' + selected.reading + '）' : '';
     home.querySelector('[data-character-description]').textContent = selected.description || '';
     const profile = selected.profile || {};
-    for (const [key, value] of Object.entries({
-      age: profile.age,
-      personality: profile.personality,
-      style: profile.style || selected.description,
-      story: profile.story,
-      skill: profile.skill,
-    })) {
-      const output = home.querySelector('[data-character-profile="' + key + '"]');
-      const row = output?.closest('.hp-character-profile-row');
-      if (output) output.textContent = value || '—';
-      if (row) row.hidden = !value;
+    const profileList = home.querySelector('[data-character-profile-list]');
+    const profileFields = registry.profileFields?.() || [];
+    if (profileList) {
+      profileList.replaceChildren(...profileFields.map(field => {
+        const row = document.createElement('div');
+        row.className = 'hp-character-profile-row' + (field.wide ? ' is-wide' : '');
+        const label = document.createElement('dt');
+        label.textContent = field.label;
+        const value = document.createElement('dd');
+        const profileValue = profile[field.key] || (field.key === 'style' ? selected.description : '');
+        value.textContent = profileValue || (field.required ? '未設定' : '—');
+        if (field.required && !profileValue) row.dataset.profileMissing = 'true';
+        row.append(label, value);
+        return row;
+      }));
+    }
+    const characterPreview = home.querySelector('[data-character-preview]');
+    if (characterPreview) {
+      if (selected.profileBackground) {
+        characterPreview.style.setProperty('--character-profile-bg', 'url("' + selected.profileBackground.replace(/"/g, '%22') + '")');
+        characterPreview.dataset.hasProfileBackground = 'true';
+      } else {
+        characterPreview.style.removeProperty('--character-profile-bg');
+        delete characterPreview.dataset.hasProfileBackground;
+      }
     }
     home.querySelector('[data-character-status]').textContent = '';
     characterLayout.dataset.characterView = 'detail';
