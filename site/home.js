@@ -400,6 +400,9 @@
 
   function renderDialogueLines(lines, animate = true) {
     if (!dialogue) return;
+    const textLength = (lines || []).join('').length;
+    dialogue.classList.toggle('hp-dialogue-long', textLength > 34);
+    dialogue.classList.toggle('hp-dialogue-extra-long', textLength > 54);
     dialogue.replaceChildren(...(lines || []).map(line => {
       const span = document.createElement('span');
       span.textContent = line;

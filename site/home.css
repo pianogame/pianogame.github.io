@@ -232,7 +232,16 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans CJK JP", sans-serif;
   font-size: calc(18 * var(--home-width-unit)); font-weight: 700; line-height: 1.4;
 }
-#hp-home-screen .hp-home-dialogue span { display: block; white-space: nowrap; }
+#hp-home-screen .hp-home-dialogue span {
+  display: block; max-width: 100%; white-space: normal;
+  overflow-wrap: anywhere; word-break: normal;
+}
+#hp-home-screen .hp-home-dialogue.hp-dialogue-long {
+  font-size: calc(15.5 * var(--home-width-unit)); line-height: 1.28;
+}
+#hp-home-screen .hp-home-dialogue.hp-dialogue-extra-long {
+  left: 14.5%; width: 69%; font-size: calc(13.2 * var(--home-width-unit)); line-height: 1.18;
+}
 #hp-home-screen .hp-home-dialogue.hp-dialogue-changing { animation: hp-dialogue-in .22s ease-out both; }
 @keyframes hp-dialogue-in { from { opacity: .3; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
