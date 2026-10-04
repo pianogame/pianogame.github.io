@@ -1183,3 +1183,21 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
 #hp-home-screen .hp-character-voice-item i {
   color: #e6cf9b; font-size: 11px; font-style: normal; white-space: nowrap;
 }
+
+/* 2026-10-04 character detail interaction cleanup */
+#hp-home-screen .hp-character-detail-tabs {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+/* Keep the top menu in a separate interaction layer from the home canvas. */
+#hp-home-screen .hp-home-top-actions {
+  isolation: isolate;
+  pointer-events: auto !important;
+}
+#hp-home-screen .hp-home-top-actions .hp-home-top-button {
+  pointer-events: auto !important;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

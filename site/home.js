@@ -192,7 +192,7 @@
   }
   for (const action of ['notice', 'settings', 'characters']) {
     const button = home.querySelector('[data-home-action="' + action + '"]');
-    button.addEventListener('click', () => {
+    const openHomePanel = () => {
       dialogOpener = button;
       home.querySelector('#hp-home-dialog-title').textContent = { notice: 'お知らせ', settings: '設定', characters: 'キャラクター' }[action];
       home.querySelector('[data-home-dialog-kicker]').textContent = { notice: 'INFORMATION', settings: 'SOUND SETTINGS', characters: 'CHARACTERS' }[action];
@@ -208,7 +208,27 @@
       syncCharacterVoice();
       previewMotion.setActive(action === 'characters' && home.querySelector('[data-character-screen="detail"]')?.hidden === false);
       dialogOverlay.querySelector('.hp-home-dialog-button').focus({ preventScroll:true });
-    });
+    };
+    if (action === 'notice' || action === 'settings') {
+      let pointerId = null, startX = 0, startY = 0, openedByPointer = false;
+      button.addEventListener('pointerdown', event => {
+        if (event.button > 0) return;
+        pointerId = event.pointerId; startX = event.clientX; startY = event.clientY; openedByPointer = false;
+      }, { passive:true });
+      button.addEventListener('pointerup', event => {
+        if (event.pointerId !== pointerId) return;
+        const moved = Math.hypot(event.clientX - startX, event.clientY - startY);
+        pointerId = null;
+        if (moved <= 14) { openedByPointer = true; openHomePanel(); }
+      }, { passive:true });
+      button.addEventListener('pointercancel', () => { pointerId = null; });
+      button.addEventListener('click', event => {
+        if (openedByPointer) { openedByPointer = false; event.preventDefault(); return; }
+        openHomePanel();
+      });
+    } else {
+      button.addEventListener('click', openHomePanel);
+    }
   }
   home.querySelectorAll('[data-home-action="dialog-close"]').forEach(button => button.addEventListener('click', closeHomeDialog));
   homeVolume.addEventListener('input', () => {
@@ -656,7 +676,7 @@
     if (!voice) stopDetailVoice();
   }
   home.querySelectorAll('[data-character-tab]').forEach(button => button.addEventListener('click', () => {
-    playHomeTapSound(); setCharacterDetailTab(button.dataset.characterTab);
+    setCharacterDetailTab(button.dataset.characterTab);
   }));
 
   function showCharacterDetail(id) {
@@ -771,8 +791,7 @@
       copy.append(name, description);
       const badge = document.createElement('small'); badge.dataset.characterHomeBadge = ''; badge.textContent = 'ホームに設定中';
       button.append(image, copy, badge);
-      button.addEventListener('pointerdown', event => { if (event.button === 0) playHomeTapSound(); }, { passive: true });
-      button.addEventListener('click', event => { if (event.detail === 0) playHomeTapSound(); showCharacterDetail(character.id); });
+      button.addEventListener('click', () => { showCharacterDetail(character.id); });
       return button;
     }));
     const fallback = characters.some(character => character.id === previewCharacterId)
