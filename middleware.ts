@@ -1,5 +1,7 @@
 import { next, rewrite } from '@vercel/functions';
 
+const MAINTENANCE_ENABLED = false;
+
 const OWNER_COOKIE = 'pds_owner_preview';
 const OWNER_SCOPE = 'pds-prod-owner-preview-v1';
 const PUBLIC_KEY = {
@@ -107,6 +109,24 @@ export const config = { matcher: ['/:path*'] };
 
 export default async function middleware(request) {
   const url = new URL(request.url);
+  if (!MAINTENANCE_ENABLED) {
+    if (url.pathname === '/__owner-access' || url.pathname === '/maintenance.html') {
+      return new Response(null, {status:302, headers:{
+        'Location':new URL('/', request.url).toString(),
+        'Cache-Control':'no-store, max-age=0',
+        'Referrer-Policy':'no-referrer',
+        'Set-Cookie':OWNER_COOKIE + '=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict',
+      }});
+    }
+    if (url.pathname === '/__owner-manifest') {
+      return new Response(JSON.stringify({...ownerManifest(''), start_url:'/'}), {headers:{
+        'Content-Type':'application/manifest+json; charset=utf-8',
+        'Cache-Control':'no-store, max-age=0',
+        'Referrer-Policy':'no-referrer',
+      }});
+    }
+    return next();
+  }
   if (PUBLIC_PWA_PATHS.has(url.pathname)) return next();
 
   if (url.pathname === '/__owner-access' || url.pathname === '/__owner-manifest') {

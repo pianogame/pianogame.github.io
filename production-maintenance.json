@@ -141,5 +141,8 @@
     "site/usage-analytics.js": "0bc13a57159bdfc054409321c3bf809ca29af53c",
     "site/violin-samples.js": "00845f8de2f058b486090099a302805b310bb2c0",
     "site/violin.js": "3a5a030a027cb9764e964aebfc1c72b341efe4b7"
-  }
+  },
+  "mode": "public",
+  "release_authorized_at": "2026-10-04T21:49:01+09:00",
+  "release_authorization": "所有者：確認出来た。一般公開宜しく"
 }

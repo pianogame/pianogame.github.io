@@ -21,6 +21,13 @@ async function verify() {
   assert.ok(JSON.parse(read('package.json')).dependencies['@vercel/functions']);
   assert.match(read('site/maintenance.html'), /ただいまメンテナンス中/);
 
+  if (lock.mode === 'public') {
+    assert.ok(lock.release_authorized_at, 'explicit owner release authorization is required');
+    assert.match(read('middleware.ts'), /const MAINTENANCE_ENABLED = false;/);
+    console.log('Production source identity preserved; owner-authorized public release ' + lock.release_authorized_at);
+    return;
+  }
+
   // Run the real middleware with only platform routing adapters and a disposable
   // verification key substituted. No production private key/token is needed.
   const pair = await webcrypto.subtle.generateKey({name:'ECDSA', namedCurve:'P-256'}, true, ['sign','verify']);
