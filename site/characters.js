@@ -13,8 +13,18 @@
         { file: 'tuginoition', lines: ['次の一音に、', '気持ちをこめて。', '一緒に奏でよう♪'], reading: 'つぎのいちおんにきもちをこめていっしょにかなでよう' },
       ],
       greetingIndex: 1,
-      rare: { interval: 20, messageIndex: 2, file: 'anatanorare', reading: 'あなたのおとをきくとしぜんとえがおになるのふしぎだね' },
+      rare: {
+        interval: 20,
+        file: 'neerare',
+        lines: [
+          '……ねえ、もう少しだけ近くに来て。',
+          '今だけは、あなたの音を誰より近くで感じていたいの。',
+          '……ふふっ、そんなに緊張しなくてもいいのに。',
+        ],
+        reading: 'ねえもうすこしだけちかくにきていまだけはあなたのおとをだれよりちかくでかんじていたいのふふっそんなにきんちょうしなくてもいいのに',
+      },
       audioBasePath: '/audio',
+      audioRevision: 'touka-20261004-1',
     },
   };
   // Shared profile schema. Required fields stay visible for every character so

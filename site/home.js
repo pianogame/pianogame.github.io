@@ -318,7 +318,7 @@
   function prepareVoice(file, set = voiceSet) {
     const entry = set.entries.find(entry => entry.file === file) || (set.rare?.file === file ? set.rare : null);
     if (!entry) return Promise.reject(new Error('Voice not configured'));
-    const url = entry.audioPath || set.audioBasePath + '/' + file + '.wav?v=1';
+    const url = entry.audioPath || set.audioBasePath + '/' + file + '.wav?v=' + encodeURIComponent(set.audioRevision || '1');
     if (!voiceBuffers.has(url)) {
       const graph = ensureVoiceGraph();
       if (!graph) return Promise.reject(new Error('Audio unavailable'));
@@ -387,19 +387,20 @@
         const startedAt = graph.context.currentTime;
         source.start(startedAt);
         if (manual) manualVoicePlays++;
-        voiceHistory.unshift(isRare ? rare.messageIndex : normalIndex);
-        voiceHistory.length = Math.min(voiceHistory.length, messages.length);
-        if (isRare) showMessage(rare.messageIndex);
+        if (!isRare) {
+          voiceHistory.unshift(normalIndex);
+          voiceHistory.length = Math.min(voiceHistory.length, messages.length);
+        }
+        renderDialogueLines(entry.lines || messages[normalIndex], isRare);
         voiceState(true, { characterId: selectedCharacter.id, buffer, context: graph.context, startedAt,
-          reading: entry.reading, message: messages[messageIndex]?.join('') });
+          reading: entry.reading, message: (entry.lines || messages[normalIndex] || []).join('') });
       }).catch(() => {});
     } catch (_) {}
   }
 
-  function showMessage(index, animate = true) {
-    messageIndex = Math.max(0, Math.min(messages.length - 1, index));
+  function renderDialogueLines(lines, animate = true) {
     if (!dialogue) return;
-    dialogue.replaceChildren(...(messages[messageIndex] || []).map(line => {
+    dialogue.replaceChildren(...(lines || []).map(line => {
       const span = document.createElement('span');
       span.textContent = line;
       return span;
@@ -409,6 +410,11 @@
       void dialogue.offsetWidth;
       dialogue.classList.add('hp-dialogue-changing');
     }
+  }
+
+  function showMessage(index, animate = true) {
+    messageIndex = Math.max(0, Math.min(messages.length - 1, index));
+    renderDialogueLines(messages[messageIndex], animate);
   }
 
   function talkToCharacter() {

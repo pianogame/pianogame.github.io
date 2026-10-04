@@ -37,13 +37,13 @@ try {
       }
       if(this instanceof AudioBufferSourceNode && this.buffer?.duration>.5 && this.buffer.duration<.7)window.tapVoiceGain=destination;
       if(this===window.tapVoiceGain)window.effectsGain=destination;
-      if(this instanceof AudioBufferSourceNode && this.buffer?.duration>=4 && this.buffer.duration<9 && !document.querySelector('#hp-home-screen')?.hidden) window.characterGain=destination;
+      if(this instanceof AudioBufferSourceNode && this.buffer?.duration>=4 && this.buffer.duration<15 && !document.querySelector('#hp-home-screen')?.hidden) window.characterGain=destination;
       return connect.call(this,destination,...rest);
     };
     const start=AudioBufferSourceNode.prototype.start,stop=AudioBufferSourceNode.prototype.stop;
     AudioBufferSourceNode.prototype.start=function(...args){
       const file=document.querySelector('#hp-home-screen')?.dataset.voiceFile;
-      if(file && this.buffer?.duration>=4 && this.buffer.duration<9 && !this.loop){
+      if(file && this.buffer?.duration>=4 && this.buffer.duration<15 && !this.loop){
         window.voiceStarts.push({file,duration:this.buffer.duration});
         window.activeVoices.add(this);window.maxVoices=Math.max(window.maxVoices,window.activeVoices.size);
         this.addEventListener('ended',()=>window.activeVoices.delete(this),{once:true});
@@ -70,7 +70,7 @@ try {
     },file,{timeout:10000});
     const actual=await page.evaluate(()=>window.voiceStarts.at(-1));
     assert.equal(actual.file,file);
-    const expected={konnani:4.226031746,okaeri:4.876190476,anatano:5.944308390,anatanorare:8.266303855,sukositukare:6.965986395,tuginoition:4.690430839};
+    const expected={konnani:4.876190476,okaeri:4.272471655,anatano:5.990748299,neerare:13.188934240,sukositukare:5.479909297,tuginoition:4.411791383};
     assert.ok(Math.abs(actual.duration-expected[file])<.001,'actual supplied WAV must be decoded: '+file);
     console.log('PASS '+file+' actual WAV source playback');
   };
@@ -96,10 +96,10 @@ try {
       await page.evaluate(random=>{Math.random=()=>random;},count===21?.5:.65);
       await character.click();
     }else await replay.click();
-    await voice(count%20===0?'anatanorare':count===21?'sukositukare':'anatano');
-    assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith(count===21?'少し疲れ':'あなたの'),'rare and normal voices must use their matching dialogue');
+    await voice(count%20===0?'neerare':count===21?'sukositukare':'anatano');
+    assert.ok((await page.locator('[data-home-dialogue]').textContent()).startsWith(count%20===0?'……ねえ':count===21?'少し疲れ':'あなたの'),'rare and normal voices must use their matching dialogue');
   }
-  assert.deepEqual(await page.evaluate(()=>window.voiceStarts.slice(1).flatMap((v,i)=>v.file==='anatanorare'?[i+1]:[])),[20,40],'only every twentieth manual play is rare, excluding the greeting');
+  assert.deepEqual(await page.evaluate(()=>window.voiceStarts.slice(1).flatMap((v,i)=>v.file==='neerare'?[i+1]:[])),[20,40],'only every twentieth manual play is rare, excluding the greeting');
   assert.doesNotMatch(await page.locator('#hp-home-screen').textContent(),/20回|レア|rare/i,'hidden bonus must not be advertised');
   assert.equal(await page.evaluate(()=>window.maxVoices),1,'rapid taps must never overlap voices');
   await page.waitForFunction(()=>document.querySelector('#hp-home-screen').dataset.voicePlaying==='false',null,{timeout:10000});
@@ -117,7 +117,7 @@ try {
       await page.evaluate(()=>{Math.random=()=>0;});
       await character.click();
     }else await replay.click();
-    await voice(count===20?'anatanorare':'konnani');
+    await voice(count===20?'neerare':'konnani');
   }
   await page.evaluate(()=>{
     Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));
@@ -150,15 +150,15 @@ try {
     assert.equal(await race.evaluate(()=>window.voiceStarts.at(-1).file),'konnani');
   }
   let failRare=true;
-  await race.route('**/anatanorare.wav*',route=>{
+  await race.route('**/neerare.wav*',route=>{
     if(failRare){failRare=false;return route.fulfill({status:503,body:'Temporary download failure'});}
     return route.continue();
   });
-  const failedRare=race.waitForResponse(r=>r.url().includes('/anatanorare.wav')&&r.status()===503);
+  const failedRare=race.waitForResponse(r=>r.url().includes('/neerare.wav')&&r.status()===503);
   await raceReplay.click();await (await failedRare).finished();await race.waitForTimeout(100);
   assert.equal(await race.evaluate(()=>window.voiceStarts.length),19,'failed voice advanced the bonus counter');
   await raceReplay.click();
-  await race.waitForFunction(()=>window.voiceStarts.length===20&&window.voiceStarts.at(-1).file==='anatanorare');
+  await race.waitForFunction(()=>window.voiceStarts.length===20&&window.voiceStarts.at(-1).file==='neerare');
   assert.ok((await race.locator('[data-home-dialogue]').textContent()).startsWith('あなたの'));
   await raceReplay.click();
   await race.waitForFunction(()=>window.voiceStarts.length===21&&window.voiceStarts.at(-1).file==='anatano');
