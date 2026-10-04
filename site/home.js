@@ -213,6 +213,9 @@
   home.querySelector('[data-notice-page="prev"]')?.addEventListener('click', () => renderNoticePage(noticePage - 1));
   home.querySelector('[data-notice-page="next"]')?.addEventListener('click', () => renderNoticePage(noticePage + 1));
   renderNoticePage(0);
+  new MutationObserver(() => renderNoticePage(0)).observe(
+    home.querySelector('[data-home-notices]'), { childList:true }
+  );
 
   const dialogOverlay = home.querySelector('.hp-home-dialog-overlay');
   const canvas = home.querySelector('[data-home-canvas]');

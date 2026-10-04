@@ -6,6 +6,7 @@
 https://github.com/pianogame/pianogame.github.io/blob/news-feed/news.json
 
 更新時は news-feed 上の news.json を取得し、現在の blob SHA を指定して内容を更新する。main / staging へのマージや Vercel デプロイは不要。
+HTML内の組み込みカードだけを変更しても、取得した配信一覧で上書きされる。告知追加時は必ず news-feed の news.json を更新すること。
 アプリへの取得機構導入は一度デプロイが必要。導入済み端末では、以後、起動時・ホーム復帰時・アプリ復帰時・お知らせを開く時に最新データを取得する。
 
 ## 形式
@@ -32,4 +33,5 @@ https://github.com/pianogame/pianogame.github.io/blob/news-feed/news.json
 - 内容を端末に保存し、通信失敗・不正形式時は最後に取得した正常な内容を保持。初回オフライン時は組み込みの3件を表示。
 - 未読内容があれば ! バッジを表示。お知らせを開くと既読を保存。同じ id のタイトル・本文・タグの変更も未読扱い。
 - 現在表示中のお知らせは、取得完了時にも既読扱いとする。
+- 一覧更新時もページ送り要素と操作を保持し、5件ずつ表示する。再取得時は先頭ページに戻る。
 - news-feed を本体のブランチにマージしないこと。APIキーや個人情報は入れないこと。

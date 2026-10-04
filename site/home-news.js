@@ -5,6 +5,7 @@
   const badge = home?.querySelector('.hp-home-notice-badge');
   const overlay = home?.querySelector('.hp-home-dialog-overlay');
   if (!list || !badge || !overlay) return;
+  const pager = list.querySelector('[data-home-notice-pager]');
 
   // This data-only branch has automatic deployments disabled. Updating it never
   // changes the app build, staging branch, or production branch.
@@ -25,9 +26,9 @@
     });
   }
   let items = [...list.querySelectorAll('article')].map((card, index) => ({
-    id:['planned-screens','planned-characters','planned-game'][index],
+    id:card.dataset.noticeId || 'builtin-notice-' + index,
     title:card.querySelector('h3').innerText,
-    body:card.querySelector('p')?.innerText || '',
+    body:[...card.querySelectorAll('p')].map(p => p.innerText).join(String.fromCharCode(10)),
     tag:card.querySelector('.hp-home-notice-tag').textContent,
   }));
   let seen = read(seenKey);
@@ -59,7 +60,7 @@
     if (!cards.length) {
       const empty = document.createElement('p'); empty.textContent = '現在、新しいお知らせはありません。'; cards.push(empty);
     }
-    list.replaceChildren(...cards);
+    list.replaceChildren(...cards, ...(pager ? [pager] : []));
     updateBadge(); markSeen();
   }
   try { const cached = read(cacheKey); if (cached) render(validate(cached)); } catch (_) {}

@@ -72,12 +72,12 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/violin.js?v=1"></script>
   <script defer src="/key-layout.js?v=14"></script>
   <script defer src="/piano.js?v=38"></script>
-  <script defer src="/home-news.js?v=1"></script>
+  <script defer src="/home-news.js?v=20261004-feedfix"></script>
   <script defer src="/characters.js?v=20261004-character4"></script>
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261004-noticefix2"></script>
+  <script defer src="/home.js?v=20261004-feedfix"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -179,7 +179,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     <section class="hp-home-dialog" role="dialog" aria-modal="true" aria-labelledby="hp-home-dialog-title">
       <header><div><span class="hp-home-dialog-kicker" data-home-dialog-kicker>INFORMATION</span><h2 id="hp-home-dialog-title">お知らせ</h2></div><div class="hp-home-dialog-actions"><button type="button" class="hp-home-dialog-button hp-character-header-action" data-home-action="character-list-back" hidden>← 一覧へ</button><button type="button" class="hp-home-dialog-button hp-character-header-action" data-home-action="set-home-character" hidden>ホームに設定</button><button type="button" class="hp-home-dialog-button" data-home-action="dialog-close">閉じる</button></div></header>
       <div class="hp-home-notices" data-home-notices>
-        <article class="hp-home-notice-card hp-home-notice-maintenance">
+        <article class="hp-home-notice-card hp-home-notice-maintenance" data-notice-id="maintenance-20261004">
           <span class="hp-home-notice-number" aria-hidden="true">01</span>
           <div>
             <span class="hp-home-notice-tag">メンテナンス</span>
@@ -188,9 +188,9 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
             <p>【メンテナンス内容】<br>・ピアノ画面のリニューアル<br>・ホーム画面の追加<br>　— ピアノモードのみ遷移可<br>　— ホーム画面のキャラ（仮）有<br>　— タッチボイス有<br>・タッチ時のエフェクト追加<br>・設定・お知らせ・キャラクター画面追加<br>・音色にバイオリン追加</p>
           </div>
         </article>
-        <article class="hp-home-notice-card"><span class="hp-home-notice-number" aria-hidden="true">04</span><div><span class="hp-home-notice-tag">追加予定</span><h3>ミッション・ランキング・<br>キャラクター画面の追加</h3></div></article>
-        <article class="hp-home-notice-card"><span class="hp-home-notice-number" aria-hidden="true">02</span><div><span class="hp-home-notice-tag">追加予定</span><h3>キャラ追加</h3><p>初期選択の2人のみ<br>（男女1名ずつ）</p></div></article>
-        <article class="hp-home-notice-card"><span class="hp-home-notice-number" aria-hidden="true">03</span><div><span class="hp-home-notice-tag">追加予定</span><h3>ゲームモード追加</h3></div></article>
+        <article class="hp-home-notice-card" data-notice-id="planned-screens"><span class="hp-home-notice-number" aria-hidden="true">04</span><div><span class="hp-home-notice-tag">追加予定</span><h3>ミッション・ランキング・<br>キャラクター画面の追加</h3></div></article>
+        <article class="hp-home-notice-card" data-notice-id="planned-characters"><span class="hp-home-notice-number" aria-hidden="true">02</span><div><span class="hp-home-notice-tag">追加予定</span><h3>キャラ追加</h3><p>初期選択の2人のみ<br>（男女1名ずつ）</p></div></article>
+        <article class="hp-home-notice-card" data-notice-id="planned-game"><span class="hp-home-notice-number" aria-hidden="true">03</span><div><span class="hp-home-notice-tag">追加予定</span><h3>ゲームモード追加</h3></div></article>
         <nav class="hp-home-notice-pager" data-home-notice-pager aria-label="お知らせページ">
           <button type="button" data-notice-page="prev" aria-label="前のページ">‹</button>
           <span data-notice-page-status>1 / 1</span>
