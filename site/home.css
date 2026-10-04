@@ -836,21 +836,6 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-character-preview[data-has-profile-background="true"] {
   box-shadow: inset 0 0 28px #08101f55, 0 5px 16px #03071155;
 }
-#hp-home-screen .hp-character-profile-background {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: 0;
-  pointer-events: none;
-}
-#hp-home-screen .hp-character-preview > canvas,
-#hp-home-screen .hp-character-preview > img:not(.hp-character-profile-background) {
-  position: relative;
-  z-index: 1;
-}
 #hp-home-screen .hp-character-profile {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
