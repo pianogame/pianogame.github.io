@@ -1,4 +1,4 @@
-const CACHE_NAME = 'piano-dream-stage-shell-v65';
+const CACHE_NAME = 'piano-dream-stage-shell-v66';
 const LEGACY_CACHE_PREFIX = 'piano-palette-shell-';
 const CACHE_PREFIX = 'piano-dream-stage-shell-';
 
@@ -61,4 +61,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(networkFirst(request));
+});
+
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
