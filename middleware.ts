@@ -5,8 +5,8 @@ const OWNER_SCOPE = 'pds-prod-owner-preview-v1';
 const PUBLIC_KEY = {
   kty: 'EC',
   crv: 'P-256',
-  x: 's6yISEKxr7WmToiviNOtHDDwSdAeDHKHcpeAKVRls54',
-  y: 'aLcR8tV9o_8s3nkUJD-mXbUpf_IZ1ahbEO9o8hMsUZE',
+  x: 'zbh721wADk_LpYpXnhvrilpt0-z-hoT4LDhWBc53d7s',
+  y: 'K6sOmoofXsDllzn8XUjT74Dklhgncl3MXLzZGoOd5nY',
   ext: true,
 };
 
