@@ -786,12 +786,29 @@
     renderCharacterCredits(selected);
     const characterPreview = home.querySelector('[data-character-preview]');
     if (characterPreview) {
+      let backgroundLayer = characterPreview.querySelector('.hp-character-profile-background');
+      if (!backgroundLayer) {
+        backgroundLayer = document.createElement('img');
+        backgroundLayer.className = 'hp-character-profile-background';
+        backgroundLayer.alt = '';
+        backgroundLayer.setAttribute('aria-hidden', 'true');
+        characterPreview.prepend(backgroundLayer);
+      }
       if (selected.profileBackground) {
         characterPreview.style.setProperty('--character-profile-bg', 'url("' + selected.profileBackground.replace(/"/g, '%22') + '")');
         characterPreview.dataset.hasProfileBackground = 'true';
+        backgroundLayer.src = selected.profileBackground;
+        backgroundLayer.hidden = false;
+        backgroundLayer.onerror = () => {
+          // Retry once without relying on the CSS background pipeline/cache.
+          const retryUrl = selected.profileBackground + (selected.profileBackground.includes('?') ? '&' : '?') + 'profileBgRetry=1';
+          if (backgroundLayer.src !== new URL(retryUrl, location.href).href) backgroundLayer.src = retryUrl;
+        };
       } else {
         characterPreview.style.removeProperty('--character-profile-bg');
         delete characterPreview.dataset.hasProfileBackground;
+        backgroundLayer.removeAttribute('src');
+        backgroundLayer.hidden = true;
       }
     }
     home.querySelector('[data-character-status]').textContent = '';
