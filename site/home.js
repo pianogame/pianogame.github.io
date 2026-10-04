@@ -631,6 +631,7 @@
     characterListScreen.hidden = false;
     characterDetailScreen.hidden = true;
     previewMotion.setActive(false);
+    home.querySelectorAll('.hp-character-header-action').forEach(button => { button.hidden = true; });
     if (focus) home.querySelector('[data-character-choice]')?.focus({ preventScroll:true });
   }
   let detailVoiceSource = null;
@@ -742,6 +743,7 @@
     characterLayout.dataset.characterView = 'detail';
     characterListScreen.hidden = true;
     characterDetailScreen.hidden = false;
+    home.querySelectorAll('.hp-character-header-action').forEach(button => { button.hidden = false; });
     void previewMotion.setCharacter(selected);
     previewMotion.setActive(true);
     syncCharacterSelection();

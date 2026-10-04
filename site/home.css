@@ -1238,3 +1238,18 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
   margin-top: 5px;
   margin-bottom: 6px;
 }
+
+/* 2026-10-04: character detail actions live in the fixed dialog header */
+#hp-home-screen .hp-home-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+#hp-home-screen .hp-character-header-action[hidden] { display: none !important; }
+#hp-home-screen .hp-character-header-action {
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+#hp-home-screen .hp-character-back-overlay { display: none !important; }
