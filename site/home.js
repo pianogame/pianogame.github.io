@@ -802,13 +802,21 @@
     syncCharacterSelection();
   }
   home.querySelector('[data-home-action="character-list-back"]').addEventListener('click', () => {
-    playHomeTapSound();
     showCharacterList({ focus: true });
   });
-  home.querySelector('[data-home-action="set-home-character"]').addEventListener('click', () => {
+  const setHomeCharacterButton = home.querySelector('[data-home-action="set-home-character"]');
+  let setHomeCharacterLocked = false;
+  setHomeCharacterButton.addEventListener('click', () => {
+    if (setHomeCharacterLocked) return;
+    if (characterSettings.getHomeCharacterId() === previewCharacterId) {
+      home.querySelector('[data-character-status]').textContent = 'ホームに設定中です。';
+      return;
+    }
+    setHomeCharacterLocked = true;
     const result = characterSettings.setHomeCharacter(previewCharacterId);
     home.querySelector('[data-character-status]').textContent = result.ok ? 'ホームキャラクターを設定しました。' : result.reason;
     syncCharacterSelection();
+    setTimeout(() => { setHomeCharacterLocked = false; }, 350);
   });
   characterSettings.subscribe(character => {
     stopCharacterVoice();

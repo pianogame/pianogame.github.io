@@ -1201,3 +1201,40 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* 2026-10-04 character detail vertical-space pass */
+#hp-home-screen .hp-character-detail-main {
+  position: relative;
+  min-height: 100%;
+}
+#hp-home-screen .hp-character-detail-toolbar { display: none !important; }
+#hp-home-screen .hp-character-back-overlay {
+  position: absolute;
+  z-index: 12;
+  left: 8px;
+  top: 8px;
+  min-width: 76px;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid #c9aa67;
+  border-radius: 999px;
+  background: linear-gradient(180deg,#fffdf7ee,#e7dbc4ee);
+  color: #473923;
+  box-shadow: 0 2px 8px #0004;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#hp-home-screen .hp-character-info {
+  padding-top: 2px;
+}
+#hp-home-screen .hp-character-profile {
+  margin-top: 4px;
+}
+#hp-home-screen .hp-character-profile-row {
+  padding-block: 5px;
+}
+#hp-home-screen .hp-character-detail-tabs {
+  margin-top: 5px;
+  margin-bottom: 6px;
+}

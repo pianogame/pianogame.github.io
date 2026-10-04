@@ -48,7 +48,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261004-character5">
+  <link rel="stylesheet" href="/home.css?v=20261004-character6">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -66,7 +66,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261004-character5"></script>
+  <script defer src="/home.js?v=20261004-character6"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -193,11 +193,8 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
             <p class="hp-character-empty" data-character-empty hidden>所持しているキャラクターがいません。</p>
           </section>
           <section class="hp-character-detail" data-character-screen="detail" aria-label="キャラクター詳細" hidden>
-            <div class="hp-character-detail-toolbar">
-              <button type="button" class="hp-home-dialog-button hp-character-back" data-home-action="character-list-back">← 一覧へ</button>
-              <span>CHARACTER DETAIL</span>
-            </div>
             <div class="hp-character-detail-main">
+              <button type="button" class="hp-character-back hp-character-back-overlay" data-home-action="character-list-back" aria-label="キャラクター一覧へ戻る">← 一覧へ</button>
               <div class="hp-character-preview" data-character-preview aria-hidden="true"></div>
               <div class="hp-character-info">
                 <span class="hp-character-detail-label">CHARACTER</span>
