@@ -246,6 +246,13 @@ if os.environ.get("GITHUB_ACTIONS") == "true":
 # Vercel: publish the actual app at the project root.
 shutil.copytree(ROOT / "site", OUT, dirs_exist_ok=True)
 
+# Character voice WAV files live directly in site/audio and are not part of the
+# legacy sample bundles below. Preserve them when the bundle is expanded.
+character_voice_backup = {
+    path.relative_to(OUT / "audio"): path.read_bytes()
+    for path in (OUT / "audio").rglob("*.wav")
+}
+
 # Generate every install icon from the exact 180x180 image shown on the install screen.
 # This avoids iOS/manifest choosing a different historical icon asset.
 import struct
@@ -519,6 +526,14 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
                 raise ValueError(f"Unexpected archive path: {entry.filename}")
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(entry))
+
+# The legacy sample archive may replace the audio directory contents. Restore
+# character voice WAVs copied from site/ so build validation and runtime both
+# receive the current character voices.
+for relative_path, data in character_voice_backup.items():
+    target = OUT / "audio" / relative_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(data)
 
 # Validate every absolute /audio/... URL referenced by JavaScript after the sample bundles
 # have been expanded into the Vercel output directory.
