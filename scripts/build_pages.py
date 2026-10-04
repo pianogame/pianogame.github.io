@@ -525,6 +525,11 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
 for js_path in sorted(OUT.glob("*.js")):
     source = js_path.read_text(encoding="utf-8")
     for asset in set(re.findall(r'[\'"](/audio/[^\'"?]+)', source)):
+        # Character voice-set base paths may exist before that character receives
+        # recorded voice files. Only concrete audio-file references are required
+        # to exist at build time.
+        if Path(asset).suffix.lower() not in {".wav", ".m4a", ".mp3", ".aac", ".ogg"}:
+            continue
         target = OUT / asset.lstrip("/")
         if not target.is_file():
             raise ValueError(f"Missing referenced audio asset: {asset} (from {js_path.name})")
