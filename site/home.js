@@ -171,6 +171,26 @@
     });
   });
 
+  const noticePageSize = 5;
+  let noticePage = 0;
+  function renderNoticePage(page = noticePage) {
+    const cards = [...home.querySelectorAll('[data-home-notices] .hp-home-notice-card')];
+    const pages = Math.max(1, Math.ceil(cards.length / noticePageSize));
+    noticePage = Math.max(0, Math.min(pages - 1, page));
+    cards.forEach((card, index) => { card.hidden = Math.floor(index / noticePageSize) !== noticePage; });
+    const status = home.querySelector('[data-notice-page-status]');
+    const prev = home.querySelector('[data-notice-page="prev"]');
+    const next = home.querySelector('[data-notice-page="next"]');
+    if (status) status.textContent = (noticePage + 1) + ' / ' + pages;
+    if (prev) prev.disabled = noticePage === 0;
+    if (next) next.disabled = noticePage >= pages - 1;
+    const pager = home.querySelector('[data-home-notice-pager]');
+    if (pager) pager.hidden = pages <= 1;
+  }
+  home.querySelector('[data-notice-page="prev"]')?.addEventListener('click', () => renderNoticePage(noticePage - 1));
+  home.querySelector('[data-notice-page="next"]')?.addEventListener('click', () => renderNoticePage(noticePage + 1));
+  renderNoticePage(0);
+
   const dialogOverlay = home.querySelector('.hp-home-dialog-overlay');
   const canvas = home.querySelector('[data-home-canvas]');
   const homeVolume = home.querySelector('[data-home-volume]');
@@ -202,6 +222,7 @@
       dialogOverlay.dataset.screen = action;
       if (action === 'characters') renderCharacterScreen();
       if (action === 'settings') renderGlobalCharacterCredits();
+      if (action === 'notice') renderNoticePage(0);
       syncHomeVolume();
       canvas.inert = true;
       dialogOverlay.hidden = false;
