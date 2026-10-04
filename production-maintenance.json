@@ -1,5 +1,5 @@
 {
-  "staging_sha": "68fa95fea5c7767f2d44e87578d005d96533955e",
+  "staging_sha": "0e6fc0f1e3dd86b73c5dadee0dc65ebbcedda6c8",
   "files": {
     "scripts/build_pages.py": "ccf464fc1050c37d0717954418ff5c4b6e5b2e92",
     "site/.nojekyll": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
@@ -105,12 +105,12 @@
     "site/home-bgm.js": "95c54257688e463d7628d9325f7924f82b1e9ab8",
     "site/home-news.js": "9a4c7cef9187235ef3653acfc7052f161c414a37",
     "site/home-stage.jpg": "edf83a0a8f5b2c9d3bac315038f026ddff21c73b",
-    "site/home.css": "04963bb18dffd604cd0650bcd1e254142bfc669a",
-    "site/home.js": "467ee0af6d62c7733f0b9df0e1ee6d288e7426bc",
+    "site/home.css": "5a58eedeb2c9b3d355092e833d15b29427bb08ca",
+    "site/home.js": "a165eca483c23d66dd0ba057cbf6dc81feb038c7",
     "site/icons/piano-180.png": "987668e20d2486f2838cbfe956f451be7fdbaa38",
     "site/icons/piano-192.png": "2596b17dbd747c723353135e63cc52beb0b0b9ef",
     "site/icons/piano-512.png": "6beb159068acf47b8b5206f43f3620b90356713c",
-    "site/index.html": "8260a105c6285eb66db9724d9788bc4181423d47",
+    "site/index.html": "45017c2b515d99e79f1d4e4ae12232e9a3e8c566",
     "site/install-v22/index.html": "ca61469dcf4bbf2a514683f987eba9377c760a1d",
     "site/install-v22/piano-dream-stage-touch-v22.png": "6fe4ab3385323fee8f5c2566b1c2b7f2b74b6ed6",
     "site/install-v23/index.html": "9e041d56f43f5bbf8ac5b10df9df13d9dd90ce4b",
@@ -137,7 +137,7 @@
     "site/playability.js": "a7aad5fa277ad36adba475f031152d867e14c9fc",
     "site/rotation-guide.js": "604b9bb754e9f109bc1ebe6a9841de6a6542f438",
     "site/sound-settings.js": "53844af1e1bc99072f92b244557ed31c20ccbafb",
-    "site/sw.js": "d76d204e385476df4e2ec487737c83e5f38276d9",
+    "site/sw.js": "857ca9766610637092b73fa1b54c05b2a49784ea",
     "site/usage-analytics.js": "0bc13a57159bdfc054409321c3bf809ca29af53c",
     "site/violin-samples.js": "00845f8de2f058b486090099a302805b310bb2c0",
     "site/violin.js": "3a5a030a027cb9764e964aebfc1c72b341efe4b7"
