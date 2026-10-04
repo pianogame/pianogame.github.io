@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "python3 scripts/build_pages.py",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then node scripts/verify_production_maintenance.cjs || exit 1; fi; python3 scripts/build_pages.py",
   "outputDirectory": "_site",
   "headers": [
     {
