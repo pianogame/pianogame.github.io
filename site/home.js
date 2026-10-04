@@ -738,6 +738,10 @@
     const owned = registry.isOwned ? registry.isOwned(selected) : selected?.available === true;
     if (!selected || !owned) return;
     previewCharacterId = id;
+    // Escalate the selected profile artwork immediately on tap. The detail view
+    // can render without waiting, while the retained preload prevents a second
+    // CSS-background fetch/decode and removes the intermittent blank frame.
+    void preloadCharacterArt(selected, 'high');
     home.querySelector('[data-character-name]').textContent = selected.name;
     home.querySelector('[data-character-reading]').textContent = selected.reading ? '（' + selected.reading + '）' : '';
     home.querySelector('[data-character-description]').textContent = selected.description || '';
@@ -802,20 +806,34 @@
     syncCharacterSelection();
     home.querySelector('[data-home-action="character-list-back"]')?.focus({ preventScroll:true });
   }
+  // Keep decoded character artwork strongly referenced. iOS Safari can evict an
+  // image that was only warmed by a temporary Image object, which made profile
+  // CSS backgrounds occasionally appear late or not at all.
   const characterArtPreloads = new Map();
-  function preloadCharacterArt(character) {
-    if (!character) return Promise.resolve();
-    const urls = [character.listImage, character.profileBackground, character.previewImage].filter(Boolean);
+  const characterArtImages = new Map();
+  function preloadCharacterArt(character, priority = 'auto') {
+    if (!character) return Promise.resolve([]);
+    const urls = [character.profileBackground, character.listImage, character.previewImage].filter(Boolean);
     return Promise.all(urls.map(url => {
-      if (characterArtPreloads.has(url)) return characterArtPreloads.get(url);
+      if (characterArtPreloads.has(url)) {
+        const image = characterArtImages.get(url);
+        if (image && priority === 'high') {
+          try { image.fetchPriority = 'high'; } catch (_) {}
+        }
+        return characterArtPreloads.get(url);
+      }
+      const image = new Image();
+      image.decoding = 'async';
+      image.loading = 'eager';
+      try { image.fetchPriority = priority; } catch (_) {}
+      characterArtImages.set(url, image);
       const task = new Promise(resolve => {
-        const image = new Image();
-        image.decoding = 'async';
+        const finish = () => resolve(image);
         image.onload = () => {
           const decoded = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
-          decoded.finally(resolve);
+          decoded.finally(finish);
         };
-        image.onerror = resolve;
+        image.onerror = finish;
         image.src = url;
       });
       characterArtPreloads.set(url, task);
