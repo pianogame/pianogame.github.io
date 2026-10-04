@@ -727,10 +727,37 @@
     syncCharacterSelection();
     home.querySelector('[data-home-action="character-list-back"]')?.focus({ preventScroll:true });
   }
+  const characterArtPreloads = new Map();
+  function preloadCharacterArt(character) {
+    if (!character) return Promise.resolve();
+    const urls = [character.listImage, character.profileBackground, character.previewImage].filter(Boolean);
+    return Promise.all(urls.map(url => {
+      if (characterArtPreloads.has(url)) return characterArtPreloads.get(url);
+      const task = new Promise(resolve => {
+        const image = new Image();
+        image.decoding = 'async';
+        image.onload = () => {
+          const decoded = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
+          decoded.finally(resolve);
+        };
+        image.onerror = resolve;
+        image.src = url;
+      });
+      characterArtPreloads.set(url, task);
+      return task;
+    }));
+  }
+  function preloadOwnedCharacterAssets() {
+    ownedCharacters().forEach(character => {
+      void preloadCharacterArt(character);
+      void window.HP_MOTION_CHARACTER?.preload?.(character).catch(() => {});
+    });
+  }
+
   function renderCharacterScreen() {
     const list = home.querySelector('[data-character-list]');
     const characters = ownedCharacters();
-    characters.forEach(character => { void window.HP_MOTION_CHARACTER?.preload?.(character).catch(() => {}); });
+    characters.forEach(character => { void preloadCharacterArt(character); void window.HP_MOTION_CHARACTER?.preload?.(character).catch(() => {}); });
     home.querySelector('[data-character-owned-count]').textContent = characters.length + '人';
     home.querySelector('[data-character-empty]').hidden = characters.length !== 0;
     list.hidden = characters.length === 0;
@@ -774,6 +801,14 @@
   });
   showMessage(0, false);
   syncCharacterVoice();
+  // Warm every owned character's list art, profile background and Motion layers
+  // while the home screen is idle, so opening the selector/detail is instant.
+  const scheduleCharacterPreload = () => {
+    if ('requestIdleCallback' in window) requestIdleCallback(preloadOwnedCharacterAssets, { timeout: 700 });
+    else setTimeout(preloadOwnedCharacterAssets, 120);
+  };
+  scheduleCharacterPreload();
+  window.addEventListener('hp-curtain-start', scheduleCharacterPreload, { once: true });
 
   function clearGamePreview() {
     window.clearTimeout(gamePreviewTimer);
