@@ -18,11 +18,9 @@
   const MAX_TRACKS = 30, MAX_SECONDS = 120, MAX_NOTES = 1500;
   const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const isStandalone=window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
-  const stageStateKey='piano-palette-stage-open-v1';
-  const exportResumeKey='piano-palette-export-resume-until-v1';
 
   let tracks = [];
-  let groupMutes = {piano:false,bass:false,guitar:false};
+  let groupMutes = {piano:false,bass:false,guitar:false,violin:false};
   let takeNumber = 1;
   let recording = null, recordingStartedAt = 0, recordingTimer = null;
   let playing = false, playbackEndTimer = null, playbackSources = [], playbackBuses = [];
@@ -42,9 +40,11 @@
       tracks=saved.tracks.slice(0,MAX_TRACKS).filter(t=>instruments[t.instrument]&&Array.isArray(t.notes)).map(t=>({
         id:String(t.id),instrument:t.instrument,name:String(t.name||instrumentName(t.instrument)).slice(0,64),muted:!!t.muted,
         duration:clamp(t.duration,0,MAX_SECONDS),
+        ...(t.instrument==='violin'?{violin:window.HP_VIOLIN.sanitise(t.violin)}:{}),
         cuts:Array.isArray(t.cuts)?t.cuts.map(value=>clamp(value,0,MAX_SECONDS)).filter(Number.isFinite).sort((a,b)=>a-b):[],
         notes:t.notes.slice(0,MAX_NOTES).filter(n=>Number.isFinite(n.midi)&&n.midi>=18&&n.midi<=108).map(n=>({
-          midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain,cut:!!n.cut
+          midi:Math.round(n.midi),start:clamp(n.start,0,MAX_SECONDS),duration:clamp(n.duration,.015,MAX_SECONDS),release:clamp(n.release,.01,10),sustain:!!n.sustain,cut:!!n.cut,
+          ...(t.instrument==='violin'?{violin:window.HP_VIOLIN.sanitise(n.violin||t.violin)}:{})
         }))
       }));
       for(const id of Object.keys(groupMutes))groupMutes[id]=!!saved.groupMutes?.[id];
@@ -60,7 +60,7 @@
   // The launch curtain is owned by rotation-guide.js. Keep multitrack focused on recording UI.
 
   const trackButton=document.createElement('button');
-  trackButton.type='button';trackButton.className='hp-control';trackButton.textContent='🎚 録音一覧';trackButton.setAttribute('aria-expanded','false');
+  trackButton.type='button';trackButton.className='hp-control';trackButton.innerHTML='<svg class="hp-ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h12v2H2Zm0 5h9v2H2Zm0 5h6v2H2Zm14-7v10c-1.2-.7-4-.7-5.1.7-2 2.5.9 5 3.8 3.9 1.9-.7 3.3-2.2 3.3-4.1V9l5-1.4V3Z"/></svg> 録音一覧';trackButton.setAttribute('aria-expanded','false');
   root.querySelector('.hp-toolbar').insertBefore(trackButton,action('display-mode'));
   const panel=document.createElement('section');panel.className='hp-track-panel';panel.hidden=true;panel.setAttribute('aria-label','楽器別録音と保存');surface.append(panel);
   function setTrackPanel(open){
@@ -80,6 +80,7 @@
   const isAudible=track=>!track.muted&&!groupMutes[track.instrument];
   const audibleTracks=()=>tracks.filter(track=>track.notes.length&&isAudible(track));
   function updatePlayButton(){
+    playButton.setAttribute('aria-pressed',String(playing&&!recording));
     if(recording){
       playButton.disabled=true;
       playButton.textContent=playing?'♪ 伴奏再生中':'▶ 全再生';
@@ -165,6 +166,7 @@
 
     const id=instrumentControl.value;
     recording={id:'take-'+Date.now()+'-'+takeNumber,instrument:id,name:instrumentName(id)+' '+takeNumber+'回目',muted:false,duration:0,cuts:[],notes:[]};
+    if(id==='violin')recording.violin=window.HP_VIOLIN.snapshot();
     takeNumber++;activeRecordedNotes.clear();
 
     const lead=selected.length?.12:0;
@@ -214,6 +216,7 @@
     if(!recording||activeRecordedNotes.has(token)||token==='audition')return;
     if(recording.notes.length>=MAX_NOTES){finishRecording();return;}
     const note={midi,start:clamp(startedAt-recordingStartedAt,0,MAX_SECONDS),duration:.06,release:clamp(releaseControl.value,.01,10),sustain:sustainButton.getAttribute('aria-pressed')==='true',cut:false};
+    if(recording.instrument==='violin')note.violin=window.HP_VIOLIN.snapshot();
     recording.notes.push(note);activeRecordedNotes.set(token,{note,startedAt});
   }
   function endRecordedNote(token,endedAt=now(),cut=false){
@@ -229,7 +232,6 @@
   root.addEventListener('hp-note-on',event=>beginRecordedNote(event.detail.token,event.detail.midi));
   root.addEventListener('hp-note-off',event=>endRecordedNote(event.detail.token));
   root.addEventListener('hp-stop-sound',()=>{
-    stopPlayback();
     const stoppedAt=now();
     if(recording){
       const cutAt=clamp(stoppedAt-recordingStartedAt,0,MAX_SECONDS);
@@ -270,7 +272,8 @@
     if(engine.state!=='running')throw new Error('音声を開始できません。もう一度再生をタップしてください');
   }
   function nearestMidi(id,midi){let best=instruments[id].samples[0].midi;for(const sample of instruments[id].samples)if(Math.abs(sample.midi-midi)<Math.abs(best-midi))best=sample.midi;return best;}
-  function descriptorFor(id,midi,purpose='load'){
+  function descriptorFor(id,midi,purpose='load',settings){
+    if(id==='violin')return window.HP_VIOLIN.descriptor(instruments.violin.samples,midi,settings);
     const anchor=nearestMidi(id,midi),variants=instruments[id].samples.filter(sample=>sample.midi===anchor);
     const key=id+':'+purpose+':'+anchor,index=roundRobin.get(key)||0;roundRobin.set(key,index+1);return variants[index%variants.length];
   }
@@ -279,10 +282,11 @@
     const decoded=await engine.decodeAudioData(await response.arrayBuffer());sampleBuffers.set(url,decoded);return decoded;
   }
   async function preload(selected){
-    const urls=new Set();for(const track of selected)for(const note of track.notes){const anchor=nearestMidi(track.instrument,note.midi);for(const sample of instruments[track.instrument].samples.filter(s=>s.midi===anchor))urls.add(sample.url);}
+    const urls=new Set();for(const track of selected)for(const note of track.notes){const descriptor=descriptorFor(track.instrument,note.midi,'load',note.violin||track.violin),anchor=descriptor.midi;for(const sample of instruments[track.instrument].samples.filter(s=>s.midi===anchor&&(track.instrument!=='violin'||s.articulation===descriptor.articulation)))urls.add(sample.url);}
     const list=[...urls];let cursor=0;await Promise.all(Array.from({length:Math.min(4,list.length)},async()=>{while(cursor<list.length)await getSampleBuffer(list[cursor++]);}));
   }
   function noteSoundLength(track,note){
+    if(track.instrument==='violin')return clamp(note.duration,.015,MAX_SECONDS)+(note.sustain?1.2:clamp(note.release,.01,10));
     const anchor=nearestMidi(track.instrument,note.midi);
     const descriptor=instruments[track.instrument].samples.find(sample=>sample.midi===anchor&&sampleBuffers.has(sample.url));
     const buffer=descriptor&&sampleBuffers.get(descriptor.url);
@@ -300,6 +304,16 @@
     }));
   }
   function scheduleNote(context,target,track,note,when,sourceList){
+    if(track.instrument==='violin'){
+      const settings=window.HP_VIOLIN.sanitise(note.violin||track.violin),d=descriptorFor('violin',note.midi,'play',settings),buffer=sampleBuffers.get(d.url);
+      if(!buffer)return;
+      const voice=window.HP_VIOLIN.createVoice(context,window.HP_VIOLIN.route(context,target,settings),d,buffer,note.midi,when,settings,instruments.violin.gain*.65);
+      const heldFor=clamp(note.duration,.015,MAX_SECONDS);
+      voice.release(when+heldFor,note.cut?.02:note.sustain?1.2:clamp(note.release,.01,10));
+      const cut=(track.cuts||[]).find(value=>Number.isFinite(value)&&value>note.start+.001);
+      if(Number.isFinite(cut))voice.release(when+Math.max(.001,cut-note.start),.02);
+      if(sourceList)sourceList.push(voice.source);return;
+    }
     const descriptor=descriptorFor(track.instrument,note.midi,'play'),buffer=sampleBuffers.get(descriptor.url);if(!buffer)return;
     const source=context.createBufferSource(),envelope=context.createGain();source.buffer=buffer;source.playbackRate.value=Math.pow(2,(note.midi-descriptor.midi)/12);
     const level=clamp(instruments[track.instrument].gain*.65,0,2),heldFor=clamp(note.duration,.015,MAX_SECONDS),releaseFor=note.cut?.02:clamp(note.release,.01,10);
@@ -339,7 +353,7 @@
   function applyLiveMutes(){if(!engine)return;for(const item of playbackBuses)item.bus.gain.setTargetAtTime(isAudible(item.track)?1:0,engine.currentTime,.008);}
   function stopPlayback(){
     playing=false;clearTimeout(playbackEndTimer);playbackEndTimer=null;for(const source of playbackSources){try{source.stop();}catch(_){}}playbackSources=[];
-    for(const item of playbackBuses){try{item.bus.disconnect();}catch(_){}}playbackBuses=[];updatePlayButton();
+    for(const item of playbackBuses){try{window.HP_VIOLIN.disposeTarget(item.bus);item.bus.disconnect();}catch(_){}}playbackBuses=[];updatePlayButton();
   }
   async function startPlayback(){
     if(recording)finishRecording();const selected=audibleTracks();if(!selected.length){say('再生する録音がありません。ミュート設定を確認してください。',true);return;}if(busy)return;
@@ -364,7 +378,6 @@
     return new File([blob],name,{type:blob.type||'application/octet-stream'});
   }
   function downloadFile(file){
-    rememberExportResume();
     const link=document.createElement('a'),url=URL.createObjectURL(file);
     link.href=url;link.download=file.name;document.body.append(link);link.click();link.remove();
     setTimeout(()=>URL.revokeObjectURL(url),60000);
@@ -425,6 +438,7 @@
       const offline=new Offline(2,Math.ceil((duration+renderLead)*sampleRate),sampleRate),out=offline.createGain();out.gain.value=clamp(volumeControl.value,0,100)/100*.55;out.connect(offline.destination);
       for(const track of selected)for(const note of track.notes)scheduleNote(offline,out,track,note,renderLead+note.start,null);
       const rendered=await offline.startRendering();
+      window.HP_VIOLIN.disposeTarget(out);
       let blob,extension=format;
       if(format==='wav')blob=encodeWav(rendered);
       else if(format==='mp3')blob=await encodeWithMediaRecorder(rendered,'audio/mpeg','MP3');

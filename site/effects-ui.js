@@ -100,7 +100,7 @@
   window.HP_EFFECTS_UI={
     state,
     attach(audioContext){engine=api.createEngine(audioContext,message=>status.textContent=message);void apply();return engine;},
-    async setInstrument(id){instrument=id;host.hidden=id==='piano';bassPanel.hidden=id!=='bass';guitarPanel.hidden=id!=='guitar';await apply();},
+    async setInstrument(id){instrument=id;host.hidden=id==='piano'||id==='violin';bassPanel.hidden=id!=='bass';guitarPanel.hidden=id!=='guitar';await apply();},
     setReady(ready){audition.disabled=!ready;},
     get engine(){return engine;}
   };

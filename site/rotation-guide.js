@@ -5,15 +5,15 @@
 
     const style=document.createElement('style');
     style.textContent=`
-      body.hp-booting #hp-viewport{visibility:hidden!important}
-      #hp-opening-sequence{position:fixed;inset:0;z-index:10000;overflow:hidden;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
+      #hp-opening-sequence{position:fixed;left:0;top:0;right:auto;bottom:auto;width:var(--hp-opening-width,100vw);height:var(--hp-opening-height,100dvh);z-index:10000;overflow:hidden;background:#120713;font-family:"Times New Roman","Hiragino Mincho ProN","Yu Mincho",serif}
       #hp-opening-sequence[hidden]{display:none!important}
       .hp-opening-orientation,.hp-opening-title{position:absolute;inset:0;display:grid;place-items:center;box-sizing:border-box}
       .hp-opening-orientation{z-index:3;padding:28px;background:#fff;color:#29242c;text-align:center;opacity:1;transition:opacity .28s ease;touch-action:none;user-select:none;-webkit-user-select:none;overflow:hidden}
       .hp-opening-orientation.hp-ready{cursor:grab}
       .hp-opening-orientation.hp-gesture-active{cursor:grabbing}
       .hp-opening-orientation.hp-leave{opacity:0;pointer-events:none}
-      .hp-opening-orientation-inner{position:relative;z-index:4;max-width:620px;transition:transform .36s ease,opacity .28s ease}
+      .hp-opening-orientation-inner{position:relative;z-index:4;max-width:620px;transition:transform .36s ease,opacity .18s ease}
+      #hp-opening-sequence.hp-layout-pending .hp-opening-orientation-inner{opacity:0!important;transition:none!important}
       .hp-opening-orientation.hp-ready .hp-opening-phone{animation:none;transform:rotate(90deg)}
       .hp-opening-orientation.hp-ready .hp-opening-orientation-inner{transform:scale(1.02)}
       .hp-ready-main{display:none}
@@ -56,6 +56,7 @@
 
     const opening=document.createElement('div');
     opening.id='hp-opening-sequence';
+    opening.classList.add('hp-layout-pending');
     opening.innerHTML=`
       <section class="hp-opening-orientation" aria-label="横画面のご案内">
         <div class="hp-opening-orientation-inner">
@@ -75,6 +76,80 @@
         <div class="hp-opening-logo"><span class="hp-opening-en">Piano Dream Stage</span><span class="hp-opening-jp">ピアノドリームステージ</span><span class="hp-opening-tap">Tap Curtain Start</span></div>
       </section>`;
     document.body.append(opening);
+    function measureOpeningBounds() {
+      const bounds=window.HP_VIEWPORT_BOUNDS?.();
+      const v=window.visualViewport;
+      let width=bounds?.width||Math.max(innerWidth,(v?.width||0)+(v?.offsetLeft||0));
+      let height=bounds?.height||Math.max(innerHeight,(v?.height||0)+(v?.offsetTop||0));
+      const installed=navigator.standalone===true;
+      // iOS can keep CSS vh and the layout viewport at the pre-launch height.
+      // Only use screen dimensions when they describe this installed full screen.
+      if(installed&&screen.width&&screen.height) {
+        const shortSide=Math.min(screen.width,screen.height),longSide=Math.max(screen.width,screen.height);
+        if(Math.abs(longSide-width)<=2)height=shortSide;
+        else if(Math.abs(shortSide-width)<=2)height=longSide;
+      }
+      opening.style.setProperty('--hp-opening-width',Math.ceil(width)+'px');
+      opening.style.setProperty('--hp-opening-height',Math.ceil(height)+'px');
+    }
+    measureOpeningBounds();
+
+    // iOS standalone can report several transient viewport geometries during
+    // cold launch. Keep only the white cover visible until geometry is stable
+    // for several consecutive samples, then reveal the orientation content.
+    let layoutGateDone=false;
+    let layoutGateTimer=0;
+    let layoutGateStartedAt=performance.now();
+    let layoutStableCount=0;
+    let layoutLastSignature='';
+    const viewportSignature=()=>{
+      const v=window.visualViewport;
+      const values=[
+        Math.round(window.innerWidth||0),
+        Math.round(window.innerHeight||0),
+        Math.round(v?.width||0),
+        Math.round(v?.height||0),
+        Math.round(v?.offsetLeft||0),
+        Math.round(v?.offsetTop||0),
+        Math.round(document.documentElement.clientWidth||0),
+        Math.round(document.documentElement.clientHeight||0)
+      ];
+      return values.join(':');
+    };
+    const finishLayoutGate=()=>{
+      if(layoutGateDone)return;
+      layoutGateDone=true;
+      clearTimeout(layoutGateTimer);
+      opening.dataset.layoutStable='true';
+      requestAnimationFrame(()=>{
+        opening.classList.remove('hp-layout-pending');
+        maybeArmPreparation();
+      });
+    };
+    const sampleLayoutGate=()=>{
+      if(layoutGateDone)return;
+      const signature=viewportSignature();
+      if(signature===layoutLastSignature)layoutStableCount+=1;
+      else{
+        layoutLastSignature=signature;
+        layoutStableCount=0;
+      }
+      const elapsed=performance.now()-layoutGateStartedAt;
+      if((layoutStableCount>=3&&elapsed>=140)||elapsed>=900){
+        finishLayoutGate();
+        return;
+      }
+      layoutGateTimer=setTimeout(sampleLayoutGate,55);
+    };
+    const restartLayoutGate=()=>{
+      if(layoutGateDone)return;
+      layoutStableCount=0;
+      layoutLastSignature='';
+      layoutGateStartedAt=performance.now();
+      clearTimeout(layoutGateTimer);
+      layoutGateTimer=setTimeout(sampleLayoutGate,45);
+    };
+    requestAnimationFrame(()=>requestAnimationFrame(restartLayoutGate));
 
     const orientation=opening.querySelector('.hp-opening-orientation');
     const title=opening.querySelector('.hp-opening-title');
@@ -89,6 +164,7 @@
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const openingAudioContext=AudioContextClass?new AudioContextClass():null;
     let bgmBuffer=null,voiceBuffer=null,tapSeBuffer=null,swipeSeBuffer=null,bgmSource=null,voiceSource=null,bgmGain=null,voiceGain=null;
+    let releaseVoiceVolume=()=>{};
 
     async function decodeAudio(url){
       if(!openingAudioContext)return null;
@@ -118,12 +194,14 @@
       try{
         const source=openingAudioContext.createBufferSource();
         const gain=openingAudioContext.createGain();
+        const volume=openingAudioContext.createGain();
+        const unbind=window.HP_SOUND_SETTINGS.bind('effects',volume);
         gain.gain.setValueAtTime(level,openingAudioContext.currentTime);
         source.buffer=buffer;
         source.connect(gain);
-        gain.connect(openingAudioContext.destination);
+        gain.connect(volume);volume.connect(openingAudioContext.destination);
         source.start();
-        source.onended=()=>{try{source.disconnect();gain.disconnect();}catch(_){}};
+        source.onended=()=>{unbind();try{source.disconnect();gain.disconnect();volume.disconnect();}catch(_){}};
       }catch(_){}
     }
 
@@ -179,7 +257,10 @@
 
         voiceGain=openingAudioContext.createGain();
         voiceGain.gain.setValueAtTime(1.70,now);
-        voiceGain.connect(openingAudioContext.destination);
+        const voiceVolume=openingAudioContext.createGain();
+        const unbindVoice=window.HP_SOUND_SETTINGS.bind('voice',voiceVolume);
+        voiceGain.connect(voiceVolume);voiceVolume.connect(openingAudioContext.destination);
+        releaseVoiceVolume=()=>{unbindVoice();voiceVolume.disconnect();};
 
         voiceSource=openingAudioContext.createBufferSource();
         voiceSource.buffer=voiceBuffer;
@@ -212,7 +293,8 @@
     function stopOpeningVoice(){
       try{voiceSource?.stop();}catch(_){}
       try{voiceSource?.disconnect();}catch(_){}
-      try{voiceGain?.disconnect();}catch(_){}
+      try{releaseVoiceVolume();voiceGain?.disconnect();}catch(_){}
+      releaseVoiceVolume=()=>{};
       voiceSource=null;
       voiceGain=null;
     }
@@ -246,6 +328,7 @@
 
     function chime(){
       const audio=tapAudios[Math.floor(Math.random()*tapAudios.length)];
+      audio.volume=.9*window.HP_SOUND_SETTINGS.get('effects');
       try{audio.currentTime=0;const p=audio.play();p?.catch(()=>{});}catch(_){}
     }
 
@@ -281,12 +364,14 @@
     sizeRippleCanvas();
     const rippleResizeObserver=window.ResizeObserver?new ResizeObserver(sizeRippleCanvas):null;
     rippleResizeObserver?.observe(opening);
-    window.addEventListener('resize',sizeRippleCanvas);
-    window.visualViewport?.addEventListener('resize',sizeRippleCanvas);
-    window.addEventListener('pageshow',sizeRippleCanvas);
-    requestAnimationFrame(()=>requestAnimationFrame(sizeRippleCanvas));
-    setTimeout(sizeRippleCanvas,120);
-    setTimeout(sizeRippleCanvas,360);
+    const refreshOpeningViewport=()=>{measureOpeningBounds();sizeRippleCanvas();};
+    window.addEventListener('resize',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.addEventListener('orientationchange',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.visualViewport?.addEventListener('resize',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.addEventListener('pageshow',()=>{refreshOpeningViewport();restartLayoutGate();});
+    window.addEventListener('focus',()=>{refreshOpeningViewport();restartLayoutGate();});
+    requestAnimationFrame(()=>requestAnimationFrame(refreshOpeningViewport));
+    [80,220,500,900,1400].forEach(delay=>setTimeout(refreshOpeningViewport,delay));
 
     const clamp01=value=>Math.max(0,Math.min(1,value));
     const easeOut=value=>1-Math.pow(1-clamp01(value),3);
@@ -471,7 +556,7 @@
 
     let gesturePointerId=null,gestureStartX=0,gestureStartY=0,landscapeReached=false;
     function maybeArmPreparation(){
-      if(started||!landscapeReached)return;
+      if(started||!landscapeReached||!layoutGateDone)return;
       orientation.classList.add('hp-loading');
       if(audioLoadFailed)return;
       if(!audioReady)return;
@@ -497,6 +582,9 @@
       orientation.classList.add('hp-ripple-release');
       playReleaseRipple();
       setTimeout(()=>{
+        document.documentElement.classList.remove('hp-opening-orientation-bg');
+        document.documentElement.classList.add('hp-opening-curtain-bg');
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#45102d');
         orientation.hidden=true;
         title.classList.add('hp-show');
       },520);
@@ -570,7 +658,13 @@
       window.dispatchEvent(new Event('hp-curtain-start'));
       title.classList.add('hp-curtain-open');
       setTimeout(()=>{document.body.classList.remove('hp-booting');opening.style.transition='opacity .65s ease';opening.style.opacity='0';},1250);
-      setTimeout(()=>{rippleResizeObserver?.disconnect();opening.remove();},1950);
+      setTimeout(()=>{
+        rippleResizeObserver?.disconnect();
+        clearTimeout(layoutGateTimer);
+        opening.remove();
+        document.documentElement.classList.remove('hp-opening-orientation-bg','hp-opening-curtain-bg');
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content','#241324');
+      },1950);
     },{once:true});
 
     window.addEventListener('resize',armPreparation);

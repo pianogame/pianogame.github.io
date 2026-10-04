@@ -172,7 +172,9 @@ def _verify_app_sources():
         raise ValueError("Initial musical ripple must fade out quickly and smoothly instead of disappearing abruptly")
     if "const cx=rippleWidth/2;" not in opening_source or "const cy=rippleHeight/2;" not in opening_source:
         raise ValueError("Musical ripple origin must be fixed to the rendered canvas center")
-    if "new ResizeObserver(sizeRippleCanvas)" not in opening_source or "visualViewport?.addEventListener('resize',sizeRippleCanvas)" not in opening_source:
+    if "new ResizeObserver(sizeRippleCanvas)" not in opening_source:
+        raise ValueError("Ripple canvas must track rendered opening size")
+    if "visualViewport?.addEventListener('resize'" not in opening_source or "refreshOpeningViewport()" not in opening_source:
         raise ValueError("Ripple canvas must track real viewport size on landscape launch")
     if "opening.getBoundingClientRect()" not in opening_source:
         raise ValueError("Ripple canvas must size from the rendered opening layer")
@@ -243,6 +245,13 @@ if os.environ.get("GITHUB_ACTIONS") == "true":
 
 # Vercel: publish the actual app at the project root.
 shutil.copytree(ROOT / "site", OUT, dirs_exist_ok=True)
+
+# Character voice WAV files live directly in site/audio and are not part of the
+# legacy sample bundles below. Preserve them when the bundle is expanded.
+character_voice_backup = {
+    path.relative_to(OUT / "audio"): path.read_bytes()
+    for path in (OUT / "audio").rglob("*.wav")
+}
 
 # Generate every install icon from the exact 180x180 image shown on the install screen.
 # This avoids iOS/manifest choosing a different historical icon asset.
@@ -333,6 +342,19 @@ def _flatten_rgba(src, bg=(36, 19, 36)):
         out[i+3] = 255
     return bytes(out)
 
+def _crop_center_rgba(src, sw, sh, cw, ch):
+    """Return a centered RGBA crop. Used for Android maskable icons."""
+    if cw > sw or ch > sh:
+        raise ValueError("Crop larger than source")
+    x0 = (sw - cw) // 2
+    y0 = (sh - ch) // 2
+    out = bytearray(cw * ch * 4)
+    for y in range(ch):
+        src_off = ((y0 + y) * sw + x0) * 4
+        dst_off = y * cw * 4
+        out[dst_off:dst_off + cw * 4] = src[src_off:src_off + cw * 4]
+    return bytes(out)
+
 def _resize_rgba(src, sw, sh, dw, dh):
     out = bytearray(dw * dh * 4)
     for y in range(dh):
@@ -354,6 +376,48 @@ def _resize_rgba(src, sw, sh, dw, dh):
                 top = p00 + (p10 - p00) * fx
                 bot = p01 + (p11 - p01) * fx
                 out[o + c] = round(top + (bot - top) * fy)
+    return bytes(out)
+
+def _edge_average_rgb(src, width, height, band=12):
+    """Average the outer edge color for an Android icon backdrop."""
+    band = max(1, min(band, width // 4, height // 4))
+    rs = gs = bs = count = 0
+    for y in range(height):
+        for x in range(width):
+            if x < band or x >= width - band or y < band or y >= height - band:
+                i = (y * width + x) * 4
+                rs += src[i]
+                gs += src[i+1]
+                bs += src[i+2]
+                count += 1
+    return (rs // count, gs // count, bs // count)
+
+def _compose_android_icon(src, width, height, scale=0.84, circular=False):
+    """Inset the artwork so Android's round mask does not crop the piano keys."""
+    side = min(width, height)
+    inset = max(1, round(side * scale))
+    art = _resize_rgba(src, width, height, inset, inset)
+    br, bg, bb = _edge_average_rgb(src, width, height)
+    out = bytearray(width * height * 4)
+    for i in range(0, len(out), 4):
+        out[i:i+4] = bytes((br, bg, bb, 255))
+    x0 = (width - inset) // 2
+    y0 = (height - inset) // 2
+    for y in range(inset):
+        src_off = y * inset * 4
+        dst_off = ((y0 + y) * width + x0) * 4
+        out[dst_off:dst_off + inset * 4] = art[src_off:src_off + inset * 4]
+    if circular:
+        cx = (width - 1) / 2.0
+        cy = (height - 1) / 2.0
+        radius = min(width, height) * 0.495
+        r2 = radius * radius
+        for y in range(height):
+            dy = y - cy
+            for x in range(width):
+                dx = x - cx
+                if dx * dx + dy * dy > r2:
+                    out[(y * width + x) * 4 + 3] = 0
     return bytes(out)
 
 def _png_chunk(kind, payload):
@@ -404,12 +468,25 @@ install_v23 = OUT / "install-v23"
 install_v23.mkdir(parents=True, exist_ok=True)
 (install_v23 / "piano-dream-stage-touch-v23.png").write_bytes(root180)
 
-# Standard Web App Manifest sizes.
+# Android / PWA icons.
+# Use a dedicated Android composition: full-bleed purple stage background with
+# the piano artwork inset so circular/rounded launcher masks do not crop it.
+android_square0 = _compose_android_icon(opaque0, sw0, sh0, scale=0.84, circular=False)
+android_round0 = _compose_android_icon(opaque0, sw0, sh0, scale=0.84, circular=True)
+
 for size, name in [
-    (192, "pwa-icon-192-v21.png"),
-    (512, "pwa-icon-512-v21.png"),
+    (192, "pwa-icon-round-192-v27.png"),
+    (512, "pwa-icon-round-512-v27.png"),
 ]:
-    resized = _resize_rgba(opaque0, sw0, sh0, size, size)
+    resized = _resize_rgba(android_round0, sw0, sh0, size, size)
+    png = _encode_rgba_png(size, size, resized)
+    (install_dir / name).write_bytes(png)
+
+for size, name in [
+    (192, "pwa-icon-maskable-192-v27.png"),
+    (512, "pwa-icon-maskable-512-v27.png"),
+]:
+    resized = _resize_rgba(android_square0, sw0, sh0, size, size)
     png = _encode_rgba_png(size, size, resized)
     (install_dir / name).write_bytes(png)
 
@@ -431,9 +508,11 @@ for size, name in apple_icons:
 _verify_png(OUT / "apple-touch-icon.png", 180)
 _verify_png(OUT / "apple-touch-icon-precomposed.png", 180)
 _verify_png(OUT / "install-v23" / "piano-dream-stage-touch-v23.png", 180)
-_verify_png(install_dir / "pwa-icon-192-v21.png", 192)
-_verify_png(install_dir / "pwa-icon-512-v21.png", 512)
-print("Verified install icons: Apple 120/152/167/180 and PWA 192/512, opaque RGBA PNG")
+_verify_png(install_dir / "pwa-icon-round-192-v27.png", 192)
+_verify_png(install_dir / "pwa-icon-round-512-v27.png", 512)
+_verify_png(install_dir / "pwa-icon-maskable-192-v27.png", 192)
+_verify_png(install_dir / "pwa-icon-maskable-512-v27.png", 512)
+print("Verified install icons: Apple 120/152/167/180 and Android round+maskable 192/512")
 
 bundles = ROOT / "sample-bundles"
 for bundle in json.loads((bundles / "parts.json").read_text()):
@@ -448,17 +527,37 @@ for bundle in json.loads((bundles / "parts.json").read_text()):
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(entry))
 
+# The legacy sample archive may replace the audio directory contents. Restore
+# character voice WAVs copied from site/ so build validation and runtime both
+# receive the current character voices.
+for relative_path, data in character_voice_backup.items():
+    target = OUT / "audio" / relative_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(data)
+
 # Validate every absolute /audio/... URL referenced by JavaScript after the sample bundles
 # have been expanded into the Vercel output directory.
 for js_path in sorted(OUT.glob("*.js")):
     source = js_path.read_text(encoding="utf-8")
     for asset in set(re.findall(r'[\'"](/audio/[^\'"?]+)', source)):
+        # Character voice-set base paths may exist before that character receives
+        # recorded voice files. Only concrete audio-file references are required
+        # to exist at build time.
+        if Path(asset).suffix.lower() not in {".wav", ".m4a", ".mp3", ".aac", ".ogg"}:
+            continue
         target = OUT / asset.lstrip("/")
         if not target.is_file():
             raise ValueError(f"Missing referenced audio asset: {asset} (from {js_path.name})")
 
-instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name not in OPENING_AUDIO_EXPECTED]
+instrument_samples = [p for p in (OUT / "audio").rglob("*.m4a") if p.name not in OPENING_AUDIO_EXPECTED and "violin" not in p.parts]
 if len(instrument_samples) != 102:
     raise ValueError(f"Expected all 102 instrument audio samples, found {len(instrument_samples)}")
 print("Verified opening audio: 3-voice call, 4 supplied tap sounds and 10 supplied full BGM tracks")
-print("Ready: Piano Dream Stage for Vercel with 102 unchanged audio samples")
+violin_sources = json.loads((OUT / "licenses/violin/source.json").read_text())
+if violin_sources["license"] != "CC0-1.0" or len(violin_sources["samples"]) != 84:
+    raise ValueError("Missing licensed violin sample provenance")
+for sample in violin_sources["samples"]:
+    asset = OUT / "audio/violin" / Path(sample["source"]).name.replace(".wav", ".m4a")
+    if not asset.is_file() or hashlib.sha256(asset.read_bytes()).hexdigest() != sample["outputSha256"]:
+        raise ValueError(f"Missing or modified violin audio: {asset.name}")
+print("Ready: Piano Dream Stage for Vercel with 102 unchanged samples and 84 CC0 violin samples")

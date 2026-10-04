@@ -1,0 +1,24 @@
+{
+  "format": "layer-motion-complete",
+  "version": 1,
+  "exportedAt": "2026-10-04T05:08:34.922Z",
+  "canvas": {"width": 1024, "height": 1536},
+  "layerOrder": ["back_hair","body","bust","face_base","eyes","mouth","front_hair"],
+  "reference": "reference/full-body.jpg",
+  "files": {
+    "back_hair":"layers/back_hair.png","body":"layers/body.png","bust":"layers/bust.png",
+    "face_base":"layers/face_base.png","eyes":"layers/eyes.png","mouth":"layers/mouth.png",
+    "front_hair":"layers/front_hair.png","closedEyes":"layers/closed-eyes.png"
+  },
+  "transforms": {
+    "back_hair":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0},
+    "body":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0},
+    "bust":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0},
+    "face_base":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0},
+    "eyes":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0},
+    "mouth":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0},
+    "front_hair":{"x":0,"y":0,"scaleX":100,"scaleY":100,"rotation":0}
+  },
+  "visibility":{"back_hair":true,"body":true,"bust":true,"face_base":true,"eyes":true,"mouth":true,"front_hair":true},
+  "motion":{"intensity":73,"blink":true,"mouthMotion":true,"mouthShape":"e","hairMotion":true,"hairStrength":249,"bustMotion":true,"bustStrength":25}
+}

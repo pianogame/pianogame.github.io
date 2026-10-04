@@ -1,0 +1,81 @@
+name: Render HOME viewports
+on:
+  push:
+    branches: [staging]
+    paths:
+      - "site/index.html"
+      - "site/home.css"
+      - "site/home.js"
+      - "site/home-news.js"
+      - "site/sound-settings.js"
+      - "scripts/verify_home_news.mjs"
+      - "scripts/verify_piano_transition.mjs"
+      - "site/home-bgm.js"
+      - "site/piano-palace.css"
+      - "site/piano.js"
+      - "site/piano-controls.js"
+      - "site/violin.js"
+      - "site/violin-samples.js"
+      - "site/effects-ui.js"
+      - "site/multitrack.js"
+      - "sample-bundles/violin.zip.*"
+      - "scripts/verify_violin.mjs"
+      - "site/key-layout.js"
+      - "site/assets/piano/**"
+      - "scripts/verify_piano_palace.mjs"
+      - "site/audio/asabgm.mp3"
+      - "site/audio/hirubgm.mp3"
+      - "site/audio/yorubgm.mp3"
+      - "site/audio/*.wav"
+      - "scripts/verify_home_voices.mjs"
+      - "scripts/verify_home_bgm.mjs"
+      - "site/display-mode.js"
+      - "site/orientation.js"
+      - "site/rotation-guide.js"
+      - "site/assets/home/**"
+      - "scripts/verify_home_layout.mjs"
+      - "scripts/build_pages.py"
+      - ".github/workflows/render-home.yml"
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: env -u GITHUB_ACTIONS python3 scripts/build_pages.py
+      - run: |
+          npm init -y >/dev/null 2>&1
+          npm install --silent playwright
+          npx playwright install --with-deps chromium >/dev/null 2>&1
+      - name: Check layout, opening, navigation and rotation
+        run: node scripts/verify_home_layout.mjs
+      - name: Check HOME BGM periods, loops and screen transitions
+        run: node scripts/verify_home_bgm.mjs
+      - name: Check concert piano, pressed keys and recording
+        run: node scripts/verify_piano_palace.mjs
+      - name: Check violin articulations, settings, recording and WAV export
+        run: node scripts/verify_violin.mjs
+      - name: Check cold piano transition and silver HOME dialogs
+        run: node scripts/verify_piano_transition.mjs
+      - name: Check external news and rapid touch audio
+        run: node scripts/verify_home_news.mjs
+      - name: Check character voices and rare playback
+        run: node scripts/verify_home_voices.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-layout-qa
+          path: |
+            home-layout-qa/
+            piano-palace-qa/
+            violin-qa/
+          retention-days: 7

@@ -15,7 +15,7 @@ html.hp-install-required #hp-viewport { display:none !important; }
 .hp-install-gate-mark { display:grid; place-items:center; width:72px; height:72px; margin:0 auto 14px; border-radius:20px; background:#665670; color:#fffaf2; font-size:42px; line-height:1; }
 .hp-install-gate h1 { margin:0; font-size:clamp(28px,8vw,40px); font-weight:650; letter-spacing:.02em; }
 .hp-install-gate-lead { margin:12px 0 18px; font-size:16px; line-height:1.7; }
-.hp-install-gate-button { width:100%; min-height:52px; margin:0 0 16px; border:0; border-radius:26px; background:#665670; color:#fff; font:600 16px/1.2 inherit; }
+.hp-install-gate-button { width:100%; min-height:52px; margin:0 0 16px; border:0; border-radius:26px; background:#665670; color:#fff; font:600 16px/1.2 inherit; display:flex; align-items:center; justify-content:center; text-align:center; }
 .hp-install-gate-guide { margin:12px 0; padding:14px 16px; border-radius:16px; background:#f4edf7; text-align:left; font-size:15px; line-height:1.7; }
 .hp-install-gate-guide p { margin:0 0 8px; }
 .hp-install-gate-guide ol { margin:0; padding-left:1.4em; }

@@ -7,10 +7,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ピアノドリームステージ">
+  <script>
+    window.__pdsInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      window.__pdsInstallPrompt = event;
+      window.dispatchEvent(new Event('pds-install-prompt-ready'));
+    });
+  </script>
   <title>ピアノドリームステージ</title>
   <link rel="icon" type="image/png" href="https://piano-dream-stage.vercel.app/install/apple-touch-icon.png?v=1">
   <link rel="apple-touch-icon" sizes="180x180" href="https://piano-dream-stage.vercel.app/install/apple-touch-icon.png?v=1">
-  <link rel="manifest" href="/install/manifest.webmanifest?v=1">
+  <link rel="manifest" href="/manifest.webmanifest?v=28">
   <style>
     :root{color-scheme:dark}
     *{box-sizing:border-box}
@@ -35,7 +43,7 @@
   <img src="/install/apple-touch-icon.png?v=1" alt="">
   <h1><span class="en">Piano Dream Stage</span><span class="kana">ピアノドリームステージ</span></h1>
   <p>ホーム画面に追加してから起動してください。</p>
-  <ol>
+  <button id="android-install-button" type="button" hidden style="width:100%;min-height:52px;margin:18px 0 0;border:0;border-radius:26px;background:linear-gradient(180deg,#f6d887,#b8832e);color:#2f1734;font:700 16px system-ui,-apple-system,sans-serif">ホーム画面に追加</button>\n  <p id="android-install-help" class="note"></p>\n  <ol>
     <li>Safariの「共有」をタップ</li>
     <li>「ホーム画面に追加」をタップ</li>
     <li>右上の「追加」をタップ</li>
@@ -44,7 +52,57 @@
 </main>
 <script>
   const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-  if (isStandalone) location.replace('/?app=home');
+  if (isStandalone) {
+    location.replace('/?app=home');
+  } else {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const button = document.getElementById('android-install-button');
+    const help = document.getElementById('android-install-help');
+    let promptEvent = window.__pdsInstallPrompt || null;
+
+    if (!isIOS) {
+      help.textContent = 'Chromeのインストール準備中です。ボタンが出ない場合は右上の「︙」→「アプリをインストール」または「ホーム画面に追加」を選んでください。';
+
+      const syncPrompt = () => {
+        promptEvent = window.__pdsInstallPrompt || promptEvent;
+        button.hidden = !promptEvent;
+        if (promptEvent) help.textContent = '下のボタンからドリステをインストールできます。';
+      };
+
+      button.addEventListener('click', async () => {
+        if (!promptEvent) return;
+        const current = promptEvent;
+        promptEvent = null;
+        window.__pdsInstallPrompt = null;
+        button.hidden = true;
+        try {
+          await current.prompt();
+          const choice = await current.userChoice;
+          help.textContent = choice.outcome === 'accepted'
+            ? 'インストール後、ホーム画面の「ドリステ」から起動してください。'
+            : 'インストールをキャンセルしました。';
+        } catch (_) {
+          help.textContent = 'Chrome右上の「︙」→「アプリをインストール」を選んでください。';
+        }
+      });
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        window.__pdsInstallPrompt = event;
+        promptEvent = event;
+        syncPrompt();
+      });
+      window.addEventListener('pds-install-prompt-ready', syncPrompt);
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js', { scope:'/' })
+          .then(() => navigator.serviceWorker.ready)
+          .then(syncPrompt)
+          .catch(() => {});
+      }
+      syncPrompt();
+    }
+  }
 </script>
 </body>
 </html>

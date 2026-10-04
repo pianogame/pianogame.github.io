@@ -6,12 +6,19 @@
   const status = root.querySelector('.hp-status');
   const output = root.querySelector('[data-output="notes"]');
   const volume = root.querySelector('[data-control="volume"]');
+  try {
+    const stored = localStorage.getItem('hp-master-volume');
+    if (stored !== null && Number.isFinite(Number(stored))) volume.value = Math.max(0, Math.min(100, Number(stored)));
+  } catch (_) {}
+  root.querySelector('[data-output="volume"]').textContent = volume.value + '%';
   const reverbControl = root.querySelector('[data-control="reverb"]');
   const decayControl = root.querySelector('[data-control="decay"]');
   function configureAudioSession() {
     try {
-      if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
-        navigator.audioSession.type = 'playback';
+      // WebKit maps transient to the native ambient category: both Web Audio
+      // and media-element BGM obey the iPhone silent switch. Playback bypasses it.
+      if (navigator.audioSession && navigator.audioSession.type !== 'transient') {
+        navigator.audioSession.type = 'transient';
       }
       return navigator.audioSession?.type || 'unsupported';
     } catch (_) {
@@ -31,15 +38,18 @@
   const shortcuts = new Map();
   const held = new Map();
   const pendingNoteOns = new Map();
+  // Finger/keyboard feedback must not wait for AudioContext.resume or an audio frame.
+  const pressedTokens = new Map(), pressedSince = new Map(), pressReleaseTimers = new Map();
   const pointerStarts = new Map();
   const allVoices = new Set();
+  const liveVoices = new Set();
   const playingCounts = new Map();
-  let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, resumePromise = null;
+  let ctx, master, compressor, reverb, wet, reverbInput, effects, ambienceSend, violinSpace, resumePromise = null;
   let audioNeedsGestureUnlock = true;
   const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
   const ambience = {piano:{amount:35,decay:.05},bass:{amount:4,decay:.3}};
-  const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true}};
+  const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}};
   const releaseControl=root.querySelector('[data-control="release"]');
   let ambienceInstrument = 'piano';
   let samplesReady = false, sampleBuffers = new Map(), currentInstrument = 'piano', loadGeneration = 0;
@@ -63,16 +73,17 @@
     key.disabled = !samplesReady; key.type = 'button'; key.className = 'hp-key' + (sharp ? ' hp-sharp' : '');
     key.dataset.midi = midi; key.setAttribute('aria-label', text + ' ' + pitchName(midi));
     key.setAttribute('aria-pressed', 'false');
+    const face = document.createElement('span'); face.className = 'hp-key-face';
     if (!sharp) {
       const octave = document.createElement('span'); octave.className = 'hp-octave';
       octave.textContent = midi >= 84 ? '••' : midi >= 72 ? '•' : '';
       const digit = document.createElement('span'); digit.className = 'hp-digit'; digit.textContent = String(naturals.indexOf(midi % 12) + 1);
       const label = document.createElement('span'); label.className = 'hp-syllable'; label.textContent = syllables[naturals.indexOf(midi % 12)];
       if (midi < 60) key.classList.add('hp-low');
-      key.append(octave, digit, label);
+      face.append(octave, digit, label);
     }
     const glow = document.createElement('span'); glow.className = 'hp-key-glow';
-    glow.setAttribute('aria-hidden','true'); key.append(glow);
+    glow.setAttribute('aria-hidden','true'); face.append(glow); key.append(face);
     if (!buttons.has(midi)) buttons.set(midi, []);
     buttons.get(midi).push(key); if (code) shortcuts.set(code, {midi, sharp});
     return key;
@@ -87,8 +98,8 @@
     const row = {...sourceRow,base:sourceRow.base+shift};
     const section = document.createElement('div'); section.className = 'hp-register-section';
     section.setAttribute('role','group'); section.setAttribute('aria-label',row.name);
-    const firstX = rowIndex === 0 ? 6 : 12.3;
-    const stepX = 88 / 7;
+    const firstX = rowIndex === 0 ? 8 : 14;
+    const stepX = 11.8;
     naturals.forEach((semitone, index) => {
       const white = makeKey(row.base + semitone, syllables[index], row.white[index], row.wc[index]);
       white.style.left = (firstX + index * stepX) + '%'; section.append(white);
@@ -98,7 +109,7 @@
       }
     });
     if (rowIndex === 0) {
-      const top = makeKey(84+shift, '高いド', 'I', 'KeyI'); top.style.left = '94%'; section.append(top);
+      const top = makeKey(84+shift, '高いド', 'I', 'KeyI'); top.style.left = '90.6%'; section.append(top);
     }
     section.setAttribute('aria-label',row.name+' '+pitchName(row.base)+'から');
     section.querySelectorAll('.hp-key:not(.hp-sharp)').forEach(key=>{
@@ -129,10 +140,10 @@
       const sharp = !naturals.includes(midi%12);
       const key = makeKey(midi,pitchName(midi),'',null,sharp);
       let x;
-      if (octave===0) x = midi===21 ? 37.5 : midi===22 ? 50 : 62.5;
+      if (octave===0) x = midi===21 ? 44.1 : midi===22 ? 50 : 55.9;
       else {
         const index = midi===108 ? 7 : sharp ? naturals.indexOf(midi%12-1)+.5 : naturals.indexOf(midi%12);
-        x = (octave===7 ? 6 : 12.3) + index * (88/7);
+        x = (octave===7 ? 8 : 14) + index * 11.8;
       }
       key.style.left = x+'%';
       if (!sharp) key.querySelector('.hp-octave').textContent = '';
@@ -140,19 +151,18 @@
     }
     block.append(heading,row); octaveStack.append(block); octaveGroups.push({lo,hi,block});
   }
-  let activeTopRow = 1;
+  const defaultTopRow=id=>octaveGroups.findIndex(group=>group.lo<=60+instruments[id].shift37&&group.hi>=60+instruments[id].shift37);
+  let activeTopRow = defaultTopRow(currentInstrument);
   const rowHeight = () => parseFloat(pianoScroll.style.getPropertyValue('--hp-row-height')) || 70;
   function showRegister() {
     if (pianoView.hidden) return;
     const height = rowHeight();
-    const first = Math.max(0,Math.min(4,Math.floor(pianoScroll.scrollTop/height+.02)));
-    const last = Math.min(octaveGroups.length-1,first+3);
+    const first = Math.max(0,Math.min(octaveGroups.length-1,Math.floor(pianoScroll.scrollTop/height+.02)));
+    const last = Math.min(octaveGroups.length-1,Math.ceil((pianoScroll.scrollTop+pianoScroll.clientHeight)/height-.02)-1);
     activeTopRow = first;
     const label = pitchName(octaveGroups[last].lo)+'–'+pitchName(octaveGroups[first].hi);
     const display = root.querySelector('[data-output="register"]');
     if (display.textContent!==label) display.textContent=label;
-    action('higher').disabled = pianoScroll.scrollTop<=1;
-    action('lower').disabled = pianoScroll.scrollTop>=pianoScroll.scrollHeight-pianoScroll.clientHeight-1;
   }
   function sizeRegister() {
     if (!root.querySelector('.hp-stage').hidden && keyboard.clientHeight > 0) {
@@ -166,26 +176,49 @@
           const property='--hp-'+name.replace(/[A-Z]/g,letter=>'-'+letter.toLowerCase());
           section.style.setProperty(property,value+'px');
         }
+        // Pack the visible group using its actual key width, including saved
+        // size preferences. Black keys stay centred on the adjoining whites.
+        const whites=[...section.querySelectorAll('.hp-key:not(.hp-sharp)')];
+        const first=section.clientWidth/2-(whites.length-1)*sizes.whiteStep/2;
+        const centres=new Map();
+        whites.forEach((key,index)=>{
+          const centre=first+index*sizes.whiteStep;
+          key.style.left=centre+'px';centres.set(Number(key.dataset.midi),centre);
+        });
+        section.querySelectorAll('.hp-key.hp-sharp').forEach(key=>{
+          const midi=Number(key.dataset.midi);
+          key.style.left=(centres.get(midi-1)+centres.get(midi+1))/2+'px';
+        });
       });
     }
     if(!root.querySelector('.hp-stage').hidden)fitKeys(keyboard,true);
     if (pianoView.hidden) return;
-    if (pianoScroll.clientHeight > 0) pianoScroll.style.setProperty('--hp-row-height', pianoScroll.clientHeight / 4 + 'px');
+    if (pianoScroll.clientHeight > 0) {
+      // Use the same rack geometry as 37 keys. The 88-key window scrolls through
+      // full-size rows instead of vertically squeezing four octaves to fit.
+      const stage=root.querySelector('.hp-stage'),style=getComputedStyle(stage);
+      const frameHeight=Math.min(root.querySelector('.hp-surface').clientHeight-root.querySelector('.hp-header').offsetHeight-root.querySelector('.hp-footer').offsetHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom),root.clientWidth*.42);
+      const gap=parseFloat(getComputedStyle(keyboard).rowGap)||0;
+      const rackHeight=Math.max(28,(frameHeight-2*gap)/3);
+      pianoScroll.style.setProperty('--hp-register-gap',gap+'px');
+      pianoScroll.style.setProperty('--hp-row-height',rackHeight+gap+'px');
+    }
     fitKeys(octaveStack,false);
     pianoScroll.scrollTop = activeTopRow*rowHeight(); showRegister();
   }
   pianoScroll.addEventListener('scroll',showRegister,{passive:true});
-  action('higher').addEventListener('click',() => { releaseHeld(); pianoScroll.scrollBy({top:-rowHeight(),behavior:'smooth'}); });
-  action('lower').addEventListener('click',() => { releaseHeld(); pianoScroll.scrollBy({top:rowHeight(),behavior:'smooth'}); });
   new ResizeObserver(sizeRegister).observe(pianoScroll);
   new ResizeObserver(sizeRegister).observe(keyboard);
   requestAnimationFrame(sizeRegister);
+  // HOME prepares the revealed layout under its cover before the first paint.
+  window.addEventListener('hp-piano-prepare', sizeRegister);
   window.addEventListener('hp-viewport-resize', () => {
     releaseHeld(); pointerStarts.clear(); requestAnimationFrame(sizeRegister);
   });
   layoutControl.addEventListener('change',() => {
     releaseHeld(); const enabled = layoutControl.value==='88';
     pianoView.hidden = !enabled; root.querySelector('.hp-stage').hidden = enabled;
+    root.querySelector('.hp-register-info').hidden = !enabled;
     requestAnimationFrame(sizeRegister);
   });
 
@@ -220,6 +253,7 @@
         const damping = ctx.createBiquadFilter(); damping.type = 'lowpass'; damping.frequency.value = 6200;
         reverbInput.connect(reverb); reverb.connect(rumble); rumble.connect(damping); damping.connect(wet); wet.connect(master);
         effects=effectUI.attach(ctx); ambienceSend=ctx.createGain();
+        violinSpace=window.HP_VIOLIN.createSpace(ctx,effects.input);
         ambienceSend.gain.value=currentInstrument!=='piano'?0:1;
         effects.output.connect(master); effects.output.connect(ambienceSend); ambienceSend.connect(reverbInput);
         updateReverb();
@@ -346,6 +380,7 @@
 
   function updateInstrumentUI() {
     const preset=instruments[currentInstrument];
+    root.dataset.instrument=currentInstrument;
     sustain=articulation[currentInstrument].sustain;
     releaseControl.value=articulation[currentInstrument].release;
     releaseControl.dispatchEvent(new Event('input'));
@@ -389,7 +424,7 @@
             let first=0,end=Math.min(left.length,Math.floor(buffer.sampleRate*.12));
             while(first<end&&Math.max(Math.abs(left[first]),Math.abs(right[first]))<.0005)first++;
             const offset=first<end?Math.max(0,(first-32)/buffer.sampleRate):0;
-            decoded.set(descriptor.url,{buffer,offset});
+            decoded.set(descriptor.url,{...descriptor,buffer,offset});
             if(generation===loadGeneration)say(preset.name+'を読み込み中 · '+decoded.size+' / '+preset.samples.length);
           } catch(error) {failures.push(error);}
         }
@@ -421,7 +456,7 @@
       await effectUI.setInstrument(id);
       currentInstrument=id; sampleBuffers=bank; sampleCounters.clear(); samplesReady=true;
       build37(instruments[id].shift37); updateInstrumentUI();
-      if(id!==previous)activeTopRow=instruments[id].row88;
+      if(id!==previous)activeTopRow=defaultTopRow(id);
       requestAnimationFrame(sizeRegister);
       say(instruments[id].name+'で演奏できます');
     } catch(_) {
@@ -442,14 +477,21 @@
     if(!instruments[id])return;
     if(!ctx) {
       currentInstrument=id; build37(instruments[id].shift37); updateInstrumentUI();
-      activeTopRow=instruments[id].row88; requestAnimationFrame(sizeRegister);
+      activeTopRow=defaultTopRow(id); requestAnimationFrame(sizeRegister);
       say('幕をタップすると'+instruments[id].name+'を準備');
     } else {void prepareSamples(id);}
   });
 
-  function synth(midi, when = ctx.currentTime) {
+  function synth(midi, when = ctx.currentTime, live = true) {
     while (allVoices.size >= 48) {
       const oldest = allVoices.values().next().value; oldest.release(ctx.currentTime,.04); allVoices.delete(oldest);
+    }
+    if(currentInstrument==='violin'){
+      const state=window.HP_VIOLIN.snapshot(),d=window.HP_VIOLIN.descriptor(instruments.violin.samples,midi,state);
+      const sample=bankCache.get('violin').get(d.url);
+      const voice=window.HP_VIOLIN.createVoice(ctx,violinSpace.input,d,sample.buffer,midi,when,state,instruments.violin.gain,voice=>{allVoices.delete(voice);liveVoices.delete(voice);});
+      const release=voice.release;voice.release=(at=ctx.currentTime,seconds=sustain?1.2:articulation.violin.release)=>release(at,seconds);
+      allVoices.add(voice);if(live)liveVoices.add(voice);return voice;
     }
     const anchor = Array.from(sampleBuffers.keys()).reduce((best,note) => Math.abs(note-midi) < Math.abs(best-midi) ? note : best);
     const variants = sampleBuffers.get(anchor), index = sampleCounters.get(anchor)||0;
@@ -481,8 +523,8 @@
       releaseAt = time; releaseEnd = time+seconds; releaseLevel = current;
       try { source.stop(time+seconds+.04); } catch (_) {}
     }};
-    source.onended = () => { ended = true; source.disconnect(); fade.disconnect(); bus.disconnect(); allVoices.delete(voice); };
-    source.start(when,sample.offset); allVoices.add(voice); return voice;
+    source.onended = () => { ended = true; source.disconnect(); fade.disconnect(); bus.disconnect(); allVoices.delete(voice); liveVoices.delete(voice); };
+    source.start(when,sample.offset); allVoices.add(voice); if(live)liveVoices.add(voice); return voice;
   }
 
   function sparkle(midi) {
@@ -528,8 +570,33 @@
     held.set(token, entry); root.dispatchEvent(new CustomEvent('hp-note-on',{detail:{token,midi}})); pendingSparkles.add(midi); redraw();
     if (!recording && !playing && status.textContent!=='演奏中') say('演奏中');
   }
+  function paintPress(midi, pressed) {
+    (buttons.get(midi)||[]).forEach(key => key.dataset.pressed = String(pressed));
+  }
+  function pressKey(token, midi) {
+    if (pressedTokens.has(token)) return;
+    const alreadyPressed = Array.from(pressedTokens.values()).includes(midi);
+    pressedTokens.set(token,midi);
+    clearTimeout(pressReleaseTimers.get(midi)); pressReleaseTimers.delete(midi);
+    if (!alreadyPressed) pressedSince.set(midi,performance.now());
+    paintPress(midi,true);
+  }
+  function releaseKey(token) {
+    const midi = pressedTokens.get(token);
+    if (midi === undefined) return;
+    pressedTokens.delete(token);
+    if (Array.from(pressedTokens.values()).includes(midi)) return;
+    // Even a tap released within one animation frame gets a visible depression.
+    const remaining = Math.max(0,60-(performance.now()-pressedSince.get(midi)));
+    const finish = () => {
+      pressReleaseTimers.delete(midi); pressedSince.delete(midi); paintPress(midi,false);
+    };
+    if (remaining) pressReleaseTimers.set(midi,setTimeout(finish,remaining)); else finish();
+  }
   function noteOn(token, midi) {
-    if (!samplesReady || held.has(token) || pendingNoteOns.has(token) || !ensureAudio()) return;
+    if (!samplesReady || held.has(token) || pendingNoteOns.has(token)) return;
+    pressKey(token,midi);
+    if (!ensureAudio()) return;
     if (ctx.state === 'running') {
       playNoteNow(token,midi);
       return;
@@ -547,6 +614,7 @@
   }
 
   function noteOff(token) {
+    releaseKey(token);
     pendingNoteOns.delete(token);
     const entry = held.get(token); if (!entry) return;
     entry.voice.release();
@@ -565,12 +633,15 @@
   function releaseHeld() {
     pendingNoteOns.clear();
     Array.from(held.keys()).forEach(noteOff);
+    pressedTokens.clear(); pressReleaseTimers.forEach(clearTimeout); pressReleaseTimers.clear();
+    pressedSince.clear(); buttons.forEach(list=>list.forEach(key=>key.dataset.pressed="false"));
   }
   function stopPlayback() {
     playGeneration++; playbackTimers.forEach(clearTimeout); playbackTimers = [];
     clearInterval(scheduler); scheduler = null;
     if (ctx) playbackVoices.forEach(voice => voice.release(ctx.currentTime, .08));
     playbackVoices = []; playingCounts.clear(); playing = false;
+    action('play').setAttribute('aria-pressed','false');
     action('play').textContent = '▶ 再生'; redraw();
   }
   function finishRecording() {
@@ -618,7 +689,7 @@
       pianoScroll.scrollTop = origin.scrollTop-dy;
       showRegister(); return;
     }
-    if ((!held.has(token) && !pendingNoteOns.has(token)) || origin.scrolling) return;
+    if (!pressedTokens.has(token) || origin.scrolling) return;
     const samples = typeof event.getCoalescedEvents === 'function' ? event.getCoalescedEvents() : [event];
     const points = samples.length ? samples : [event];
     for (const sample of points) {
@@ -630,7 +701,7 @@
         const x=fromX+moveX*step/steps, y=fromY+moveY*step/steps;
         const hit = document.elementFromPoint(x,y);
         const key = keyAtPoint(x,y,hit);
-        const currentMidi = held.get(token)?.midi ?? pendingNoteOns.get(token);
+        const currentMidi = pressedTokens.get(token);
         if (key && root.contains(key) && Number(key.dataset.midi) !== currentMidi) {
           noteOff(token); noteOn(token, Number(key.dataset.midi));
         }
@@ -688,13 +759,13 @@
     }
     markHeldCutForRecording();
     root.dispatchEvent(new Event('hp-stop-sound'));
-    stopPlayback(); releaseHeld(); pointerStarts.clear();
+    releaseHeld(); pointerStarts.clear();
     if (ctx) {
-      allVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
-      playingCounts.clear();
+      liveVoices.forEach(voice=>voice.release(ctx.currentTime,.02));
+      violinSpace?.clear();
       if (reverb) { reverb.buffer=null; updateReverb(); }
     }
-    redraw(); say('鳴っている音と余韻を止めました');
+    redraw(); say('手弾きの音と余韻を止めました');
   });
   action('record').addEventListener('click', () => {
     if (recording) { finishRecording(); return; }
@@ -711,7 +782,7 @@
   action('play').addEventListener('click', async () => {
     if (playing) { stopPlayback(); say('再生を停止'); return; }
     if (!events.length || !ensureAudio()) return;
-    releaseHeld(); playing = true; action('play').textContent = '■ 停止'; say('再生中');
+    releaseHeld(); playing = true; action('play').setAttribute('aria-pressed','true'); action('play').textContent = '■ 停止'; say('再生中');
     const generation = ++playGeneration;
     try { await ctx.resume(); } catch (_) { stopPlayback(); say('鍵盤をタップしてから再生してください', true); return; }
     if (generation !== playGeneration) return;
@@ -722,7 +793,7 @@
       if (generation !== playGeneration) return;
       while (nextEvent < events.length && start + events[nextEvent].start < ctx.currentTime + .14) {
         const event = events[nextEvent++], when = Math.max(ctx.currentTime, start + event.start);
-        const voice = synth(event.midi, when); playbackVoices.push(voice);
+        const voice = synth(event.midi, when, false); playbackVoices.push(voice);
         voice.release(when + event.duration, event.cut ? .02 : (event.sustain ? Infinity : articulation[currentInstrument].release));
         const globalStop=soundStopEvents.find(value=>Number.isFinite(value)&&value>event.start+.001);
         if(Number.isFinite(globalStop))voice.release(start+globalStop,.02);
@@ -734,14 +805,15 @@
     schedule(); scheduler = setInterval(schedule, 25);
   });
   releaseControl.addEventListener('input',()=>{articulation[currentInstrument].release=Number(releaseControl.value);root.querySelector('[data-output="release"]').textContent=Number(releaseControl.value).toFixed(2)+'秒';});
-  volume.addEventListener('input', () => { root.querySelector('[data-output="volume"]').textContent = volume.value + '%'; if (master) master.gain.setTargetAtTime(Number(volume.value) / 100 * .9, ctx.currentTime, .03); });
+  root.addEventListener('hp-violin-change',event=>violinSpace?.update(event.detail));
+  volume.addEventListener('input', () => { try { localStorage.setItem('hp-master-volume',volume.value); } catch (_) {} root.querySelector('[data-output="volume"]').textContent = volume.value + '%'; if (master) master.gain.setTargetAtTime(Number(volume.value) / 100 * .9, ctx.currentTime, .03); });
   let auditionTimer, auditionVoice;
   root.addEventListener('hp-audition',()=>{
     if(!samplesReady||!ensureAudio())return;
     clearTimeout(auditionTimer);
     auditionVoice?.release(ctx.currentTime,.06);
     noteOff('audition');
-    const midi=currentInstrument==='bass'?40:currentInstrument==='guitar'?64:60;
+    const midi=currentInstrument==='bass'?40:currentInstrument==='guitar'?64:currentInstrument==='violin'?72:60;
     noteOn('audition',midi);
     const voice=held.get('audition')?.voice; auditionVoice=voice;
     auditionTimer=setTimeout(()=>{noteOff('audition');voice?.release(ctx.currentTime,.5);},600);
