@@ -1250,6 +1250,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
   flex: 0 0 auto;
 }
 #hp-home-screen .hp-character-header-action[hidden] { display: none !important; }
+#hp-home-screen .hp-home-dialog-overlay:not([data-screen="characters"]) .hp-character-header-action { display: none !important; }
 #hp-home-screen .hp-character-header-action {
   touch-action: manipulation;
   white-space: nowrap;

@@ -222,6 +222,9 @@
   const homeVolume = home.querySelector('[data-home-volume]');
   const pianoVolume = piano.querySelector('[data-control="volume"]');
   let dialogOpener = null;
+  function setCharacterHeaderActionsVisible(visible) {
+    home.querySelectorAll('.hp-character-header-action').forEach(button => { button.hidden = !visible; });
+  }
   const syncHomeVolume = () => {
     homeVolume.value = pianoVolume.value;
     home.querySelector('[data-home-volume-output]').textContent = pianoVolume.value + '%';
@@ -229,6 +232,8 @@
   function closeHomeDialog() {
     if (dialogOverlay.hidden) return;
     dialogOverlay.hidden = true;
+    setCharacterHeaderActionsVisible(false);
+    delete dialogOverlay.dataset.screen;
     canvas.inert = false;
     dialogOpener?.focus({ preventScroll:true });
     dialogOpener = null;
@@ -240,6 +245,7 @@
     const button = home.querySelector('[data-home-action="' + action + '"]');
     const openHomePanel = () => {
       dialogOpener = button;
+      setCharacterHeaderActionsVisible(false);
       home.querySelector('#hp-home-dialog-title').textContent = { notice: 'お知らせ', settings: '設定', characters: 'キャラクター' }[action];
       home.querySelector('[data-home-dialog-kicker]').textContent = { notice: 'INFORMATION', settings: 'SOUND SETTINGS', characters: 'CHARACTERS' }[action];
       home.querySelector('[data-home-notices]').hidden = action !== 'notice';
@@ -254,7 +260,7 @@
       dialogOverlay.hidden = false;
       syncCharacterVoice();
       previewMotion.setActive(action === 'characters' && home.querySelector('[data-character-screen="detail"]')?.hidden === false);
-      dialogOverlay.querySelector('.hp-home-dialog-button').focus({ preventScroll:true });
+      dialogOverlay.querySelector('.hp-home-dialog-button:not([hidden])').focus({ preventScroll:true });
     };
     if (action === 'notice' || action === 'settings') {
       let pointerId = null, startX = 0, startY = 0, openedByPointer = false;
@@ -678,7 +684,7 @@
     characterListScreen.hidden = false;
     characterDetailScreen.hidden = true;
     previewMotion.setActive(false);
-    home.querySelectorAll('.hp-character-header-action').forEach(button => { button.hidden = true; });
+    setCharacterHeaderActionsVisible(false);
     if (focus) home.querySelector('[data-character-choice]')?.focus({ preventScroll:true });
   }
   let detailVoiceSource = null;
@@ -790,7 +796,7 @@
     characterLayout.dataset.characterView = 'detail';
     characterListScreen.hidden = true;
     characterDetailScreen.hidden = false;
-    home.querySelectorAll('.hp-character-header-action').forEach(button => { button.hidden = false; });
+    setCharacterHeaderActionsVisible(true);
     void previewMotion.setCharacter(selected);
     previewMotion.setActive(true);
     syncCharacterSelection();
