@@ -836,6 +836,20 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
 #hp-home-screen .hp-character-preview[data-has-profile-background="true"] {
   box-shadow: inset 0 0 28px #08101f55, 0 5px 16px #03071155;
 }
+/* MotionCharacter owns the preview's child DOM and its canvas fills the frame.
+   Paint the profile artwork on that canvas element too so the background cannot
+   be visually hidden behind the full-size motion surface. The canvas bitmap
+   remains transparent and character layers are still drawn normally. */
+#hp-home-screen .hp-character-preview[data-has-profile-background="true"] > canvas {
+  background-image:
+    linear-gradient(180deg, #09122b16, #070d1f55),
+    var(--character-profile-bg, none),
+    radial-gradient(circle at 50% 40%, #ebdbb51c, transparent 52%),
+    linear-gradient(180deg,#0b1423aa,#10182766);
+  background-size: cover, cover, auto, auto;
+  background-position: center, center, center, center;
+  background-repeat: no-repeat;
+}
 #hp-home-screen .hp-character-profile {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
