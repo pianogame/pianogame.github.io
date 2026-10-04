@@ -90,7 +90,14 @@
   }
   function loadImage(url) {
     return new Promise((resolve, reject) => {
-      const image = new Image(); image.onload = () => resolve(image); image.onerror = () => reject(new Error('キャラクター画像を読み込めませんでした。')); image.src = url;
+      const image = new Image();
+      image.decoding = 'async';
+      image.onload = () => {
+        const decoded = image.decode ? image.decode().catch(() => {}) : Promise.resolve();
+        decoded.then(() => resolve(image));
+      };
+      image.onerror = () => reject(new Error('キャラクター画像を読み込めませんでした。'));
+      image.src = url;
     });
   }
   async function load(path) {

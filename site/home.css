@@ -1121,3 +1121,65 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   .hp-character-skill-modal-card p { font-size: 11px; line-height: 1.55; }
   .hp-character-skill-modal-close { margin-top: 10px; padding: 6px 20px; }
 }
+
+/* 2026-10-04: measured dialogue fitting, fixed top actions, character voice tab */
+#hp-home-screen .hp-home-dialogue {
+  overflow: hidden;
+  contain: layout;
+}
+#hp-home-screen .hp-home-dialogue.hp-dialogue-fit-small {
+  font-size: calc(13.2 * var(--home-width-unit) * var(--dialogue-fit-scale, 1));
+  line-height: 1.12;
+}
+#hp-home-screen .hp-home-top-actions {
+  position: fixed;
+  z-index: 40;
+  right: max(var(--safe-r), calc(16 * var(--home-width-unit)));
+  top: max(var(--safe-t), calc(10 * var(--home-width-unit)));
+  pointer-events: auto;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
+  right: max(var(--safe-t), calc(16 * var(--home-width-unit)));
+  top: max(var(--safe-r), calc(10 * var(--home-width-unit)));
+}
+#hp-home-screen .hp-character-detail-tabs {
+  position: sticky; top: 0; z-index: 3;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin: 8px 0 10px; padding: 4px;
+  border: 1px solid #b99a5f77; border-radius: 10px;
+  background: #0a1427f2;
+}
+#hp-home-screen .hp-character-detail-tabs button {
+  min-height: 40px; border: 1px solid transparent; border-radius: 7px;
+  background: transparent; color: #cbb98f; font-weight: 700;
+  cursor: pointer; touch-action: manipulation;
+}
+#hp-home-screen .hp-character-detail-tabs button[aria-pressed="true"] {
+  border-color: #d7b96f; color: #fff4d5;
+  background: linear-gradient(#34415b,#17233a);
+  box-shadow: inset 0 1px 0 #fff3c933, 0 0 10px #e4c47722;
+}
+#hp-home-screen .hp-character-voice-panel[hidden],
+#hp-home-screen [data-character-panel="profile"][hidden] { display: none !important; }
+#hp-home-screen .hp-character-voice-note {
+  margin: 4px 0 8px !important; color: #cdbb94; font-size: 11px !important;
+}
+#hp-home-screen .hp-character-voice-list { display: grid; gap: 7px; }
+#hp-home-screen .hp-character-voice-item {
+  display: grid; grid-template-columns: 34px minmax(0,1fr) auto; align-items: center; gap: 8px;
+  width: 100%; min-height: 48px; padding: 8px 10px;
+  border: 1px solid #8f784f88; border-radius: 9px;
+  background: linear-gradient(135deg,#18243bcc,#0a1325d9);
+  color: #eee3cf; text-align: left; cursor: pointer; touch-action: manipulation;
+}
+#hp-home-screen .hp-character-voice-item b {
+  color: #e4c57e; font: 15px/1 "Times New Roman",serif;
+}
+#hp-home-screen .hp-character-voice-item span {
+  min-width: 0; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere;
+}
+#hp-home-screen .hp-character-voice-item i {
+  color: #e6cf9b; font-size: 11px; font-style: normal; white-space: nowrap;
+}

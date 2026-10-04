@@ -187,6 +187,7 @@
     dialogOpener?.focus({ preventScroll:true });
     dialogOpener = null;
     previewMotion.setActive(false);
+    stopDetailVoice();
     syncCharacterVoice();
   }
   for (const action of ['notice', 'settings', 'characters']) {
@@ -398,16 +399,33 @@
     } catch (_) {}
   }
 
+  function fitDialogueToCard() {
+    if (!dialogue || !dialogue.isConnected) return;
+    dialogue.classList.remove('hp-dialogue-long', 'hp-dialogue-extra-long', 'hp-dialogue-fit-small');
+    dialogue.style.removeProperty('--dialogue-fit-scale');
+    const fits = () => dialogue.scrollHeight <= dialogue.clientHeight + 1 && dialogue.scrollWidth <= dialogue.clientWidth + 1;
+    if (fits()) return;
+    dialogue.classList.add('hp-dialogue-long');
+    if (fits()) return;
+    dialogue.classList.add('hp-dialogue-extra-long');
+    if (fits()) return;
+    let scale = 1;
+    for (let attempt = 0; attempt < 10 && !fits(); attempt++) {
+      scale -= .055;
+      dialogue.style.setProperty('--dialogue-fit-scale', Math.max(.58, scale));
+      dialogue.classList.add('hp-dialogue-fit-small');
+    }
+  }
+
   function renderDialogueLines(lines, animate = true) {
     if (!dialogue) return;
-    const textLength = (lines || []).join('').length;
-    dialogue.classList.toggle('hp-dialogue-long', textLength > 34);
-    dialogue.classList.toggle('hp-dialogue-extra-long', textLength > 54);
     dialogue.replaceChildren(...(lines || []).map(line => {
       const span = document.createElement('span');
       span.textContent = line;
       return span;
     }));
+    fitDialogueToCard();
+    requestAnimationFrame(fitDialogueToCard);
     dialogue.classList.remove('hp-dialogue-changing');
     if (animate) {
       void dialogue.offsetWidth;
@@ -595,6 +613,52 @@
     previewMotion.setActive(false);
     if (focus) home.querySelector('[data-character-choice]')?.focus({ preventScroll:true });
   }
+  let detailVoiceSource = null;
+  function stopDetailVoice() {
+    if (!detailVoiceSource) return;
+    try { detailVoiceSource.stop(); } catch (_) {}
+    try { detailVoiceSource.disconnect(); } catch (_) {}
+    detailVoiceSource = null;
+  }
+  function renderCharacterVoiceList(character) {
+    const list = home.querySelector('[data-character-voice-list]');
+    if (!list) return;
+    stopDetailVoice();
+    const set = registry.voiceSet(character);
+    const entries = (set?.entries || []).filter(entry => entry?.file);
+    list.replaceChildren(...entries.map((entry, index) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'hp-character-voice-item';
+      const number = document.createElement('b'); number.textContent = String(index + 1).padStart(2, '0');
+      const copy = document.createElement('span'); copy.textContent = (entry.lines || []).join(' ');
+      const play = document.createElement('i'); play.textContent = '▶ 再生';
+      button.append(number, copy, play);
+      button.addEventListener('click', async () => {
+        stopDetailVoice();
+        try {
+          window.HP_AUDIO_BRIDGE?.configureSession?.();
+          window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+          const buffer = await prepareVoice(entry.file, set);
+          const graph = ensureVoiceGraph(); if (!graph) return;
+          const source = graph.context.createBufferSource(); source.buffer = buffer; source.connect(graph.gain);
+          source.onended = () => { if (detailVoiceSource === source) detailVoiceSource = null; source.disconnect(); };
+          detailVoiceSource = source; source.start();
+        } catch (_) {}
+      });
+      return button;
+    }));
+  }
+  function setCharacterDetailTab(tab) {
+    const voice = tab === 'voices';
+    home.querySelectorAll('[data-character-tab]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.characterTab === tab)));
+    home.querySelector('[data-character-panel="profile"]').hidden = voice;
+    home.querySelector('[data-character-panel="voices"]').hidden = !voice;
+    if (!voice) stopDetailVoice();
+  }
+  home.querySelectorAll('[data-character-tab]').forEach(button => button.addEventListener('click', () => {
+    playHomeTapSound(); setCharacterDetailTab(button.dataset.characterTab);
+  }));
+
   function showCharacterDetail(id) {
     const selected = registry.get(id);
     const owned = registry.isOwned ? registry.isOwned(selected) : selected?.available === true;
@@ -653,6 +717,8 @@
       }
     }
     home.querySelector('[data-character-status]').textContent = '';
+    renderCharacterVoiceList(selected);
+    setCharacterDetailTab('profile');
     characterLayout.dataset.characterView = 'detail';
     characterListScreen.hidden = true;
     characterDetailScreen.hidden = false;
@@ -664,13 +730,14 @@
   function renderCharacterScreen() {
     const list = home.querySelector('[data-character-list]');
     const characters = ownedCharacters();
+    characters.forEach(character => { void window.HP_MOTION_CHARACTER?.preload?.(character).catch(() => {}); });
     home.querySelector('[data-character-owned-count]').textContent = characters.length + '人';
     home.querySelector('[data-character-empty]').hidden = characters.length !== 0;
     list.hidden = characters.length === 0;
     list.replaceChildren(...characters.map(character => {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'hp-character-choice';
       button.dataset.characterChoice = character.id; button.setAttribute('aria-label', character.name + 'の詳細を見る');
-      const image = document.createElement('img'); image.src = character.listImage || character.previewImage; image.alt = ''; image.loading = 'lazy';
+      const image = document.createElement('img'); image.src = character.listImage || character.previewImage; image.alt = ''; image.loading = 'eager'; image.decoding = 'async';
       const copy = document.createElement('span'); copy.className = 'hp-character-choice-copy';
       const name = document.createElement('strong'); name.textContent = character.name;
       const description = document.createElement('span'); description.textContent = character.description || '';
@@ -759,6 +826,7 @@
       home.style.setProperty('--home-mode-unit', modeWidth / 511 + 'px');
     }
     syncModeFxCenter();
+    fitDialogueToCard();
   }
   if (safeArea && 'ResizeObserver' in window) {
     new ResizeObserver(syncHomeLayout).observe(safeArea);
