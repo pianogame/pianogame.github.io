@@ -12,7 +12,8 @@
   z-index: 2;
   overflow: hidden;
   overflow: clip;
-  background: #171018;
+  background:
+    linear-gradient(180deg, #4a3529 0%, #6b4a30 38%, #3a2b27 100%);
   isolation: isolate;
   container-type: size;
   -webkit-text-size-adjust: 100%;
@@ -1275,3 +1276,11 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
 #hp-home-screen .hp-home-notice-pager span {
   min-width: 58px; text-align: center; color: #d9c79d; font-weight: 800;
 }
+
+/* Home background reliability: never expose a black frame while the main art decodes. */
+#hp-home-screen .hp-home-bg {
+  opacity: 0;
+  transition: opacity .16s ease-out;
+  will-change: opacity;
+}
+#hp-home-screen.hp-home-background-ready .hp-home-bg { opacity: 1; }

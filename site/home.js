@@ -12,6 +12,29 @@
   const homeButton = piano.querySelector('[data-home-action="home"]');
   if (!pianoButton || !homeButton) return;
 
+  const homeBackground = home.querySelector('.hp-home-bg');
+  let homeBackgroundReady = false;
+  function markHomeBackgroundReady() {
+    if (!homeBackground || homeBackgroundReady) return;
+    homeBackgroundReady = true;
+    home.classList.add('hp-home-background-ready');
+  }
+  function prioritizeHomeBackground() {
+    if (!homeBackground) return Promise.resolve(false);
+    if (homeBackground.complete && homeBackground.naturalWidth > 0) {
+      markHomeBackgroundReady();
+      return homeBackground.decode?.().catch(() => {}).then(() => true) || Promise.resolve(true);
+    }
+    return new Promise(resolve => {
+      const done = ok => { if (ok) markHomeBackgroundReady(); resolve(ok); };
+      homeBackground.addEventListener('load', () => done(true), { once:true });
+      homeBackground.addEventListener('error', () => done(false), { once:true });
+      // Never replace the fallback with black if the network stalls.
+      setTimeout(() => resolve(false), 1800);
+    });
+  }
+  void prioritizeHomeBackground();
+
   let homeTapGraph = null;
   let homeTapBuffer = null;
   let homeTapLoading = null;
@@ -854,8 +877,10 @@
   // Warm every owned character's list art, profile background and Motion layers
   // while the home screen is idle, so opening the selector/detail is instant.
   const scheduleCharacterPreload = () => {
-    if ('requestIdleCallback' in window) requestIdleCallback(preloadOwnedCharacterAssets, { timeout: 700 });
-    else setTimeout(preloadOwnedCharacterAssets, 120);
+    void prioritizeHomeBackground().finally(() => {
+      if ('requestIdleCallback' in window) requestIdleCallback(preloadOwnedCharacterAssets, { timeout: 900 });
+      else setTimeout(preloadOwnedCharacterAssets, 180);
+    });
   };
   scheduleCharacterPreload();
   window.addEventListener('hp-curtain-start', scheduleCharacterPreload, { once: true });
