@@ -1907,3 +1907,10 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   top: auto;
   z-index: auto;
 }
+
+
+/* 2026-10-06: keep each character's full face visible in owned-character cards. */
+#hp-home-screen .hp-character-choice img {
+  object-fit: cover;
+  object-position: 50% 8%;
+}
