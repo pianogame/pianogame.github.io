@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261005-character-screen">
+  <link rel="stylesheet" href="/home.css?v=20261006-mission-ranking">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261005-character-screen"></script>
+  <script defer src="/home.js?v=20261006-mission-ranking"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -160,10 +160,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
       </div>
 
       <nav class="hp-home-bottom" aria-label="ホームメニュー">
-        <button type="button" class="hp-home-bottom-button" aria-label="ミッション">
+        <button type="button" class="hp-home-bottom-button" data-home-action="missions" aria-label="ミッション">
           <svg class="hp-home-reference-art" viewBox="0 0 283 151" aria-hidden="true" focusable="false"><svg data-home-menu-frame x="3" y="2" width="277" height="147" viewBox="414 682 261 147" preserveAspectRatio="none"><defs><clipPath id="home-mission-clip"><path d="M414 715 L420 697 L439 689 L463 689 L477 684 L616 686 L632 682 L646 690 L662 692 L666 711 L671 722 L668 792 L675 806 L665 817 L649 827 L434 829 L420 819 L415 802 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-mission-clip)"/></svg></svg>
         </button>
-        <button type="button" class="hp-home-bottom-button" aria-label="ランキング">
+        <button type="button" class="hp-home-bottom-button" data-home-action="ranking" aria-label="ランキング">
           <svg class="hp-home-reference-art" viewBox="0 0 283 151" aria-hidden="true" focusable="false"><svg data-home-menu-frame x="3" y="2" width="277" height="147" viewBox="690 682 280 147" preserveAspectRatio="none"><defs><clipPath id="home-ranking-clip"><path d="M690 717 L696 702 L708 696 L712 688 L731 689 L747 684 L931 686 L947 682 L956 696 L967 705 L970 793 L965 818 L948 829 L713 829 L695 819 L690 799 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-ranking-clip)"/></svg></svg>
         </button>
         <button type="button" class="hp-home-bottom-button" data-home-action="characters" aria-label="キャラクター">
@@ -307,6 +307,56 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     </div>
   </section>
 </section>
+
+<section class="hp-feature-screen hp-mission-screen" data-home-mission-screen hidden aria-label="ミッション画面">
+  <header class="hp-feature-screen-header">
+    <button type="button" class="hp-feature-home" data-home-action="mission-screen-close">← HOME</button>
+    <div class="hp-feature-heading"><span>MISSIONS</span><h2>ミッション</h2></div>
+    <div class="hp-mission-ticket" aria-label="ガチャチケット所持数"><span>GACHA TICKET</span><b data-mission-ticket-count>0</b><i>枚</i></div>
+  </header>
+  <div class="hp-feature-screen-body">
+    <section class="hp-mission-shell">
+      <div class="hp-mission-summary">
+        <div><span>PIANO DREAM STAGE</span><strong>ステージを楽しんで報酬をGET</strong><p>今できる遊びで進むミッションです。報酬のガチャチケットは今後のガチャ機能で使用予定です。</p></div>
+        <button type="button" class="hp-mission-claim-all" data-mission-claim-all>一括受取</button>
+      </div>
+      <nav class="hp-mission-tabs" aria-label="ミッション種別">
+        <button type="button" data-mission-tab="daily" aria-pressed="true">デイリー</button>
+        <button type="button" data-mission-tab="normal" aria-pressed="false">通常</button>
+      </nav>
+      <div class="hp-mission-list" data-mission-list></div>
+      <p class="hp-mission-footnote" data-mission-footnote>デイリーミッションは端末の日付が変わると更新されます。</p>
+    </section>
+  </div>
+</section>
+
+<section class="hp-feature-screen hp-ranking-screen" data-home-ranking-screen hidden aria-label="ランキング画面">
+  <header class="hp-feature-screen-header">
+    <button type="button" class="hp-feature-home" data-home-action="ranking-screen-close">← HOME</button>
+    <div class="hp-feature-heading"><span>RANKING</span><h2>ランキング</h2></div>
+    <div class="hp-ranking-season"><span>PIANO DREAM STAGE</span><b>RANKING</b></div>
+  </header>
+  <div class="hp-feature-screen-body">
+    <section class="hp-ranking-shell">
+      <div class="hp-ranking-self-card">
+        <div class="hp-ranking-self-rank"><small>YOUR RANK</small><strong data-ranking-self-rank>—</strong><span>位</span></div>
+        <div class="hp-ranking-self-copy"><span>PLAYER</span><strong data-ranking-player-name>ドリステP</strong><p data-ranking-self-status>まだランキング記録がありません。</p></div>
+        <div class="hp-ranking-self-score"><small>SCORE</small><strong data-ranking-self-score>—</strong></div>
+      </div>
+      <nav class="hp-ranking-tabs" aria-label="ランキング種別">
+        <button type="button" data-ranking-tab="overall" aria-pressed="true">総合</button>
+        <button type="button" data-ranking-tab="monthly" aria-pressed="false">今月</button>
+      </nav>
+      <div class="hp-ranking-list" data-ranking-list></div>
+      <div class="hp-ranking-empty" data-ranking-empty>
+        <span>♛</span>
+        <strong>まだランキングデータがありません</strong>
+        <p>ゲームモードのスコア連携後、この画面に実際の順位を表示します。架空のプレイヤーや順位は表示しません。</p>
+      </div>
+    </section>
+  </div>
+</section>
+
 <div id="hp-four88" lang="ja" data-instrument="piano" hidden>
   <div class="hp-surface" role="group" aria-label="グランドピアノ">
     <header class="hp-header" data-settings-background>
