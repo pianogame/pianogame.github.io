@@ -728,11 +728,15 @@
     if (focus) home.querySelector('[data-character-choice]')?.focus({ preventScroll:true });
   }
   let detailVoiceSource = null;
+  let detailVoiceGeneration = 0;
   function stopDetailVoice() {
+    detailVoiceGeneration++;
     if (!detailVoiceSource) return;
-    try { detailVoiceSource.stop(); } catch (_) {}
-    try { detailVoiceSource.disconnect(); } catch (_) {}
+    const source = detailVoiceSource;
     detailVoiceSource = null;
+    source.onended = null;
+    try { source.stop(); } catch (_) {}
+    try { source.disconnect(); } catch (_) {}
   }
   function renderCharacterVoiceList(character) {
     const list = home.querySelector('[data-character-voice-list]');
@@ -749,14 +753,20 @@
       button.append(number, copy, play);
       button.addEventListener('click', async () => {
         stopDetailVoice();
+        const generation = detailVoiceGeneration;
         try {
           window.HP_AUDIO_BRIDGE?.configureSession?.();
           window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
           const buffer = await prepareVoice(entry.file, set);
+          if (generation !== detailVoiceGeneration) return;
           const graph = ensureVoiceGraph(); if (!graph) return;
           const source = graph.context.createBufferSource(); source.buffer = buffer; source.connect(graph.gain);
-          source.onended = () => { if (detailVoiceSource === source) detailVoiceSource = null; source.disconnect(); };
-          detailVoiceSource = source; source.start();
+          source.onended = () => {
+            try { source.disconnect(); } catch (_) {}
+            if (detailVoiceSource === source) detailVoiceSource = null;
+          };
+          detailVoiceSource = source;
+          source.start();
         } catch (_) {}
       });
       return button;
@@ -768,6 +778,8 @@
     home.querySelector('[data-character-panel="profile"]').hidden = voice;
     home.querySelector('[data-character-panel="voices"]').hidden = !voice;
     if (!voice) stopDetailVoice();
+    const info = home.querySelector('.hp-character-info');
+    if (info) info.scrollTop = 0;
   }
   home.querySelectorAll('[data-character-tab]').forEach(button => button.addEventListener('click', () => {
     setCharacterDetailTab(button.dataset.characterTab);
@@ -840,6 +852,11 @@
     characterLayout.dataset.characterView = 'detail';
     characterListScreen.hidden = true;
     characterDetailScreen.hidden = false;
+    const characterInfo = home.querySelector('.hp-character-info');
+    if (characterInfo) {
+      characterInfo.scrollTop = 0;
+      requestAnimationFrame(() => { characterInfo.scrollTop = 0; });
+    }
     setCharacterHeaderActionsVisible(true);
     void previewMotion.setCharacter(selected);
     previewMotion.setActive(true);
