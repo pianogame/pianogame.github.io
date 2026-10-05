@@ -607,10 +607,50 @@
 
   let rankingState = loadRankingState();
 
+  const rankingDemoEnabled =
+    location.hostname.includes('git-staging-')
+    || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
+
+  function demoRankingData() {
+    const selfName = playerProfile.name || profileDefaults.name;
+    return {
+      overall: [
+        { rank:1, name:'Nocturne', score:982430 },
+        { rank:2, name:'みずいろ鍵盤', score:951820 },
+        { rank:3, name:'Aria_P', score:927560 },
+        { rank:4, name:'月灯り', score:901240 },
+        { rank:5, name:'Fortissimo', score:879630 },
+        { rank:6, name:selfName, score:852110, isSelf:true },
+        { rank:7, name:'Crescendo', score:828940 },
+        { rank:8, name:'星屑ピアノ', score:801520 },
+        { rank:9, name:'Cantabile', score:774300 },
+        { rank:10, name:'鍵盤ねこ', score:748860 },
+      ],
+      monthly: [
+        { rank:1, name:'Aria_P', score:316420 },
+        { rank:2, name:'Nocturne', score:301780 },
+        { rank:3, name:'星屑ピアノ', score:289560 },
+        { rank:4, name:selfName, score:271930, isSelf:true },
+        { rank:5, name:'月灯り', score:263480 },
+        { rank:6, name:'Cantabile', score:252710 },
+        { rank:7, name:'みずいろ鍵盤', score:244300 },
+        { rank:8, name:'Fortissimo', score:231940 },
+        { rank:9, name:'Crescendo', score:219660 },
+        { rank:10, name:'鍵盤ねこ', score:204810 },
+      ],
+      self: {
+        overall:{ rank:6, score:852110 },
+        monthly:{ rank:4, score:271930 },
+      },
+    };
+  }
+
   function renderRankingScreen() {
     const list = home.querySelector('[data-ranking-list]');
     const empty = home.querySelector('[data-ranking-empty]');
-    const entries = Array.isArray(rankingState[rankingTab]) ? rankingState[rankingTab] : [];
+    const storedEntries = Array.isArray(rankingState[rankingTab]) ? rankingState[rankingTab] : [];
+    const demo = rankingDemoEnabled && storedEntries.length === 0 ? demoRankingData() : null;
+    const entries = demo ? demo[rankingTab] : storedEntries;
     home.querySelectorAll('[data-ranking-tab]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.rankingTab === rankingTab));
     });
@@ -618,9 +658,12 @@
     if (list) {
       list.replaceChildren(...entries.map((entry,index) => {
         const row = document.createElement('article');
-        row.className = 'hp-ranking-row' + (entry?.isSelf ? ' is-self' : '');
+        const numericRank = Number(entry?.rank) || index + 1;
+        row.className = 'hp-ranking-row'
+          + (entry?.isSelf ? ' is-self' : '')
+          + (numericRank <= 3 ? ' is-top-' + numericRank : '');
         const rank = document.createElement('b');
-        rank.textContent = String(Number(entry?.rank) || index + 1);
+        rank.textContent = String(numericRank);
         const name = document.createElement('strong');
         name.textContent = String(entry?.name || 'PLAYER');
         const score = document.createElement('span');
@@ -632,13 +675,15 @@
     }
     if (empty) empty.hidden = entries.length > 0;
 
-    const self = rankingState.self?.[rankingTab] || null;
+    const self = demo ? demo.self[rankingTab] : (rankingState.self?.[rankingTab] || null);
     const selfRank = home.querySelector('[data-ranking-self-rank]');
     const selfScore = home.querySelector('[data-ranking-self-score]');
     const selfStatus = home.querySelector('[data-ranking-self-status]');
     if (selfRank) selfRank.textContent = self?.rank ? String(self.rank) : '—';
     if (selfScore) selfScore.textContent = Number.isFinite(Number(self?.score)) ? Number(self.score).toLocaleString('ja-JP') : '—';
-    if (selfStatus) selfStatus.textContent = self?.rank ? 'ランキングに参加中です。' : 'まだランキング記録がありません。';
+    if (selfStatus) selfStatus.textContent = demo
+      ? 'STAGING用の仮ランキングを表示中です。'
+      : self?.rank ? 'ランキングに参加中です。' : 'まだランキング記録がありません。';
     const rankingName = home.querySelector('[data-ranking-player-name]');
     if (rankingName) rankingName.textContent = playerProfile.name || profileDefaults.name;
   }
