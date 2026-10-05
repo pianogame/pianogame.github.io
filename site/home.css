@@ -1314,9 +1314,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
   min-height: 0;
   color: #f5ead5;
   background:
-    radial-gradient(circle at 18% 8%, #5a4a7f3d, transparent 35%),
-    radial-gradient(circle at 82% 100%, #b28a4540, transparent 38%),
-    linear-gradient(145deg, #111a2df7, #081120 58%, #15182bf9);
+    linear-gradient(180deg, #07132942, #0b183044),
+    url("/assets/home/character-screen-bg-20261006.svg") center / cover no-repeat,
+    linear-gradient(145deg, #111a2d, #081120 58%, #15182b);
   isolation: isolate;
 }
 #hp-home-screen .hp-character-screen::before {
