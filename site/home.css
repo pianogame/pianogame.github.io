@@ -1539,3 +1539,109 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-body {
     0 18px 65px #0009,
     0 0 40px #f1d89b24;
 }
+
+
+/* 2026-10-06: align character actions, brighten glass panels, clarify voice playback */
+#hp-home-screen .hp-character-screen-home {
+  position: absolute !important;
+  left: max(18px, var(--safe-l));
+  top: 50%;
+  transform: translateY(-50%);
+}
+#hp-home-screen .hp-character-screen-home:active {
+  transform: translateY(calc(-50% + 1px));
+}
+#hp-home-screen .hp-character-screen-actions {
+  position: absolute !important;
+  right: max(18px, var(--safe-r));
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-home {
+  left: max(18px, var(--safe-b));
+}
+html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
+  right: max(18px, var(--safe-t));
+}
+@container (max-width: 760px) {
+  #hp-home-screen .hp-character-screen-home {
+    left: 10px;
+  }
+  #hp-home-screen .hp-character-screen-actions {
+    right: 10px;
+  }
+}
+
+/* Match INFORMATION / SETTINGS inner panel to the bright classical-glass backdrop. */
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog {
+  color: #263b52;
+  border-color: #d3b875;
+  background:
+    linear-gradient(145deg, #f7fbfddf 0%, #dce8f0e6 45%, #c7d8e5e3 100%);
+  box-shadow:
+    inset 0 0 0 1px #ffffffd9,
+    inset 0 0 0 4px #d6ba7445,
+    0 18px 55px #1429424d,
+    0 0 34px #f4dfaa42;
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
+  backdrop-filter: blur(12px) saturate(1.08);
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog header,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog header {
+  background: linear-gradient(180deg, #f5fafce8, #d9e6eee8);
+  border-bottom-color: #b79a5e80;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog-kicker,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog-kicker {
+  color: #8b6b34;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog h2,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog h2 {
+  color: #243950;
+  text-shadow: 0 1px 0 #fff;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-sound-intro {
+  color: #53677a;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog::before,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog::before {
+  color: #b8924c;
+  text-shadow: 0 0 10px #fff5cf;
+}
+
+/* Voice rows keep their full tap target, while a circular play control makes the action obvious. */
+#hp-home-screen .hp-character-voice-item {
+  grid-template-columns: 34px minmax(0,1fr) 42px;
+}
+#hp-home-screen .hp-character-voice-item i {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #d6b872;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, #ffffff38, transparent 34%),
+    linear-gradient(180deg, #425577, #18253d);
+  color: transparent;
+  font-size: 0;
+  font-style: normal;
+  box-shadow:
+    inset 0 1px 0 #fff4c94d,
+    0 2px 7px #0006,
+    0 0 10px #d9b86222;
+}
+#hp-home-screen .hp-character-voice-item i::before {
+  content: "▶";
+  margin-left: 2px;
+  color: #f7e3ad;
+  font-size: 15px;
+  line-height: 1;
+}
+#hp-home-screen .hp-character-voice-item:active i {
+  transform: scale(.93);
+  filter: brightness(1.15);
+}
