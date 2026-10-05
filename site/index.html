@@ -126,7 +126,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     <ellipse cx="511" cy="320" rx="143" ry="141" fill="url(#ink)"/>
   </g>
 </svg>
-        <span class="hp-home-level-orb"><span class="hp-home-level-copy"><span class="hp-home-level-label">PLv</span><span class="hp-home-level" data-home-level>82</span></span></span>
+        <button type="button" class="hp-home-level-orb" data-home-action="profile-open" aria-label="プロフィール設定を開く"><span class="hp-home-level-copy"><span class="hp-home-level-label">PLv</span><span class="hp-home-level" data-home-level>82</span></span></button>
         <span class="hp-home-player-name" data-home-player-name>ドリステP</span>
         <span class="hp-home-stamina-value" data-home-stamina>25/25</span>
         <span class="hp-home-stamina-fill" style="--stamina:1" aria-hidden="true"></span>
@@ -196,6 +196,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         </nav>
       </div>
       <div data-home-settings hidden>
+        <button type="button" class="hp-home-profile-settings-link" data-home-action="profile-settings">
+          <span><b>プロフィール設定</b><small>プレイヤー名・ひとこと・お気に入り楽器を変更</small></span>
+          <i aria-hidden="true">›</i>
+        </button>
         <p class="hp-home-sound-intro">あなたに心地よい音のバランスで。</p>
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-volume">全体音量 <output data-home-volume-output>75%</output></label><input id="hp-home-volume" type="range" data-home-volume min="0" max="100" value="75" aria-label="ホームの音量"><p>BGM・ボイス・効果音・楽器の全体バランス</p></div>
         <div class="hp-home-sound-card"><label class="hp-home-volume-label" for="hp-home-effects">効果音 <output data-sound-output="effects">100%</output></label><input id="hp-home-effects" type="range" data-sound-control="effects" min="0" max="100" value="100" aria-label="ホームの効果音量"><p>ボタンのタッチ音・起動時の効果音</p></div>
@@ -204,6 +208,42 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
           <div class="hp-home-credit-heading"><span>CREDITS</span><strong>キャラクタークレジット</strong></div>
           <div class="hp-home-credit-list" data-home-character-credit-list></div>
         </section>
+      </div>
+      <div class="hp-player-profile-panel" data-home-profile hidden>
+        <div class="hp-player-profile-summary">
+          <span class="hp-player-profile-level"><small>PLv</small><strong data-profile-level>82</strong></span>
+          <div>
+            <span class="hp-player-profile-eyebrow">PLAYER PROFILE</span>
+            <strong data-profile-preview-name>ドリステP</strong>
+            <p data-profile-preview-message>ピアノを楽しもう♪</p>
+          </div>
+        </div>
+        <form class="hp-player-profile-form" data-player-profile-form>
+          <label class="hp-player-profile-field">
+            <span>プレイヤー名</span>
+            <input type="text" data-profile-name maxlength="12" autocomplete="nickname" placeholder="ドリステP">
+            <small>12文字まで</small>
+          </label>
+          <label class="hp-player-profile-field">
+            <span>ひとこと</span>
+            <textarea data-profile-message maxlength="40" rows="2" placeholder="ピアノを楽しもう♪"></textarea>
+            <small>40文字まで</small>
+          </label>
+          <label class="hp-player-profile-field">
+            <span>お気に入り楽器</span>
+            <select data-profile-instrument>
+              <option value="piano">ピアノ</option>
+              <option value="violin">バイオリン</option>
+              <option value="bass">エレキベース</option>
+              <option value="guitar">エレキギター</option>
+            </select>
+          </label>
+          <div class="hp-player-profile-actions">
+            <button type="submit" class="hp-player-profile-save">保存する</button>
+            <button type="button" class="hp-player-profile-back" data-home-action="profile-back">設定へ戻る</button>
+          </div>
+          <p class="hp-player-profile-status" data-profile-status role="status" aria-live="polite"></p>
+        </form>
       </div>
       
     </section>
