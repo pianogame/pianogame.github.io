@@ -2541,3 +2541,94 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-actions { margin-top:7px; }
   #hp-home-screen .hp-gacha-actions button { min-height:48px;padding:6px 12px; }
 }
+
+
+/* 2026-10-06: integrate GACHA into the existing ticket campaign instead of floating over modes. */
+#hp-home-screen .hp-home-campaign-gacha {
+  position:relative;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:transform .12s ease,filter .12s ease;
+}
+#hp-home-screen .hp-home-campaign-gacha .hp-home-reference-art {
+  display:block;
+  width:100%;
+  height:auto;
+  filter:drop-shadow(0 3px 4px #26140c33);
+}
+#hp-home-screen .hp-home-campaign-gacha:active {
+  transform:translateY(2px) scale(.98);
+  filter:brightness(.9);
+}
+#hp-home-screen .hp-home-campaign-gacha-label {
+  position:absolute;
+  right:5.5%;
+  bottom:16%;
+  z-index:2;
+  min-width:27%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto;
+  align-items:center;
+  gap:1px 5px;
+  padding:5px 9px 5px 10px;
+  border:1px solid #d5b56f;
+  border-radius:999px;
+  color:#fff7df;
+  background:
+    radial-gradient(circle at 28% 0,#fff1b04a,transparent 45%),
+    linear-gradient(180deg,#a8772d,#684315);
+  box-shadow:inset 0 1px 0 #fff3c27a,0 2px 7px #3b220f66;
+  text-align:center;
+  pointer-events:none;
+}
+#hp-home-screen .hp-home-campaign-gacha-label small {
+  grid-column:1;
+  color:#f2deb0;
+  font:6px/1 "Times New Roman",serif;
+  letter-spacing:.13em;
+}
+#hp-home-screen .hp-home-campaign-gacha-label b {
+  grid-column:1;
+  color:#fff9ea;
+  font:12px/1 "Times New Roman",serif;
+  letter-spacing:.08em;
+}
+#hp-home-screen .hp-home-campaign-gacha-label i {
+  grid-column:2;
+  grid-row:1 / 3;
+  color:#ffe9ac;
+  font:14px/1 "Times New Roman",serif;
+  font-style:normal;
+}
+#hp-home-screen .hp-ranking-row.is-top-1 {
+  border-color:#e0bb58;
+  background:linear-gradient(110deg,#fff8ddec,#efe1bfe8 60%,#d8c194e5);
+  box-shadow:inset 0 1px 0 #fff,0 0 12px #e2bd5a48;
+}
+#hp-home-screen .hp-ranking-row.is-top-2 {
+  border-color:#b7c1cb;
+  background:linear-gradient(110deg,#fafcfdec,#e3e9ede8 60%,#ccd5dce5);
+}
+#hp-home-screen .hp-ranking-row.is-top-3 {
+  border-color:#b78762;
+  background:linear-gradient(110deg,#fbf4efec,#ead9cee8 60%,#d9bdabe5);
+}
+#hp-home-screen .hp-ranking-row.is-top-1 b { color:#a87816; }
+#hp-home-screen .hp-ranking-row.is-top-2 b { color:#667786; }
+#hp-home-screen .hp-ranking-row.is-top-3 b { color:#8a5937; }
+@container (max-height:480px) {
+  #hp-home-screen .hp-home-campaign-gacha-label {
+    right:5%;
+    bottom:14%;
+    padding:4px 7px 4px 8px;
+  }
+}
