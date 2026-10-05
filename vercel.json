@@ -173,9 +173,26 @@
           "value": "public, max-age=86400, stale-while-revalidate=604800"
         }
       ]
+    },
+    {
+      "source": "/live-news.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "0"
+        }
+      ]
     }
   ],
   "routes": [
+    {
+      "src": "/live-news\\.json",
+      "dest": "https://raw.githubusercontent.com/pianogame/pianogame.github.io/news-feed/news.json"
+    },
     {
       "src": "/audio/.*",
       "has": [
