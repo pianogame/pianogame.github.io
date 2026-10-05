@@ -271,10 +271,29 @@
 
   let playerProfile = loadPlayerProfile();
 
+  function fitHomePlayerName() {
+    if (!playerNameDisplay) return;
+    playerNameDisplay.style.removeProperty('font-size');
+    playerNameDisplay.style.removeProperty('letter-spacing');
+    requestAnimationFrame(() => {
+      if (!playerNameDisplay.isConnected || !playerNameDisplay.clientWidth) return;
+      const baseSize = parseFloat(getComputedStyle(playerNameDisplay).fontSize) || 14;
+      const available = Math.max(1, playerNameDisplay.clientWidth - 8);
+      const required = playerNameDisplay.scrollWidth;
+      if (required <= available) return;
+      const target = Math.max(baseSize * .54, baseSize * (available / required) * .96);
+      playerNameDisplay.style.fontSize = target + 'px';
+      if (target < baseSize * .72) playerNameDisplay.style.letterSpacing = '-.025em';
+    });
+  }
+
   function syncPlayerProfileUI() {
     const name = playerProfile.name || profileDefaults.name;
     const message = playerProfile.message || profileDefaults.message;
-    if (playerNameDisplay) playerNameDisplay.textContent = name;
+    if (playerNameDisplay) {
+      playerNameDisplay.textContent = name;
+      fitHomePlayerName();
+    }
     if (profilePreviewName) profilePreviewName.textContent = name;
     if (profilePreviewMessage) profilePreviewMessage.textContent = message;
     if (profileNameInput) profileNameInput.value = name;
@@ -1095,6 +1114,7 @@
     }
     syncModeFxCenter();
     fitDialogueToCard();
+    fitHomePlayerName();
   }
   if (safeArea && 'ResizeObserver' in window) {
     new ResizeObserver(syncHomeLayout).observe(safeArea);
