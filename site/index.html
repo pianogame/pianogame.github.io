@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=70', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=71', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -72,12 +72,12 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/violin.js?v=1"></script>
   <script defer src="/key-layout.js?v=14"></script>
   <script defer src="/piano.js?v=38"></script>
-  <script defer src="/home-news.js?v=20261004-feedfix"></script>
+  <script defer src="/home-news.js?v=20261005-home-return-refresh"></script>
   <script defer src="/characters.js?v=20261005-touka-correct"></script>
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261005-profile-bg-fix"></script>
+  <script defer src="/home.js?v=20261005-home-return-refresh"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
