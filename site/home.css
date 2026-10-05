@@ -1899,3 +1899,11 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   max-width: 42%;
   min-width: 0;
 }
+
+
+/* 2026-10-06: profile settings header scrolls with the panel like notice/settings. */
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog header {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
