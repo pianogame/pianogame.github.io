@@ -915,12 +915,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-safe {
   scrollbar-color: #b99a5f #111a2b;
 }
 #hp-home-screen .hp-character-info::before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 1px solid #d9bf8452;
-  border-radius: 10px;
-  pointer-events: none;
+  content: none;
 }
 #hp-home-screen .hp-character-info::-webkit-scrollbar { width: 6px; }
 #hp-home-screen .hp-character-info::-webkit-scrollbar-track {
@@ -1330,6 +1325,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
     radial-gradient(circle at 50% 0%, #fff4cf14, transparent 42%);
 }
 #hp-home-screen .hp-character-screen-header {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(92px, auto) minmax(0, 1fr) minmax(210px, auto);
   align-items: center;
@@ -1340,9 +1336,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-home-top-actions {
     max(18px, var(--safe-r))
     10px
     max(18px, var(--safe-l));
-  border-bottom: 1px solid #b7985f88;
-  background: linear-gradient(180deg, #17233cf5, #0a1428ed);
-  box-shadow: 0 5px 18px #0005, inset 0 -1px 0 #fff1c817;
+  border-bottom: 1px solid #d7c08a66;
+  background: transparent;
+  box-shadow: none;
 }
 html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-header {
   padding:
@@ -1366,7 +1362,17 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-header {
 }
 #hp-home-screen .hp-character-screen-home:active,
 #hp-home-screen .hp-character-screen-button:active { transform: translateY(1px); filter: brightness(1.1); }
-#hp-home-screen .hp-character-screen-heading { min-width: 0; text-align: center; }
+#hp-home-screen .hp-character-screen-heading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: max-content;
+  max-width: 40%;
+  min-width: 0;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
 #hp-home-screen .hp-character-screen-heading span {
   display: block;
   color: #c9ab70;
@@ -1499,4 +1505,37 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-body {
 #hp-home-screen .hp-character-screen [data-character-preview] canvas,
 #hp-home-screen .hp-character-screen [data-character-preview] img {
   z-index: 0;
+}
+
+
+/* 2026-10-06: character header/profile polish and classical-glass home panels */
+#hp-home-screen .hp-character-info {
+  box-sizing: border-box;
+}
+#hp-home-screen .hp-character-info [data-character-panel] {
+  min-width: 0;
+  max-width: 100%;
+}
+#hp-home-screen .hp-character-info .hp-character-profile,
+#hp-home-screen .hp-character-info .hp-character-profile-row {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog-backdrop,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog-backdrop {
+  background:
+    linear-gradient(180deg, #19304c26, #0a172d52),
+    url("/assets/home/classical-glass-bg-20261006.svg") center / cover no-repeat;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog {
+  background:
+    linear-gradient(125deg, #14233be8, #101626df 55%, #1c1e30e6);
+  box-shadow:
+    inset 0 0 0 3px #101628,
+    inset 0 0 0 4px #d1b5728a,
+    0 18px 65px #0009,
+    0 0 40px #f1d89b24;
 }
