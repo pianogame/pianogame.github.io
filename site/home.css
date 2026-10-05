@@ -1645,3 +1645,242 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   transform: scale(.93);
   filter: brightness(1.15);
 }
+
+
+/* 2026-10-06: profile settings and dialog/header polish */
+#hp-home-screen .hp-home-level-orb {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#hp-home-screen .hp-home-level-orb:focus-visible {
+  outline: 2px solid #f0d18b;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+#hp-home-screen .hp-home-level-orb:active .hp-home-level-copy {
+  transform: scale(.94);
+}
+
+/* Remove the half-frame/line around the dialog title area. */
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog header,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog header,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Use the same classical-glass treatment for profile settings. */
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog-backdrop {
+  background:
+    linear-gradient(180deg, #19304c26, #0a172d52),
+    url("/assets/home/classical-glass-bg-20261006.svg") center / cover no-repeat;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog {
+  color: #263b52;
+  border-color: #d3b875;
+  background: linear-gradient(145deg, #f7fbfddf 0%, #dce8f0e6 45%, #c7d8e5e3 100%);
+  box-shadow:
+    inset 0 0 0 1px #ffffffd9,
+    inset 0 0 0 4px #d6ba7445,
+    0 18px 55px #1429424d,
+    0 0 34px #f4dfaa42;
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
+  backdrop-filter: blur(12px) saturate(1.08);
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog-kicker { color: #8b6b34; }
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog h2 {
+  color: #243950;
+  text-shadow: 0 1px 0 #fff;
+}
+
+/* True geometric centering for the circular play icon. */
+#hp-home-screen .hp-character-voice-item i {
+  position: relative;
+}
+#hp-home-screen .hp-character-voice-item i::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 13px;
+  height: 15px;
+  margin: 0;
+  background: #f7e3ad;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  transform: translate(-45%, -50%);
+}
+
+/* Settings -> Profile entry */
+#hp-home-screen .hp-home-profile-settings-link {
+  width: 100%;
+  min-height: 64px;
+  margin: 2px 0 14px;
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #b99a5f;
+  border-radius: 13px;
+  color: #263b52;
+  background:
+    linear-gradient(135deg, #ffffffb8, #eaf2f6b8 56%, #cfdee8c2);
+  box-shadow: inset 0 1px 0 #fff, 0 3px 10px #28435a24;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#hp-home-screen .hp-home-profile-settings-link span { display: grid; gap: 3px; }
+#hp-home-screen .hp-home-profile-settings-link b {
+  font: 700 16px/1.25 "Hiragino Sans","Yu Gothic",sans-serif;
+}
+#hp-home-screen .hp-home-profile-settings-link small {
+  color: #607286;
+  font-size: 11px;
+}
+#hp-home-screen .hp-home-profile-settings-link i {
+  color: #9c783d;
+  font: 30px/1 "Times New Roman",serif;
+  font-style: normal;
+}
+#hp-home-screen .hp-home-profile-settings-link:active { transform: translateY(1px); filter: brightness(1.03); }
+
+/* Player profile editor */
+#hp-home-screen .hp-player-profile-panel { display: grid; gap: 14px; }
+#hp-home-screen .hp-player-profile-summary {
+  display: grid;
+  grid-template-columns: 82px minmax(0,1fr);
+  align-items: center;
+  gap: 15px;
+  padding: 13px 15px;
+  border: 1px solid #c3a467;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #ffffffc9, #dce9f1bc);
+  box-shadow: inset 0 1px 0 #fff, 0 4px 12px #24415b1d;
+}
+#hp-home-screen .hp-player-profile-level {
+  width: 68px;
+  aspect-ratio: 1;
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  border: 2px solid #d3b46e;
+  border-radius: 50%;
+  color: #fff2d2;
+  background: radial-gradient(circle at 35% 28%, #445f85, #10223f 68%, #07152b);
+  box-shadow: inset 0 0 0 3px #ffffff17, 0 3px 9px #203b5550;
+  text-align: center;
+}
+#hp-home-screen .hp-player-profile-level small { font: 10px/1 "Times New Roman",serif; letter-spacing: .08em; }
+#hp-home-screen .hp-player-profile-level strong { font: 25px/1 "Times New Roman",serif; font-weight: 400; }
+#hp-home-screen .hp-player-profile-eyebrow {
+  display: block;
+  color: #9a793d;
+  font: 10px/1.2 "Times New Roman",serif;
+  letter-spacing: .18em;
+}
+#hp-home-screen .hp-player-profile-summary div > strong {
+  display: block;
+  margin-top: 3px;
+  color: #223850;
+  font-size: 20px;
+}
+#hp-home-screen .hp-player-profile-summary p {
+  margin: 4px 0 0;
+  color: #5d7184;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+#hp-home-screen .hp-player-profile-form { display: grid; gap: 10px; }
+#hp-home-screen .hp-player-profile-field {
+  display: grid;
+  grid-template-columns: 112px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #baa06a99;
+  border-radius: 12px;
+  background: #ffffff8f;
+}
+#hp-home-screen .hp-player-profile-field > span {
+  color: #334b62;
+  font-weight: 700;
+  font-size: 13px;
+}
+#hp-home-screen .hp-player-profile-field > small {
+  color: #748699;
+  font-size: 10px;
+  white-space: nowrap;
+}
+#hp-home-screen .hp-player-profile-field input,
+#hp-home-screen .hp-player-profile-field textarea,
+#hp-home-screen .hp-player-profile-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #a98d58;
+  border-radius: 9px;
+  color: #20364e;
+  background: #fbfdfee8;
+  font: 14px/1.35 "Hiragino Sans","Yu Gothic",sans-serif;
+  outline: none;
+}
+#hp-home-screen .hp-player-profile-field textarea { resize: none; }
+#hp-home-screen .hp-player-profile-field input:focus,
+#hp-home-screen .hp-player-profile-field textarea:focus,
+#hp-home-screen .hp-player-profile-field select:focus {
+  border-color: #c49b4f;
+  box-shadow: 0 0 0 2px #d9b96d2e;
+}
+#hp-home-screen .hp-player-profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+#hp-home-screen .hp-player-profile-save,
+#hp-home-screen .hp-player-profile-back {
+  min-height: 42px;
+  padding: 8px 18px;
+  border: 1px solid #af8c4b;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#hp-home-screen .hp-player-profile-save {
+  color: #fff8e8;
+  background: linear-gradient(180deg, #486487, #1e3554);
+  box-shadow: inset 0 1px 0 #ffffff35, 0 3px 8px #273e5638;
+}
+#hp-home-screen .hp-player-profile-back {
+  color: #40566b;
+  background: linear-gradient(#fff,#e7eff4);
+}
+#hp-home-screen .hp-player-profile-status {
+  min-height: 18px;
+  margin: 0;
+  color: #87672f;
+  font-size: 11px;
+  text-align: right;
+}
+@container (max-height: 520px) {
+  #hp-home-screen .hp-player-profile-panel { gap: 8px; }
+  #hp-home-screen .hp-player-profile-summary { padding: 8px 12px; }
+  #hp-home-screen .hp-player-profile-level { width: 56px; }
+  #hp-home-screen .hp-player-profile-field { padding: 6px 9px; }
+  #hp-home-screen .hp-player-profile-field input,
+  #hp-home-screen .hp-player-profile-field textarea,
+  #hp-home-screen .hp-player-profile-field select { min-height: 34px; padding-top: 5px; padding-bottom: 5px; }
+}
