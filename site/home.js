@@ -221,6 +221,7 @@
   const characterScreen = home.querySelector('[data-home-character-screen]');
   const missionScreen = home.querySelector('[data-home-mission-screen]');
   const rankingScreen = home.querySelector('[data-home-ranking-screen]');
+  const gachaScreen = home.querySelector('[data-home-gacha-screen]');
   const canvas = home.querySelector('[data-home-canvas]');
   const homeVolume = home.querySelector('[data-home-volume]');
   const pianoVolume = piano.querySelector('[data-control="volume"]');
@@ -469,6 +470,8 @@
     if (!missionList) return;
     if (normalizeMissionDate()) saveMissionState();
     if (missionTicketCount) missionTicketCount.textContent = String(missionState.tickets);
+    const gachaTicketCount = home.querySelector('[data-gacha-ticket-count]');
+    if (gachaTicketCount) gachaTicketCount.textContent = String(missionState.tickets);
     home.querySelectorAll('[data-mission-tab]').forEach(button => {
       button.setAttribute('aria-pressed', String(button.dataset.missionTab === missionTab));
     });
@@ -565,6 +568,7 @@
     closeHomeDialog();
     if (characterScreen && !characterScreen.hidden) closeCharacterScreen();
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
+    if (gachaScreen && !gachaScreen.hidden) closeGachaScreen();
     renderMissionScreen();
     canvas.inert = true;
     missionScreen.hidden = false;
@@ -649,6 +653,7 @@
     closeHomeDialog();
     if (characterScreen && !characterScreen.hidden) closeCharacterScreen();
     if (missionScreen && !missionScreen.hidden) closeMissionScreen();
+    if (gachaScreen && !gachaScreen.hidden) closeGachaScreen();
     renderRankingScreen();
     canvas.inert = true;
     rankingScreen.hidden = false;
@@ -667,7 +672,39 @@
   rankingMenuButton?.addEventListener('click', openRankingScreen);
   rankingScreen?.querySelector('[data-home-action="ranking-screen-close"]')?.addEventListener('click', closeRankingScreen);
 
-  window.HP_HOME_RANKING = {
+  const gachaMenuButton = home.querySelector('[data-home-action="gacha"]');
+
+  function renderGachaScreen() {
+    const gachaTicketCount = home.querySelector('[data-gacha-ticket-count]');
+    if (gachaTicketCount) gachaTicketCount.textContent = String(missionState.tickets);
+  }
+
+  function openGachaScreen() {
+    if (!gachaScreen || !gachaScreen.hidden) return;
+    closeHomeDialog();
+    if (characterScreen && !characterScreen.hidden) closeCharacterScreen();
+    if (missionScreen && !missionScreen.hidden) closeMissionScreen();
+    if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
+    renderGachaScreen();
+    canvas.inert = true;
+    gachaScreen.hidden = false;
+    stopCharacterVoice();
+    syncCharacterVoice();
+    gachaScreen.querySelector('[data-home-action="gacha-screen-close"]')?.focus({preventScroll:true});
+  }
+
+  function closeGachaScreen() {
+    if (!gachaScreen || gachaScreen.hidden) return;
+    gachaScreen.hidden = true;
+    canvas.inert = false;
+    syncCharacterVoice();
+    gachaMenuButton?.focus({preventScroll:true});
+  }
+
+  gachaMenuButton?.addEventListener('click', openGachaScreen);
+  gachaScreen?.querySelector('[data-home-action="gacha-screen-close"]')?.addEventListener('click', closeGachaScreen);
+
+    window.HP_HOME_RANKING = {
     set(data = {}) {
       rankingState = {
         overall: Array.isArray(data.overall) ? data.overall.slice(0,100) : rankingState.overall,
@@ -756,6 +793,10 @@
       if (event.key === 'Escape') { event.preventDefault(); closeRankingScreen(); }
       return;
     }
+    if (gachaScreen && !gachaScreen.hidden) {
+      if (event.key === 'Escape') { event.preventDefault(); closeGachaScreen(); }
+      return;
+    }
     if (characterScreen && !characterScreen.hidden) {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -830,6 +871,7 @@
       && (!characterScreen || characterScreen.hidden)
       && (!missionScreen || missionScreen.hidden)
       && (!rankingScreen || rankingScreen.hidden)
+      && (!gachaScreen || gachaScreen.hidden)
       && !home.classList.contains('hp-piano-launching');
   }
 
@@ -1011,6 +1053,7 @@
   if (characterScreen) voiceObserver.observe(characterScreen, { attributes:true, attributeFilter:['hidden'] });
   if (missionScreen) voiceObserver.observe(missionScreen, { attributes:true, attributeFilter:['hidden'] });
   if (rankingScreen) voiceObserver.observe(rankingScreen, { attributes:true, attributeFilter:['hidden'] });
+  if (gachaScreen) voiceObserver.observe(gachaScreen, { attributes:true, attributeFilter:['hidden'] });
   document.addEventListener('visibilitychange', syncCharacterVoice);
   window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; voiceHistory.length = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
