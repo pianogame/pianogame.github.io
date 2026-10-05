@@ -1884,3 +1884,18 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-player-profile-field textarea,
   #hp-home-screen .hp-player-profile-field select { min-height: 34px; padding-top: 5px; padding-bottom: 5px; }
 }
+
+
+/* 2026-10-06: let dialog headings scroll normally and keep long player names inside the HUD. */
+#hp-home-screen .hp-home-dialog-overlay[data-screen="notice"] .hp-home-dialog header,
+#hp-home-screen .hp-home-dialog-overlay[data-screen="settings"] .hp-home-dialog header {
+  position: static;
+  top: auto;
+  z-index: auto;
+}
+#hp-home-screen .hp-home-player-name {
+  box-sizing: border-box;
+  padding-inline: 4px;
+  max-width: 42%;
+  min-width: 0;
+}
