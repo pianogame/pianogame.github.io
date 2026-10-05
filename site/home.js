@@ -219,6 +219,8 @@
 
   const dialogOverlay = home.querySelector('.hp-home-dialog-overlay');
   const characterScreen = home.querySelector('[data-home-character-screen]');
+  const missionScreen = home.querySelector('[data-home-mission-screen]');
+  const rankingScreen = home.querySelector('[data-home-ranking-screen]');
   const canvas = home.querySelector('[data-home-canvas]');
   const homeVolume = home.querySelector('[data-home-volume]');
   const pianoVolume = piano.querySelector('[data-control="volume"]');
@@ -295,6 +297,8 @@
       fitHomePlayerName();
     }
     if (profilePreviewName) profilePreviewName.textContent = name;
+    const rankingName = home.querySelector('[data-ranking-player-name]');
+    if (rankingName) rankingName.textContent = name;
     if (profilePreviewMessage) profilePreviewMessage.textContent = message;
     if (profileNameInput) profileNameInput.value = name;
     if (profileMessageInput) profileMessageInput.value = message;
@@ -375,7 +379,315 @@
     syncPlayerProfileUI();
     if (profileStatus) profileStatus.textContent = 'プロフィールを保存しました。';
   });
-  const characterMenuButton = home.querySelector('[data-home-action="characters"]');
+  const missionMenuButton = home.querySelector('[data-home-action="missions"]');
+  const rankingMenuButton = home.querySelector('[data-home-action="ranking"]');
+  const missionList = home.querySelector('[data-mission-list]');
+  const missionTicketCount = home.querySelector('[data-mission-ticket-count]');
+  const missionClaimAll = home.querySelector('[data-mission-claim-all]');
+  const missionStateKey = 'pds-mission-state-v1';
+  let missionTab = 'daily';
+
+  const missionDefinitions = [
+    { id:'daily-home', group:'daily', stat:'homeOpen', target:1, reward:1, icon:'♬', title:'ホームを開く', note:'今日のステージにアクセスしよう' },
+    { id:'daily-talk', group:'daily', stat:'characterTalk', target:3, reward:1, icon:'♪', title:'キャラクターに3回話しかける', note:'ホームのキャラクターをタップ' },
+    { id:'daily-notes', group:'daily', stat:'notes', target:20, reward:1, icon:'♩', title:'鍵盤を20音弾く', note:'ピアノモードで自由に演奏' },
+    { id:'normal-piano', group:'normal', stat:'pianoEnter', target:1, reward:1, icon:'♬', title:'ピアノモードを使ってみる', note:'ピアノモードへ1回移動' },
+    { id:'normal-notes-100', group:'normal', stat:'notes', target:100, reward:2, icon:'♫', title:'鍵盤を100音弾く', note:'累計100音を演奏' },
+    { id:'normal-talk-20', group:'normal', stat:'characterTalk', target:20, reward:2, icon:'♪', title:'キャラクターに20回話しかける', note:'お気に入りのキャラクターと交流' },
+  ];
+
+  function localDateKey() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + day;
+  }
+
+  function loadMissionState() {
+    const blank = {
+      dailyDate: localDateKey(),
+      daily: {},
+      lifetime: {},
+      claimedDaily: [],
+      claimedNormal: [],
+      tickets: 0,
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(missionStateKey) || 'null');
+      if (!saved || typeof saved !== 'object') return blank;
+      const state = {
+        ...blank,
+        ...saved,
+        daily: saved.daily && typeof saved.daily === 'object' ? saved.daily : {},
+        lifetime: saved.lifetime && typeof saved.lifetime === 'object' ? saved.lifetime : {},
+        claimedDaily: Array.isArray(saved.claimedDaily) ? saved.claimedDaily : [],
+        claimedNormal: Array.isArray(saved.claimedNormal) ? saved.claimedNormal : [],
+        tickets: Math.max(0, Number(saved.tickets) || 0),
+      };
+      if (state.dailyDate !== localDateKey()) {
+        state.dailyDate = localDateKey();
+        state.daily = {};
+        state.claimedDaily = [];
+      }
+      return state;
+    } catch (_) {
+      return blank;
+    }
+  }
+
+  let missionState = loadMissionState();
+
+  function normalizeMissionDate() {
+    const today = localDateKey();
+    if (missionState.dailyDate === today) return false;
+    missionState.dailyDate = today;
+    missionState.daily = {};
+    missionState.claimedDaily = [];
+    return true;
+  }
+
+  function saveMissionState() {
+    try { localStorage.setItem(missionStateKey, JSON.stringify(missionState)); } catch (_) {}
+  }
+
+  function missionValue(definition) {
+    const source = definition.group === 'daily' ? missionState.daily : missionState.lifetime;
+    return Math.max(0, Number(source[definition.stat]) || 0);
+  }
+
+  function missionClaimed(definition) {
+    const source = definition.group === 'daily' ? missionState.claimedDaily : missionState.claimedNormal;
+    return source.includes(definition.id);
+  }
+
+  function missionComplete(definition) {
+    return missionValue(definition) >= definition.target;
+  }
+
+  function renderMissionScreen() {
+    if (!missionList) return;
+    if (normalizeMissionDate()) saveMissionState();
+    if (missionTicketCount) missionTicketCount.textContent = String(missionState.tickets);
+    home.querySelectorAll('[data-mission-tab]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.missionTab === missionTab));
+    });
+
+    const definitions = missionDefinitions.filter(definition => definition.group === missionTab);
+    missionList.replaceChildren(...definitions.map(definition => {
+      const value = Math.min(missionValue(definition), definition.target);
+      const complete = missionComplete(definition);
+      const claimed = missionClaimed(definition);
+
+      const card = document.createElement('article');
+      card.className = 'hp-mission-card' + (claimed ? ' is-claimed' : '');
+
+      const icon = document.createElement('span');
+      icon.className = 'hp-mission-icon';
+      icon.textContent = definition.icon;
+
+      const copy = document.createElement('div');
+      copy.className = 'hp-mission-copy';
+      const title = document.createElement('strong');
+      title.textContent = definition.title;
+      const note = document.createElement('small');
+      note.textContent = definition.note;
+      copy.append(title,note);
+
+      const progress = document.createElement('div');
+      progress.className = 'hp-mission-progress';
+      const line = document.createElement('div');
+      line.className = 'hp-mission-progress-line';
+      line.style.setProperty('--mission-progress', Math.min(100, value / definition.target * 100) + '%');
+      const fill = document.createElement('i');
+      line.appendChild(fill);
+      const count = document.createElement('b');
+      count.textContent = value + ' / ' + definition.target;
+      progress.append(line,count);
+
+      const reward = document.createElement('div');
+      reward.className = 'hp-mission-reward';
+      const rewardText = document.createElement('span');
+      rewardText.textContent = '🎟 ×' + definition.reward;
+      const claim = document.createElement('button');
+      claim.type = 'button';
+      claim.dataset.missionClaim = definition.id;
+      claim.textContent = claimed ? '受取済み' : complete ? '受け取る' : '未達成';
+      claim.disabled = claimed || !complete;
+      reward.append(rewardText,claim);
+
+      card.append(icon,copy,progress,reward);
+      return card;
+    }));
+
+    const hasClaimable = missionDefinitions.some(definition => missionComplete(definition) && !missionClaimed(definition));
+    if (missionClaimAll) missionClaimAll.disabled = !hasClaimable;
+  }
+
+  function claimMission(definition) {
+    if (!definition || missionClaimed(definition) || !missionComplete(definition)) return false;
+    if (definition.group === 'daily') missionState.claimedDaily.push(definition.id);
+    else missionState.claimedNormal.push(definition.id);
+    missionState.tickets += definition.reward;
+    saveMissionState();
+    return true;
+  }
+
+  function recordMissionStat(stat, amount = 1) {
+    normalizeMissionDate();
+    const value = Math.max(0, Number(amount) || 0);
+    missionState.daily[stat] = (Number(missionState.daily[stat]) || 0) + value;
+    missionState.lifetime[stat] = (Number(missionState.lifetime[stat]) || 0) + value;
+    saveMissionState();
+    if (missionScreen && !missionScreen.hidden) renderMissionScreen();
+  }
+
+  missionList?.addEventListener('click', event => {
+    const button = event.target.closest('[data-mission-claim]');
+    if (!button) return;
+    const definition = missionDefinitions.find(item => item.id === button.dataset.missionClaim);
+    if (claimMission(definition)) renderMissionScreen();
+  });
+  missionClaimAll?.addEventListener('click', () => {
+    let claimedAny = false;
+    missionDefinitions.forEach(definition => {
+      if (claimMission(definition)) claimedAny = true;
+    });
+    if (claimedAny) renderMissionScreen();
+  });
+  home.querySelectorAll('[data-mission-tab]').forEach(button => button.addEventListener('click', () => {
+    missionTab = button.dataset.missionTab === 'normal' ? 'normal' : 'daily';
+    renderMissionScreen();
+  }));
+
+  function openMissionScreen() {
+    if (!missionScreen || !missionScreen.hidden) return;
+    closeHomeDialog();
+    if (characterScreen && !characterScreen.hidden) closeCharacterScreen();
+    if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
+    renderMissionScreen();
+    canvas.inert = true;
+    missionScreen.hidden = false;
+    stopCharacterVoice();
+    syncCharacterVoice();
+    missionScreen.querySelector('[data-home-action="mission-screen-close"]')?.focus({preventScroll:true});
+  }
+  function closeMissionScreen() {
+    if (!missionScreen || missionScreen.hidden) return;
+    missionScreen.hidden = true;
+    canvas.inert = false;
+    syncCharacterVoice();
+    missionMenuButton?.focus({preventScroll:true});
+  }
+
+  missionMenuButton?.addEventListener('click', openMissionScreen);
+  missionScreen?.querySelector('[data-home-action="mission-screen-close"]')?.addEventListener('click', closeMissionScreen);
+
+  const rankingStateKey = 'pds-ranking-cache-v1';
+  let rankingTab = 'overall';
+
+  function loadRankingState() {
+    const blank = { overall:[], monthly:[], self:{ overall:null, monthly:null } };
+    try {
+      const saved = JSON.parse(localStorage.getItem(rankingStateKey) || 'null');
+      if (!saved || typeof saved !== 'object') return blank;
+      return {
+        overall: Array.isArray(saved.overall) ? saved.overall : [],
+        monthly: Array.isArray(saved.monthly) ? saved.monthly : [],
+        self: saved.self && typeof saved.self === 'object' ? saved.self : blank.self,
+      };
+    } catch (_) {
+      return blank;
+    }
+  }
+
+  let rankingState = loadRankingState();
+
+  function renderRankingScreen() {
+    const list = home.querySelector('[data-ranking-list]');
+    const empty = home.querySelector('[data-ranking-empty]');
+    const entries = Array.isArray(rankingState[rankingTab]) ? rankingState[rankingTab] : [];
+    home.querySelectorAll('[data-ranking-tab]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.rankingTab === rankingTab));
+    });
+
+    if (list) {
+      list.replaceChildren(...entries.map((entry,index) => {
+        const row = document.createElement('article');
+        row.className = 'hp-ranking-row' + (entry?.isSelf ? ' is-self' : '');
+        const rank = document.createElement('b');
+        rank.textContent = String(Number(entry?.rank) || index + 1);
+        const name = document.createElement('strong');
+        name.textContent = String(entry?.name || 'PLAYER');
+        const score = document.createElement('span');
+        const numericScore = Number(entry?.score);
+        score.textContent = Number.isFinite(numericScore) ? numericScore.toLocaleString('ja-JP') : '—';
+        row.append(rank,name,score);
+        return row;
+      }));
+    }
+    if (empty) empty.hidden = entries.length > 0;
+
+    const self = rankingState.self?.[rankingTab] || null;
+    const selfRank = home.querySelector('[data-ranking-self-rank]');
+    const selfScore = home.querySelector('[data-ranking-self-score]');
+    const selfStatus = home.querySelector('[data-ranking-self-status]');
+    if (selfRank) selfRank.textContent = self?.rank ? String(self.rank) : '—';
+    if (selfScore) selfScore.textContent = Number.isFinite(Number(self?.score)) ? Number(self.score).toLocaleString('ja-JP') : '—';
+    if (selfStatus) selfStatus.textContent = self?.rank ? 'ランキングに参加中です。' : 'まだランキング記録がありません。';
+    const rankingName = home.querySelector('[data-ranking-player-name]');
+    if (rankingName) rankingName.textContent = playerProfile.name || profileDefaults.name;
+  }
+
+  home.querySelectorAll('[data-ranking-tab]').forEach(button => button.addEventListener('click', () => {
+    rankingTab = button.dataset.rankingTab === 'monthly' ? 'monthly' : 'overall';
+    renderRankingScreen();
+  }));
+
+  function openRankingScreen() {
+    if (!rankingScreen || !rankingScreen.hidden) return;
+    closeHomeDialog();
+    if (characterScreen && !characterScreen.hidden) closeCharacterScreen();
+    if (missionScreen && !missionScreen.hidden) closeMissionScreen();
+    renderRankingScreen();
+    canvas.inert = true;
+    rankingScreen.hidden = false;
+    stopCharacterVoice();
+    syncCharacterVoice();
+    rankingScreen.querySelector('[data-home-action="ranking-screen-close"]')?.focus({preventScroll:true});
+  }
+  function closeRankingScreen() {
+    if (!rankingScreen || rankingScreen.hidden) return;
+    rankingScreen.hidden = true;
+    canvas.inert = false;
+    syncCharacterVoice();
+    rankingMenuButton?.focus({preventScroll:true});
+  }
+
+  rankingMenuButton?.addEventListener('click', openRankingScreen);
+  rankingScreen?.querySelector('[data-home-action="ranking-screen-close"]')?.addEventListener('click', closeRankingScreen);
+
+  window.HP_HOME_RANKING = {
+    set(data = {}) {
+      rankingState = {
+        overall: Array.isArray(data.overall) ? data.overall.slice(0,100) : rankingState.overall,
+        monthly: Array.isArray(data.monthly) ? data.monthly.slice(0,100) : rankingState.monthly,
+        self: data.self && typeof data.self === 'object' ? data.self : rankingState.self,
+      };
+      try { localStorage.setItem(rankingStateKey, JSON.stringify(rankingState)); } catch (_) {}
+      renderRankingScreen();
+    },
+    clear() {
+      rankingState = { overall:[], monthly:[], self:{ overall:null, monthly:null } };
+      try { localStorage.removeItem(rankingStateKey); } catch (_) {}
+      renderRankingScreen();
+    },
+  };
+
+  piano.addEventListener('hp-note-on', () => recordMissionStat('notes',1));
+  recordMissionStat('homeOpen',1);
+
+    const characterMenuButton = home.querySelector('[data-home-action="characters"]');
   let characterScreenOpener = null;
   function openCharacterScreen() {
     if (!characterScreen || !characterScreen.hidden) return;
@@ -436,6 +748,14 @@
     ['pointerup','pointercancel','lostpointercapture'].forEach(name => input.addEventListener(name, finish));
   });
   home.addEventListener('keydown', event => {
+    if (missionScreen && !missionScreen.hidden) {
+      if (event.key === 'Escape') { event.preventDefault(); closeMissionScreen(); }
+      return;
+    }
+    if (rankingScreen && !rankingScreen.hidden) {
+      if (event.key === 'Escape') { event.preventDefault(); closeRankingScreen(); }
+      return;
+    }
     if (characterScreen && !characterScreen.hidden) {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -506,7 +826,10 @@
     return pageActive && !document.hidden && !home.hidden
       && !document.body.classList.contains('hp-booting')
       && !document.documentElement.classList.contains('hp-install-required')
-      && dialogOverlay.hidden && (!characterScreen || characterScreen.hidden)
+      && dialogOverlay.hidden
+      && (!characterScreen || characterScreen.hidden)
+      && (!missionScreen || missionScreen.hidden)
+      && (!rankingScreen || rankingScreen.hidden)
       && !home.classList.contains('hp-piano-launching');
   }
 
@@ -658,6 +981,7 @@
     });
     showMessage(nextIndex < 0 ? 0 : nextIndex);
     playMessageVoice(true);
+    recordMissionStat('characterTalk',1);
   }
 
   function syncCharacterVoice() {
@@ -685,6 +1009,8 @@
   voiceObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   voiceObserver.observe(home, { attributes: true, attributeFilter: ['hidden'] });
   if (characterScreen) voiceObserver.observe(characterScreen, { attributes:true, attributeFilter:['hidden'] });
+  if (missionScreen) voiceObserver.observe(missionScreen, { attributes:true, attributeFilter:['hidden'] });
+  if (rankingScreen) voiceObserver.observe(rankingScreen, { attributes:true, attributeFilter:['hidden'] });
   document.addEventListener('visibilitychange', syncCharacterVoice);
   window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; voiceHistory.length = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
@@ -1210,6 +1536,7 @@
     canvas.inert = false;
     home.classList.remove('hp-piano-launching');
     home.hidden = true;
+    recordMissionStat('pianoEnter',1);
     document.body.classList.add('hp-piano-active');
     finishTransition();
   }
