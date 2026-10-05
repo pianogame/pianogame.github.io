@@ -1914,3 +1914,378 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   object-fit: cover;
   object-position: 50% 8%;
 }
+
+
+/* 2026-10-06: Mission / Ranking screens */
+#hp-home-screen .hp-feature-screen[hidden] { display:none !important; }
+#hp-home-screen .hp-feature-screen {
+  position:absolute;
+  inset:0;
+  z-index:60;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  min-width:0;
+  min-height:0;
+  isolation:isolate;
+  overflow:hidden;
+  color:#f7ecd7;
+  background:
+    linear-gradient(180deg,#08162c55,#08152c70),
+    url("/assets/home/character-screen-bg-20261006.svg") center / cover no-repeat,
+    #10213e;
+}
+#hp-home-screen .hp-feature-screen::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 0,#fff4cf1a,transparent 40%),
+    linear-gradient(90deg,transparent 0 49.9%,#e5ca8d12 50%,transparent 50.1%);
+}
+#hp-home-screen .hp-feature-screen-header {
+  position:relative;
+  min-height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:
+    max(10px,var(--safe-t))
+    max(18px,var(--safe-r))
+    10px
+    max(18px,var(--safe-l));
+  border-bottom:1px solid #d7bd7a6b;
+  background:#08152b2e;
+}
+#hp-home-screen .hp-feature-home {
+  position:absolute;
+  left:max(18px,var(--safe-l));
+  top:50%;
+  transform:translateY(-50%);
+  min-height:44px;
+  padding:8px 14px;
+  border:1px solid #c1a05e;
+  border-radius:10px;
+  color:#fff1d3;
+  background:linear-gradient(180deg,#31415e,#14213a);
+  box-shadow:inset 0 1px 0 #fff2c52b,0 3px 9px #0004;
+  font-weight:700;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+#hp-home-screen .hp-feature-home:active { transform:translateY(calc(-50% + 1px)); }
+#hp-home-screen .hp-feature-heading { text-align:center; pointer-events:none; }
+#hp-home-screen .hp-feature-heading span {
+  display:block;
+  color:#d0b275;
+  font:10px/1.2 "Times New Roman",serif;
+  letter-spacing:.24em;
+}
+#hp-home-screen .hp-feature-heading h2 {
+  margin:3px 0 0;
+  color:#fff3dc;
+  font:clamp(19px,2.2cqw,28px)/1.2 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  letter-spacing:.08em;
+}
+#hp-home-screen .hp-feature-screen-body {
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  padding:14px max(18px,var(--safe-r)) max(14px,var(--safe-b)) max(18px,var(--safe-l));
+}
+#hp-home-screen .hp-mission-shell,
+#hp-home-screen .hp-ranking-shell {
+  width:min(1120px,100%);
+  height:100%;
+  min-width:0;
+  min-height:0;
+  margin:0 auto;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:#c4a15c #12213a88;
+}
+#hp-home-screen .hp-mission-ticket,
+#hp-home-screen .hp-ranking-season {
+  position:absolute;
+  right:max(18px,var(--safe-r));
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  min-width:150px;
+  justify-content:flex-end;
+  color:#f8e8c7;
+}
+#hp-home-screen .hp-mission-ticket span,
+#hp-home-screen .hp-ranking-season span {
+  color:#c8aa6b;
+  font:9px/1.2 "Times New Roman",serif;
+  letter-spacing:.13em;
+}
+#hp-home-screen .hp-mission-ticket b {
+  font:28px/1 "Times New Roman",serif;
+  font-weight:400;
+  color:#fff6df;
+}
+#hp-home-screen .hp-mission-ticket i { font-style:normal;font-size:11px;color:#d5c29e; }
+#hp-home-screen .hp-ranking-season { display:grid;gap:2px;text-align:right; }
+#hp-home-screen .hp-ranking-season b { font:15px/1 "Times New Roman",serif;letter-spacing:.12em;color:#fff2d2; }
+
+#hp-home-screen .hp-mission-summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:18px 20px;
+  border:1px solid #c3a465;
+  border-radius:16px;
+  color:#263c54;
+  background:
+    linear-gradient(110deg,#ffffffd9,#e8f0f5df 55%,#d0e0eae3);
+  box-shadow:inset 0 1px 0 #fff,0 8px 24px #07152e42;
+}
+#hp-home-screen .hp-mission-summary span {
+  color:#9a7537;
+  font:10px/1.2 "Times New Roman",serif;
+  letter-spacing:.17em;
+}
+#hp-home-screen .hp-mission-summary strong { display:block;margin-top:4px;font-size:19px; }
+#hp-home-screen .hp-mission-summary p { margin:5px 0 0;color:#617487;font-size:11px;line-height:1.5; }
+#hp-home-screen .hp-mission-claim-all {
+  flex:none;
+  min-height:44px;
+  padding:8px 17px;
+  border:1px solid #b3904d;
+  border-radius:10px;
+  color:#fff6e2;
+  background:linear-gradient(180deg,#b99349,#765421);
+  box-shadow:inset 0 1px 0 #fff1b65c,0 3px 9px #28364835;
+  font-weight:700;
+  cursor:pointer;
+}
+#hp-home-screen .hp-mission-claim-all:disabled { opacity:.45;filter:saturate(.45);cursor:default; }
+
+#hp-home-screen .hp-mission-tabs,
+#hp-home-screen .hp-ranking-tabs {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:12px 0 10px;
+  padding:5px;
+  border:1px solid #b99a5f80;
+  border-radius:13px;
+  background:#0c1a31a8;
+}
+#hp-home-screen .hp-mission-tabs button,
+#hp-home-screen .hp-ranking-tabs button {
+  min-height:42px;
+  border:1px solid transparent;
+  border-radius:9px;
+  color:#d6c7ab;
+  background:transparent;
+  font-weight:700;
+  cursor:pointer;
+}
+#hp-home-screen .hp-mission-tabs button[aria-pressed="true"],
+#hp-home-screen .hp-ranking-tabs button[aria-pressed="true"] {
+  border-color:#d0af6c;
+  color:#fff7e5;
+  background:linear-gradient(180deg,#394a67,#162640);
+  box-shadow:inset 0 1px 0 #fff2c72e;
+}
+
+#hp-home-screen .hp-mission-list { display:grid;gap:8px; }
+#hp-home-screen .hp-mission-card {
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr) minmax(120px,220px) auto;
+  align-items:center;
+  gap:12px;
+  padding:11px 13px;
+  border:1px solid #b89a60a3;
+  border-radius:13px;
+  color:#293d52;
+  background:linear-gradient(120deg,#ffffffdc,#e6eef3e5 62%,#cedce6dc);
+  box-shadow:inset 0 1px 0 #fff,0 3px 10px #0d1c3029;
+}
+#hp-home-screen .hp-mission-icon {
+  width:44px;
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  border:1px solid #c7a762;
+  border-radius:50%;
+  color:#f9e7b2;
+  background:radial-gradient(circle at 35% 28%,#506b90,#172944 70%,#0b1930);
+  font-size:19px;
+}
+#hp-home-screen .hp-mission-copy { min-width:0; }
+#hp-home-screen .hp-mission-copy strong { display:block;font-size:14px;line-height:1.35; }
+#hp-home-screen .hp-mission-copy small { display:block;margin-top:3px;color:#6c7e8f;font-size:10px; }
+#hp-home-screen .hp-mission-progress { min-width:0; }
+#hp-home-screen .hp-mission-progress-line {
+  height:8px;
+  overflow:hidden;
+  border:1px solid #a8946c;
+  border-radius:999px;
+  background:#ffffff80;
+  box-shadow:inset 0 1px 3px #71809635;
+}
+#hp-home-screen .hp-mission-progress-line i {
+  display:block;
+  width:var(--mission-progress,0%);
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#8fb4d1,#d6b565);
+}
+#hp-home-screen .hp-mission-progress b {
+  display:block;
+  margin-top:3px;
+  color:#536779;
+  font:11px/1 "Times New Roman",serif;
+  text-align:right;
+}
+#hp-home-screen .hp-mission-reward {
+  display:grid;
+  grid-template-columns:auto auto;
+  align-items:center;
+  gap:8px;
+}
+#hp-home-screen .hp-mission-reward span {
+  color:#81632f;
+  font:12px/1.2 "Times New Roman",serif;
+  white-space:nowrap;
+}
+#hp-home-screen .hp-mission-reward button {
+  min-width:82px;
+  min-height:38px;
+  padding:7px 10px;
+  border:1px solid #aa8747;
+  border-radius:9px;
+  color:#fff7e7;
+  background:linear-gradient(180deg,#486485,#203650);
+  font-weight:700;
+  cursor:pointer;
+}
+#hp-home-screen .hp-mission-reward button[disabled] {
+  color:#627284;
+  background:linear-gradient(#e8edf0,#cbd6dd);
+  border-color:#9eaaae;
+  cursor:default;
+}
+#hp-home-screen .hp-mission-card.is-claimed { opacity:.74; }
+#hp-home-screen .hp-mission-footnote { margin:9px 2px 0;color:#d0c2a8;font-size:10px;text-align:right; }
+
+#hp-home-screen .hp-ranking-self-card {
+  display:grid;
+  grid-template-columns:115px minmax(0,1fr) 150px;
+  align-items:center;
+  gap:16px;
+  padding:16px 18px;
+  border:1px solid #c9a65d;
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 12% 50%,#d7b76424,transparent 22%),
+    linear-gradient(135deg,#182c4be8,#0b1830eb 60%,#263350e8);
+  box-shadow:inset 0 1px 0 #fff2c828,0 8px 24px #020a184f;
+}
+#hp-home-screen .hp-ranking-self-rank,
+#hp-home-screen .hp-ranking-self-score { text-align:center; }
+#hp-home-screen .hp-ranking-self-rank small,
+#hp-home-screen .hp-ranking-self-score small,
+#hp-home-screen .hp-ranking-self-copy > span {
+  display:block;
+  color:#c7a966;
+  font:9px/1.2 "Times New Roman",serif;
+  letter-spacing:.15em;
+}
+#hp-home-screen .hp-ranking-self-rank strong {
+  display:inline-block;
+  margin-top:3px;
+  color:#fff1c5;
+  font:36px/1 "Times New Roman",serif;
+  font-weight:400;
+}
+#hp-home-screen .hp-ranking-self-rank span { color:#d5c29d;font-size:11px; }
+#hp-home-screen .hp-ranking-self-copy strong {
+  display:block;
+  margin-top:4px;
+  color:#fff6e6;
+  font-size:18px;
+  overflow-wrap:anywhere;
+}
+#hp-home-screen .hp-ranking-self-copy p { margin:4px 0 0;color:#c5cbd3;font-size:11px; }
+#hp-home-screen .hp-ranking-self-score strong {
+  display:block;
+  margin-top:5px;
+  color:#fff2ce;
+  font:24px/1 "Times New Roman",serif;
+  font-weight:400;
+}
+#hp-home-screen .hp-ranking-list { display:grid;gap:7px; }
+#hp-home-screen .hp-ranking-row {
+  display:grid;
+  grid-template-columns:54px minmax(0,1fr) 120px;
+  align-items:center;
+  gap:12px;
+  min-height:52px;
+  padding:8px 13px;
+  border:1px solid #9d8453a8;
+  border-radius:11px;
+  color:#263b51;
+  background:linear-gradient(110deg,#f7fafbdd,#dce7eee0);
+}
+#hp-home-screen .hp-ranking-row b {
+  color:#8d6b33;
+  font:20px/1 "Times New Roman",serif;
+  text-align:center;
+}
+#hp-home-screen .hp-ranking-row strong { min-width:0;overflow-wrap:anywhere; }
+#hp-home-screen .hp-ranking-row span {
+  color:#344d64;
+  font:16px/1 "Times New Roman",serif;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+#hp-home-screen .hp-ranking-row.is-self {
+  border-color:#d1ad63;
+  box-shadow:inset 0 0 0 1px #fff7d49c,0 0 12px #e0bc6760;
+}
+#hp-home-screen .hp-ranking-empty {
+  display:grid;
+  justify-items:center;
+  gap:7px;
+  padding:40px 18px;
+  border:1px dashed #c4a76b91;
+  border-radius:14px;
+  color:#e8dbc2;
+  background:#0d1b33a3;
+  text-align:center;
+}
+#hp-home-screen .hp-ranking-empty[hidden] { display:none !important; }
+#hp-home-screen .hp-ranking-empty > span { color:#e0bd70;font-size:34px; }
+#hp-home-screen .hp-ranking-empty strong { font-size:16px; }
+#hp-home-screen .hp-ranking-empty p { max-width:520px;margin:0;color:#bfc5ce;font-size:11px;line-height:1.6; }
+
+@container (max-width:760px) {
+  #hp-home-screen .hp-feature-home { left:10px;padding:7px 10px;font-size:12px; }
+  #hp-home-screen .hp-mission-ticket,
+  #hp-home-screen .hp-ranking-season { right:10px;min-width:120px; }
+  #hp-home-screen .hp-mission-ticket span,
+  #hp-home-screen .hp-ranking-season span { display:none; }
+  #hp-home-screen .hp-mission-card { grid-template-columns:40px minmax(0,1fr) auto; }
+  #hp-home-screen .hp-mission-progress { grid-column:2 / -1; }
+  #hp-home-screen .hp-ranking-self-card { grid-template-columns:88px minmax(0,1fr) 105px;gap:10px; }
+}
+@container (max-height:480px) {
+  #hp-home-screen .hp-feature-screen-header { min-height:52px;padding-top:5px;padding-bottom:5px; }
+  #hp-home-screen .hp-feature-screen-body { padding-top:8px;padding-bottom:8px; }
+  #hp-home-screen .hp-mission-summary { padding:10px 14px; }
+  #hp-home-screen .hp-mission-summary p { display:none; }
+  #hp-home-screen .hp-mission-card { padding:7px 10px;min-height:50px; }
+  #hp-home-screen .hp-mission-icon { width:36px;font-size:16px; }
+  #hp-home-screen .hp-ranking-self-card { padding:10px 14px; }
+}
