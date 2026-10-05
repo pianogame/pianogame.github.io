@@ -67,6 +67,7 @@
   updateBadge();
 
   let pending = null;
+  let returnRefreshQueued = false;
   function refresh() {
     if (pending) return pending;
     const controller = new AbortController();
@@ -83,12 +84,25 @@
       .finally(() => { clearTimeout(timeout); pending = null; });
     return pending;
   }
+  function refreshOnHomeEnter() {
+    if (pending) {
+      if (returnRefreshQueued) return;
+      returnRefreshQueued = true;
+      pending.finally(() => {
+        returnRefreshQueued = false;
+        if (!home.hidden) void refresh();
+      });
+      return;
+    }
+    void refresh();
+  }
   new MutationObserver(() => {
     if (!home.hidden) void refresh();
   }).observe(home, {attributes:true,attributeFilter:['hidden']});
   new MutationObserver(markSeen).observe(overlay, {attributes:true,attributeFilter:['hidden']});
   new MutationObserver(markSeen).observe(list, {attributes:true,attributeFilter:['hidden']});
   home.querySelector('[data-home-action="notice"]').addEventListener('click', () => { void refresh(); });
+  window.addEventListener('hp-home-enter', refreshOnHomeEnter);
   window.addEventListener('pageshow', () => { if (!home.hidden) void refresh(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && !home.hidden) void refresh(); });
   void refresh();
