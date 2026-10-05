@@ -615,34 +615,78 @@
     const selfName = playerProfile.name || profileDefaults.name;
     return {
       overall: [
-        { rank:1, name:'Nocturne', score:982430 },
-        { rank:2, name:'みずいろ鍵盤', score:951820 },
-        { rank:3, name:'Aria_P', score:927560 },
-        { rank:4, name:'月灯り', score:901240 },
-        { rank:5, name:'Fortissimo', score:879630 },
+        { rank:1, name:'Nocturne', score:982430, profile:{level:96,message:'夜の曲を中心に弾いています。',instrument:'ピアノ'} },
+        { rank:2, name:'みずいろ鍵盤', score:951820, profile:{level:91,message:'今日も一音ずつ。',instrument:'ピアノ'} },
+        { rank:3, name:'Aria_P', score:927560, profile:{level:89,message:'音楽は自由に。',instrument:'バイオリン'} },
+        { rank:4, name:'月灯り', score:901240, profile:{level:87,message:'ゆっくり遊んでます。',instrument:'ピアノ'} },
+        { rank:5, name:'Fortissimo', score:879630, profile:{level:85,message:'強く、楽しく。',instrument:'エレキギター'} },
         { rank:6, name:selfName, score:852110, isSelf:true },
-        { rank:7, name:'Crescendo', score:828940 },
-        { rank:8, name:'星屑ピアノ', score:801520 },
-        { rank:9, name:'Cantabile', score:774300 },
-        { rank:10, name:'鍵盤ねこ', score:748860 },
+        { rank:7, name:'Crescendo', score:828940, profile:{level:80,message:'少しずつ上達中。',instrument:'ピアノ'} },
+        { rank:8, name:'星屑ピアノ', score:801520, profile:{level:77,message:'星空みたいな音が好き。',instrument:'ピアノ'} },
+        { rank:9, name:'Cantabile', score:774300, profile:{level:74,message:'歌うように弾きたい。',instrument:'バイオリン'} },
+        { rank:10, name:'鍵盤ねこ', score:748860, profile:{level:72,message:'ねことピアノ。',instrument:'ピアノ'} },
       ],
       monthly: [
-        { rank:1, name:'Aria_P', score:316420 },
-        { rank:2, name:'Nocturne', score:301780 },
-        { rank:3, name:'星屑ピアノ', score:289560 },
+        { rank:1, name:'Aria_P', score:316420, profile:{level:89,message:'音楽は自由に。',instrument:'バイオリン'} },
+        { rank:2, name:'Nocturne', score:301780, profile:{level:96,message:'夜の曲を中心に弾いています。',instrument:'ピアノ'} },
+        { rank:3, name:'星屑ピアノ', score:289560, profile:{level:77,message:'星空みたいな音が好き。',instrument:'ピアノ'} },
         { rank:4, name:selfName, score:271930, isSelf:true },
-        { rank:5, name:'月灯り', score:263480 },
-        { rank:6, name:'Cantabile', score:252710 },
-        { rank:7, name:'みずいろ鍵盤', score:244300 },
-        { rank:8, name:'Fortissimo', score:231940 },
-        { rank:9, name:'Crescendo', score:219660 },
-        { rank:10, name:'鍵盤ねこ', score:204810 },
+        { rank:5, name:'月灯り', score:263480, profile:{level:87,message:'ゆっくり遊んでます。',instrument:'ピアノ'} },
+        { rank:6, name:'Cantabile', score:252710, profile:{level:74,message:'歌うように弾きたい。',instrument:'バイオリン'} },
+        { rank:7, name:'みずいろ鍵盤', score:244300, profile:{level:91,message:'今日も一音ずつ。',instrument:'ピアノ'} },
+        { rank:8, name:'Fortissimo', score:231940, profile:{level:85,message:'強く、楽しく。',instrument:'エレキギター'} },
+        { rank:9, name:'Crescendo', score:219660, profile:{level:80,message:'少しずつ上達中。',instrument:'ピアノ'} },
+        { rank:10, name:'鍵盤ねこ', score:204810, profile:{level:72,message:'ねことピアノ。',instrument:'ピアノ'} },
       ],
       self: {
         overall:{ rank:6, score:852110 },
         monthly:{ rank:4, score:271930 },
       },
     };
+  }
+
+  function fitRankingName(button) {
+    const label = button?.querySelector('span');
+    if (!button || !label) return;
+    button.style.removeProperty('font-size');
+    requestAnimationFrame(() => {
+      const available = Math.max(1, button.clientWidth - 20);
+      const required = label.scrollWidth;
+      if (required <= available) return;
+      const base = parseFloat(getComputedStyle(button).fontSize) || 13;
+      button.style.fontSize = Math.max(base * .62, base * available / required * .96) + 'px';
+    });
+  }
+
+  function openRankingProfile(entry, rankValue) {
+    const overlay = home.querySelector('[data-ranking-profile-overlay]');
+    if (!overlay) return;
+    const isSelf = !!entry?.isSelf;
+    const profile = isSelf
+      ? {
+          level: Number(home.querySelector('[data-home-level]')?.textContent) || null,
+          message: playerProfile.message || profileDefaults.message,
+          instrument: ({piano:'ピアノ',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
+        }
+      : (entry?.profile || {});
+    const setText = (selector, value) => {
+      const node = overlay.querySelector(selector);
+      if (node) node.textContent = value;
+    };
+    setText('[data-ranking-profile-name]', String(entry?.name || 'PLAYER'));
+    setText('[data-ranking-profile-level]', profile.level ?? '—');
+    setText('[data-ranking-profile-rank]', (rankValue || '—') + (rankValue ? '位' : ''));
+    const score = Number(entry?.score);
+    setText('[data-ranking-profile-score]', Number.isFinite(score) ? score.toLocaleString('ja-JP') : '—');
+    setText('[data-ranking-profile-instrument]', profile.instrument || '未設定');
+    setText('[data-ranking-profile-message]', profile.message || 'プロフィール情報未連携');
+    overlay.hidden = false;
+    overlay.querySelector('[data-ranking-profile-close]:not(.hp-ranking-profile-backdrop)')?.focus({preventScroll:true});
+  }
+
+  function closeRankingProfile() {
+    const overlay = home.querySelector('[data-ranking-profile-overlay]');
+    if (overlay) overlay.hidden = true;
   }
 
   function renderRankingScreen() {
@@ -664,12 +708,18 @@
           + (numericRank <= 3 ? ' is-top-' + numericRank : '');
         const rank = document.createElement('b');
         rank.textContent = String(numericRank);
-        const name = document.createElement('strong');
-        name.textContent = String(entry?.name || 'PLAYER');
+        const name = document.createElement('button');
+        name.type = 'button';
+        name.className = 'hp-ranking-name-button';
+        const nameLabel = document.createElement('span');
+        nameLabel.textContent = String(entry?.name || 'PLAYER');
+        name.appendChild(nameLabel);
+        name.addEventListener('click', () => openRankingProfile(entry, numericRank));
         const score = document.createElement('span');
         const numericScore = Number(entry?.score);
         score.textContent = Number.isFinite(numericScore) ? numericScore.toLocaleString('ja-JP') : '—';
         row.append(rank,name,score);
+        requestAnimationFrame(() => fitRankingName(name));
         return row;
       }));
     }
@@ -684,8 +734,27 @@
     if (selfStatus) selfStatus.textContent = demo
       ? 'STAGING用の仮ランキングを表示中です。'
       : self?.rank ? 'ランキングに参加中です。' : 'まだランキング記録がありません。';
-    const rankingName = home.querySelector('[data-ranking-player-name]');
-    if (rankingName) rankingName.textContent = playerProfile.name || profileDefaults.name;
+    let rankingName = home.querySelector('[data-ranking-player-name]');
+    if (rankingName) {
+      const selfName = playerProfile.name || profileDefaults.name;
+      if (rankingName.tagName !== 'BUTTON') {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'hp-ranking-self-name-button';
+        button.setAttribute('data-ranking-player-name','');
+        const label = document.createElement('span');
+        button.appendChild(label);
+        rankingName.replaceWith(button);
+        rankingName = button;
+      }
+      rankingName.firstElementChild.textContent = selfName;
+      rankingName.onclick = () => openRankingProfile({
+        name:selfName,
+        score:self?.score,
+        isSelf:true
+      }, self?.rank || null);
+      requestAnimationFrame(() => fitRankingName(rankingName));
+    }
   }
 
   home.querySelectorAll('[data-ranking-tab]').forEach(button => button.addEventListener('click', () => {
@@ -708,6 +777,7 @@
   }
   function closeRankingScreen() {
     if (!rankingScreen || rankingScreen.hidden) return;
+    closeRankingProfile();
     rankingScreen.hidden = true;
     canvas.inert = false;
     syncCharacterVoice();
@@ -716,6 +786,7 @@
 
   rankingMenuButton?.addEventListener('click', openRankingScreen);
   rankingScreen?.querySelector('[data-home-action="ranking-screen-close"]')?.addEventListener('click', closeRankingScreen);
+  home.querySelectorAll('[data-ranking-profile-close]').forEach(button => button.addEventListener('click', closeRankingProfile));
 
   const gachaMenuButton = home.querySelector('[data-home-action="gacha"]');
 
