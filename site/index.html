@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-gacha-fourth-button">
+  <link rel="stylesheet" href="/home.css?v=20261006-ranking-profile">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261006-ranking-demo-gacha-placement"></script>
+  <script defer src="/home.js?v=20261006-ranking-profile"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -358,6 +358,24 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <span>♛</span>
         <strong>まだランキングデータがありません</strong>
         <p>ゲームモードのスコア連携後、この画面に実際の順位を表示します。架空のプレイヤーや順位は表示しません。</p>
+      </div>
+    </section>
+  </div>
+  <div class="hp-ranking-profile-overlay" data-ranking-profile-overlay hidden>
+    <button type="button" class="hp-ranking-profile-backdrop" data-ranking-profile-close aria-label="プロフィールを閉じる"></button>
+    <section class="hp-ranking-profile-card" role="dialog" aria-modal="true" aria-label="プレイヤープロフィール">
+      <header>
+        <div><span>PLAYER PROFILE</span><h3 data-ranking-profile-name>PLAYER</h3></div>
+        <button type="button" data-ranking-profile-close>閉じる</button>
+      </header>
+      <div class="hp-ranking-profile-body">
+        <div class="hp-ranking-profile-level"><small>PLv</small><strong data-ranking-profile-level>—</strong></div>
+        <dl class="hp-ranking-profile-data">
+          <div><dt>順位</dt><dd data-ranking-profile-rank>—</dd></div>
+          <div><dt>スコア</dt><dd data-ranking-profile-score>—</dd></div>
+          <div><dt>お気に入り楽器</dt><dd data-ranking-profile-instrument>未設定</dd></div>
+          <div class="is-wide"><dt>ひとこと</dt><dd data-ranking-profile-message>プロフィール情報未連携</dd></div>
+        </dl>
       </div>
     </section>
   </div>
