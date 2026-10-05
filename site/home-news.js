@@ -9,7 +9,7 @@
 
   // This data-only branch has automatic deployments disabled. Updating it never
   // changes the app build, staging branch, or production branch.
-  const endpoint = 'https://raw.githubusercontent.com/pianogame/pianogame.github.io/news-feed/news.json';
+  const endpoint = '/live-news.json';
   const cacheKey = 'hp-news-cache-v1', seenKey = 'hp-news-seen-v1';
   const read = key => { try { return JSON.parse(localStorage.getItem(key)); } catch (_) { return null; } };
   const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} };
