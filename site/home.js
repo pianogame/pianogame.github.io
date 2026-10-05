@@ -234,6 +234,7 @@
     if (dialogOverlay.hidden) return;
     dialogOverlay.hidden = true;
     setCharacterHeaderActionsVisible(false);
+    home.querySelector('[data-home-profile]').hidden = true;
     delete dialogOverlay.dataset.screen;
     canvas.inert = false;
     dialogOpener?.focus({ preventScroll:true });
@@ -242,46 +243,119 @@
     stopDetailVoice();
     syncCharacterVoice();
   }
-  for (const action of ['notice', 'settings']) {
-    const button = home.querySelector('[data-home-action="' + action + '"]');
-    const openHomePanel = () => {
-      dialogOpener = button;
-      setCharacterHeaderActionsVisible(false);
-      home.querySelector('#hp-home-dialog-title').textContent = { notice: 'お知らせ', settings: '設定', characters: 'キャラクター' }[action];
-      home.querySelector('[data-home-dialog-kicker]').textContent = { notice: 'INFORMATION', settings: 'SOUND SETTINGS', characters: 'CHARACTERS' }[action];
-      home.querySelector('[data-home-notices]').hidden = action !== 'notice';
-      home.querySelector('[data-home-settings]').hidden = action !== 'settings';
-      dialogOverlay.dataset.screen = action;
-      if (action === 'settings') renderGlobalCharacterCredits();
-      if (action === 'notice') renderNoticePage(0);
-      syncHomeVolume();
-      canvas.inert = true;
-      dialogOverlay.hidden = false;
-      syncCharacterVoice();
-      previewMotion.setActive(false);
-      dialogOverlay.querySelector('.hp-home-dialog-button:not([hidden])').focus({ preventScroll:true });
-    };
-    if (action === 'notice' || action === 'settings') {
-      let pointerId = null, startX = 0, startY = 0, openedByPointer = false;
-      button.addEventListener('pointerdown', event => {
-        if (event.button > 0) return;
-        pointerId = event.pointerId; startX = event.clientX; startY = event.clientY; openedByPointer = false;
-      }, { passive:true });
-      button.addEventListener('pointerup', event => {
-        if (event.pointerId !== pointerId) return;
-        const moved = Math.hypot(event.clientX - startX, event.clientY - startY);
-        pointerId = null;
-        if (moved <= 14) { openedByPointer = true; openHomePanel(); }
-      }, { passive:true });
-      button.addEventListener('pointercancel', () => { pointerId = null; });
-      button.addEventListener('click', event => {
-        if (openedByPointer) { openedByPointer = false; event.preventDefault(); return; }
-        openHomePanel();
-      });
-    } else {
-      button.addEventListener('click', openHomePanel);
+  const playerProfileKey = 'pds-player-profile-v1';
+  const playerNameDisplay = home.querySelector('[data-home-player-name]');
+  const profileNameInput = home.querySelector('[data-profile-name]');
+  const profileMessageInput = home.querySelector('[data-profile-message]');
+  const profileInstrumentInput = home.querySelector('[data-profile-instrument]');
+  const profileStatus = home.querySelector('[data-profile-status]');
+  const profilePreviewName = home.querySelector('[data-profile-preview-name]');
+  const profilePreviewMessage = home.querySelector('[data-profile-preview-message]');
+  const profileLevel = home.querySelector('[data-profile-level]');
+  const homeLevel = home.querySelector('[data-home-level]');
+  const profileDefaults = { name: 'ドリステP', message: 'ピアノを楽しもう♪', instrument: 'piano' };
+
+  function loadPlayerProfile() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(playerProfileKey) || 'null');
+      if (!saved || typeof saved !== 'object') return { ...profileDefaults };
+      return {
+        name: String(saved.name || profileDefaults.name).slice(0, 12),
+        message: String(saved.message || profileDefaults.message).slice(0, 40),
+        instrument: ['piano','violin','bass','guitar'].includes(saved.instrument) ? saved.instrument : 'piano',
+      };
+    } catch (_) {
+      return { ...profileDefaults };
     }
   }
+
+  let playerProfile = loadPlayerProfile();
+
+  function syncPlayerProfileUI() {
+    const name = playerProfile.name || profileDefaults.name;
+    const message = playerProfile.message || profileDefaults.message;
+    if (playerNameDisplay) playerNameDisplay.textContent = name;
+    if (profilePreviewName) profilePreviewName.textContent = name;
+    if (profilePreviewMessage) profilePreviewMessage.textContent = message;
+    if (profileNameInput) profileNameInput.value = name;
+    if (profileMessageInput) profileMessageInput.value = message;
+    if (profileInstrumentInput) profileInstrumentInput.value = playerProfile.instrument;
+    if (profileLevel && homeLevel) profileLevel.textContent = homeLevel.textContent;
+  }
+  syncPlayerProfileUI();
+
+  function openHomePanel(action, opener = null) {
+    dialogOpener = opener;
+    setCharacterHeaderActionsVisible(false);
+    home.querySelector('#hp-home-dialog-title').textContent = { notice: 'お知らせ', settings: '設定', profile: 'プロフィール設定' }[action];
+    home.querySelector('[data-home-dialog-kicker]').textContent = { notice: 'INFORMATION', settings: 'SOUND SETTINGS', profile: 'PLAYER PROFILE' }[action];
+    home.querySelector('[data-home-notices]').hidden = action !== 'notice';
+    home.querySelector('[data-home-settings]').hidden = action !== 'settings';
+    home.querySelector('[data-home-profile]').hidden = action !== 'profile';
+    dialogOverlay.dataset.screen = action;
+    if (action === 'settings') renderGlobalCharacterCredits();
+    if (action === 'notice') renderNoticePage(0);
+    if (action === 'profile') {
+      syncPlayerProfileUI();
+      if (profileStatus) profileStatus.textContent = '';
+    }
+    syncHomeVolume();
+    canvas.inert = true;
+    dialogOverlay.hidden = false;
+    syncCharacterVoice();
+    previewMotion.setActive(false);
+    dialogOverlay.querySelector('.hp-home-dialog-button:not([hidden])')?.focus({ preventScroll:true });
+  }
+
+  for (const action of ['notice', 'settings']) {
+    const button = home.querySelector('[data-home-action="' + action + '"]');
+    const openPanel = () => openHomePanel(action, button);
+    let pointerId = null, startX = 0, startY = 0, openedByPointer = false;
+    button.addEventListener('pointerdown', event => {
+      if (event.button > 0) return;
+      pointerId = event.pointerId; startX = event.clientX; startY = event.clientY; openedByPointer = false;
+    }, { passive:true });
+    button.addEventListener('pointerup', event => {
+      if (event.pointerId !== pointerId) return;
+      const moved = Math.hypot(event.clientX - startX, event.clientY - startY);
+      pointerId = null;
+      if (moved <= 14) { openedByPointer = true; openPanel(); }
+    }, { passive:true });
+    button.addEventListener('pointercancel', () => { pointerId = null; });
+    button.addEventListener('click', event => {
+      if (openedByPointer) { openedByPointer = false; event.preventDefault(); return; }
+      openPanel();
+    });
+  }
+
+  const settingsProfileButton = home.querySelector('[data-home-action="profile-settings"]');
+  settingsProfileButton?.addEventListener('click', () => openHomePanel('profile', settingsProfileButton));
+
+  const levelProfileButton = home.querySelector('[data-home-action="profile-open"]');
+  levelProfileButton?.addEventListener('click', () => openHomePanel('profile', levelProfileButton));
+
+  home.querySelector('[data-home-action="profile-back"]')?.addEventListener('click', () => {
+    openHomePanel('settings', settingsProfileButton || levelProfileButton);
+  });
+
+  home.querySelector('[data-player-profile-form]')?.addEventListener('submit', event => {
+    event.preventDefault();
+    const name = (profileNameInput?.value || '').trim().slice(0, 12);
+    const message = (profileMessageInput?.value || '').trim().slice(0, 40);
+    if (!name) {
+      if (profileStatus) profileStatus.textContent = 'プレイヤー名を入力してください。';
+      profileNameInput?.focus({ preventScroll:true });
+      return;
+    }
+    playerProfile = {
+      name,
+      message: message || profileDefaults.message,
+      instrument: profileInstrumentInput?.value || 'piano',
+    };
+    try { localStorage.setItem(playerProfileKey, JSON.stringify(playerProfile)); } catch (_) {}
+    syncPlayerProfileUI();
+    if (profileStatus) profileStatus.textContent = 'プロフィールを保存しました。';
+  });
   const characterMenuButton = home.querySelector('[data-home-action="characters"]');
   let characterScreenOpener = null;
   function openCharacterScreen() {
