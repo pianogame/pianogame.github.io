@@ -218,6 +218,7 @@
   );
 
   const dialogOverlay = home.querySelector('.hp-home-dialog-overlay');
+  const characterScreen = home.querySelector('[data-home-character-screen]');
   const canvas = home.querySelector('[data-home-canvas]');
   const homeVolume = home.querySelector('[data-home-volume]');
   const pianoVolume = piano.querySelector('[data-control="volume"]');
@@ -241,7 +242,7 @@
     stopDetailVoice();
     syncCharacterVoice();
   }
-  for (const action of ['notice', 'settings', 'characters']) {
+  for (const action of ['notice', 'settings']) {
     const button = home.querySelector('[data-home-action="' + action + '"]');
     const openHomePanel = () => {
       dialogOpener = button;
@@ -250,16 +251,14 @@
       home.querySelector('[data-home-dialog-kicker]').textContent = { notice: 'INFORMATION', settings: 'SOUND SETTINGS', characters: 'CHARACTERS' }[action];
       home.querySelector('[data-home-notices]').hidden = action !== 'notice';
       home.querySelector('[data-home-settings]').hidden = action !== 'settings';
-      home.querySelector('[data-home-characters]').hidden = action !== 'characters';
       dialogOverlay.dataset.screen = action;
-      if (action === 'characters') renderCharacterScreen();
       if (action === 'settings') renderGlobalCharacterCredits();
       if (action === 'notice') renderNoticePage(0);
       syncHomeVolume();
       canvas.inert = true;
       dialogOverlay.hidden = false;
       syncCharacterVoice();
-      previewMotion.setActive(action === 'characters' && home.querySelector('[data-character-screen="detail"]')?.hidden === false);
+      previewMotion.setActive(false);
       dialogOverlay.querySelector('.hp-home-dialog-button:not([hidden])').focus({ preventScroll:true });
     };
     if (action === 'notice' || action === 'settings') {
@@ -283,6 +282,36 @@
       button.addEventListener('click', openHomePanel);
     }
   }
+  const characterMenuButton = home.querySelector('[data-home-action="characters"]');
+  let characterScreenOpener = null;
+  function openCharacterScreen() {
+    if (!characterScreen || !characterScreen.hidden) return;
+    characterScreenOpener = characterMenuButton;
+    setCharacterHeaderActionsVisible(false);
+    renderCharacterScreen();
+    canvas.inert = true;
+    characterScreen.hidden = false;
+    stopCharacterVoice();
+    syncCharacterVoice();
+    previewMotion.setActive(false);
+    requestAnimationFrame(() => {
+      characterScreen.querySelector('[data-home-action="character-screen-close"]')?.focus({ preventScroll:true });
+    });
+  }
+  function closeCharacterScreen() {
+    if (!characterScreen || characterScreen.hidden) return;
+    characterScreen.hidden = true;
+    setCharacterHeaderActionsVisible(false);
+    canvas.inert = false;
+    previewMotion.setActive(false);
+    stopDetailVoice();
+    syncCharacterVoice();
+    characterScreenOpener?.focus({ preventScroll:true });
+    characterScreenOpener = null;
+  }
+  characterMenuButton?.addEventListener('click', openCharacterScreen);
+  characterScreen?.querySelector('[data-home-action="character-screen-close"]')?.addEventListener('click', closeCharacterScreen);
+
   home.querySelectorAll('[data-home-action="dialog-close"]').forEach(button => button.addEventListener('click', closeHomeDialog));
   homeVolume.addEventListener('input', () => {
     pianoVolume.value = homeVolume.value;
@@ -314,6 +343,15 @@
     ['pointerup','pointercancel','lostpointercapture'].forEach(name => input.addEventListener(name, finish));
   });
   home.addEventListener('keydown', event => {
+    if (characterScreen && !characterScreen.hidden) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        const detail = home.querySelector('[data-character-screen="detail"]');
+        if (detail && !detail.hidden) showCharacterList({ focus:true });
+        else closeCharacterScreen();
+      }
+      return;
+    }
     if (dialogOverlay.hidden) return;
     if (event.key === 'Escape') { event.preventDefault(); closeHomeDialog(); }
     if (event.key === 'Tab') {
@@ -375,7 +413,8 @@
     return pageActive && !document.hidden && !home.hidden
       && !document.body.classList.contains('hp-booting')
       && !document.documentElement.classList.contains('hp-install-required')
-      && dialogOverlay.hidden && !home.classList.contains('hp-piano-launching');
+      && dialogOverlay.hidden && (!characterScreen || characterScreen.hidden)
+      && !home.classList.contains('hp-piano-launching');
   }
 
   function ensureVoiceGraph() {
@@ -552,6 +591,7 @@
   voiceObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
   voiceObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   voiceObserver.observe(home, { attributes: true, attributeFilter: ['hidden'] });
+  if (characterScreen) voiceObserver.observe(characterScreen, { attributes:true, attributeFilter:['hidden'] });
   document.addEventListener('visibilitychange', syncCharacterVoice);
   window.addEventListener('pagehide', () => { pageActive = false; manualVoicePlays = 0; voiceHistory.length = 0; stopCharacterVoice(); });
   window.addEventListener('pageshow', () => { pageActive = true; syncCharacterVoice(); });
