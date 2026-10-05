@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-mission-ranking-gacha2">
+  <link rel="stylesheet" href="/home.css?v=20261006-ranking-demo-gacha-placement">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261006-mission-ranking-gacha2"></script>
+  <script defer src="/home.js?v=20261006-ranking-demo-gacha-placement"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -155,9 +155,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
       </nav>
 
       <div class="hp-home-footer">
-      <div class="hp-home-campaign" role="img" aria-label="ミッションをクリアしてガチャチケットをGET">
+      <button type="button" class="hp-home-campaign hp-home-campaign-gacha" data-home-action="gacha" aria-label="ガチャ">
         <svg class="hp-home-reference-art" viewBox="18 663 382 174" aria-hidden="true" focusable="false"><defs><clipPath id="home-campaign-clip"><path d="M20 751 L29 724 L40 712 L61 704 L93 704 L109 697 L128 697 L137 678 L155 676 L166 663 L181 670 L192 685 L206 700 L342 698 L357 704 L371 721 L380 728 L390 731 L399 748 L394 766 L380 780 L375 792 L361 805 L353 816 L340 817 L331 827 L319 832 L306 827 L294 836 L280 830 L264 833 L249 825 L224 823 L207 816 L59 822 L38 817 L25 804 L22 779 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-campaign-clip)"/></svg>
-      </div>
+        <span class="hp-home-campaign-gacha-label" aria-hidden="true"><small>CHARACTER</small><b>GACHA</b><i>→</i></span>
+      </button>
 
       <nav class="hp-home-bottom" aria-label="ホームメニュー">
         <button type="button" class="hp-home-bottom-button" data-home-action="missions" aria-label="ミッション">
@@ -170,11 +171,6 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
           <svg class="hp-home-reference-art" viewBox="0 0 283 151" aria-hidden="true" focusable="false"><svg data-home-menu-frame x="3" y="2" width="277" height="147" viewBox="975 686 277 145" preserveAspectRatio="none"><defs><clipPath id="home-character-clip"><path d="M978 710 L987 696 L1004 687 L1026 686 L1205 687 L1224 692 L1241 705 L1247 725 L1246 792 L1252 809 L1240 821 L1224 830 L998 831 L982 820 L975 801 Z"/></clipPath></defs><image href="/assets/home/ui/home-reference-v1.jpg" width="1536" height="864" clip-path="url(#home-character-clip)"/></svg></svg>
         </button>
       </nav>
-      <button type="button" class="hp-home-gacha-button" data-home-action="gacha" aria-label="ガチャ">
-        <span class="hp-home-gacha-spark" aria-hidden="true">✦</span>
-        <span><small>CHARACTER</small><b>GACHA</b></span>
-        <i aria-hidden="true">→</i>
-      </button>
       </div>
     </div>
   </div>
