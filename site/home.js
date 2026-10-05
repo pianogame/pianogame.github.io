@@ -1110,6 +1110,7 @@
 
     piano.hidden = true;
     home.hidden = false;
+    window.dispatchEvent(new Event('hp-home-enter'));
     document.body.classList.remove('hp-piano-active');
     showMessage(voiceSet.greetingIndex ?? 0, false);
     playMessageVoice();
