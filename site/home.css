@@ -3435,3 +3435,125 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-pickup-ribbon { top:7px;padding:4px 12px; }
   #hp-home-screen .hp-gacha-pickup-character > div { bottom:8px;left:12px;right:12px; }
 }
+
+
+/* 2026-10-06: profile images + left-aligned ranking names */
+#hp-home-screen .hp-player-profile-summary {
+  grid-template-columns:68px 68px minmax(0,1fr);
+}
+#hp-home-screen .hp-player-profile-avatar,
+#hp-home-screen .hp-ranking-profile-avatar,
+#hp-home-screen .hp-ranking-avatar,
+#hp-home-screen .hp-ranking-self-avatar {
+  display:block;
+  object-fit:cover;
+  object-position:center;
+  background:#152844;
+}
+#hp-home-screen .hp-player-profile-avatar {
+  width:64px;
+  aspect-ratio:1;
+  border:2px solid #d0ae67;
+  border-radius:50%;
+  box-shadow:inset 0 0 0 2px #fff6d74a,0 3px 9px #223b5240;
+}
+#hp-home-screen .hp-player-profile-image-field {
+  display:grid;
+  grid-template-columns:112px minmax(0,1fr);
+  align-items:center;
+  gap:8px 10px;
+  padding:10px 12px;
+  border:1px solid #baa06a99;
+  border-radius:12px;
+  background:#ffffff8f;
+}
+#hp-home-screen .hp-player-profile-image-field > span {
+  color:#334b62;
+  font-weight:700;
+  font-size:13px;
+}
+#hp-home-screen .hp-player-profile-image-field > small {
+  grid-column:2;
+  color:#738598;
+  font-size:9px;
+  line-height:1.45;
+}
+#hp-home-screen .hp-player-profile-image-controls {
+  display:flex;
+  gap:8px;
+  min-width:0;
+}
+#hp-home-screen .hp-player-profile-image-select,
+#hp-home-screen .hp-player-profile-image-controls button {
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 12px;
+  border:1px solid #aa8b52;
+  border-radius:9px;
+  color:#344b61;
+  background:linear-gradient(#fff,#e7eef3);
+  font:700 12px/1 "Hiragino Sans","Yu Gothic",sans-serif;
+  cursor:pointer;
+}
+#hp-home-screen .hp-ranking-row {
+  grid-template-columns:54px 42px minmax(0,1fr) 120px;
+}
+#hp-home-screen .hp-ranking-avatar {
+  width:38px;
+  aspect-ratio:1;
+  border:1px solid #b69a62;
+  border-radius:50%;
+  box-shadow:0 2px 6px #1c2d3d35;
+}
+#hp-home-screen .hp-ranking-name-button {
+  justify-content:flex-start;
+  text-align:left;
+}
+#hp-home-screen .hp-ranking-name-button > span {
+  text-align:left;
+}
+#hp-home-screen .hp-ranking-self-name-button {
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:9px;
+  text-align:left;
+}
+#hp-home-screen .hp-ranking-self-avatar {
+  flex:none;
+  width:30px;
+  aspect-ratio:1;
+  border:1px solid #b89856;
+  border-radius:50%;
+}
+#hp-home-screen .hp-ranking-self-name-button > span {
+  min-width:0;
+  flex:1;
+  text-align:left;
+}
+#hp-home-screen .hp-ranking-profile-body {
+  grid-template-columns:96px minmax(0,1fr);
+}
+#hp-home-screen .hp-ranking-profile-side {
+  display:grid;
+  justify-items:center;
+  gap:9px;
+}
+#hp-home-screen .hp-ranking-profile-avatar {
+  width:84px;
+  aspect-ratio:1;
+  border:2px solid #d0ae67;
+  border-radius:50%;
+  box-shadow:inset 0 0 0 2px #fff6d74a,0 3px 9px #223b5240;
+}
+@container (max-width:760px) {
+  #hp-home-screen .hp-player-profile-summary { grid-template-columns:56px 56px minmax(0,1fr); }
+  #hp-home-screen .hp-player-profile-avatar { width:52px; }
+  #hp-home-screen .hp-player-profile-image-field { grid-template-columns:92px minmax(0,1fr); }
+  #hp-home-screen .hp-ranking-row { grid-template-columns:42px 34px minmax(0,1fr) 86px; gap:8px; }
+  #hp-home-screen .hp-ranking-avatar { width:31px; }
+  #hp-home-screen .hp-ranking-profile-body { grid-template-columns:78px minmax(0,1fr); }
+  #hp-home-screen .hp-ranking-profile-avatar { width:68px; }
+}
