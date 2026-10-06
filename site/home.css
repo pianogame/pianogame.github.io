@@ -4023,3 +4023,246 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-result-card { min-height:96px;padding:7px; }
   #hp-home-screen .hp-gacha-result-overlay[data-count="1"] .hp-gacha-result-card { min-height:185px; }
 }
+
+
+/* 2026-10-06: Touka gacha portrait is face/upper-body only, never full-body. */
+#hp-home-screen .hp-gacha-motion-portrait canvas,
+#hp-home-screen .hp-gacha-motion-portrait img {
+  left:50%;
+  top:-5%;
+  width:auto;
+  height:180%;
+  max-width:none;
+  transform:translateX(-50%);
+  object-fit:contain;
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka::after {
+  background:
+    linear-gradient(180deg,transparent 55%,#07101ecf 100%),
+    linear-gradient(90deg,#0b10233b,transparent 32% 68%,#0b10233b);
+}
+
+/* Full-screen app-style piano gacha animation. */
+#hp-home-screen .hp-gacha-animation-overlay[hidden] { display:none !important; }
+#hp-home-screen .hp-gacha-animation-overlay {
+  position:absolute;
+  inset:0;
+  z-index:94;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  background:#030813;
+  isolation:isolate;
+}
+#hp-home-screen .hp-gacha-animation-sky {
+  position:absolute;
+  inset:-12%;
+  background:
+    radial-gradient(circle at 50% 56%,#ffe7a53d 0 5%,transparent 34%),
+    radial-gradient(circle at 50% 42%,#7860c960,transparent 32%),
+    radial-gradient(circle at 20% 10%,#caa4ff28,transparent 22%),
+    linear-gradient(180deg,#061124,#19102d 54%,#050a15);
+  transform:scale(.92);
+  opacity:.2;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-animation-sky {
+  animation:hp-gacha-sky-in 2.8s ease both;
+}
+@keyframes hp-gacha-sky-in {
+  0% { opacity:0;transform:scale(.86);filter:brightness(.5); }
+  35% { opacity:1;transform:scale(1);filter:brightness(1); }
+  78% { filter:brightness(1.22); }
+  100% { opacity:1;transform:scale(1.03);filter:brightness(1.12); }
+}
+#hp-home-screen .hp-gacha-animation-staff {
+  position:absolute;
+  left:-10%;
+  right:-10%;
+  top:18%;
+  height:48%;
+  opacity:.13;
+  transform:rotate(-7deg);
+  background:
+    repeating-linear-gradient(180deg,
+      transparent 0 20px,
+      #ffe6a4 20px 22px,
+      transparent 22px 39px);
+  filter:drop-shadow(0 0 8px #ffdc8a);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-animation-staff {
+  animation:hp-gacha-staff 2.8s ease-out both;
+}
+@keyframes hp-gacha-staff {
+  0% { opacity:0;transform:translateX(-16%) rotate(-7deg); }
+  45% { opacity:.18; }
+  100% { opacity:.08;transform:translateX(12%) rotate(-3deg); }
+}
+#hp-home-screen .hp-gacha-animation-title {
+  position:absolute;
+  z-index:7;
+  top:8%;
+  left:50%;
+  width:min(72%,720px);
+  transform:translateX(-50%);
+  color:#fff4d7;
+  text-align:center;
+  opacity:0;
+  text-shadow:0 0 16px #e5b95a73,0 2px 5px #000;
+}
+#hp-home-screen .hp-gacha-animation-title small {
+  display:block;
+  color:#d3b46a;
+  font:10px/1 "Times New Roman",serif;
+  letter-spacing:.28em;
+}
+#hp-home-screen .hp-gacha-animation-title strong {
+  display:block;
+  margin-top:8px;
+  font:clamp(17px,2.2cqw,30px)/1.2 "Hiragino Mincho ProN","Yu Mincho",serif;
+  letter-spacing:.09em;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-animation-title {
+  animation:hp-gacha-title 2.5s ease both;
+}
+@keyframes hp-gacha-title {
+  0%,10% { opacity:0;transform:translate(-50%,-10px); }
+  28%,74% { opacity:1;transform:translate(-50%,0); }
+  100% { opacity:0;transform:translate(-50%,-4px); }
+}
+#hp-home-screen .hp-gacha-grand-piano {
+  position:absolute;
+  z-index:5;
+  left:50%;
+  top:50%;
+  width:min(54vw,690px);
+  min-width:360px;
+  transform:translate(-50%,-42%) scale(.82);
+  opacity:0;
+  filter:drop-shadow(0 18px 22px #0009);
+}
+#hp-home-screen .hp-gacha-grand-piano svg {
+  display:block;
+  width:100%;
+  height:auto;
+  filter:drop-shadow(0 0 15px #d9b45b45);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-grand-piano {
+  animation:hp-gacha-piano-in 2.75s cubic-bezier(.2,.8,.25,1) both;
+}
+@keyframes hp-gacha-piano-in {
+  0% { opacity:0;transform:translate(-50%,-34%) scale(.64);filter:blur(8px) brightness(.7); }
+  24% { opacity:1;transform:translate(-50%,-42%) scale(.93);filter:blur(0) brightness(1); }
+  67% { transform:translate(-50%,-42%) scale(1);filter:brightness(1.15); }
+  88% { filter:brightness(1.45) drop-shadow(0 0 28px #ffdc86); }
+  100% { opacity:1;transform:translate(-50%,-42%) scale(1.025);filter:brightness(1.18); }
+}
+#hp-home-screen .hp-gacha-animation-keys {
+  position:absolute;
+  left:63%;
+  bottom:16%;
+  width:27%;
+  height:14%;
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:1px;
+  transform:skewX(-8deg);
+}
+#hp-home-screen .hp-gacha-animation-keys i {
+  display:block;
+  border-radius:0 0 2px 2px;
+  background:linear-gradient(180deg,#fffdf4,#d8d7d2);
+  box-shadow:inset 0 -3px 4px #64717c35;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-animation-keys i {
+  animation:hp-gacha-key-light .62s ease both;
+}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(1){animation-delay:.52s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(2){animation-delay:.61s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(3){animation-delay:.70s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(4){animation-delay:.79s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(5){animation-delay:.88s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(6){animation-delay:.97s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(7){animation-delay:1.06s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(8){animation-delay:1.15s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(9){animation-delay:1.24s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(10){animation-delay:1.33s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(11){animation-delay:1.42s}
+#hp-home-screen .hp-gacha-animation-keys i:nth-child(12){animation-delay:1.51s}
+@keyframes hp-gacha-key-light {
+  0%,100% { background:linear-gradient(180deg,#fffdf4,#d8d7d2);box-shadow:inset 0 -3px 4px #64717c35; }
+  40% { background:#fff3ad;box-shadow:0 0 15px #ffe085,0 0 28px #eab95c;transform:translateY(3px); }
+}
+#hp-home-screen .hp-gacha-note-burst {
+  position:absolute;
+  z-index:6;
+  left:50%;
+  top:50%;
+  width:1px;
+  height:1px;
+}
+#hp-home-screen .hp-gacha-note-burst i {
+  position:absolute;
+  color:#f8dda0;
+  font-style:normal;
+  font-size:clamp(16px,2.4cqw,34px);
+  opacity:0;
+  text-shadow:0 0 12px #ffd777;
+}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(1){--x:-270px;--y:-130px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(2){--x:-180px;--y:-210px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(3){--x:-70px;--y:-250px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(4){--x:85px;--y:-245px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(5){--x:210px;--y:-175px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(6){--x:275px;--y:-55px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(7){--x:-250px;--y:25px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(8){--x:245px;--y:45px}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-note-burst i {
+  animation:hp-gacha-note-fly 1.45s cubic-bezier(.2,.75,.25,1) 1.35s both;
+}
+@keyframes hp-gacha-note-fly {
+  0% { opacity:0;transform:translate(0,0) scale(.3) rotate(-20deg); }
+  28% { opacity:1; }
+  100% { opacity:0;transform:translate(var(--x),var(--y)) scale(1.35) rotate(18deg); }
+}
+#hp-home-screen .hp-gacha-animation-flash {
+  position:absolute;
+  z-index:8;
+  inset:0;
+  background:#fffbe9;
+  opacity:0;
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-animation-flash {
+  animation:hp-gacha-white-flash .7s ease 2.05s both;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-special .hp-gacha-animation-flash {
+  background:radial-gradient(circle,#ffffff,#f8eaff 36%,#dff7ff 62%,#fff4bd);
+}
+@keyframes hp-gacha-white-flash {
+  0% { opacity:0; }
+  36% { opacity:.95; }
+  100% { opacity:0; }
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-special .hp-gacha-grand-piano svg {
+  filter:drop-shadow(0 0 28px #fff0a7) drop-shadow(0 0 45px #c6a3ff);
+}
+#hp-home-screen .hp-gacha-animation-skip {
+  position:absolute;
+  z-index:10;
+  right:max(18px,var(--safe-r));
+  bottom:max(14px,var(--safe-b));
+  min-width:74px;
+  min-height:34px;
+  border:1px solid #bea15f80;
+  border-radius:999px;
+  color:#d9ceb5;
+  background:#0b1426a8;
+  font:10px/1 "Times New Roman",serif;
+  letter-spacing:.12em;
+}
+@container (max-height:480px) {
+  #hp-home-screen .hp-gacha-grand-piano { width:min(50vw,610px);min-width:320px; }
+  #hp-home-screen .hp-gacha-animation-title { top:5%; }
+  #hp-home-screen .hp-gacha-motion-portrait canvas,
+  #hp-home-screen .hp-gacha-motion-portrait img { top:-5%;height:180%; }
+}
