@@ -895,7 +895,7 @@
       ? {
           level: Number(home.querySelector('[data-home-level]')?.textContent) || null,
           message: playerProfile.message || profileDefaults.message,
-          instrument: ({piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ff9cb86a-3ab0-4ebd-8ad5-cef293dcb2a4.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOGY5ZmM2ZWMwMzYzOWE0NCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQyMTAzNn0.31oyt1KOKE733hbjHOXK5g7FfcuAg0CS-ubrhwwPlEw',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
+          instrument: ({piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ff9cb86a-3ab0-4ebd-8ad5-cef293dcb2a4.jpg',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
           image: playerProfile.image || '',
         }
       : (entry?.profile || {});
@@ -1052,10 +1052,10 @@
 
   const gachaTrialTicketCap = 9999;
   const gachaVisuals = {
-    piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/33b0f6b5-c27e-4cdd-819f-c281a613c415.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiY2IwYjc3ZTA4YTdkMTM3MSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM2NDgzMn0.30z96FyZvEWmnVd-9xJtyt3xWvh-V45ZKxdl3djKsBw',
-    normal: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/94ace327-eb0a-4b3a-bb63-fc6ea11ebe15.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYjQwZGVhYWMyOTg1NWJlOSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQyNTMyNH0.v7nufV0zoXiUGZjO7MOMn-VdtHCqXNlW2LTfDQ7bgMw',
-    special: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cf1fecad-1030-4b72-956e-b4eaafa5b2ea.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzIxNzcxMDZjZTc0OWU1MSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQwMTg2Mn0.dLsNoym65KMoEu9r_QpJecvhX18T7WppPrxEO0azI-4',
-    ticket: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/36db6e9d-5a77-42b2-a089-3c7fa4b48eb7.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOWIyZTdjNmQ0NTE2Y2JiOSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ0MTM4OX0.H5TcanEsrEeEEhgMD5T_I_gWaF2_rPQy5BDj-ykYYfc',
+    piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/33b0f6b5-c27e-4cdd-819f-c281a613c415.png',
+    normal: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/94ace327-eb0a-4b3a-bb63-fc6ea11ebe15.png',
+    special: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cf1fecad-1030-4b72-956e-b4eaafa5b2ea.png',
+    ticket: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/36db6e9d-5a77-42b2-a089-3c7fa4b48eb7.png',
   };
   let gachaDrawing = false;
 
