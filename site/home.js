@@ -1578,7 +1578,11 @@
   function nextRainbowResultIndex(afterIndex = -1) {
     if (!gachaResultState?.results?.length) return -1;
     for (let index = Math.max(-1, afterIndex) + 1; index < gachaResultState.results.length; index++) {
-      if (gachaResultState.results[index]?.rarity === 'rainbow') return index;
+      const result = gachaResultState.results[index];
+      // Only a genuinely new character gets the rainbow reveal.
+      // Already-owned characters — including duplicates first obtained earlier
+      // in this same 10-pull — are kept for the final summary only.
+      if (result?.rarity === 'rainbow' && result?.isNewCharacter === true) return index;
     }
     return -1;
   }
