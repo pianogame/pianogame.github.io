@@ -288,34 +288,11 @@
 
   const homeBackgroundCatalog = Object.freeze({
     default: { name:'標準ホーム', image:defaultHomeBackground },
-    celestial: { name:'天空クリスタル音楽宮殿', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/77f517b7-bf41-470c-90ea-1b7d362b3932.png' },
-    moonlight: { name:'月明かりの幻想音楽堂', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/77e486ed-23f2-4a20-b990-a54745c991f5.png' },
-    sunset: { name:'夕映えの宮殿ロビー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/b539d4a3-9a6e-4314-93ca-7970be4d2acb.png' },
-    dreamroom: { name:'夢見る音楽室', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/e87b1617-ab51-46ae-9191-f8d093b2ed98.png' },
-    stardome: { name:'星空ドーム', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/77911b0b-e446-4200-8cae-bdaa41f4f446.png' },
-    icepalace: { name:'氷晶宮殿', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c7024bdd-cd5e-4bf7-9727-13bcba135893.png' },
-    roseterrace: { name:'夕暮れの薔薇庭園', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/6f41f3a0-cc07-45e1-9666-75529b769852.png' },
-    neon: { name:'未来都市ネオンラウンジ', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/1c6995de-8264-4927-b258-dc8182942e9c.png' },
-    undersea: { name:'夢幻の海底宮殿', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/d79cfd0a-bcec-465e-a8dc-5f79023e9cd6.png' },
-    rainbow: { name:'虹色天空の祝祭ステージ', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/0129472e-84b8-48c0-8454-cf09ded728dc.png' },
+    crystal: { name:'クリスタルステージ', image:'/assets/home/character-screen-bg-20261006.svg' },
   });
   const profileFrameCatalog = Object.freeze({
     default: { name:'標準フレーム' },
-    frame01: { name:'星空ゴールド', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/a79dd18d-8a00-48a5-b625-cbf68b06594c.png' },
-    frame02: { name:'ロイヤルブルー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ab9c47a3-67fd-4af1-87cc-dc2343faf3cd.png' },
-    frame03: { name:'クリスタルシルバー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/bac29284-bbd3-4d3f-83f9-fa8336f23efd.png' },
-    frame04: { name:'ローズゴールド', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/950ff9af-6bd9-44f9-a85a-d4c4abb319f1.png' },
-    frame05: { name:'エメラルド', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/40b3f721-2362-4579-b0e9-f1cad6cf0c1f.png' },
-    frame06: { name:'アメジスト', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/d1bcb934-936f-4824-b4d2-cdc766428f73.png' },
-    frame07: { name:'サファイア', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ae09369f-5b2e-47ff-853c-94c144dc4c85.png' },
-    frame08: { name:'ルビー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/b1764cd1-888b-44e7-bfc9-3490f8a2cf07.png' },
-    frame09: { name:'ムーンライト', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c765f712-2508-4026-b74a-b1643e9d2976.png' },
-    frame10: { name:'フェアリー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/3fa7b9b8-4fc6-4605-bad6-8848f8e6b199.png' },
-    frame11: { name:'クラシック', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/029e8b31-2d30-4bf5-a9d5-585712b569f3.png' },
-    frame12: { name:'オーロラ', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cb986def-7260-457e-9e15-883646c27d1c.png' },
-    frame13: { name:'スノークリスタル', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/2b52b531-bf51-41eb-9a41-f3daaa07654b.png' },
-    frame14: { name:'ノクターン', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cf9026a7-6406-4d33-8532-ef06ac670590.png' },
-    frame15: { name:'セレブレーション', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/4689906d-b2d1-4c34-9fce-12392db3009c.png' },
+    starlight: { name:'スターライトフレーム' },
   });
 
   function loadGachaInventory() {
