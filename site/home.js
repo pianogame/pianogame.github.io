@@ -1553,6 +1553,14 @@
     }
   }
 
+  function nextRainbowResultIndex(afterIndex = -1) {
+    if (!gachaResultState?.results?.length) return -1;
+    for (let index = Math.max(-1, afterIndex) + 1; index < gachaResultState.results.length; index++) {
+      if (gachaResultState.results[index]?.rarity === 'rainbow') return index;
+    }
+    return -1;
+  }
+
   function showFinalGachaSummary() {
     if (!gachaResultState?.results?.length) return;
     const animationOverlay = home.querySelector('[data-gacha-animation-overlay]');
@@ -1582,7 +1590,12 @@
     destroyGachaResultMotions();
     gachaDrawing = true;
     renderGachaScreen();
-    const status = await playGachaDrawReveal(results[nextIndex], nextIndex, results.length);
+    const status = await playGachaDrawReveal(
+      results[nextIndex],
+      nextIndex,
+      results.length,
+      { mandatory: results[nextIndex]?.isNewCharacter === true }
+    );
     if (status === 'done' && results[nextIndex]?.isNewCharacter === true) {
       markNewCharacterRevealSeen(nextIndex);
     }
@@ -1605,17 +1618,19 @@
     const { results, index } = gachaResultState;
     if (results.length <= 1) return;
 
-    // After the player has seen a rainbow result, do not make them manually skip
-    // ordinary remaining pulls if there is no later rainbow hit.
-    const current = results[index];
-    if (current?.rarity === 'rainbow') {
-      const hasLaterRainbow = results.slice(index + 1).some(result => result?.rarity === 'rainbow');
-      if (!hasLaterRainbow) {
+    // Ten-pull flow: after a rainbow character result, skip all ordinary pulls.
+    // "Next" shows the next rainbow character, or the final ten-pull summary.
+    if (results.length === 10) {
+      const nextRainbow = nextRainbowResultIndex(index);
+      if (nextRainbow >= 0) {
+        await transitionToGachaResultIndex(nextRainbow);
+      } else {
         showFinalGachaSummary();
-        return;
       }
+      return;
     }
 
+    // Single-pull / future non-ten sequences keep the ordinary sequential behavior.
     if (index < results.length - 1) {
       await transitionToGachaResultIndex(index + 1);
     } else {
@@ -1707,14 +1722,48 @@
       return;
     }
 
-    const firstStatus = await playGachaDrawReveal(results[0],0,results.length);
-    if (firstStatus === 'done' && results[0]?.isNewCharacter === true) markNewCharacterRevealSeen(0);
-    await resultAssetsReady;
-    if (firstStatus === 'summary') {
-      await playPendingNewCharacterReveals();
-      showFinalGachaSummary();
+    // Normal ten-pull flow only pauses on rainbow character hits.
+    // Ordinary pulls are collected silently and are shown together in the final summary.
+    if (results.length === 10) {
+      await resultAssetsReady;
+      const firstRainbowIndex = nextRainbowResultIndex(-1);
+      if (firstRainbowIndex < 0) {
+        showFinalGachaSummary();
+        return;
+      }
+
+      const rainbowStatus = await playGachaDrawReveal(
+        results[firstRainbowIndex],
+        firstRainbowIndex,
+        results.length,
+        { mandatory: results[firstRainbowIndex]?.isNewCharacter === true }
+      );
+      if (rainbowStatus === 'done' && results[firstRainbowIndex]?.isNewCharacter === true) {
+        markNewCharacterRevealSeen(firstRainbowIndex);
+      }
+      if (rainbowStatus === 'summary') {
+        await playPendingNewCharacterReveals();
+        showFinalGachaSummary();
+        return;
+      }
+
+      gachaResultState.index = firstRainbowIndex;
+      gachaResultState.summary = false;
+      gachaScreen?.classList.remove('is-drawing');
+      const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
+      if (resultOverlay) resultOverlay.hidden = false;
+      renderGachaResultStep();
+      gachaDrawing = false;
+      renderGachaScreen();
       return;
     }
+
+    // Single pull keeps its existing reveal -> single result flow.
+    const firstStatus = await playGachaDrawReveal(results[0],0,results.length, {
+      mandatory: results[0]?.isNewCharacter === true
+    });
+    if (firstStatus === 'done' && results[0]?.isNewCharacter === true) markNewCharacterRevealSeen(0);
+    await resultAssetsReady;
     gachaResultState.index = 0;
     gachaResultState.summary = false;
     gachaScreen?.classList.remove('is-drawing');
