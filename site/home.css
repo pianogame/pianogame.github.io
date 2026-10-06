@@ -5989,3 +5989,60 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   width:min(55%,90px);
   top:41%;
 }
+
+
+/* ===== 2026-10-06 Real gacha customization ownership v13 ===== */
+
+#hp-home-screen .hp-gacha-result-ownership {
+  position:absolute;
+  z-index:9;
+  top:9px;
+  right:9px;
+  margin:0;
+  padding:4px 9px 3px;
+  border:1px solid #d9c17e;
+  border-radius:999px;
+  color:#fff2c8;
+  background:#101b31df;
+  box-shadow:0 2px 8px #0008;
+  font:800 9px/1 "Hiragino Sans","Yu Gothic",sans-serif;
+  letter-spacing:.06em;
+}
+#hp-home-screen .hp-gacha-result-card.is-new-reward .hp-gacha-result-ownership {
+  color:#fff;
+  border-color:#fff5cf;
+  background:linear-gradient(135deg,#d69c3d,#8f5ec2 55%,#527bc4);
+  box-shadow:0 0 10px #fff7,0 0 18px #d4adff77;
+}
+#hp-home-screen .hp-gacha-result-card.is-owned-reward .hp-gacha-result-ownership {
+  color:#d9d4c6;
+  border-color:#9c927a;
+  background:#202536d9;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-ownership {
+  top:5px;
+  right:5px;
+  padding:3px 6px 2px;
+  font-size:7px;
+}
+
+/* Starlight frame visibly wraps the actual profile picture when equipped. */
+#hp-home-screen [data-profile-frame="starlight"],
+#hp-home-screen img[data-profile-frame="starlight"] {
+  border:3px solid #f2d27c !important;
+  outline:1px solid #fff3c7a8;
+  outline-offset:2px;
+  box-shadow:
+    0 0 0 5px #6e4f9a8c,
+    0 0 15px #efd279b8,
+    0 0 30px #a47cf18a !important;
+}
+
+/* Owned selectors look like inventory/equipment controls, not plain form fields. */
+#hp-home-screen select[data-profile-home-background],
+#hp-home-screen select[data-profile-frame] {
+  border-color:#c9ab68;
+  background:
+    linear-gradient(180deg,#fffdf9,#edf2f5);
+  box-shadow:inset 0 1px 0 #fff,0 0 0 1px #d2bd8540;
+}
