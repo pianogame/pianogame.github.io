@@ -1227,6 +1227,9 @@
     renderGachaScreen();
 
     const results = Array.from({length:cost}, () => drawTrialCharacter()).filter(Boolean);
+    const resultAssetsReady = Promise.all(results.map(character =>
+      window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => null)
+    ));
     gachaTrialState.history.unshift({
       at: new Date().toISOString(),
       count:cost,
@@ -1237,6 +1240,7 @@
 
     gachaScreen?.classList.add('is-drawing');
     await playGachaAnimation(cost);
+    await resultAssetsReady;
     gachaScreen?.classList.remove('is-drawing');
     showGachaResult(results);
     gachaDrawing = false;
@@ -1289,6 +1293,9 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareGachaFlourish();
+    for (const character of gachaPool()) {
+      void window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => {});
+    }
     canvas.inert = true;
     gachaScreen.hidden = false;
     stopCharacterVoice();
