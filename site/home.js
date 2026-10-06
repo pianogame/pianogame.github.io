@@ -923,6 +923,8 @@
     location.hostname.includes('git-staging-')
     || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
   const gachaTrialKey = 'pds-gacha-trial-v1';
+  const gachaTrialTicketCap = 9999;
+  const gachaTrialMaxProfileName = 'Proゲーマー園児ベアー';
   let gachaDrawing = false;
 
   function loadGachaTrialState() {
@@ -1017,6 +1019,10 @@
   }
 
   function renderGachaScreen() {
+    if (gachaTrialEnabled && (playerProfile.name || '').trim() === gachaTrialMaxProfileName && missionState.tickets !== gachaTrialTicketCap) {
+      missionState.tickets = gachaTrialTicketCap;
+      saveMissionState();
+    }
     const gachaTicketCount = home.querySelector('[data-gacha-ticket-count]');
     if (gachaTicketCount) gachaTicketCount.textContent = String(missionState.tickets);
 
@@ -1082,7 +1088,7 @@
   }));
   home.querySelector('[data-gacha-test-ticket]')?.addEventListener('click', () => {
     if (!gachaTrialEnabled) return;
-    missionState.tickets += 10;
+    missionState.tickets = Math.min(gachaTrialTicketCap, missionState.tickets + 10);
     saveMissionState();
     renderGachaScreen();
   });
