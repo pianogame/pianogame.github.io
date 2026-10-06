@@ -3142,3 +3142,296 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     width:345%;
   }
 }
+
+
+/* 2026-10-06: simplify ranking name plate — glossy ivory key, no black keys or divisions. */
+#hp-home-screen .hp-ranking-name-button,
+#hp-home-screen .hp-ranking-self-name-button {
+  position:relative;
+  isolation:isolate;
+  min-height:40px;
+  padding:8px 12px;
+  border:1px solid #a98d59;
+  border-radius:8px;
+  color:#25384c;
+  background:
+    linear-gradient(180deg,#fffefa 0%,#f8f6ef 48%,#e7e4da 100%);
+  box-shadow:
+    inset 0 2px 0 #ffffff,
+    inset 0 -4px 7px #8f9aa71f,
+    0 2px 5px #18283a2b;
+  overflow:hidden;
+}
+#hp-home-screen .hp-ranking-name-button::before,
+#hp-home-screen .hp-ranking-self-name-button::before {
+  content:none;
+  display:none;
+}
+#hp-home-screen .hp-ranking-name-button::after,
+#hp-home-screen .hp-ranking-self-name-button::after {
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:7px;
+  background:
+    linear-gradient(110deg,transparent 0 32%,#ffffff8c 45%,transparent 59%);
+  pointer-events:none;
+}
+#hp-home-screen .hp-ranking-name-button > span,
+#hp-home-screen .hp-ranking-self-name-button > span {
+  position:relative;
+  z-index:2;
+  padding-top:0;
+  color:#25384c;
+  text-shadow:0 1px 0 #fff;
+}
+
+/* HOME gacha: same size as the other menu buttons, but deliberately premium. */
+#hp-home-screen .hp-home-gacha-standard-card {
+  border:1px solid #e7c56d;
+  color:#fff7df;
+  background:
+    radial-gradient(circle at 20% 16%,#fff3b676,transparent 19%),
+    radial-gradient(circle at 79% 18%,#b99cff3e,transparent 24%),
+    linear-gradient(125deg,#4d1f5e 0%,#2f174a 42%,#7b4e22 100%);
+  box-shadow:
+    inset 0 0 0 2px #fff2bd73,
+    inset 0 0 0 5px #b9883454,
+    inset 0 -10px 22px #150a276e,
+    0 4px 8px #26140c4d,
+    0 0 15px #e0b4523d;
+}
+#hp-home-screen .hp-home-gacha-standard-card::before {
+  content:"✦";
+  left:5%;
+  top:7%;
+  width:auto;
+  aspect-ratio:auto;
+  border:0;
+  transform:none;
+  color:#fff1a8;
+  font-size:13px;
+  text-shadow:0 0 9px #ffe49f;
+}
+#hp-home-screen .hp-home-gacha-standard-card::after {
+  content:"✧";
+  right:6%;
+  bottom:8%;
+  width:auto;
+  aspect-ratio:auto;
+  border:0;
+  transform:none;
+  color:#e6cdff;
+  font-size:15px;
+  text-shadow:0 0 9px #d5b4ff;
+}
+#hp-home-screen .hp-home-bottom-gacha .hp-home-standard-icon {
+  position:relative;
+  border:1px solid #f0cf76;
+  color:#fff2bb;
+  background:
+    radial-gradient(circle at 38% 30%,#e6bc6e 0 7%,transparent 8%),
+    radial-gradient(circle at 50% 48%,#a678c8,#5a3274 47%,#21142e 76%);
+  box-shadow:
+    inset 0 0 0 3px #fff0ae38,
+    0 0 0 2px #6d451c,
+    0 0 12px #dcb76f7a;
+  text-shadow:0 0 9px #fff0a8;
+}
+#hp-home-screen .hp-home-bottom-gacha .hp-home-standard-icon::before {
+  content:"";
+  position:absolute;
+  inset:18%;
+  border:1px solid #ffe5a480;
+  transform:rotate(45deg);
+}
+#hp-home-screen .hp-home-bottom-gacha .hp-home-standard-copy b {
+  color:#fff7e4;
+  font-size:clamp(16px,1.75cqw,25px);
+  text-shadow:0 1px 3px #190b24,0 0 7px #e4bc67;
+}
+#hp-home-screen .hp-home-bottom-gacha .hp-home-standard-copy small {
+  color:#f0dcb4;
+  text-shadow:0 1px 2px #1b1024;
+}
+#hp-home-screen .hp-home-bottom-gacha .hp-home-standard-arrow {
+  color:#ffe9a2;
+  text-shadow:0 0 8px #ffdc77;
+}
+#hp-home-screen .hp-home-bottom-gacha.hp-home-confirmed .hp-home-gacha-standard-card {
+  animation:hp-gacha-menu-glow .55s ease-out both;
+}
+@keyframes hp-gacha-menu-glow {
+  0% { filter:brightness(.88); }
+  35% { filter:brightness(1.28); box-shadow:inset 0 0 0 2px #fff2bd73,inset 0 0 0 5px #b9883454,0 0 24px #ffe28a9c; }
+  100% { filter:brightness(1); }
+}
+
+/* Gacha screen: the characters are the hero, not an explanatory frame. */
+#hp-home-screen .hp-gacha-shell {
+  width:min(1140px,100%);
+  display:grid;
+  grid-template-rows:minmax(0,1fr) auto auto;
+  gap:12px;
+  overflow:hidden;
+}
+#hp-home-screen .hp-gacha-pickup {
+  position:relative;
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  overflow:hidden;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 30%,#fff0c927,transparent 33%),
+    linear-gradient(135deg,#101c36c4,#2d2144c7 52%,#172a42cf);
+  box-shadow:
+    inset 0 0 0 1px #dfc17a80,
+    inset 0 0 0 5px #ffffff0d,
+    0 10px 28px #02071354;
+}
+#hp-home-screen .hp-gacha-pickup::before,
+#hp-home-screen .hp-gacha-pickup::after {
+  content:"";
+  position:absolute;
+  z-index:3;
+  width:34%;
+  aspect-ratio:1;
+  border:1px solid #e0bd6a5c;
+  transform:rotate(45deg);
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-pickup::before { left:-17%;top:-45%; }
+#hp-home-screen .hp-gacha-pickup::after { right:-17%;bottom:-45%; }
+#hp-home-screen .hp-gacha-pickup-ribbon {
+  position:absolute;
+  z-index:5;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:5px 15px;
+  border:1px solid #e6c46e;
+  border-radius:999px;
+  color:#fff2c2;
+  background:linear-gradient(180deg,#8b672c,#4e3315);
+  box-shadow:inset 0 1px 0 #fff3bd6e,0 3px 10px #09051171;
+  font:11px/1 "Times New Roman",serif;
+  letter-spacing:.15em;
+}
+#hp-home-screen .hp-gacha-pickup-character {
+  position:relative;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
+#hp-home-screen .hp-gacha-pickup-character img {
+  width:100%;
+  height:100%;
+  min-height:240px;
+  display:block;
+  object-fit:cover;
+  object-position:50% 18%;
+  filter:saturate(1.08) contrast(1.03);
+}
+#hp-home-screen .hp-gacha-pickup-character::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,transparent 52%,#081425c9 100%),
+    linear-gradient(90deg,#11182b29,transparent 36% 64%,#11182b29);
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-pickup-character > div {
+  position:absolute;
+  z-index:4;
+  left:18px;
+  right:18px;
+  bottom:14px;
+  color:#fff5e1;
+  text-shadow:0 2px 5px #000c;
+}
+#hp-home-screen .hp-gacha-pickup-character > div small {
+  display:block;
+  color:#e3c276;
+  font:9px/1 "Times New Roman",serif;
+  letter-spacing:.16em;
+}
+#hp-home-screen .hp-gacha-pickup-character > div strong {
+  display:block;
+  margin-top:3px;
+  font:clamp(20px,2.2cqw,31px)/1.05 "Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  letter-spacing:.06em;
+}
+#hp-home-screen .hp-gacha-pickup-character > div span {
+  display:block;
+  margin-top:3px;
+  color:#ddd4c4;
+  font-size:10px;
+}
+#hp-home-screen .hp-gacha-pickup-center {
+  position:absolute;
+  z-index:6;
+  left:50%;
+  top:50%;
+  width:48px;
+  aspect-ratio:1;
+  display:grid;
+  place-items:center;
+  border:1px solid #e4c36e;
+  border-radius:50%;
+  color:#fff0b3;
+  background:radial-gradient(circle,#735b35,#2a1d31 72%);
+  box-shadow:inset 0 0 0 3px #fff3bf24,0 0 18px #e9c46f67;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-actions-large {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:0;
+}
+#hp-home-screen .hp-gacha-actions-large button {
+  min-height:84px;
+  grid-template-columns:minmax(0,1fr) auto;
+  padding:12px 20px;
+  border:1px solid #d5b262;
+  border-radius:15px;
+  color:#fff3d4;
+  background:
+    radial-gradient(circle at 20% 0,#fff0b03b,transparent 30%),
+    linear-gradient(180deg,#4b345e,#241e42 58%,#171a33);
+  box-shadow:
+    inset 0 1px 0 #fff1bd50,
+    inset 0 0 0 4px #a6783730,
+    0 5px 13px #02071355;
+  opacity:.76;
+}
+#hp-home-screen .hp-gacha-actions-large button span {
+  color:#fff6e5;
+  font-size:clamp(18px,2cqw,28px);
+}
+#hp-home-screen .hp-gacha-actions-large button small {
+  color:#e5c982;
+  font-size:11px;
+}
+#hp-home-screen .hp-gacha-actions-large button b {
+  color:#d8cbb8;
+  background:#ffffff12;
+  border:1px solid #d4b66a55;
+}
+#hp-home-screen .hp-gacha-note {
+  margin:0 2px;
+}
+@container (max-height:480px) {
+  #hp-home-screen .hp-gacha-shell { gap:7px; }
+  #hp-home-screen .hp-gacha-pickup-character img { min-height:175px; }
+  #hp-home-screen .hp-gacha-actions-large button { min-height:58px;padding:7px 15px; }
+  #hp-home-screen .hp-gacha-pickup-ribbon { top:7px;padding:4px 12px; }
+  #hp-home-screen .hp-gacha-pickup-character > div { bottom:8px;left:12px;right:12px; }
+}
