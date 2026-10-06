@@ -1542,15 +1542,37 @@
       .map(({index}) => index);
   }
 
-  async function playPendingNewCharacterReveals() {
-    if (!gachaResultState) return;
-    const overlay = home.querySelector('[data-gacha-result-overlay]');
-    if (overlay) overlay.hidden = true;
-    for (const index of pendingNewCharacterIndexes()) {
-      const result = gachaResultState.results[index];
-      await playGachaDrawReveal(result, index, gachaResultState.results.length, { mandatory:true });
-      markNewCharacterRevealSeen(index);
-    }
+  function nextPendingNewCharacterIndex(afterIndex = -1) {
+    const pending = pendingNewCharacterIndexes();
+    if (!pending.length) return -1;
+    const later = pending.find(index => index > afterIndex);
+    return Number.isInteger(later) ? later : pending[0];
+  }
+
+  async function revealNextPendingNewCharacter(afterIndex = -1) {
+    if (!gachaResultState) return false;
+    const index = nextPendingNewCharacterIndex(afterIndex);
+    if (index < 0) return false;
+
+    const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
+    if (resultOverlay) resultOverlay.hidden = true;
+    destroyGachaResultMotions();
+
+    const result = gachaResultState.results[index];
+    gachaDrawing = true;
+    renderGachaScreen();
+    await playGachaDrawReveal(result, index, gachaResultState.results.length, { mandatory:true });
+    markNewCharacterRevealSeen(index);
+
+    gachaResultState.index = index;
+    gachaResultState.summary = false;
+    gachaResultTransitioning = false;
+    gachaDrawing = false;
+    gachaScreen?.classList.remove('is-drawing');
+    if (resultOverlay) resultOverlay.hidden = false;
+    renderGachaResultStep();
+    renderGachaScreen();
+    return true;
   }
 
   function nextRainbowResultIndex(afterIndex = -1) {
@@ -1600,8 +1622,8 @@
       markNewCharacterRevealSeen(nextIndex);
     }
     if (status === 'summary') {
-      await playPendingNewCharacterReveals();
-      showFinalGachaSummary();
+      const stoppedOnNewCharacter = await revealNextPendingNewCharacter(nextIndex);
+      if (!stoppedOnNewCharacter) showFinalGachaSummary();
       return;
     }
     gachaResultState.index = nextIndex;
@@ -1642,8 +1664,8 @@
   async function skipGachaResultSequence() {
     if (!gachaResultState || gachaResultState.results.length <= 1 || gachaResultState.summary || gachaResultTransitioning) return;
     gachaResultTransitioning = true;
-    await playPendingNewCharacterReveals();
-    showFinalGachaSummary();
+    const stoppedOnNewCharacter = await revealNextPendingNewCharacter(gachaResultState.index);
+    if (!stoppedOnNewCharacter) showFinalGachaSummary();
   }
 
   function skipGachaAnimationToLast() {
@@ -1707,8 +1729,8 @@
     if (introStatus === 'summary' || introStatus === 'result') {
       await resultAssetsReady;
       if (introStatus === 'summary') {
-        await playPendingNewCharacterReveals();
-        showFinalGachaSummary();
+        const stoppedOnNewCharacter = await revealNextPendingNewCharacter(-1);
+        if (!stoppedOnNewCharacter) showFinalGachaSummary();
       } else {
         gachaResultState.index = 0;
         gachaResultState.summary = false;
@@ -1742,8 +1764,8 @@
         markNewCharacterRevealSeen(firstRainbowIndex);
       }
       if (rainbowStatus === 'summary') {
-        await playPendingNewCharacterReveals();
-        showFinalGachaSummary();
+        const stoppedOnNewCharacter = await revealNextPendingNewCharacter(firstRainbowIndex);
+        if (!stoppedOnNewCharacter) showFinalGachaSummary();
         return;
       }
 
