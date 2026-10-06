@@ -329,7 +329,7 @@
     select.replaceChildren(...ids.map(id => {
       const option = document.createElement('option');
       option.value = id;
-      option.textContent = catalog[id].name;
+      option.textContent = id === 'default' ? catalog[id].name : '所持｜' + catalog[id].name;
       return option;
     }));
     select.value = ids.includes(selectedId) ? selectedId : 'default';
@@ -566,7 +566,11 @@
     };
     try { localStorage.setItem(playerProfileKey, JSON.stringify(playerProfile)); } catch (_) {}
     syncPlayerProfileUI();
-    if (profileStatus) profileStatus.textContent = 'プロフィールを保存しました。';
+    if (profileStatus) {
+      const bgName = homeBackgroundCatalog[playerProfile.homeBackground]?.name || homeBackgroundCatalog.default.name;
+      const frameName = profileFrameCatalog[playerProfile.frame]?.name || profileFrameCatalog.default.name;
+      profileStatus.textContent = '保存しました｜背景：' + bgName + '／フレーム：' + frameName;
+    }
   });
   const missionMenuButton = home.querySelector('[data-home-action="missions"]');
   const rankingMenuButton = home.querySelector('[data-home-action="ranking"]');
@@ -1085,6 +1089,37 @@
     });
   }
 
+  function annotateGachaOwnership(results) {
+    const seenBackgrounds = new Set(gachaInventory.backgrounds || []);
+    const seenFrames = new Set(gachaInventory.frames || []);
+    const seenVoices = new Set(gachaInventory.voices || []);
+    const seenCharacters = new Set(gachaInventory.characters || []);
+
+    return (results || []).map(result => {
+      if (!result) return result;
+      let isNewReward = false;
+      let alreadyOwned = false;
+      if (result.kind === 'background' && result.customizationId) {
+        alreadyOwned = seenBackgrounds.has(result.customizationId);
+        isNewReward = !alreadyOwned;
+        seenBackgrounds.add(result.customizationId);
+      } else if (result.kind === 'frame' && result.customizationId) {
+        alreadyOwned = seenFrames.has(result.customizationId);
+        isNewReward = !alreadyOwned;
+        seenFrames.add(result.customizationId);
+      } else if (result.kind === 'voice' && result.voiceId) {
+        alreadyOwned = seenVoices.has(result.voiceId);
+        isNewReward = !alreadyOwned;
+        seenVoices.add(result.voiceId);
+      } else if (result.kind === 'character' && result.characterId) {
+        alreadyOwned = seenCharacters.has(result.characterId);
+        isNewReward = !alreadyOwned;
+        seenCharacters.add(result.characterId);
+      }
+      return { ...result, isNewReward, alreadyOwned };
+    });
+  }
+
   function grantGachaResults(results) {
     let changed = false;
     for (const result of results || []) {
@@ -1160,6 +1195,8 @@
         : result?.kind === 'voice' ? ' is-voice-result'
         : ' is-item-result');
     card.dataset.resultKind = result?.kind || 'item';
+    card.classList.toggle('is-new-reward', result?.isNewReward === true);
+    card.classList.toggle('is-owned-reward', result?.alreadyOwned === true);
 
     if (result?.kind === 'character') {
       const character = registry?.get?.(result.characterId);
@@ -1194,7 +1231,10 @@
     name.textContent = result?.name || 'REWARD';
     const reading = document.createElement('em');
     reading.textContent = result?.reading || result?.description || '';
-    card.append(name,reading);
+    const ownership = document.createElement('mark');
+    ownership.className = 'hp-gacha-result-ownership';
+    ownership.textContent = result?.isNewReward === true ? 'NEW' : result?.alreadyOwned === true ? '獲得済み' : '獲得';
+    card.append(name,reading,ownership);
     return card;
   }
 
@@ -1566,14 +1606,10 @@
       if (character && results.length) results[Math.min(rainbowIndex, results.length - 1)] = makeCharacterResult(character);
     }
 
-    const ownedBeforePull = new Set(gachaInventory.characters || []);
-    const newCharactersInThisPull = new Set();
-    results = results.map(result => {
-      if (result?.kind !== 'character' || !result.characterId) return result;
-      const isNewCharacter = !ownedBeforePull.has(result.characterId) && !newCharactersInThisPull.has(result.characterId);
-      if (isNewCharacter) newCharactersInThisPull.add(result.characterId);
-      return { ...result, isNewCharacter };
-    });
+    results = annotateGachaOwnership(results).map(result => ({
+      ...result,
+      isNewCharacter: result?.kind === 'character' && result?.isNewReward === true,
+    }));
 
     grantGachaResults(results);
 
@@ -1664,7 +1700,7 @@
     });
     const note = home.querySelector('[data-gacha-note]');
     if (note && gachaTrialEnabled && !gachaDrawing) {
-      note.textContent = 'staging限定の試作ガチャです。起動・再読み込みごとに獲得状態をリセットします。';
+      note.textContent = 'staging限定｜背景・フレーム・ボイスは獲得後すぐ設定で使用可能。再起動・再読み込みで所持状態をリセットします。';
     }
   }
 
