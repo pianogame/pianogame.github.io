@@ -3808,3 +3808,218 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     grid-template-columns:minmax(0,1131fr);
   }
 }
+
+
+/* 2026-10-06: high-resolution Touka gacha portrait + staging trial gacha. */
+#hp-home-screen .hp-gacha-pickup-character > .hp-gacha-motion-portrait {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,#16102824,#0b12246e),
+    var(--gacha-profile-bg, none) center / cover no-repeat,
+    #17132b;
+  color:initial;
+  text-shadow:none;
+}
+#hp-home-screen .hp-gacha-motion-portrait canvas,
+#hp-home-screen .hp-gacha-motion-portrait img {
+  position:absolute;
+  left:50%;
+  top:-28%;
+  width:auto;
+  height:172%;
+  max-width:none;
+  object-fit:contain;
+  transform:translateX(-50%);
+  filter:saturate(1.05) contrast(1.02);
+}
+#hp-home-screen .hp-gacha-pickup-character > .hp-gacha-pickup-caption {
+  position:absolute;
+  z-index:4;
+  left:18px;
+  right:18px;
+  bottom:14px;
+  color:#fff5e1;
+  text-shadow:0 2px 5px #000c;
+}
+#hp-home-screen .hp-gacha-actions-large button:not(:disabled) {
+  opacity:1;
+  cursor:pointer;
+  background:
+    radial-gradient(circle at 20% 0,#fff0b04f,transparent 30%),
+    linear-gradient(180deg,#62447a,#342454 58%,#211b3d);
+  box-shadow:
+    inset 0 1px 0 #fff1bd68,
+    inset 0 0 0 4px #b88d4538,
+    0 5px 13px #02071355,
+    0 0 14px #d6b76f38;
+}
+#hp-home-screen .hp-gacha-actions-large button:not(:disabled):active {
+  transform:translateY(2px);
+  filter:brightness(.93);
+}
+#hp-home-screen .hp-gacha-actions-large button:not(:disabled) b {
+  color:#fff1c6;
+  background:#c19b4d2b;
+  border-color:#e3c67488;
+}
+#hp-home-screen .hp-gacha-test-tools {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:-4px;
+}
+#hp-home-screen .hp-gacha-test-tools[hidden] { display:none !important; }
+#hp-home-screen .hp-gacha-test-tools span {
+  color:#bcae95;
+  font:8px/1 "Times New Roman",serif;
+  letter-spacing:.13em;
+}
+#hp-home-screen .hp-gacha-test-tools button {
+  min-height:30px;
+  padding:5px 10px;
+  border:1px solid #a98d58;
+  border-radius:999px;
+  color:#f6e8c5;
+  background:#15243d;
+  font-size:10px;
+  cursor:pointer;
+}
+#hp-home-screen .hp-gacha-screen.is-drawing .hp-gacha-pickup {
+  animation:hp-gacha-draw-flash .52s ease both;
+}
+@keyframes hp-gacha-draw-flash {
+  0% { filter:brightness(1); }
+  34% { filter:brightness(2.15) saturate(.75); }
+  58% { filter:brightness(1.35) saturate(1.25); }
+  100% { filter:brightness(1); }
+}
+#hp-home-screen .hp-gacha-result-overlay[hidden] { display:none !important; }
+#hp-home-screen .hp-gacha-result-overlay {
+  position:absolute;
+  inset:0;
+  z-index:95;
+  display:grid;
+  place-items:center;
+}
+#hp-home-screen .hp-gacha-result-backdrop {
+  position:absolute;
+  inset:0;
+  border:0;
+  background:#040914d4;
+  -webkit-backdrop-filter:blur(7px);
+  backdrop-filter:blur(7px);
+}
+#hp-home-screen .hp-gacha-result-panel {
+  position:relative;
+  z-index:1;
+  width:min(920px,calc(100% - 42px));
+  max-height:calc(100% - 34px);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:12px;
+  overflow:hidden;
+  padding:16px;
+  box-sizing:border-box;
+  border:1px solid #d7b968;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 0,#ecd58b20,transparent 32%),
+    linear-gradient(145deg,#1a2945f4,#0d182df5 58%,#2d213cf2);
+  box-shadow:inset 0 0 0 3px #fff1b51a,0 20px 60px #000b;
+}
+#hp-home-screen .hp-gacha-result-panel header {
+  text-align:center;
+  color:#fff2d1;
+}
+#hp-home-screen .hp-gacha-result-panel header span {
+  display:block;
+  color:#cbaa62;
+  font:9px/1 "Times New Roman",serif;
+  letter-spacing:.18em;
+}
+#hp-home-screen .hp-gacha-result-panel header h3 {
+  margin:4px 0 0;
+  font:24px/1.1 "Hiragino Mincho ProN","Yu Mincho",serif;
+  letter-spacing:.08em;
+}
+#hp-home-screen .hp-gacha-result-list {
+  min-height:0;
+  overflow:auto;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:9px;
+  align-content:center;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-count="1"] .hp-gacha-result-list {
+  grid-template-columns:minmax(220px,360px);
+  justify-content:center;
+}
+#hp-home-screen .hp-gacha-result-card {
+  position:relative;
+  min-height:142px;
+  display:grid;
+  align-content:end;
+  gap:2px;
+  overflow:hidden;
+  padding:10px;
+  border:1px solid #c9a85e;
+  border-radius:12px;
+  color:#fff5df;
+  background:
+    linear-gradient(180deg,#0c15222b,#07111edb 76%),
+    var(--gacha-result-bg, linear-gradient(#293b5a,#111d35)) center / cover no-repeat;
+  box-shadow:inset 0 1px 0 #fff2bd3b,0 4px 11px #0006;
+  text-shadow:0 2px 4px #000c;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-count="1"] .hp-gacha-result-card {
+  min-height:260px;
+}
+#hp-home-screen .hp-gacha-result-card small {
+  position:absolute;
+  top:8px;
+  left:9px;
+  color:#e5c77d;
+  font:10px/1 "Times New Roman",serif;
+}
+#hp-home-screen .hp-gacha-result-card > span {
+  color:#f0ce72;
+  font-size:17px;
+}
+#hp-home-screen .hp-gacha-result-card strong {
+  font:clamp(13px,1.45cqw,20px)/1.15 "Hiragino Mincho ProN","Yu Mincho",serif;
+}
+#hp-home-screen .hp-gacha-result-card em {
+  color:#d5d1c8;
+  font-size:9px;
+  font-style:normal;
+}
+#hp-home-screen .hp-gacha-result-ok {
+  justify-self:center;
+  min-width:160px;
+  min-height:42px;
+  border:1px solid #d3b365;
+  border-radius:10px;
+  color:#fff4d7;
+  background:linear-gradient(#5a4470,#28203f);
+  font-weight:800;
+  cursor:pointer;
+}
+@container (max-height:480px) {
+  #hp-home-screen .hp-gacha-motion-portrait canvas,
+  #hp-home-screen .hp-gacha-motion-portrait img {
+    top:-34%;
+    height:185%;
+  }
+  #hp-home-screen .hp-gacha-result-panel { padding:10px;gap:8px; }
+  #hp-home-screen .hp-gacha-result-list { gap:6px; }
+  #hp-home-screen .hp-gacha-result-card { min-height:96px;padding:7px; }
+  #hp-home-screen .hp-gacha-result-overlay[data-count="1"] .hp-gacha-result-card { min-height:185px; }
+}
