@@ -1694,19 +1694,8 @@
     const { results, index } = gachaResultState;
     if (results.length <= 1) return;
 
-    // Ten-pull flow: after a rainbow character result, skip all ordinary pulls.
-    // "Next" shows the next rainbow character, or the final ten-pull summary.
-    if (results.length === 10) {
-      const nextRainbow = nextRainbowResultIndex(index);
-      if (nextRainbow >= 0) {
-        await transitionToGachaResultIndex(nextRainbow);
-      } else {
-        showFinalGachaSummary();
-      }
-      return;
-    }
-
-    // Single-pull / future non-ten sequences keep the ordinary sequential behavior.
+    // Every result in a ten-pull is revealed one by one.
+    // Only the explicit SKIP action may jump ahead to the remaining mandatory NEW character reveals / summary.
     if (index < results.length - 1) {
       await transitionToGachaResultIndex(index + 1);
     } else {
@@ -1798,43 +1787,8 @@
       return;
     }
 
-    // Normal ten-pull flow only pauses on rainbow character hits.
-    // Ordinary pulls are collected silently and are shown together in the final summary.
-    if (results.length === 10) {
-      await resultAssetsReady;
-      const firstRainbowIndex = nextRainbowResultIndex(-1);
-      if (firstRainbowIndex < 0) {
-        showFinalGachaSummary();
-        return;
-      }
-
-      const rainbowStatus = await playGachaDrawReveal(
-        results[firstRainbowIndex],
-        firstRainbowIndex,
-        results.length,
-        { mandatory: results[firstRainbowIndex]?.isNewCharacter === true }
-      );
-      if (rainbowStatus === 'done' && results[firstRainbowIndex]?.isNewCharacter === true) {
-        markNewCharacterRevealSeen(firstRainbowIndex);
-      }
-      if (rainbowStatus === 'summary') {
-        const stoppedOnNewCharacter = await revealNextPendingNewCharacter(firstRainbowIndex);
-        if (!stoppedOnNewCharacter) showFinalGachaSummary();
-        return;
-      }
-
-      gachaResultState.index = firstRainbowIndex;
-      gachaResultState.summary = false;
-      gachaScreen?.classList.remove('is-drawing');
-      const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
-      if (resultOverlay) resultOverlay.hidden = false;
-      renderGachaResultStep();
-      gachaDrawing = false;
-      renderGachaScreen();
-      return;
-    }
-
-    // Single pull keeps its existing reveal -> single result flow.
+    // Ten-pull and single-pull both begin from result #1.
+    // Ten-pull advances sequentially through all ten results unless the user explicitly presses SKIP.
     const firstStatus = await playGachaDrawReveal(results[0],0,results.length, {
       mandatory: results[0]?.isNewCharacter === true
     });
