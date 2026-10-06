@@ -288,11 +288,34 @@
 
   const homeBackgroundCatalog = Object.freeze({
     default: { name:'標準ホーム', image:defaultHomeBackground },
-    crystal: { name:'クリスタルステージ', image:'/assets/home/character-screen-bg-20261006.svg' },
+    celestial: { name:'天空クリスタル音楽宮殿', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/77f517b7-bf41-470c-90ea-1b7d362b3932.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNTY5N2U0YTI4ZGVjMjMxMyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM5NjY0Mn0.1eWeiVFs3vFa5uOLeWkvl9MY6UpkcnbRY76MugNt_bg' },
+    moonlight: { name:'月明かりの幻想音楽堂', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/77e486ed-23f2-4a20-b990-a54745c991f5.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYzE1MjRkYjkwMTk2MmI4ZSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ0NDUzN30.I38Oy9y5lcFw9cKDSthuv3wcIAM6Zatp7NBByoPvSdY' },
+    sunset: { name:'夕映えの宮殿ロビー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/b539d4a3-9a6e-4314-93ca-7970be4d2acb.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMTZhZTU3ZTJjNzI3Mzc5ZCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQzNjUxNH0.9L2mF862PmoX8msCbjHL3llR7P_cjXlgtgcO9AjnkV8' },
+    dreamroom: { name:'夢見る音楽室', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/e87b1617-ab51-46ae-9191-f8d093b2ed98.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMmFlZDI5MzIzYTNlMzFiNiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ1OTI1MH0.YOQcLUe_wpXyYB5GlrtkvTI7veLm27jYew4UA48YnDM' },
+    stardome: { name:'星空ドーム', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/77911b0b-e446-4200-8cae-bdaa41f4f446.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZDJkM2E4NWUxMjg4Zjg1MyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ2MDk1OH0.X3PTEj_wPUbBM5TFnlD0bFFLCgs8YeP4inBUfkecbMc' },
+    icepalace: { name:'氷晶宮殿', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c7024bdd-cd5e-4bf7-9727-13bcba135893.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNjdhMzBjOTAxMGY0OGM0OSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ0MjgzMn0.YDibCz7k2bmjmNq9xcsFyCzvRu8OyzEg2hNFVM2ZxAM' },
+    roseterrace: { name:'夕暮れの薔薇庭園', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/6f41f3a0-cc07-45e1-9666-75529b769852.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYzEwMjQ2ZGY5OGYxNWE4NiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM4MzkwM30.7_IWxQmK4WD_4QBsmaf5x81cfieG-LF-SCVm2EYiYc8' },
+    neon: { name:'未来都市ネオンラウンジ', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/1c6995de-8264-4927-b258-dc8182942e9c.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNGVkZjcyNzAyZTIzYzQyMyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM4MTg3Mn0.pkUnGpEQWAbB8ym_aWA96GCckGpg75bOxc9G6tYe7Jg' },
+    undersea: { name:'夢幻の海底宮殿', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/d79cfd0a-bcec-465e-a8dc-5f79023e9cd6.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYjdmMjNiZWE3NTU5YzA3MiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQwMTU3OH0.-fxwZZsuux6wl3nXY94bSSbcEuhaILTKVT1sfgRlkt4' },
+    rainbow: { name:'虹色天空の祝祭ステージ', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/0129472e-84b8-48c0-8454-cf09ded728dc.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZWM0MzA4YjE2NThkM2VkNSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ2MDkxM30.Ueg5L3hBcYJskNH8yhBpIl9CbY91ebheokHCfuTdXaA' },
   });
   const profileFrameCatalog = Object.freeze({
     default: { name:'標準フレーム' },
-    starlight: { name:'スターライトフレーム' },
+    frame01: { name:'星空ゴールド', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/a79dd18d-8a00-48a5-b625-cbf68b06594c.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOTBlYzc4ZjI3MmZiZGY1ZiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ1MTc2Mn0.2LAjGaF2sdI4kOhoOKdI6tBHKLMl2v5gnk9Ibx-bimo' },
+    frame02: { name:'ロイヤルブルー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ab9c47a3-67fd-4af1-87cc-dc2343faf3cd.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNjM4MTM1ZThlNDJjYmYzOSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQwOTEyOH0.c1g3Wqqt0LjuNzn974Tw7nGEk-HxYom8DN89RCmwOgg' },
+    frame03: { name:'クリスタルシルバー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/bac29284-bbd3-4d3f-83f9-fa8336f23efd.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNzBiMDk2Y2QwZTRhN2E1ZiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQzMzkzM30.l3eRLnEwpGmigd1LcUBWNO_1QIhoaQNrklJA1ScaYV8' },
+    frame04: { name:'ローズゴールド', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/950ff9af-6bd9-44f9-a85a-d4c4abb319f1.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYjVlNjZkNjAxNmY4YmQ2MCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ2MDU3Nn0.JS-Cxaq0ljkzM6s59l3xU-0u311n38bH6fh2fu3oUeg' },
+    frame05: { name:'エメラルド', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/40b3f721-2362-4579-b0e9-f1cad6cf0c1f.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMWU3NWIxZTU0Zjc3MDY2OSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM5MTMzM30.pb0gWRMqw9EYo_QV_TV0B2rU9ABwcnzZtYLla8AH5oQ' },
+    frame06: { name:'アメジスト', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/d1bcb934-936f-4824-b4d2-cdc766428f73.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNTYxY2NlMTMzMDcyNmQyOCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ1MTUzOX0._Z13MzGEk_6hCXU0fVm2paJyI605bEPvLBEiBQDZvjg' },
+    frame07: { name:'サファイア', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ae09369f-5b2e-47ff-853c-94c144dc4c85.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYzUyOTBjZTcxOTkxMjdiYiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM5NTQzMX0.7lK_6aVH9gsIj1DRzCYV6cVOMp0m6ZILsMekwRIwSzU' },
+    frame08: { name:'ルビー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/b1764cd1-888b-44e7-bfc9-3490f8a2cf07.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzlhZDZiMjQzNzM2OTVkNSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQwNDA2OH0.KrPoLitTsY1uHOsbceXozNXfE3-D5tM_CXXIpvAjndA' },
+    frame09: { name:'ムーンライト', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c765f712-2508-4026-b74a-b1643e9d2976.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMTk3ZTllZDQzN2JjMzllMyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM3OTc5Nn0.rpsrIKpmgQjDZ4KYW4BG99esX2nYbxOskyR2X_bTPhE' },
+    frame10: { name:'フェアリー', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/3fa7b9b8-4fc6-4605-bad6-8848f8e6b199.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZTU3YTE0Y2RjNWYzMmJiYiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQxNjc4MX0.lIpBiyeLJPK2I5botyYX8EtiaB1OzxfY6RyVIBp98TQ' },
+    frame11: { name:'クラシック', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/029e8b31-2d30-4bf5-a9d5-585712b569f3.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOGU4MmZjZTQzOGUzMzdiMyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQxOTQ5Mn0.FSn3zG-XcZ6Iwv2joibnnEIi0XgJmHwkO9IyQzxtrK4' },
+    frame12: { name:'オーロラ', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cb986def-7260-457e-9e15-883646c27d1c.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzhmMzVmYjI4ODM1YTVjZCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM5Mzg0Mn0.mNH8ViMhHkKe5IoT27PpMwbHpo_0goywgJCXaxJcW6Q' },
+    frame13: { name:'スノークリスタル', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/2b52b531-bf51-41eb-9a41-f3daaa07654b.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNTg0M2UzMDA5ODhkNTNjOSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ1MjAzMn0.kZ4pK6nE4KxKR9qOzwqCvQ10sragpKNuH5KrCCgGVS4' },
+    frame14: { name:'ノクターン', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cf9026a7-6406-4d33-8532-ef06ac670590.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNmE2MzFiZjVlMmM4Nzc1NSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQ0NjUxN30.BDv4OwnB8RfkEgOOvvv1pNMMju3A8KkbZJs2azAEgRg' },
+    frame15: { name:'セレブレーション', image:'https://d2jqrm6oza8nb6.cloudfront.net/datasets/4689906d-b2d1-4c34-9fce-12392db3009c.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzU4ZWJlNjk0M2JhYzNkNyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQwNDkwNX0.t8L4ci3ppQwFrF0u8GFqj2_3rNVQXvHx-cUtbtEyFIc' },
   });
 
   function loadGachaInventory() {
@@ -347,6 +370,8 @@
       img.dataset.profileFrame = frameId;
     });
     home.dataset.profileFrame = frameId;
+    const frameImage = profileFrameCatalog[frameId]?.image || '';
+    home.style.setProperty('--profile-frame-image', frameImage ? 'url("' + frameImage.replace(/"/g,'%22') + '")' : 'none');
   }
 
   function syncCustomizationInputs() {
@@ -889,6 +914,7 @@
     if (profileImage) {
       profileImage.src = safeProfileImage(profile.image);
       profileImage.dataset.profileFrame = entry?.isSelf ? (playerProfile.frame || 'default') : (profile.frame || 'default');
+      profileImage.style.setProperty('--profile-frame-image', profileFrameCatalog[profileImage.dataset.profileFrame]?.image ? 'url("' + profileFrameCatalog[profileImage.dataset.profileFrame].image.replace(/"/g,'%22') + '")' : 'none');
       attachProfileImageFallback(profileImage);
     }
     overlay.hidden = false;
@@ -924,6 +950,7 @@
         avatar.alt = '';
         avatar.src = safeProfileImage(entry?.isSelf ? playerProfile.image : entry?.profile?.image);
         avatar.dataset.profileFrame = entry?.isSelf ? (playerProfile.frame || 'default') : (entry?.profile?.frame || 'default');
+        avatar.style.setProperty('--profile-frame-image', profileFrameCatalog[avatar.dataset.profileFrame]?.image ? 'url("' + profileFrameCatalog[avatar.dataset.profileFrame].image.replace(/"/g,'%22') + '")' : 'none');
         attachProfileImageFallback(avatar);
 
         const name = document.createElement('button');
@@ -978,7 +1005,7 @@
         rankingName = button;
       }
       const selfAvatar = rankingName.querySelector('.hp-ranking-self-avatar');
-      if (selfAvatar) selfAvatar.src = safeProfileImage(playerProfile.image);
+      if (selfAvatar) { selfAvatar.src = safeProfileImage(playerProfile.image); selfAvatar.dataset.profileFrame = playerProfile.frame || 'default'; selfAvatar.style.setProperty('--profile-frame-image', profileFrameCatalog[selfAvatar.dataset.profileFrame]?.image ? 'url("' + profileFrameCatalog[selfAvatar.dataset.profileFrame].image.replace(/"/g,'%22') + '")' : 'none'); }
       const selfLabel = rankingName.querySelector('span');
       if (selfLabel) selfLabel.textContent = selfName;
       rankingName.onclick = () => openRankingProfile({
@@ -1053,24 +1080,31 @@
   }
 
   const gachaTrialItems = [
-    {
-      kind:'background',
-      id:'background:crystal',
-      customizationId:'crystal',
-      name:'ホーム背景「クリスタルステージ」',
-      reading:'HOME BACKGROUND',
-      description:'ホーム背景',
-      image:'/assets/home/character-screen-bg-20261006.svg',
-    },
-    {
-      kind:'frame',
-      id:'frame:starlight',
-      customizationId:'starlight',
-      name:'プロフィールフレーム「スターライト」',
-      reading:'PROFILE FRAME',
-      description:'プロフィールフレーム',
-      image:gachaVisuals.ticket,
-    },
+    { kind:'background', id:'background:celestial', customizationId:'celestial', name:'ホーム背景「天空クリスタル音楽宮殿」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.celestial.image },
+    { kind:'background', id:'background:moonlight', customizationId:'moonlight', name:'ホーム背景「月明かりの幻想音楽堂」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.moonlight.image },
+    { kind:'background', id:'background:sunset', customizationId:'sunset', name:'ホーム背景「夕映えの宮殿ロビー」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.sunset.image },
+    { kind:'background', id:'background:dreamroom', customizationId:'dreamroom', name:'ホーム背景「夢見る音楽室」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.dreamroom.image },
+    { kind:'background', id:'background:stardome', customizationId:'stardome', name:'ホーム背景「星空ドーム」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.stardome.image },
+    { kind:'background', id:'background:icepalace', customizationId:'icepalace', name:'ホーム背景「氷晶宮殿」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.icepalace.image },
+    { kind:'background', id:'background:roseterrace', customizationId:'roseterrace', name:'ホーム背景「夕暮れの薔薇庭園」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.roseterrace.image },
+    { kind:'background', id:'background:neon', customizationId:'neon', name:'ホーム背景「未来都市ネオンラウンジ」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.neon.image },
+    { kind:'background', id:'background:undersea', customizationId:'undersea', name:'ホーム背景「夢幻の海底宮殿」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.undersea.image },
+    { kind:'background', id:'background:rainbow', customizationId:'rainbow', name:'ホーム背景「虹色天空の祝祭ステージ」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.rainbow.image },
+    { kind:'frame', id:'frame:frame01', customizationId:'frame01', name:'プロフィールフレーム「星空ゴールド」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame01.image },
+    { kind:'frame', id:'frame:frame02', customizationId:'frame02', name:'プロフィールフレーム「ロイヤルブルー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame02.image },
+    { kind:'frame', id:'frame:frame03', customizationId:'frame03', name:'プロフィールフレーム「クリスタルシルバー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame03.image },
+    { kind:'frame', id:'frame:frame04', customizationId:'frame04', name:'プロフィールフレーム「ローズゴールド」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame04.image },
+    { kind:'frame', id:'frame:frame05', customizationId:'frame05', name:'プロフィールフレーム「エメラルド」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame05.image },
+    { kind:'frame', id:'frame:frame06', customizationId:'frame06', name:'プロフィールフレーム「アメジスト」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame06.image },
+    { kind:'frame', id:'frame:frame07', customizationId:'frame07', name:'プロフィールフレーム「サファイア」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame07.image },
+    { kind:'frame', id:'frame:frame08', customizationId:'frame08', name:'プロフィールフレーム「ルビー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame08.image },
+    { kind:'frame', id:'frame:frame09', customizationId:'frame09', name:'プロフィールフレーム「ムーンライト」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame09.image },
+    { kind:'frame', id:'frame:frame10', customizationId:'frame10', name:'プロフィールフレーム「フェアリー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame10.image },
+    { kind:'frame', id:'frame:frame11', customizationId:'frame11', name:'プロフィールフレーム「クラシック」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame11.image },
+    { kind:'frame', id:'frame:frame12', customizationId:'frame12', name:'プロフィールフレーム「オーロラ」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame12.image },
+    { kind:'frame', id:'frame:frame13', customizationId:'frame13', name:'プロフィールフレーム「スノークリスタル」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame13.image },
+    { kind:'frame', id:'frame:frame14', customizationId:'frame14', name:'プロフィールフレーム「ノクターン」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame14.image },
+    { kind:'frame', id:'frame:frame15', customizationId:'frame15', name:'プロフィールフレーム「セレブレーション」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame15.image },
   ];
 
   function gachaVoiceRewards() {
