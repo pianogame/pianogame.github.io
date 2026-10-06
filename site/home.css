@@ -4777,3 +4777,514 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     grid-template-columns:minmax(210px,340px);
   }
 }
+
+
+/* ===== 2026-10-06 Gacha cinematic v5 ===== */
+
+/* TOP Touka: non-standing card art in an inset frame. Never use MotionCharacter here. */
+#hp-home-screen .hp-gacha-touka-card-visual {
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 40%,#dcaeff2e,transparent 28%),
+    linear-gradient(180deg,#130d2720,#07101b90 74%,#06101bdd),
+    url("/characters/character01/profile-bg.jpg?v=20261005-touka-correct") center 38% / cover no-repeat;
+}
+#hp-home-screen .hp-gacha-touka-card-visual::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,#08112450,transparent 26% 72%,#0811247a),
+    radial-gradient(circle at 52% 42%,transparent 0 21%,#7b50b51c 42%,transparent 61%);
+}
+#hp-home-screen .hp-gacha-touka-card-art {
+  position:absolute;
+  z-index:2;
+  left:50%;
+  top:47%;
+  width:min(58%,310px);
+  height:min(72%,300px);
+  object-fit:cover;
+  object-position:center 42%;
+  transform:translate(-50%,-50%);
+  border:1px solid #e0c6798c;
+  border-radius:18px;
+  box-shadow:
+    0 10px 30px #03061199,
+    0 0 0 4px #fff0c310,
+    0 0 28px #b078e15c;
+  filter:saturate(1.05) contrast(1.02);
+}
+#hp-home-screen .hp-gacha-touka-card-halo {
+  position:absolute;
+  z-index:1;
+  left:50%;
+  top:46%;
+  width:55%;
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,#f7d99b28 0 18%,#af7ae51d 35%,transparent 67%);
+  filter:blur(4px);
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-pickup-caption {
+  z-index:5;
+  text-shadow:0 2px 5px #000,0 0 12px #1b0c35;
+}
+
+/* Transparent standing-art result renderer. */
+#hp-home-screen .hp-gacha-result-motion {
+  position:absolute;
+  z-index:0;
+  left:50%;
+  top:2%;
+  width:92%;
+  height:88%;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-result-motion canvas,
+#hp-home-screen .hp-gacha-result-motion img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center bottom;
+  filter:drop-shadow(0 10px 10px #0009);
+}
+#hp-home-screen .hp-gacha-result-character { display:none !important; }
+#hp-home-screen .hp-gacha-result-card.is-single-reveal .hp-gacha-result-motion {
+  width:96%;
+  height:91%;
+  top:0;
+}
+#hp-home-screen .hp-gacha-result-card.is-compact .hp-gacha-result-motion {
+  width:90%;
+  height:82%;
+  top:3%;
+}
+#hp-home-screen .hp-gacha-result-card::after {
+  z-index:1;
+  background:linear-gradient(180deg,transparent 43%,#06101c8f 73%,#06101cf2 100%);
+}
+
+/* Cinematic stage is the already-preloaded high-quality HOME scene, including its grand piano. */
+#hp-home-screen .hp-gacha-animation-overlay {
+  background:#020712;
+}
+#hp-home-screen .hp-gacha-cinematic-stage {
+  position:absolute;
+  inset:-5%;
+  background:
+    linear-gradient(180deg,#05091a1a,#07071645 55%,#05051175),
+    url("/assets/home/background/528030FF-B2C0-40B1-AA18-0B5410044B05.png?v=3") center / cover no-repeat;
+  transform:scale(1.09);
+  opacity:0;
+  will-change:transform,opacity;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-cinematic-stage {
+  animation:hp-gacha-stage-open 1.35s cubic-bezier(.16,.8,.2,1) both;
+}
+@keyframes hp-gacha-stage-open {
+  0% { opacity:0;transform:scale(1.13); }
+  42% { opacity:1; }
+  100% { opacity:1;transform:scale(1); }
+}
+#hp-home-screen .hp-gacha-cinematic-shade {
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 76% 61%,transparent 0 13%,#0507122b 30%,#0307127d 70%),
+    linear-gradient(90deg,#040817a8 0 18%,transparent 48%,#0307112b 100%);
+  opacity:.9;
+}
+#hp-home-screen .hp-gacha-curtain {
+  position:absolute;
+  z-index:10;
+  top:-4%;
+  bottom:-4%;
+  width:54%;
+  background:
+    repeating-linear-gradient(90deg,#210719 0 5%,#591438 8%,#26081b 13%,#741b48 18%,#2e0921 24%);
+  box-shadow:inset 0 0 38px #000a,0 0 20px #0009;
+  will-change:transform;
+}
+#hp-home-screen .hp-gacha-curtain::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,#f3c76d20,transparent 16% 80%,#0007);
+}
+#hp-home-screen .hp-gacha-curtain.is-left { left:0;transform-origin:left center; }
+#hp-home-screen .hp-gacha-curtain.is-right { right:0;transform-origin:right center; }
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-curtain.is-left {
+  animation:hp-gacha-curtain-left 1.05s cubic-bezier(.6,0,.15,1) .13s forwards;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-playing .hp-gacha-curtain.is-right {
+  animation:hp-gacha-curtain-right 1.05s cubic-bezier(.6,0,.15,1) .13s forwards;
+}
+@keyframes hp-gacha-curtain-left { to { transform:translateX(-96%) skewX(-4deg); } }
+@keyframes hp-gacha-curtain-right { to { transform:translateX(96%) skewX(4deg); } }
+
+#hp-home-screen .hp-gacha-spotlight {
+  position:absolute;
+  z-index:3;
+  top:-22%;
+  width:24%;
+  height:100%;
+  opacity:0;
+  background:linear-gradient(180deg,#fff9d285,transparent 78%);
+  filter:blur(15px);
+  transform-origin:50% 0;
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-spotlight.is-a { left:30%;transform:rotate(20deg); }
+#hp-home-screen .hp-gacha-spotlight.is-b { right:18%;transform:rotate(-18deg); }
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-spotlight {
+  opacity:.22;
+  animation:hp-gacha-spotlight-sweep 2.6s ease-in-out infinite alternate;
+}
+@keyframes hp-gacha-spotlight-sweep {
+  from { transform:rotate(14deg); }
+  to { transform:rotate(-13deg); }
+}
+
+#hp-home-screen .hp-gacha-aurora {
+  position:absolute;
+  z-index:4;
+  inset:-30%;
+  opacity:0;
+  background:
+    conic-gradient(from 90deg at 50% 50%,transparent,#89d8ff33,#d999ff3d,#ffe5893d,#7eead833,transparent);
+  filter:blur(34px);
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-special.is-revealing .hp-gacha-aurora {
+  animation:hp-gacha-aurora 1.8s ease-out both;
+}
+@keyframes hp-gacha-aurora {
+  0% { opacity:0;transform:rotate(0) scale(.7); }
+  45% { opacity:.9; }
+  100% { opacity:.2;transform:rotate(95deg) scale(1.12); }
+}
+
+/* Piano hotspot sits on the real grand piano already visible at the right side of the scene. */
+#hp-home-screen .hp-gacha-piano-hotspot {
+  position:absolute;
+  z-index:9;
+  right:7%;
+  top:44%;
+  width:38%;
+  height:42%;
+  border:0;
+  border-radius:44% 36% 20% 22%;
+  background:transparent;
+  opacity:0;
+  cursor:default;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-piano-hotspot {
+  opacity:1;
+  cursor:pointer;
+}
+#hp-home-screen .hp-gacha-piano-pulse {
+  position:absolute;
+  inset:10%;
+  border:2px solid #ffe4a081;
+  border-radius:46%;
+  box-shadow:0 0 24px #ffd16e70,inset 0 0 28px #ffe5a125;
+  opacity:0;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-piano-pulse {
+  animation:hp-gacha-piano-pulse 1.15s ease-out infinite;
+}
+@keyframes hp-gacha-piano-pulse {
+  0% { opacity:0;transform:scale(.82); }
+  38% { opacity:.8; }
+  100% { opacity:0;transform:scale(1.15); }
+}
+#hp-home-screen .hp-gacha-piano-spark {
+  position:absolute;
+  left:48%;
+  top:45%;
+  color:#fff2b4;
+  font-size:38px;
+  text-shadow:0 0 10px #fff,0 0 25px #ffd36f;
+  opacity:0;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-piano-spark {
+  animation:hp-gacha-piano-spark 1s ease-in-out infinite alternate;
+}
+@keyframes hp-gacha-piano-spark {
+  from { opacity:.35;transform:scale(.8) rotate(0); }
+  to { opacity:1;transform:scale(1.2) rotate(28deg); }
+}
+
+#hp-home-screen .hp-gacha-piano-touch-guide {
+  top:auto;
+  left:auto;
+  right:13%;
+  bottom:10%;
+  min-width:160px;
+  display:grid;
+  gap:3px;
+  transform:translateY(8px);
+}
+#hp-home-screen .hp-gacha-piano-touch-guide span {
+  color:#ddc177;
+  font:8px/1 "Times New Roman",serif;
+  letter-spacing:.22em;
+}
+#hp-home-screen .hp-gacha-piano-touch-guide b { font-size:12px; }
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-piano-touch-guide {
+  animation:hp-gacha-touch-guide-v5 .85s ease-in-out infinite alternate;
+}
+@keyframes hp-gacha-touch-guide-v5 {
+  from { opacity:.55;transform:translateY(6px); }
+  to { opacity:1;transform:translateY(0); }
+}
+
+/* Keyboard strip only appears after touch and races from left to right. */
+#hp-home-screen .hp-gacha-stage-keyboard {
+  position:absolute;
+  z-index:8;
+  left:8%;
+  right:8%;
+  bottom:7%;
+  height:18%;
+  opacity:0;
+  transform:translateY(40px) perspective(800px) rotateX(48deg);
+  transform-origin:center bottom;
+}
+#hp-home-screen .hp-gacha-stage-white-keys {
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:repeat(18,1fr);
+  gap:2px;
+}
+#hp-home-screen .hp-gacha-stage-white-keys i {
+  background:linear-gradient(180deg,#fffef9,#d8dde2);
+  border-radius:2px 2px 6px 6px;
+  box-shadow:inset -1px 0 #8c9299,inset 0 -7px 9px #64707c4f;
+}
+#hp-home-screen .hp-gacha-stage-black-keys {
+  position:absolute;
+  z-index:2;
+  left:3%;
+  right:3%;
+  top:0;
+  height:60%;
+  display:grid;
+  grid-template-columns:repeat(13,1fr);
+  gap:2.4%;
+}
+#hp-home-screen .hp-gacha-stage-black-keys i {
+  width:54%;
+  justify-self:end;
+  background:linear-gradient(100deg,#050608,#282b30 48%,#06070a);
+  border-radius:1px 1px 4px 4px;
+  box-shadow:0 3px 4px #0009,inset 1px 0 #ffffff16;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-keyboard {
+  animation:hp-gacha-keyboard-rise .55s cubic-bezier(.16,.8,.2,1) .12s both;
+}
+@keyframes hp-gacha-keyboard-rise {
+  to { opacity:.88;transform:translateY(0) perspective(800px) rotateX(48deg); }
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i {
+  animation:hp-gacha-key-run .55s ease both;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(1){animation-delay:0.180s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(2){animation-delay:0.235s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(3){animation-delay:0.290s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(4){animation-delay:0.345s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(5){animation-delay:0.400s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(6){animation-delay:0.455s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(7){animation-delay:0.510s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(8){animation-delay:0.565s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(9){animation-delay:0.620s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(10){animation-delay:0.675s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(11){animation-delay:0.730s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(12){animation-delay:0.785s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(13){animation-delay:0.840s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(14){animation-delay:0.895s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(15){animation-delay:0.950s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(16){animation-delay:1.005s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(17){animation-delay:1.060s}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-stage-white-keys i:nth-child(18){animation-delay:1.115s}
+@keyframes hp-gacha-key-run {
+  0%,100% { background:linear-gradient(180deg,#fffef9,#d8dde2);transform:translateY(0); }
+  42% { background:#fff1a2;box-shadow:0 0 15px #ffe17f,0 0 30px #dbad4d;transform:translateY(7px); }
+}
+
+/* Five-line musical score streaks across the stage after touch. */
+#hp-home-screen .hp-gacha-score-stream {
+  position:absolute;
+  z-index:6;
+  left:-20%;
+  right:-20%;
+  top:22%;
+  height:46%;
+  opacity:0;
+  transform:rotate(-6deg);
+}
+#hp-home-screen .hp-gacha-score-stream::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(180deg,transparent 0 22px,#ffe9a66c 22px 24px,transparent 24px 42px);
+  filter:drop-shadow(0 0 6px #ffdd7e);
+}
+#hp-home-screen .hp-gacha-score-stream i {
+  position:absolute;
+  width:10px;height:10px;border-radius:50%;
+  background:#fff0a8;
+  box-shadow:0 0 11px #ffe187,0 0 22px #ca94ff;
+}
+#hp-home-screen .hp-gacha-score-stream i:nth-child(1){left:10%;top:17%}
+#hp-home-screen .hp-gacha-score-stream i:nth-child(2){left:31%;top:42%}
+#hp-home-screen .hp-gacha-score-stream i:nth-child(3){left:51%;top:28%}
+#hp-home-screen .hp-gacha-score-stream i:nth-child(4){left:70%;top:54%}
+#hp-home-screen .hp-gacha-score-stream i:nth-child(5){left:88%;top:20%}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-score-stream {
+  animation:hp-gacha-score-fly 1.55s cubic-bezier(.15,.7,.2,1) .35s both;
+}
+@keyframes hp-gacha-score-fly {
+  0% { opacity:0;transform:translateX(-16%) rotate(-9deg) scale(.9); }
+  30% { opacity:.55; }
+  100% { opacity:.08;transform:translateX(18%) rotate(-2deg) scale(1.08); }
+}
+
+/* Three escalating chord shockwaves. */
+#hp-home-screen .hp-gacha-chord-wave {
+  position:absolute;
+  z-index:7;
+  left:74%;
+  top:62%;
+  width:16vw;
+  aspect-ratio:1;
+  border:2px solid #ffe4a6;
+  border-radius:50%;
+  opacity:0;
+  transform:translate(-50%,-50%) scale(.25);
+  box-shadow:0 0 22px #ffd677,0 0 50px #ad7aff70;
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-chord-wave.is-one { animation:hp-gacha-wave .8s ease-out .08s both; }
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-chord-wave.is-two { animation:hp-gacha-wave .9s ease-out .38s both; }
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-chord-wave.is-three { animation:hp-gacha-wave 1s ease-out .72s both; }
+@keyframes hp-gacha-wave {
+  0% { opacity:.92;transform:translate(-50%,-50%) scale(.22); }
+  100% { opacity:0;transform:translate(-50%,-50%) scale(2.7); }
+}
+
+/* Result-card pre-reveal: modern gacha anticipation before actual result screen. */
+#hp-home-screen .hp-gacha-reveal-card {
+  position:absolute;
+  z-index:12;
+  left:50%;
+  top:48%;
+  width:min(25vw,245px);
+  aspect-ratio:.72;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:8px;
+  border:2px solid #e4c46e;
+  border-radius:16px;
+  color:#fff0c5;
+  background:
+    radial-gradient(circle at 50% 30%,#7551a849,transparent 30%),
+    linear-gradient(145deg,#0b1730,#2b173f 60%,#0c1428);
+  box-shadow:inset 0 0 0 5px #fff0bb14,0 0 35px #d9b25f5c,0 16px 45px #000a;
+  opacity:0;
+  transform:translate(-50%,-50%) perspective(900px) rotateY(90deg) scale(.6);
+  backface-visibility:hidden;
+}
+#hp-home-screen .hp-gacha-reveal-card::before,
+#hp-home-screen .hp-gacha-reveal-card::after {
+  content:"";
+  position:absolute;
+  inset:7%;
+  border:1px solid #d6b96873;
+  border-radius:12px;
+}
+#hp-home-screen .hp-gacha-reveal-card::after {
+  inset:13%;
+  border-color:#9c7fc95e;
+  transform:rotate(45deg);
+}
+#hp-home-screen .hp-gacha-reveal-emblem {
+  z-index:1;
+  display:grid;
+  place-items:center;
+  width:54px;height:54px;
+  border:1px solid #e9ca78;
+  border-radius:50%;
+  color:#fff1ba;
+  font-size:30px;
+  box-shadow:0 0 17px #ffd8754f;
+}
+#hp-home-screen .hp-gacha-reveal-card small,
+#hp-home-screen .hp-gacha-reveal-card b { z-index:1; }
+#hp-home-screen .hp-gacha-reveal-card small { font:8px/1 "Times New Roman",serif;letter-spacing:.18em; }
+#hp-home-screen .hp-gacha-reveal-card b { font:15px/1.2 "Times New Roman",serif;letter-spacing:.16em; }
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-reveal-card {
+  animation:hp-gacha-card-emerge 1.25s cubic-bezier(.16,.8,.2,1) 1.05s both;
+}
+@keyframes hp-gacha-card-emerge {
+  0% { opacity:0;transform:translate(-50%,-50%) perspective(900px) rotateY(90deg) scale(.55); }
+  55% { opacity:1;transform:translate(-50%,-50%) perspective(900px) rotateY(-8deg) scale(1.08); }
+  100% { opacity:1;transform:translate(-50%,-50%) perspective(900px) rotateY(0) scale(1); }
+}
+
+/* Bigger, more energetic note/particle burst. */
+#hp-home-screen .hp-gacha-note-burst i:nth-child(9){--x:-120px;--y:180px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(10){--x:120px;--y:190px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(11){--x:-340px;--y:-20px}
+#hp-home-screen .hp-gacha-note-burst i:nth-child(12){--x:340px;--y:-10px}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-note-burst i {
+  animation:hp-gacha-note-fly 1.65s cubic-bezier(.16,.75,.2,1) .72s both;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-revealing .hp-gacha-animation-flash {
+  animation:hp-gacha-white-flash-v5 .82s ease 2.05s both;
+}
+@keyframes hp-gacha-white-flash-v5 {
+  0% { opacity:0; }
+  35% { opacity:1; }
+  68% { opacity:.78; }
+  100% { opacity:0; }
+}
+
+/* Do not let old homemade piano CSS show. */
+#hp-home-screen .hp-gacha-grand-piano,
+#hp-home-screen .hp-gacha-piano-photo-frame,
+#hp-home-screen .hp-gacha-piano-lid,
+#hp-home-screen .hp-gacha-piano-body,
+#hp-home-screen .hp-gacha-piano-rim,
+#hp-home-screen .hp-gacha-piano-leg,
+#hp-home-screen .hp-gacha-piano-pedal,
+#hp-home-screen .hp-gacha-piano-keybed,
+#hp-home-screen .hp-gacha-piano-reflection { display:none !important; }
+
+@container (max-height:480px) {
+  #hp-home-screen .hp-gacha-touka-card-art {
+    width:min(53%,260px);
+    height:min(69%,230px);
+  }
+  #hp-home-screen .hp-gacha-piano-hotspot {
+    right:8%;
+    top:42%;
+    width:38%;
+    height:43%;
+  }
+  #hp-home-screen .hp-gacha-piano-touch-guide {
+    right:11%;
+    bottom:8%;
+  }
+  #hp-home-screen .hp-gacha-stage-keyboard { bottom:3%;height:17%; }
+  #hp-home-screen .hp-gacha-reveal-card { width:min(21vw,185px); }
+}
