@@ -919,6 +919,103 @@
 
   const gachaMenuButton = home.querySelector('[data-home-action="gacha"]');
 
+  const gachaTrialEnabled =
+    location.hostname.includes('git-staging-')
+    || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
+  const gachaTrialKey = 'pds-gacha-trial-v1';
+  let gachaDrawing = false;
+
+  function loadGachaTrialState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(gachaTrialKey) || 'null');
+      return saved && typeof saved === 'object'
+        ? { history:Array.isArray(saved.history) ? saved.history.slice(0,100) : [] }
+        : { history:[] };
+    } catch (_) {
+      return { history:[] };
+    }
+  }
+  let gachaTrialState = loadGachaTrialState();
+
+  function saveGachaTrialState() {
+    try { localStorage.setItem(gachaTrialKey, JSON.stringify(gachaTrialState)); } catch (_) {}
+  }
+
+  function gachaPool() {
+    return registry?.list?.().filter(character => character && character.available !== false) || [];
+  }
+
+  function drawTrialCharacter() {
+    const pool = gachaPool();
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)] || null;
+  }
+
+  function closeGachaResult() {
+    const overlay = home.querySelector('[data-gacha-result-overlay]');
+    if (overlay) overlay.hidden = true;
+  }
+
+  function showGachaResult(results) {
+    const overlay = home.querySelector('[data-gacha-result-overlay]');
+    const list = home.querySelector('[data-gacha-result-list]');
+    if (!overlay || !list) return;
+    overlay.dataset.count = String(results.length);
+    list.replaceChildren(...results.map((character, index) => {
+      const card = document.createElement('article');
+      card.className = 'hp-gacha-result-card';
+      if (character?.profileBackground) {
+        card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
+      }
+      const number = document.createElement('small');
+      number.textContent = String(index + 1).padStart(2,'0');
+      const mark = document.createElement('span');
+      mark.textContent = '✦';
+      const name = document.createElement('strong');
+      name.textContent = character?.name || 'CHARACTER';
+      const reading = document.createElement('em');
+      reading.textContent = character?.reading || '';
+      card.append(number,mark,name,reading);
+      return card;
+    }));
+    overlay.hidden = false;
+    overlay.querySelector('.hp-gacha-result-ok')?.focus({preventScroll:true});
+  }
+
+  async function runTrialGacha(count) {
+    if (!gachaTrialEnabled || gachaDrawing) return;
+    const cost = count === 10 ? 10 : 1;
+    if (missionState.tickets < cost) {
+      const note = home.querySelector('[data-gacha-note]');
+      if (note) note.textContent = 'ガチャチケットが足りません。stagingでは「テスト用チケット +10」で試せます。';
+      return;
+    }
+    const pool = gachaPool();
+    if (!pool.length) return;
+
+    gachaDrawing = true;
+    closeGachaResult();
+    missionState.tickets = Math.max(0, missionState.tickets - cost);
+    saveMissionState();
+    renderGachaScreen();
+
+    const results = Array.from({length:cost}, () => drawTrialCharacter()).filter(Boolean);
+    gachaTrialState.history.unshift({
+      at: new Date().toISOString(),
+      count:cost,
+      characterIds:results.map(character => character.id),
+    });
+    gachaTrialState.history = gachaTrialState.history.slice(0,100);
+    saveGachaTrialState();
+
+    gachaScreen?.classList.add('is-drawing');
+    await new Promise(resolve => setTimeout(resolve, 520));
+    gachaScreen?.classList.remove('is-drawing');
+    showGachaResult(results);
+    gachaDrawing = false;
+    renderGachaScreen();
+  }
+
   function renderGachaScreen() {
     const gachaTicketCount = home.querySelector('[data-gacha-ticket-count]');
     if (gachaTicketCount) gachaTicketCount.textContent = String(missionState.tickets);
@@ -938,6 +1035,21 @@
         });
       }
     });
+
+    const tools = home.querySelector('[data-gacha-test-tools]');
+    if (tools) tools.hidden = !gachaTrialEnabled;
+    home.querySelectorAll('[data-gacha-pull]').forEach(button => {
+      const cost = Number(button.dataset.gachaPull) === 10 ? 10 : 1;
+      const state = button.querySelector('[data-gacha-button-state]');
+      button.disabled = !gachaTrialEnabled || gachaDrawing || missionState.tickets < cost;
+      if (state) state.textContent = !gachaTrialEnabled
+        ? '準備中'
+        : missionState.tickets >= cost ? '引く' : 'チケット不足';
+    });
+    const note = home.querySelector('[data-gacha-note]');
+    if (note && gachaTrialEnabled && !gachaDrawing) {
+      note.textContent = 'staging限定の試作ガチャです。チケットは消費しますが、正式なキャラクター所持状況には反映しません。';
+    }
   }
 
   function openGachaScreen() {
@@ -956,6 +1068,7 @@
 
   function closeGachaScreen() {
     if (!gachaScreen || gachaScreen.hidden) return;
+    closeGachaResult();
     gachaScreen.hidden = true;
     canvas.inert = false;
     syncCharacterVoice();
@@ -964,6 +1077,16 @@
 
   gachaMenuButton?.addEventListener('click', openGachaScreen);
   gachaScreen?.querySelector('[data-home-action="gacha-screen-close"]')?.addEventListener('click', closeGachaScreen);
+  home.querySelectorAll('[data-gacha-pull]').forEach(button => button.addEventListener('click', () => {
+    void runTrialGacha(Number(button.dataset.gachaPull) === 10 ? 10 : 1);
+  }));
+  home.querySelector('[data-gacha-test-ticket]')?.addEventListener('click', () => {
+    if (!gachaTrialEnabled) return;
+    missionState.tickets += 10;
+    saveMissionState();
+    renderGachaScreen();
+  });
+  home.querySelectorAll('[data-gacha-result-close]').forEach(button => button.addEventListener('click', closeGachaResult));
 
     window.HP_HOME_RANKING = {
     set(data = {}) {
@@ -1111,6 +1234,14 @@
   let voiceFiles = voiceSet.entries.map(entry => entry.file);
   const homeMotion = new window.HP_MOTION_CHARACTER.MotionCharacter(home.querySelector('[data-home-motion]'));
   const previewMotion = new window.HP_MOTION_CHARACTER.MotionCharacter(home.querySelector('[data-character-preview]'));
+  const gachaMotionRoot = home.querySelector('[data-gacha-motion]');
+  const gachaMotion = gachaMotionRoot ? new window.HP_MOTION_CHARACTER.MotionCharacter(gachaMotionRoot) : null;
+  const gachaTouka = registry.get('character01');
+  if (gachaMotionRoot && gachaTouka) {
+    gachaMotionRoot.style.setProperty('--gacha-profile-bg', 'url("' + gachaTouka.profileBackground + '")');
+    void gachaMotion?.setCharacter(gachaTouka);
+    gachaMotion?.setActive(false);
+  }
   void homeMotion.setCharacter(homeCharacter);
   let previewCharacterId = homeCharacter.id;
   let manualVoicePlays = 0;
