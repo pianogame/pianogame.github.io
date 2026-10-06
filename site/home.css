@@ -5811,3 +5811,104 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-result-skip {
   min-width:96px !important;
 }
+
+
+/* ===== 2026-10-06 Gacha voice/customization v10 ===== */
+
+/* Center-only TAP prompt. No bottom-right pill. */
+#hp-home-screen .hp-gacha-piano-touch-guide {
+  left:50% !important;
+  right:auto !important;
+  top:50% !important;
+  bottom:auto !important;
+  min-width:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  transform:translate(-50%,-50%) !important;
+  pointer-events:none !important;
+  text-align:center;
+  opacity:0;
+}
+#hp-home-screen .hp-gacha-piano-touch-guide span { display:none !important; }
+#hp-home-screen .hp-gacha-piano-touch-guide b {
+  display:block;
+  color:#fff7d5;
+  font:900 clamp(24px,3.2cqw,42px)/1 "Hiragino Sans","Yu Gothic",sans-serif;
+  letter-spacing:.14em;
+  text-shadow:
+    0 2px 4px #000c,
+    0 0 10px #fff8d8,
+    0 0 24px #e4be68,
+    0 0 42px #9e7cff;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-piano-touch-guide {
+  animation:hp-gacha-center-tap 0.72s ease-in-out infinite alternate !important;
+}
+@keyframes hp-gacha-center-tap {
+  from { opacity:.34;transform:translate(-50%,-50%) scale(.94) !important; }
+  to { opacity:1;transform:translate(-50%,-50%) scale(1.06) !important; }
+}
+
+/* SKIP reacts immediately and stays above curtains/effects. */
+#hp-home-screen .hp-gacha-animation-skip {
+  z-index:100 !important;
+  pointer-events:auto !important;
+  touch-action:manipulation;
+}
+
+/* Rainbow hit is unmistakable for both single and ten-pull character results. */
+#hp-home-screen .hp-gacha-animation-overlay.is-special::after {
+  content:"";
+  position:absolute;
+  z-index:11;
+  inset:-18%;
+  pointer-events:none;
+  background:
+    conic-gradient(from 0deg,
+      transparent 0 5%,
+      #ff83aa90 10%,
+      #ffe985a8 22%,
+      #8dffc3a8 36%,
+      #74d8ffa8 50%,
+      #aa8bffa8 64%,
+      #ff91d8a8 78%,
+      #ffffffcc 90%,
+      transparent 100%);
+  mix-blend-mode:screen;
+  filter:blur(30px) saturate(1.55);
+  animation:hp-gacha-rainbow-burst 2.1s cubic-bezier(.18,.72,.2,1) both;
+}
+@keyframes hp-gacha-rainbow-burst {
+  0% { opacity:0;transform:scale(.38) rotate(-60deg); }
+  32% { opacity:1;transform:scale(.82) rotate(10deg); }
+  72% { opacity:.86;transform:scale(1.05) rotate(100deg); }
+  100% { opacity:.2;transform:scale(1.25) rotate(160deg); }
+}
+
+/* Direct voice rewards get their own visual treatment. */
+#hp-home-screen .hp-gacha-result-card.is-voice-result {
+  border-color:#d9b9ff;
+  box-shadow:inset 0 1px 0 #fff8ff55,0 0 18px #b78cff55,0 5px 14px #0007;
+}
+#hp-home-screen .hp-character-voice-item.is-gacha-owned {
+  border-color:#d7b5ff;
+  box-shadow:inset 0 0 0 1px #d7b5ff33,0 0 10px #b58bff2e;
+}
+
+/* Profile frame rewarded by gacha. */
+#hp-home-screen img[data-profile-frame="starlight"] {
+  border:2px solid #f1d27c !important;
+  box-shadow:
+    0 0 0 3px #7f66b66b,
+    0 0 13px #e5c66f9c,
+    0 0 24px #a37ee966 !important;
+}
+
+/* Keep new customization fields visually consistent with the existing profile form. */
+#hp-home-screen .hp-player-profile-field select[data-profile-home-background],
+#hp-home-screen .hp-player-profile-field select[data-profile-frame] {
+  width:100%;
+}
