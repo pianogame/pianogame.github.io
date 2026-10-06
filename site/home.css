@@ -6046,3 +6046,33 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     linear-gradient(180deg,#fffdf9,#edf2f5);
   box-shadow:inset 0 1px 0 #fff,0 0 0 1px #d2bd8540;
 }
+
+/* Profile artwork overlays occupy exactly the avatar box, independent of the
+   width of the ranking row/profile panel. Never add percent padding to avatars. */
+#hp-home-screen .hp-profile-portrait {
+  position:relative;
+  display:inline-grid;
+  width:max-content;
+  height:max-content;
+  flex:none;
+  line-height:0;
+  isolation:isolate;
+}
+#hp-home-screen .hp-profile-portrait > img[data-profile-frame] { grid-area:1 / 1; }
+#hp-home-screen .hp-profile-portrait.is-framed > img[data-profile-frame] {
+  transform:scale(.64);
+  clip-path:circle(50%);
+  border-color:transparent !important;
+  outline:0 !important;
+  box-shadow:none !important;
+}
+#hp-home-screen .hp-profile-frame-layer {
+  position:absolute;
+  inset:0;
+  z-index:1;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:none;
+  pointer-events:none;
+}

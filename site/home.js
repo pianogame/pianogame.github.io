@@ -289,10 +289,35 @@
   const homeBackgroundCatalog = Object.freeze({
     default: { name:'標準ホーム', image:defaultHomeBackground },
     crystal: { name:'クリスタルステージ', image:'/assets/home/character-screen-bg-20261006.svg' },
+    celestial: { name:'天空クリスタル音楽宮殿', image:'/assets/gacha/backgrounds/celestial-v1.webp' },
+    moonlight: { name:'月明かりの幻想音楽堂', image:'/assets/gacha/backgrounds/moonlight-v1.webp' },
+    sunset: { name:'夕映えの宮殿ロビー', image:'/assets/gacha/backgrounds/sunset-v1.webp' },
+    dreamroom: { name:'夢見る音楽室', image:'/assets/gacha/backgrounds/dreamroom-v1.webp' },
+    stardome: { name:'星空ドーム', image:'/assets/gacha/backgrounds/stardome-v1.webp' },
+    icepalace: { name:'氷晶宮殿', image:'/assets/gacha/backgrounds/icepalace-v1.webp' },
+    roseterrace: { name:'夕暮れの薔薇庭園', image:'/assets/gacha/backgrounds/roseterrace-v1.webp' },
+    neon: { name:'未来都市ネオンラウンジ', image:'/assets/gacha/backgrounds/neon-v1.webp' },
+    undersea: { name:'夢幻の海底宮殿', image:'/assets/gacha/backgrounds/undersea-v1.webp' },
+    rainbow: { name:'虹色天空の祝祭ステージ', image:'/assets/gacha/backgrounds/rainbow-v1.webp' },
   });
   const profileFrameCatalog = Object.freeze({
     default: { name:'標準フレーム' },
     starlight: { name:'スターライトフレーム' },
+    frame01: { name:'星空ゴールド', image:'/assets/gacha/frames/frame01-v1.webp' },
+    frame02: { name:'ロイヤルブルー', image:'/assets/gacha/frames/frame02-v1.webp' },
+    frame03: { name:'クリスタルシルバー', image:'/assets/gacha/frames/frame03-v1.webp' },
+    frame04: { name:'ローズゴールド', image:'/assets/gacha/frames/frame04-v1.webp' },
+    frame05: { name:'エメラルド', image:'/assets/gacha/frames/frame05-v1.webp' },
+    frame06: { name:'アメジスト', image:'/assets/gacha/frames/frame06-v1.webp' },
+    frame07: { name:'サファイア', image:'/assets/gacha/frames/frame07-v1.webp' },
+    frame08: { name:'ルビー', image:'/assets/gacha/frames/frame08-v1.webp' },
+    frame09: { name:'ムーンライト', image:'/assets/gacha/frames/frame09-v1.webp' },
+    frame10: { name:'フェアリー', image:'/assets/gacha/frames/frame10-v1.webp' },
+    frame11: { name:'クラシック', image:'/assets/gacha/frames/frame11-v1.webp' },
+    frame12: { name:'オーロラ', image:'/assets/gacha/frames/frame12-v1.webp' },
+    frame13: { name:'スノークリスタル', image:'/assets/gacha/frames/frame13-v1.webp' },
+    frame14: { name:'ノクターン', image:'/assets/gacha/frames/frame14-v1.webp' },
+    frame15: { name:'セレブレーション', image:'/assets/gacha/frames/frame15-v1.webp' },
   });
 
   function loadGachaInventory() {
@@ -344,11 +369,41 @@
       if (homeBg.getAttribute('src') !== next) homeBg.setAttribute('src', next);
     }
     [profilePreviewImage, home.querySelector('[data-ranking-profile-image]')].filter(Boolean).forEach(img => {
-      img.dataset.profileFrame = frameId;
+      renderProfileFrame(img, frameId);
     });
     home.dataset.profileFrame = frameId;
     const frameImage = profileFrameCatalog[frameId]?.image || '';
     home.style.setProperty('--profile-frame-image', frameImage ? 'url("' + frameImage.replace(/"/g,'%22') + '")' : 'none');
+  }
+
+  // Keep the avatar's existing dimensions. The frame is a separate overlay;
+  // percentage padding on an img would be measured against the parent width.
+  function renderProfileFrame(img, frameId) {
+    if (!img) return;
+    const id = profileFrameCatalog[frameId] ? frameId : 'default';
+    img.dataset.profileFrame = id;
+    const source = profileFrameCatalog[id]?.image;
+    let portrait = img.parentElement;
+    if (!portrait?.classList.contains('hp-profile-portrait')) {
+      if (!source || !portrait) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'hp-profile-portrait';
+      img.replaceWith(wrapper);
+      wrapper.appendChild(img);
+      portrait = wrapper;
+    }
+    let layer = portrait.querySelector('.hp-profile-frame-layer');
+    portrait.classList.toggle('is-framed', !!source);
+    if (!source) { layer?.remove(); return; }
+    if (!layer) {
+      layer = document.createElement('img');
+      layer.className = 'hp-profile-frame-layer';
+      layer.alt = '';
+      layer.setAttribute('aria-hidden','true');
+      layer.decoding = 'async';
+      portrait.appendChild(layer);
+    }
+    if (layer.getAttribute('src') !== source) layer.src = source;
   }
 
   function syncCustomizationInputs() {
@@ -872,7 +927,7 @@
       ? {
           level: Number(home.querySelector('[data-home-level]')?.textContent) || null,
           message: playerProfile.message || profileDefaults.message,
-          instrument: ({piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ff9cb86a-3ab0-4ebd-8ad5-cef293dcb2a4.jpg',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
+          instrument: ({piano:'ピアノ',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
           image: playerProfile.image || '',
         }
       : (entry?.profile || {});
@@ -891,7 +946,7 @@
     if (profileImage) {
       profileImage.src = safeProfileImage(profile.image);
       profileImage.dataset.profileFrame = entry?.isSelf ? (playerProfile.frame || 'default') : (profile.frame || 'default');
-      profileImage.style.setProperty('--profile-frame-image', profileFrameCatalog[profileImage.dataset.profileFrame]?.image ? 'url("' + profileFrameCatalog[profileImage.dataset.profileFrame].image.replace(/"/g,'%22') + '")' : 'none');
+      renderProfileFrame(profileImage, profileImage.dataset.profileFrame);
       attachProfileImageFallback(profileImage);
     }
     overlay.hidden = false;
@@ -927,7 +982,7 @@
         avatar.alt = '';
         avatar.src = safeProfileImage(entry?.isSelf ? playerProfile.image : entry?.profile?.image);
         avatar.dataset.profileFrame = entry?.isSelf ? (playerProfile.frame || 'default') : (entry?.profile?.frame || 'default');
-        avatar.style.setProperty('--profile-frame-image', profileFrameCatalog[avatar.dataset.profileFrame]?.image ? 'url("' + profileFrameCatalog[avatar.dataset.profileFrame].image.replace(/"/g,'%22') + '")' : 'none');
+
         attachProfileImageFallback(avatar);
 
         const name = document.createElement('button');
@@ -942,6 +997,7 @@
         const numericScore = Number(entry?.score);
         score.textContent = Number.isFinite(numericScore) ? numericScore.toLocaleString('ja-JP') : '—';
         row.append(rank,avatar,name,score);
+        renderProfileFrame(avatar, avatar.dataset.profileFrame);
         requestAnimationFrame(() => {
           fitRankingName(name);
           fitRankingScore(score);
@@ -982,7 +1038,7 @@
         rankingName = button;
       }
       const selfAvatar = rankingName.querySelector('.hp-ranking-self-avatar');
-      if (selfAvatar) { selfAvatar.src = safeProfileImage(playerProfile.image); selfAvatar.dataset.profileFrame = playerProfile.frame || 'default'; selfAvatar.style.setProperty('--profile-frame-image', profileFrameCatalog[selfAvatar.dataset.profileFrame]?.image ? 'url("' + profileFrameCatalog[selfAvatar.dataset.profileFrame].image.replace(/"/g,'%22') + '")' : 'none'); }
+      if (selfAvatar) { selfAvatar.src = safeProfileImage(playerProfile.image); renderProfileFrame(selfAvatar, playerProfile.frame); }
       const selfLabel = rankingName.querySelector('span');
       if (selfLabel) selfLabel.textContent = selfName;
       rankingName.onclick = () => openRankingProfile({
@@ -1029,10 +1085,10 @@
 
   const gachaTrialTicketCap = 9999;
   const gachaVisuals = {
-    piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/33b0f6b5-c27e-4cdd-819f-c281a613c415.png',
-    normal: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/94ace327-eb0a-4b3a-bb63-fc6ea11ebe15.png',
-    special: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/cf1fecad-1030-4b72-956e-b4eaafa5b2ea.png',
-    ticket: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/36db6e9d-5a77-42b2-a089-3c7fa4b48eb7.png',
+    piano: '/assets/gacha/visuals/piano-v1.webp',
+    normal: '/assets/gacha/visuals/normal-v1.webp',
+    special: '/assets/gacha/visuals/special-v1.webp',
+    ticket: '/assets/gacha/visuals/ticket-v1.webp',
   };
   let gachaDrawing = false;
 
@@ -1057,31 +1113,14 @@
   }
 
   const gachaTrialItems = [
-    { kind:'background', id:'background:celestial', customizationId:'celestial', name:'ホーム背景「天空クリスタル音楽宮殿」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.celestial.image },
-    { kind:'background', id:'background:moonlight', customizationId:'moonlight', name:'ホーム背景「月明かりの幻想音楽堂」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.moonlight.image },
-    { kind:'background', id:'background:sunset', customizationId:'sunset', name:'ホーム背景「夕映えの宮殿ロビー」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.sunset.image },
-    { kind:'background', id:'background:dreamroom', customizationId:'dreamroom', name:'ホーム背景「夢見る音楽室」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.dreamroom.image },
-    { kind:'background', id:'background:stardome', customizationId:'stardome', name:'ホーム背景「星空ドーム」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.stardome.image },
-    { kind:'background', id:'background:icepalace', customizationId:'icepalace', name:'ホーム背景「氷晶宮殿」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.icepalace.image },
-    { kind:'background', id:'background:roseterrace', customizationId:'roseterrace', name:'ホーム背景「夕暮れの薔薇庭園」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.roseterrace.image },
-    { kind:'background', id:'background:neon', customizationId:'neon', name:'ホーム背景「未来都市ネオンラウンジ」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.neon.image },
-    { kind:'background', id:'background:undersea', customizationId:'undersea', name:'ホーム背景「夢幻の海底宮殿」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.undersea.image },
-    { kind:'background', id:'background:rainbow', customizationId:'rainbow', name:'ホーム背景「虹色天空の祝祭ステージ」', reading:'HOME BACKGROUND', description:'ホーム背景', image:homeBackgroundCatalog.rainbow.image },
-    { kind:'frame', id:'frame:frame01', customizationId:'frame01', name:'プロフィールフレーム「星空ゴールド」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame01.image },
-    { kind:'frame', id:'frame:frame02', customizationId:'frame02', name:'プロフィールフレーム「ロイヤルブルー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame02.image },
-    { kind:'frame', id:'frame:frame03', customizationId:'frame03', name:'プロフィールフレーム「クリスタルシルバー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame03.image },
-    { kind:'frame', id:'frame:frame04', customizationId:'frame04', name:'プロフィールフレーム「ローズゴールド」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame04.image },
-    { kind:'frame', id:'frame:frame05', customizationId:'frame05', name:'プロフィールフレーム「エメラルド」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame05.image },
-    { kind:'frame', id:'frame:frame06', customizationId:'frame06', name:'プロフィールフレーム「アメジスト」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame06.image },
-    { kind:'frame', id:'frame:frame07', customizationId:'frame07', name:'プロフィールフレーム「サファイア」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame07.image },
-    { kind:'frame', id:'frame:frame08', customizationId:'frame08', name:'プロフィールフレーム「ルビー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame08.image },
-    { kind:'frame', id:'frame:frame09', customizationId:'frame09', name:'プロフィールフレーム「ムーンライト」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame09.image },
-    { kind:'frame', id:'frame:frame10', customizationId:'frame10', name:'プロフィールフレーム「フェアリー」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame10.image },
-    { kind:'frame', id:'frame:frame11', customizationId:'frame11', name:'プロフィールフレーム「クラシック」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame11.image },
-    { kind:'frame', id:'frame:frame12', customizationId:'frame12', name:'プロフィールフレーム「オーロラ」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame12.image },
-    { kind:'frame', id:'frame:frame13', customizationId:'frame13', name:'プロフィールフレーム「スノークリスタル」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame13.image },
-    { kind:'frame', id:'frame:frame14', customizationId:'frame14', name:'プロフィールフレーム「ノクターン」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame14.image },
-    { kind:'frame', id:'frame:frame15', customizationId:'frame15', name:'プロフィールフレーム「セレブレーション」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:profileFrameCatalog.frame15.image },
+    ...Object.entries(homeBackgroundCatalog).filter(([id, item]) => !['default','crystal'].includes(id) && item.image).map(([id, item]) => ({
+      kind:'background', id:'background:' + id, customizationId:id,
+      name:'ホーム背景「' + item.name + '」', reading:'HOME BACKGROUND', description:'ホーム背景', image:item.image,
+    })),
+    ...Object.entries(profileFrameCatalog).filter(([id, item]) => id !== 'default' && item.image).map(([id, item]) => ({
+      kind:'frame', id:'frame:' + id, customizationId:id,
+      name:'プロフィールフレーム「' + item.name + '」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:item.image,
+    })),
   ];
 
   function gachaVoiceRewards() {
