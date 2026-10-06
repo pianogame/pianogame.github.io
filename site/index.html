@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-gacha-trial-motion">
+  <link rel="stylesheet" href="/home.css?v=20261006-gacha-piano-stage2">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261006-gacha-trial-motion"></script>
+  <script defer src="/home.js?v=20261006-gacha-piano-stage2"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -415,12 +415,37 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <button type="button" data-gacha-pull="1" disabled><span>1回ガチャ</span><small>ガチャチケット × 1</small><b data-gacha-button-state>準備中</b></button>
         <button type="button" data-gacha-pull="10" disabled><span>10回ガチャ</span><small>ガチャチケット × 10</small><b data-gacha-button-state>準備中</b></button>
       </div>
-      <div class="hp-gacha-test-tools" data-gacha-test-tools hidden>
-        <span>STAGING TEST</span>
-        <button type="button" data-gacha-test-ticket>テスト用チケット +10</button>
-      </div>
       <p class="hp-gacha-note" data-gacha-note>staging限定の試作ガチャです。獲得結果は正式なキャラクター所持状況には反映しません。</p>
     </section>
+  </div>
+  <div class="hp-gacha-animation-overlay" data-gacha-animation-overlay hidden aria-hidden="true">
+    <div class="hp-gacha-animation-sky"></div>
+    <div class="hp-gacha-animation-staff" aria-hidden="true"></div>
+    <div class="hp-gacha-animation-title"><small>PIANO DREAM STAGE</small><strong data-gacha-animation-label>運命の一音を奏でる——</strong></div>
+    <div class="hp-gacha-grand-piano" aria-hidden="true">
+      <svg viewBox="0 0 520 270" focusable="false">
+        <defs>
+          <linearGradient id="gachaPianoGold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff1b6"/>
+            <stop offset=".42" stop-color="#c9983e"/>
+            <stop offset="1" stop-color="#6f4616"/>
+          </linearGradient>
+        </defs>
+        <path d="M105 66C153 30 270 24 374 58c61 20 94 60 80 94-12 30-57 39-123 31l-42-5-7 46h-17l-3-51-115-17-18 68h-17l8-74c-47-13-75-36-72-60 2-18 16-31 37-24Z" fill="#170d20" stroke="url(#gachaPianoGold)" stroke-width="5"/>
+        <path d="M119 73c75-28 196-23 278 8-79 4-153 25-206 56-35-7-63-19-76-33-11-12-10-22 4-31Z" fill="#3f2450" stroke="#e6bf68" stroke-width="3"/>
+        <path d="M331 177h118l-5 30H326Z" fill="#efe5cb" stroke="#d8b05b" stroke-width="3"/>
+        <path d="M340 180v25m16-25v25m16-25v25m16-25v25m16-25v25m16-25v25" stroke="#92754f" stroke-width="2"/>
+        <path d="M348 180v14m32-14v14m32-14v14" stroke="#17151b" stroke-width="9"/>
+      </svg>
+      <div class="hp-gacha-animation-keys">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+    </div>
+    <div class="hp-gacha-note-burst" aria-hidden="true">
+      <i>♪</i><i>✦</i><i>♫</i><i>✧</i><i>♪</i><i>✦</i><i>♫</i><i>✧</i>
+    </div>
+    <div class="hp-gacha-animation-flash" aria-hidden="true"></div>
+    <button type="button" class="hp-gacha-animation-skip" data-gacha-animation-skip>SKIP</button>
   </div>
   <div class="hp-gacha-result-overlay" data-gacha-result-overlay hidden>
     <button type="button" class="hp-gacha-result-backdrop" data-gacha-result-close aria-label="ガチャ結果を閉じる"></button>
