@@ -955,10 +955,30 @@
   function closeGachaResult() {
     const overlay = home.querySelector('[data-gacha-result-overlay]');
     if (overlay) overlay.hidden = true;
+    destroyGachaResultMotions();
     gachaResultState = null;
   }
 
   let gachaResultState = null;
+  let gachaResultMotions = [];
+
+  function destroyGachaResultMotions() {
+    for (const motion of gachaResultMotions) {
+      try { motion.destroy(); } catch (_) {}
+    }
+    gachaResultMotions = [];
+  }
+
+  function mountGachaResultMotions() {
+    destroyGachaResultMotions();
+    home.querySelectorAll('[data-gacha-result-motion]').forEach(root => {
+      const character = registry?.get?.(root.dataset.gachaResultMotion);
+      if (!character) return;
+      const motion = new window.HP_MOTION_CHARACTER.MotionCharacter(root);
+      gachaResultMotions.push(motion);
+      void motion.setCharacter(character).then(() => motion.setActive(false));
+    });
+  }
 
   function buildGachaResultCard(character, index, compact = false) {
     const card = document.createElement('article');
@@ -968,11 +988,10 @@
       card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
     }
 
-    const art = document.createElement('img');
-    art.className = 'hp-gacha-result-character';
-    art.alt = '';
-    art.src = character?.previewImage || defaultProfileImage;
-    art.addEventListener('error', () => { art.src = defaultProfileImage; }, { once:true });
+    const art = document.createElement('div');
+    art.className = 'hp-gacha-result-motion';
+    art.dataset.gachaResultMotion = character?.id || '';
+    art.setAttribute('aria-hidden','true');
 
     const number = document.createElement('small');
     number.textContent = String(index + 1).padStart(2,'0');
@@ -1008,6 +1027,7 @@
       if (next) next.hidden = true;
       if (skip) skip.hidden = true;
       if (ok) ok.hidden = false;
+      requestAnimationFrame(mountGachaResultMotions);
       ok?.focus({preventScroll:true});
       return;
     }
@@ -1019,8 +1039,9 @@
       next.hidden = results.length <= 1;
       next.textContent = index >= results.length - 1 ? '結果一覧へ' : '次へ';
     }
-    if (skip) skip.hidden = results.length <= 1;
+    if (skip) skip.hidden = results.length <= 1 || index >= results.length - 1;
     if (ok) ok.hidden = results.length > 1;
+    requestAnimationFrame(mountGachaResultMotions);
     (results.length > 1 ? next : ok)?.focus({preventScroll:true});
   }
 
@@ -1036,8 +1057,9 @@
   }
 
   function skipGachaResultSequence() {
-    if (!gachaResultState || gachaResultState.results.length <= 1) return;
-    gachaResultState.summary = true;
+    if (!gachaResultState || gachaResultState.results.length <= 1 || gachaResultState.summary) return;
+    gachaResultState.index = gachaResultState.results.length - 1;
+    gachaResultState.summary = false;
     renderGachaResultStep();
   }
 
@@ -1102,7 +1124,36 @@
     }
   }
 
-  function playGachaFlourish() {
+  function playGachaPianoChord() {
+    try {
+      const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+      if (!bridge) return;
+      void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      const ctx = bridge.context;
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(.0001, ctx.currentTime);
+      master.gain.exponentialRampToValueAtTime(.18, ctx.currentTime + .025);
+      master.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + 1.45);
+      window.HP_SOUND_SETTINGS?.bind?.('effects', master);
+      master.connect(bridge.output);
+      const notes = [261.63,329.63,392,523.25,659.25];
+      notes.forEach((frequency,index) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = index % 2 ? 'triangle' : 'sine';
+        osc.frequency.value = frequency;
+        gain.gain.setValueAtTime(.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(.23/(index+1), ctx.currentTime + .025 + index*.07);
+        gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .75 + index*.11);
+        osc.connect(gain); gain.connect(master);
+        osc.start(ctx.currentTime + index*.07);
+        osc.stop(ctx.currentTime + 1.1 + index*.12);
+      });
+      setTimeout(() => { try { master.disconnect(); } catch (_) {} }, 1700);
+    } catch (_) {}
+  }
+
+    function playGachaFlourish() {
     try {
       if (!gachaFlourishBuffer || !gachaFlourishGraph) return;
       window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
@@ -1141,14 +1192,16 @@
     gachaAnimationRevealStarted = true;
     overlay.classList.remove('is-awaiting-touch');
     overlay.classList.add('is-revealing');
+    playGachaPianoChord();
     playGachaFlourish();
-    gachaAnimationTimer = setTimeout(finishGachaAnimation, overlay.classList.contains('is-ten') ? 2050 : 1750);
+    const label = overlay.querySelector('[data-gacha-animation-label]');
+    if (label) label.textContent = overlay.classList.contains('is-special') ? '響きが、虹色に変わる——' : 'その一音が、運命を開く——';
+    gachaAnimationTimer = setTimeout(finishGachaAnimation, overlay.classList.contains('is-ten') ? 3150 : 2850);
   }
 
   async function playGachaAnimation(count) {
     const overlay = home.querySelector('[data-gacha-animation-overlay]');
     if (!overlay) return Promise.resolve();
-    await Promise.race([preloadGachaPianoPhoto(), new Promise(resolve => setTimeout(resolve, 500))]);
     clearTimeout(gachaAnimationTimer);
     clearTimeout(gachaAnimationReadyTimer);
     gachaAnimationAwaitingTouch = false;
@@ -1160,18 +1213,18 @@
     overlay.classList.toggle('is-special', isSpecial);
     overlay.classList.remove('is-awaiting-touch','is-revealing');
     const label = overlay.querySelector('[data-gacha-animation-label]');
-    if (label) label.textContent = '運命の一音を奏でる——';
+    if (label) label.textContent = '夢のステージが、幕を開ける——';
     requestAnimationFrame(() => overlay.classList.add('is-playing'));
     return new Promise(resolve => {
       gachaAnimationResolve = resolve;
-      // Piano finishes entering first, then progression is completely user-controlled.
+      // The concert scene opens first. After that nothing advances until the player taps the piano.
       gachaAnimationReadyTimer = setTimeout(() => {
         if (!gachaAnimationResolve) return;
         gachaAnimationAwaitingTouch = true;
         overlay.classList.add('is-awaiting-touch');
         const activeLabel = overlay.querySelector('[data-gacha-animation-label]');
-        if (activeLabel) activeLabel.textContent = isSpecial ? '星のピアノに触れてください' : 'ピアノに触れてください';
-      }, 1050);
+        if (activeLabel) activeLabel.textContent = isSpecial ? '光るピアノに触れてください' : 'ピアノに触れてください';
+      }, 1450);
     });
   }
 
@@ -1255,9 +1308,6 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareGachaFlourish();
-    void preloadGachaPianoPhoto();
-    const pianoPhoto = home.querySelector('[data-gacha-piano-photo]');
-    if (pianoPhoto && pianoPhoto.src !== gachaPianoPhotoUrl) pianoPhoto.src = gachaPianoPhotoUrl;
     canvas.inert = true;
     gachaScreen.hidden = false;
     stopCharacterVoice();
