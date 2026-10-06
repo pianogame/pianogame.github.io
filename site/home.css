@@ -3775,3 +3775,36 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   }
   #hp-home-screen .hp-home-campaign-mini-copy small { display:none; }
 }
+
+
+/* 2026-10-06: remove the left HOME promo completely; keep all four menu buttons unchanged. */
+#hp-home-screen .hp-home-footer {
+  grid-template-columns: minmax(0, 1124fr);
+  justify-content: end;
+}
+#hp-home-screen .hp-home-campaign {
+  display: none !important;
+}
+#hp-home-screen .hp-home-bottom {
+  width: 100%;
+  justify-self: end;
+}
+
+/* Gacha pickup uses finished character list artwork, never Motion/standing references. */
+#hp-home-screen .hp-gacha-pickup-character img {
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka img {
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+#hp-home-screen .hp-gacha-pickup-character.is-kanato img {
+  object-fit: cover;
+  object-position: 50% 36%;
+}
+@container (max-width:760px) {
+  #hp-home-screen .hp-home-footer {
+    grid-template-columns:minmax(0,1131fr);
+  }
+}
