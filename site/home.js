@@ -768,7 +768,7 @@
       ? {
           level: Number(home.querySelector('[data-home-level]')?.textContent) || null,
           message: playerProfile.message || profileDefaults.message,
-          instrument: ({piano:'ピアノ',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
+          instrument: ({piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/ff9cb86a-3ab0-4ebd-8ad5-cef293dcb2a4.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOGY5ZmM2ZWMwMzYzOWE0NCIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTQyMTAzNn0.31oyt1KOKE733hbjHOXK5g7FfcuAg0CS-ubrhwwPlEw',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
           image: playerProfile.image || '',
         }
       : (entry?.profile || {});
@@ -1396,6 +1396,13 @@
   }
 
   function renderGachaScreen() {
+    const toukaTop = home.querySelector('.hp-gacha-touka-card-art');
+    if (toukaTop && toukaTop.dataset.gachaFallbackBound !== 'true') {
+      toukaTop.dataset.gachaFallbackBound = 'true';
+      toukaTop.addEventListener('error', () => {
+        toukaTop.src = registry?.get?.('character01')?.profileBackground || defaultProfileImage;
+      });
+    }
     if (gachaTrialEnabled && missionState.tickets !== gachaTrialTicketCap) {
       missionState.tickets = gachaTrialTicketCap;
       saveMissionState();
