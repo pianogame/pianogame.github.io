@@ -272,6 +272,20 @@
   };
   const defaultProfileImage = '/assets/home/profile-default.svg';
   const gachaInventoryKey = 'pds-gacha-inventory-v1';
+  const gachaTrialKey = 'pds-gacha-trial-v1';
+  const gachaTrialEnabled =
+    location.hostname.includes('git-staging-')
+    || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
+
+  // Staging QA is session-only: every fresh app/page launch starts unowned again.
+  // Player name/profile image/etc. are deliberately preserved.
+  if (gachaTrialEnabled) {
+    try {
+      localStorage.removeItem(gachaInventoryKey);
+      localStorage.removeItem(gachaTrialKey);
+    } catch (_) {}
+  }
+
   const homeBackgroundCatalog = Object.freeze({
     default: { name:'標準ホーム', image:defaultHomeBackground },
     crystal: { name:'クリスタルステージ', image:'/assets/home/character-screen-bg-20261006.svg' },
@@ -1005,10 +1019,6 @@
 
   const gachaMenuButton = home.querySelector('[data-home-action="gacha"]');
 
-  const gachaTrialEnabled =
-    location.hostname.includes('git-staging-')
-    || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
-  const gachaTrialKey = 'pds-gacha-trial-v1';
   const gachaTrialTicketCap = 9999;
   const gachaVisuals = {
     piano: 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/33b0f6b5-c27e-4cdd-819f-c281a613c415.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiY2IwYjc3ZTA4YTdkMTM3MSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTM2NDgzMn0.30z96FyZvEWmnVd-9xJtyt3xWvh-V45ZKxdl3djKsBw',
@@ -1654,7 +1664,7 @@
     });
     const note = home.querySelector('[data-gacha-note]');
     if (note && gachaTrialEnabled && !gachaDrawing) {
-      note.textContent = 'staging限定の試作ガチャです。キャラクター・ボイス・ホーム背景・プロフィールフレームが排出されます。';
+      note.textContent = 'staging限定の試作ガチャです。起動・再読み込みごとに獲得状態をリセットします。';
     }
   }
 
