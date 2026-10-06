@@ -1052,15 +1052,11 @@
       card.appendChild(art);
     }
 
-    const number = document.createElement('small');
-    number.textContent = String(index + 1).padStart(2,'0');
-    const mark = document.createElement('span');
-    mark.textContent = result?.kind === 'character' ? '✦ CHARACTER' : '◇ ITEM';
     const name = document.createElement('strong');
     name.textContent = result?.name || 'REWARD';
     const reading = document.createElement('em');
     reading.textContent = result?.reading || result?.description || '';
-    card.append(number,mark,name,reading);
+    card.append(name,reading);
     return card;
   }
 
@@ -1298,9 +1294,13 @@
     gachaDrawing = true;
     renderGachaScreen();
     const status = await playGachaDrawReveal(results[nextIndex], nextIndex, results.length);
-    const target = status === 'skip' ? results.length - 1 : nextIndex;
-    gachaResultState.index = target;
-    gachaResultState.summary = false;
+    if (status === 'summary') {
+      gachaResultState.index = results.length - 1;
+      gachaResultState.summary = true;
+    } else {
+      gachaResultState.index = nextIndex;
+      gachaResultState.summary = false;
+    }
     if (overlay) overlay.hidden = false;
     renderGachaResultStep();
     gachaResultTransitioning = false;
@@ -1322,16 +1322,12 @@
   function skipGachaResultSequence() {
     if (!gachaResultState || gachaResultState.results.length <= 1 || gachaResultState.summary || gachaResultTransitioning) return;
     gachaResultState.index = gachaResultState.results.length - 1;
-    gachaResultState.summary = false;
+    gachaResultState.summary = true;
     renderGachaResultStep();
   }
 
   function skipGachaAnimationToLast() {
-    if (!gachaResultState?.results?.length) {
-      finishGachaAnimation('skip');
-      return;
-    }
-    finishGachaAnimation('skip');
+    finishGachaAnimation(gachaResultState?.results?.length > 1 ? 'summary' : 'done');
   }
 
   async function runTrialGacha(count) {
@@ -1372,9 +1368,10 @@
 
     gachaScreen?.classList.add('is-drawing');
     const introStatus = await playGachaIntro(cost);
-    if (introStatus === 'skip') {
+    if (introStatus === 'summary') {
       await resultAssetsReady;
       gachaResultState.index = results.length - 1;
+      gachaResultState.summary = true;
       gachaScreen?.classList.remove('is-drawing');
       const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
       if (resultOverlay) resultOverlay.hidden = false;
@@ -1386,7 +1383,8 @@
 
     const firstStatus = await playGachaDrawReveal(results[0],0,results.length);
     await resultAssetsReady;
-    gachaResultState.index = firstStatus === 'skip' ? results.length - 1 : 0;
+    gachaResultState.index = firstStatus === 'summary' ? results.length - 1 : 0;
+    gachaResultState.summary = firstStatus === 'summary';
     gachaScreen?.classList.remove('is-drawing');
     const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
     if (resultOverlay) resultOverlay.hidden = false;
