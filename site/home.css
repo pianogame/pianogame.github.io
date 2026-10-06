@@ -5320,3 +5320,196 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     linear-gradient(180deg,transparent 50%,#06101bc4 82%,#06101bed),
     linear-gradient(90deg,#07101e5e,transparent 22% 76%,#07101e44);
 }
+
+
+/* ===== 2026-10-06 Gacha sequence v7 ===== */
+
+/* Pickup cards: both characters must show the entire face. */
+#hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-touka-card-visual {
+  inset:0;
+  background:#0b1124;
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-touka-card-art {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  transform:none;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  object-fit:cover;
+  object-position:50% 24%;
+  filter:saturate(1.04) contrast(1.02);
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-touka-card-halo { display:none; }
+#hp-home-screen .hp-gacha-pickup-character.is-kanato > img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 8%;
+  transform:scale(.96);
+  background:#11182b;
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka::after,
+#hp-home-screen .hp-gacha-pickup-character.is-kanato::after {
+  z-index:3;
+  background:
+    linear-gradient(180deg,transparent 54%,#07101dc2 84%,#07101df2),
+    linear-gradient(90deg,#07101d2b,transparent 28% 72%,#07101d35);
+}
+
+/* Intro stage uses the user-selected jewel-piano scene. Draw reveals swap via --gacha-stage-bg. */
+#hp-home-screen .hp-gacha-cinematic-stage {
+  inset:0;
+  background:
+    linear-gradient(180deg,#06102225,#0810223d 62%,#0508167a),
+    var(--gacha-stage-bg, none) center / cover no-repeat;
+  transform:scale(1.045);
+  will-change:transform,opacity,filter;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-intro .hp-gacha-cinematic-stage {
+  filter:saturate(1.08) contrast(1.03);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-draw-reveal .hp-gacha-curtain {
+  display:none;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-draw-reveal .hp-gacha-piano-hotspot,
+#hp-home-screen .hp-gacha-animation-overlay.is-draw-reveal .hp-gacha-piano-touch-guide {
+  display:none;
+}
+
+/* Every character hit gets a modern rainbow/aurora escalation. */
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit::before {
+  content:"";
+  position:absolute;
+  z-index:5;
+  inset:-28%;
+  background:
+    conic-gradient(from 0deg at 50% 50%,
+      #ff7da555,#ffdf7955,#9affc955,#72d8ff66,#a783ff66,#ff83db55,#ff7da555);
+  mix-blend-mode:screen;
+  filter:blur(36px) saturate(1.4);
+  animation:hp-gacha-rainbow-spin 1.8s ease-out both;
+  pointer-events:none;
+}
+@keyframes hp-gacha-rainbow-spin {
+  0% { opacity:0;transform:scale(.5) rotate(-55deg); }
+  36% { opacity:.95; }
+  100% { opacity:.18;transform:scale(1.18) rotate(125deg); }
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit .hp-gacha-reveal-card {
+  border-color:#fff;
+  background:
+    radial-gradient(circle at 50% 28%,#ffffffc7 0 4%,transparent 22%),
+    linear-gradient(135deg,#ff94ba,#f9d66d 20%,#7cf2ce 42%,#7fc9ff 61%,#ad8aff 80%,#ff9ad7);
+  color:#fff;
+  box-shadow:
+    inset 0 0 0 5px #ffffff54,
+    0 0 24px #fff,
+    0 0 58px #c997ff,
+    0 18px 52px #000a;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit .hp-gacha-reveal-card b::after {
+  content:" GET!";
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit .hp-gacha-animation-flash {
+  background:
+    radial-gradient(circle,#fff 0 18%,#fff8d9 31%,#cdfaff 48%,#efcfff 66%,#ffffff00 86%);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-item-hit .hp-gacha-reveal-card {
+  border-color:#d7bc72;
+  background:
+    radial-gradient(circle at 50% 30%,#ffffff5e,transparent 27%),
+    linear-gradient(145deg,#122e55,#162143 55%,#2e2754);
+}
+
+/* Result cards: transparent MotionCharacter for characters, visual item cards for provisional rewards. */
+#hp-home-screen .hp-gacha-result-item-art {
+  position:absolute;
+  z-index:0;
+  left:50%;
+  top:46%;
+  width:88%;
+  height:72%;
+  transform:translate(-50%,-50%);
+  object-fit:contain;
+  border-radius:12px;
+  filter:drop-shadow(0 8px 12px #0008);
+}
+#hp-home-screen .hp-gacha-result-card.is-item-result::after {
+  background:linear-gradient(180deg,transparent 40%,#06101c94 72%,#06101cf4);
+}
+#hp-home-screen .hp-gacha-result-card.is-character-result {
+  border-color:#ecd47f;
+  box-shadow:
+    inset 0 1px 0 #fff6cf55,
+    0 0 12px #e0c06f52,
+    0 5px 14px #0007;
+}
+#hp-home-screen .hp-gacha-result-card > span {
+  width:auto;
+  font-size:10px;
+  letter-spacing:.08em;
+}
+
+/* SKIP: fixed conventional top-right position, never overlaps the piano touch guide. */
+#hp-home-screen .hp-gacha-animation-skip {
+  top:max(14px,var(--safe-t));
+  right:max(18px,var(--safe-r));
+  bottom:auto;
+  min-width:82px;
+  min-height:38px;
+  border-color:#d3bb7d99;
+  background:#081329d9;
+  box-shadow:0 3px 12px #0008;
+}
+#hp-home-screen .hp-gacha-piano-touch-guide {
+  right:12%;
+  bottom:9%;
+}
+
+/* Per-draw animation is intentionally punchier than the intro. */
+#hp-home-screen .hp-gacha-animation-overlay.is-draw-reveal .hp-gacha-cinematic-stage {
+  animation:hp-gacha-draw-bg 1.7s cubic-bezier(.16,.8,.2,1) both;
+}
+@keyframes hp-gacha-draw-bg {
+  0% { opacity:0;transform:scale(1.16);filter:blur(8px) brightness(.65); }
+  24% { opacity:1;filter:blur(0) brightness(1.08); }
+  72% { transform:scale(1.01);filter:brightness(1.22); }
+  100% { opacity:1;transform:scale(1);filter:brightness(1.08); }
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit .hp-gacha-stage-white-keys i {
+  box-shadow:0 0 16px #fff,0 0 32px #bfa1ff;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit .hp-gacha-score-stream {
+  filter:drop-shadow(0 0 9px #fff) drop-shadow(0 0 18px #a98cff);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-character-hit .hp-gacha-note-burst i {
+  color:#fff;
+  text-shadow:0 0 10px #fff,0 0 24px #c892ff,0 0 34px #71dcff;
+}
+
+/* Result-screen SKIP remains near the actions, and jumps to draw 10 rather than the summary. */
+#hp-home-screen .hp-gacha-result-skip {
+  min-width:96px !important;
+}
+
+/* Keep 10-result summary compact enough for landscape while supporting mixed item/character results. */
+#hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-item-art {
+  width:92%;
+  height:70%;
+  top:44%;
+}
+@container (max-height:480px) {
+  #hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-touka-card-art {
+    object-position:50% 22%;
+  }
+  #hp-home-screen .hp-gacha-pickup-character.is-kanato > img {
+    object-position:50% 5%;
+  }
+  #hp-home-screen .hp-gacha-animation-skip {
+    top:max(8px,var(--safe-t));
+    right:max(12px,var(--safe-r));
+  }
+}
