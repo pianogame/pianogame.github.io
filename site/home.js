@@ -922,6 +922,22 @@
   function renderGachaScreen() {
     const gachaTicketCount = home.querySelector('[data-gacha-ticket-count]');
     if (gachaTicketCount) gachaTicketCount.textContent = String(missionState.tickets);
+
+    home.querySelectorAll('[data-gacha-character-image]').forEach(image => {
+      const character = registry?.get?.(image.dataset.gachaCharacterImage);
+      const source = character?.listImage || character?.profileBackground || defaultProfileImage;
+      if (image.dataset.gachaResolvedSource !== source) {
+        image.dataset.gachaResolvedSource = source;
+        image.src = source;
+      }
+      if (image.dataset.gachaFallbackBound !== 'true') {
+        image.dataset.gachaFallbackBound = 'true';
+        image.addEventListener('error', () => {
+          const fallback = character?.profileBackground || defaultProfileImage;
+          if (image.src !== fallback) image.src = fallback;
+        });
+      }
+    });
   }
 
   function openGachaScreen() {
