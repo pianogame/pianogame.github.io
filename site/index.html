@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=76', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=77', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-adopted-gacha-assets-v16">
+  <link rel="stylesheet" href="/home.css?v=20261007-layout-recovery-v19">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
