@@ -1071,26 +1071,7 @@
     renderGachaResultStep();
   }
 
-  const gachaPianoPhotoUrl = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Grand%20Piano%20MET%20DT7057.jpg?width=1280';
-  let gachaPianoPhotoReady = null;
-
-  function preloadGachaPianoPhoto() {
-    if (gachaPianoPhotoReady) return gachaPianoPhotoReady;
-    gachaPianoPhotoReady = new Promise(resolve => {
-      const image = new Image();
-      image.decoding = 'async';
-      image.referrerPolicy = 'no-referrer';
-      const finish = () => resolve(true);
-      image.onload = () => { image.decode?.().catch(() => {}).finally(finish) || finish(); };
-      image.onerror = () => resolve(false);
-      image.src = gachaPianoPhotoUrl;
-      setTimeout(() => resolve(false), 2200);
-    });
-    return gachaPianoPhotoReady;
-  }
-  void preloadGachaPianoPhoto();
-
-    let gachaAnimationTimer = 0;
+  let gachaAnimationTimer = 0;
   let gachaAnimationReadyTimer = 0;
   let gachaAnimationResolve = null;
   let gachaAnimationAwaitingTouch = false;
