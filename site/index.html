@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-gacha-pickup-luxe">
+  <link rel="stylesheet" href="/home.css?v=20261006-profile-images">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261006-ranking-profile"></script>
+  <script defer src="/home.js?v=20261006-profile-images"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -218,6 +218,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
       </div>
       <div class="hp-player-profile-panel" data-home-profile hidden>
         <div class="hp-player-profile-summary">
+          <img class="hp-player-profile-avatar" data-profile-preview-image src="/assets/home/profile-default.svg" alt="プロフィール画像">
           <span class="hp-player-profile-level"><small>PLv</small><strong data-profile-level>82</strong></span>
           <div>
             <span class="hp-player-profile-eyebrow">PLAYER PROFILE</span>
@@ -226,6 +227,14 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
           </div>
         </div>
         <form class="hp-player-profile-form" data-player-profile-form>
+          <div class="hp-player-profile-image-field">
+            <span>プロフィール画像</span>
+            <div class="hp-player-profile-image-controls">
+              <label class="hp-player-profile-image-select">画像を選ぶ<input type="file" data-profile-image-input accept="image/jpeg,image/png,image/webp" hidden></label>
+              <button type="button" data-profile-image-remove>画像を外す</button>
+            </div>
+            <small>端末内に保存。公開ランキング連携時は露骨な成人向け画像を禁止する画像審査を通す予定です。</small>
+          </div>
           <label class="hp-player-profile-field">
             <span>プレイヤー名</span>
             <input type="text" data-profile-name maxlength="12" autocomplete="nickname" placeholder="ドリステP">
@@ -369,7 +378,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <button type="button" data-ranking-profile-close>閉じる</button>
       </header>
       <div class="hp-ranking-profile-body">
-        <div class="hp-ranking-profile-level"><small>PLv</small><strong data-ranking-profile-level>—</strong></div>
+        <div class="hp-ranking-profile-side">
+          <img class="hp-ranking-profile-avatar" data-ranking-profile-image src="/assets/home/profile-default.svg" alt="プロフィール画像">
+          <div class="hp-ranking-profile-level"><small>PLv</small><strong data-ranking-profile-level>—</strong></div>
+        </div>
         <dl class="hp-ranking-profile-data">
           <div><dt>順位</dt><dd data-ranking-profile-rank>—</dd></div>
           <div><dt>スコア</dt><dd data-ranking-profile-score>—</dd></div>
