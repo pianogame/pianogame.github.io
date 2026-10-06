@@ -1131,7 +1131,7 @@
     });
     const note = home.querySelector('[data-gacha-note]');
     if (note && gachaTrialEnabled && !gachaDrawing) {
-      note.textContent = 'staging限定の試作ガチャです。チケットは消費しますが、正式なキャラクター所持状況には反映しません。';
+      note.textContent = 'staging限定の試作ガチャです。チケットは9999枚固定で、正式なキャラクター所持状況には反映しません。';
     }
   }
 
