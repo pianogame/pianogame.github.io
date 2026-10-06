@@ -955,44 +955,120 @@
   function closeGachaResult() {
     const overlay = home.querySelector('[data-gacha-result-overlay]');
     if (overlay) overlay.hidden = true;
+    gachaResultState = null;
+  }
+
+  let gachaResultState = null;
+
+  function buildGachaResultCard(character, index, compact = false) {
+    const card = document.createElement('article');
+    card.className = 'hp-gacha-result-card' + (compact ? ' is-compact' : ' is-single-reveal');
+    card.dataset.characterId = character?.id || '';
+    if (character?.profileBackground) {
+      card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
+    }
+
+    const art = document.createElement('img');
+    art.className = 'hp-gacha-result-character';
+    art.alt = '';
+    art.src = character?.previewImage || defaultProfileImage;
+    art.addEventListener('error', () => { art.src = defaultProfileImage; }, { once:true });
+
+    const number = document.createElement('small');
+    number.textContent = String(index + 1).padStart(2,'0');
+    const mark = document.createElement('span');
+    mark.textContent = '✦';
+    const name = document.createElement('strong');
+    name.textContent = character?.name || 'CHARACTER';
+    const reading = document.createElement('em');
+    reading.textContent = character?.reading || '';
+
+    card.append(art,number,mark,name,reading);
+    return card;
+  }
+
+  function renderGachaResultStep() {
+    const overlay = home.querySelector('[data-gacha-result-overlay]');
+    const list = home.querySelector('[data-gacha-result-list]');
+    const title = home.querySelector('[data-gacha-result-title]');
+    const progress = home.querySelector('[data-gacha-result-progress]');
+    const next = home.querySelector('[data-gacha-result-next]');
+    const skip = home.querySelector('[data-gacha-result-skip]');
+    const ok = home.querySelector('.hp-gacha-result-ok');
+    if (!overlay || !list || !gachaResultState) return;
+
+    const { results, index, summary } = gachaResultState;
+    overlay.dataset.count = String(results.length);
+    overlay.dataset.mode = summary ? 'summary' : 'sequence';
+
+    if (summary) {
+      if (title) title.textContent = '10連結果';
+      if (progress) progress.textContent = '';
+      list.replaceChildren(...results.map((character, cardIndex) => buildGachaResultCard(character, cardIndex, true)));
+      if (next) next.hidden = true;
+      if (skip) skip.hidden = true;
+      if (ok) ok.hidden = false;
+      ok?.focus({preventScroll:true});
+      return;
+    }
+
+    if (title) title.textContent = results.length > 1 ? 'キャラクター獲得' : '抽選結果';
+    if (progress) progress.textContent = results.length > 1 ? (index + 1) + ' / ' + results.length : '';
+    list.replaceChildren(buildGachaResultCard(results[index], index, false));
+    if (next) {
+      next.hidden = results.length <= 1;
+      next.textContent = index >= results.length - 1 ? '結果一覧へ' : '次へ';
+    }
+    if (skip) skip.hidden = results.length <= 1;
+    if (ok) ok.hidden = results.length > 1;
+    (results.length > 1 ? next : ok)?.focus({preventScroll:true});
+  }
+
+  function advanceGachaResult() {
+    if (!gachaResultState || gachaResultState.summary) return;
+    if (gachaResultState.results.length <= 1) return;
+    if (gachaResultState.index < gachaResultState.results.length - 1) {
+      gachaResultState.index += 1;
+    } else {
+      gachaResultState.summary = true;
+    }
+    renderGachaResultStep();
+  }
+
+  function skipGachaResultSequence() {
+    if (!gachaResultState || gachaResultState.results.length <= 1) return;
+    gachaResultState.summary = true;
+    renderGachaResultStep();
   }
 
   function showGachaResult(results) {
     const overlay = home.querySelector('[data-gacha-result-overlay]');
-    const list = home.querySelector('[data-gacha-result-list]');
-    if (!overlay || !list) return;
-    overlay.dataset.count = String(results.length);
-    list.replaceChildren(...results.map((character, index) => {
-      const card = document.createElement('article');
-      card.className = 'hp-gacha-result-card';
-      if (character?.profileBackground) {
-        card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
-      }
-      card.dataset.characterId = character?.id || '';
-      const art = document.createElement('img');
-      art.className = 'hp-gacha-result-character';
-      art.alt = '';
-      art.src = character?.id === 'character01'
-        ? (character?.previewImage || defaultProfileImage)
-        : (character?.listImage || character?.previewImage || defaultProfileImage);
-      art.addEventListener('error', () => { art.src = character?.previewImage || defaultProfileImage; }, { once:true });
-
-      const number = document.createElement('small');
-      number.textContent = String(index + 1).padStart(2,'0');
-      const mark = document.createElement('span');
-      mark.textContent = '✦';
-      const name = document.createElement('strong');
-      name.textContent = character?.name || 'CHARACTER';
-      const reading = document.createElement('em');
-      reading.textContent = character?.reading || '';
-      card.append(art,number,mark,name,reading);
-      return card;
-    }));
+    if (!overlay || !results.length) return;
+    gachaResultState = { results:[...results], index:0, summary:false };
     overlay.hidden = false;
-    overlay.querySelector('.hp-gacha-result-ok')?.focus({preventScroll:true});
+    renderGachaResultStep();
   }
 
-  let gachaAnimationTimer = 0;
+  const gachaPianoPhotoUrl = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Grand%20Piano%20MET%20DT7057.jpg?width=1280';
+  let gachaPianoPhotoReady = null;
+
+  function preloadGachaPianoPhoto() {
+    if (gachaPianoPhotoReady) return gachaPianoPhotoReady;
+    gachaPianoPhotoReady = new Promise(resolve => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.referrerPolicy = 'no-referrer';
+      const finish = () => resolve(true);
+      image.onload = () => { image.decode?.().catch(() => {}).finally(finish) || finish(); };
+      image.onerror = () => resolve(false);
+      image.src = gachaPianoPhotoUrl;
+      setTimeout(() => resolve(false), 2200);
+    });
+    return gachaPianoPhotoReady;
+  }
+  void preloadGachaPianoPhoto();
+
+    let gachaAnimationTimer = 0;
   let gachaAnimationReadyTimer = 0;
   let gachaAnimationResolve = null;
   let gachaAnimationAwaitingTouch = false;
@@ -1069,9 +1145,10 @@
     gachaAnimationTimer = setTimeout(finishGachaAnimation, overlay.classList.contains('is-ten') ? 2050 : 1750);
   }
 
-  function playGachaAnimation(count) {
+  async function playGachaAnimation(count) {
     const overlay = home.querySelector('[data-gacha-animation-overlay]');
     if (!overlay) return Promise.resolve();
+    await Promise.race([preloadGachaPianoPhoto(), new Promise(resolve => setTimeout(resolve, 500))]);
     clearTimeout(gachaAnimationTimer);
     clearTimeout(gachaAnimationReadyTimer);
     gachaAnimationAwaitingTouch = false;
@@ -1178,6 +1255,9 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareGachaFlourish();
+    void preloadGachaPianoPhoto();
+    const pianoPhoto = home.querySelector('[data-gacha-piano-photo]');
+    if (pianoPhoto && pianoPhoto.src !== gachaPianoPhotoUrl) pianoPhoto.src = gachaPianoPhotoUrl;
     canvas.inert = true;
     gachaScreen.hidden = false;
     stopCharacterVoice();
@@ -1201,6 +1281,11 @@
     void runTrialGacha(Number(button.dataset.gachaPull) === 10 ? 10 : 1);
   }));
   home.querySelectorAll('[data-gacha-result-close]').forEach(button => button.addEventListener('click', closeGachaResult));
+  home.querySelector('[data-gacha-result-next]')?.addEventListener('click', advanceGachaResult);
+  home.querySelector('[data-gacha-result-skip]')?.addEventListener('click', skipGachaResultSequence);
+  home.querySelector('[data-gacha-result-list]')?.addEventListener('click', () => {
+    if (gachaResultState && gachaResultState.results.length > 1 && !gachaResultState.summary) advanceGachaResult();
+  });
   home.querySelector('[data-gacha-piano-touch]')?.addEventListener('click', revealGachaAnimation);
   home.querySelector('[data-gacha-animation-overlay]')?.addEventListener('click', event => {
     if (gachaAnimationAwaitingTouch && !event.target.closest('[data-gacha-animation-skip]')) revealGachaAnimation();
@@ -1356,14 +1441,6 @@
   let voiceFiles = voiceSet.entries.map(entry => entry.file);
   const homeMotion = new window.HP_MOTION_CHARACTER.MotionCharacter(home.querySelector('[data-home-motion]'));
   const previewMotion = new window.HP_MOTION_CHARACTER.MotionCharacter(home.querySelector('[data-character-preview]'));
-  const gachaMotionRoot = home.querySelector('[data-gacha-motion]');
-  const gachaMotion = gachaMotionRoot ? new window.HP_MOTION_CHARACTER.MotionCharacter(gachaMotionRoot) : null;
-  const gachaTouka = registry.get('character01');
-  if (gachaMotionRoot && gachaTouka) {
-    gachaMotionRoot.style.setProperty('--gacha-profile-bg', 'url("' + gachaTouka.profileBackground + '")');
-    void gachaMotion?.setCharacter(gachaTouka);
-    gachaMotion?.setActive(false);
-  }
   void homeMotion.setCharacter(homeCharacter);
   let previewCharacterId = homeCharacter.id;
   let manualVoicePlays = 0;
