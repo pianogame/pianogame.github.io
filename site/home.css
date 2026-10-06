@@ -5912,3 +5912,80 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-player-profile-field select[data-profile-frame] {
   width:100%;
 }
+
+
+/* ===== 2026-10-06 First-acquisition rainbow + voice note v11 ===== */
+
+/* A first-time character acquisition cannot be skipped out of its rainbow reveal. */
+#hp-home-screen .hp-gacha-animation-overlay.is-mandatory-special .hp-gacha-animation-skip {
+  display:none !important;
+}
+
+/* Make first-acquisition result visually identifiable after the mandatory reveal. */
+#hp-home-screen .hp-gacha-result-card.is-new-character::before {
+  content:"NEW";
+  position:absolute;
+  z-index:7;
+  top:8px;
+  right:8px;
+  padding:4px 8px 3px;
+  border:1px solid #fff4c9;
+  border-radius:999px;
+  color:#fff;
+  background:linear-gradient(135deg,#ff7eb4,#f3c759 25%,#76dfd0 52%,#8ba2ff 76%,#d08af2);
+  box-shadow:0 0 14px #fff8,0 0 24px #b38bff77;
+  font:900 10px/1 "Times New Roman",serif;
+  letter-spacing:.12em;
+}
+
+/* Voice rewards use a clean musical-note emblem instead of unrelated character/background art. */
+#hp-home-screen .hp-gacha-result-voice-art {
+  position:absolute;
+  z-index:1;
+  left:50%;
+  top:43%;
+  width:min(58%,210px);
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  display:grid;
+  place-items:center;
+  border:1px solid #e6d6ff;
+  border-radius:50%;
+  color:#fff7e8;
+  background:
+    radial-gradient(circle at 37% 30%,#ffffffb8 0 4%,transparent 20%),
+    radial-gradient(circle,#7953a9 0 12%,#372359 48%,#131a38 73%,#0a1225 100%);
+  box-shadow:
+    inset 0 0 0 5px #ffffff18,
+    0 0 18px #d7b1ff99,
+    0 0 38px #9c7cff55,
+    0 13px 28px #0008;
+}
+#hp-home-screen .hp-gacha-result-voice-art span {
+  font:700 clamp(58px,8cqw,108px)/1 "Times New Roman",serif;
+  transform:translate(-2%,-1%);
+  text-shadow:0 0 10px #fff,0 0 26px #d8b0ff;
+}
+#hp-home-screen .hp-gacha-result-voice-art i,
+#hp-home-screen .hp-gacha-result-voice-art b {
+  position:absolute;
+  color:#e9d7ff;
+  font-style:normal;
+  text-shadow:0 0 9px #cda8ff;
+}
+#hp-home-screen .hp-gacha-result-voice-art i {
+  right:15%;
+  top:15%;
+  font-size:clamp(18px,2.6cqw,30px);
+  transform:rotate(12deg);
+}
+#hp-home-screen .hp-gacha-result-voice-art b {
+  left:16%;
+  bottom:16%;
+  font-size:clamp(15px,2.1cqw,25px);
+  transform:rotate(-18deg);
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-voice-art {
+  width:min(55%,90px);
+  top:41%;
+}
