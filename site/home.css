@@ -2894,3 +2894,251 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-ranking-profile-body { grid-template-columns:68px minmax(0,1fr);gap:10px; }
   #hp-home-screen .hp-ranking-profile-level { width:62px; }
 }
+
+
+/* 2026-10-06: restore original HOME menu button size and compact the ticket campaign. */
+#hp-home-screen .hp-home-footer {
+  grid-template-columns: minmax(86px, 111fr) minmax(0, 1124fr);
+  gap: calc(8 * var(--home-width-unit));
+}
+#hp-home-screen .hp-home-bottom {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(14 * var(--home-width-unit));
+}
+#hp-home-screen .hp-home-campaign {
+  width: 100%;
+  min-width: 0;
+  align-self: end;
+  overflow: hidden;
+  border-radius: 12px;
+}
+#hp-home-screen .hp-home-campaign .hp-home-reference-art {
+  width: 318%;
+  max-width: none;
+  transform: translateX(-2%);
+  transform-origin: left bottom;
+}
+/* Keep the ticket/mission promo compact instead of shrinking the menu buttons. */
+#hp-home-screen .hp-home-campaign {
+  clip-path: inset(0 0 0 0 round 12px);
+}
+
+/* Fourth menu button matches the same cream / gold visual family and exact dimensions. */
+#hp-home-screen .hp-home-bottom-gacha {
+  aspect-ratio: 283 / 151;
+}
+#hp-home-screen .hp-home-standard-card {
+  position:absolute;
+  inset:1.4% 1.1% 1.4% 1.1%;
+  display:grid;
+  grid-template-columns:29% minmax(0,1fr) 11%;
+  align-items:center;
+  gap:4%;
+  padding:8% 7%;
+  box-sizing:border-box;
+  overflow:hidden;
+  border:1px solid #b79657;
+  border-radius:13px;
+  color:#33291f;
+  background:
+    radial-gradient(circle at 18% 12%, #fffdf4e8, transparent 25%),
+    linear-gradient(120deg,#f8f0dd 0%,#ead9b8 50%,#f6edd9 100%);
+  box-shadow:
+    inset 0 0 0 2px #fffaf0,
+    inset 0 0 0 4px #c4a26361,
+    0 3px 5px #26140c33;
+}
+#hp-home-screen .hp-home-standard-card::before,
+#hp-home-screen .hp-home-standard-card::after {
+  content:"";
+  position:absolute;
+  width:30%;
+  aspect-ratio:1;
+  border:1px solid #b98f4c6b;
+  transform:rotate(45deg);
+  pointer-events:none;
+}
+#hp-home-screen .hp-home-standard-card::before { left:-18%; top:-31%; }
+#hp-home-screen .hp-home-standard-card::after { right:-17%; bottom:-32%; }
+#hp-home-screen .hp-home-standard-icon {
+  display:grid;
+  place-items:center;
+  width:100%;
+  aspect-ratio:1;
+  border:1px solid #b8914d;
+  border-radius:50%;
+  color:#fff2bc;
+  background:
+    radial-gradient(circle at 34% 28%,#8a7049,#49351f 70%,#2b1d11);
+  box-shadow:inset 0 0 0 3px #f1d89d33,0 2px 5px #432b1550;
+  font-size:clamp(18px,2.25cqw,30px);
+  text-shadow:0 0 8px #ffe6a56b;
+}
+#hp-home-screen .hp-home-standard-copy {
+  min-width:0;
+  display:grid;
+  gap:5px;
+  text-align:center;
+  font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+}
+#hp-home-screen .hp-home-standard-copy b {
+  color:#30271e;
+  font-size:clamp(14px,1.55cqw,23px);
+  line-height:1;
+  white-space:nowrap;
+}
+#hp-home-screen .hp-home-standard-copy small {
+  color:#78603b;
+  font-size:clamp(7px,.72cqw,11px);
+  line-height:1.2;
+  white-space:nowrap;
+}
+#hp-home-screen .hp-home-standard-arrow {
+  color:#72552c;
+  font:clamp(25px,2.7cqw,38px)/1 "Times New Roman",serif;
+}
+#hp-home-screen .hp-home-bottom-gacha:is(:active,.hp-home-is-pressed) .hp-home-standard-card {
+  filter:brightness(.86);
+}
+
+/* Ranking names use a piano-key name plate. */
+#hp-home-screen .hp-ranking-name-button {
+  position:relative;
+  isolation:isolate;
+  min-height:40px;
+  padding:11px 11px 5px;
+  border:1px solid #9e865c;
+  border-radius:7px;
+  color:#24354a;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #fafafa 0,
+      #fafafa calc(14.285% - 1px),
+      #b9b9b9 calc(14.285% - 1px),
+      #b9b9b9 14.285%
+    );
+  box-shadow:
+    inset 0 -4px 6px #9ca5af35,
+    inset 0 1px 0 #fff,
+    0 2px 5px #18283a2b;
+  overflow:hidden;
+}
+#hp-home-screen .hp-ranking-name-button::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:0;
+  left:7.5%;
+  right:7.5%;
+  height:43%;
+  background:
+    linear-gradient(90deg,
+      transparent 0 7%,
+      #20242c 7% 13%,
+      transparent 13% 21%,
+      #20242c 21% 27%,
+      transparent 27% 42%,
+      #20242c 42% 48%,
+      transparent 48% 56%,
+      #20242c 56% 62%,
+      transparent 62% 70%,
+      #20242c 70% 76%,
+      transparent 76% 100%);
+  filter:drop-shadow(0 1px 1px #0005);
+  pointer-events:none;
+}
+#hp-home-screen .hp-ranking-name-button::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  background:linear-gradient(180deg,#ffffff34,transparent 38%,#d7dde31f);
+  pointer-events:none;
+}
+#hp-home-screen .hp-ranking-name-button > span {
+  position:relative;
+  z-index:2;
+  display:block;
+  width:100%;
+  max-width:100%;
+  padding-top:4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-shadow:0 1px 0 #fff;
+}
+#hp-home-screen .hp-ranking-name-button:active {
+  transform:translateY(2px);
+  box-shadow:
+    inset 0 -1px 3px #7d87913f,
+    inset 0 2px 3px #7f879044;
+}
+#hp-home-screen .hp-ranking-row.is-top-1 .hp-ranking-name-button,
+#hp-home-screen .hp-ranking-row.is-top-2 .hp-ranking-name-button,
+#hp-home-screen .hp-ranking-row.is-top-3 .hp-ranking-name-button {
+  border-color:#a98c55;
+}
+
+/* The current player's name plate gets the same piano-key treatment on the dark self card. */
+#hp-home-screen .hp-ranking-self-name-button {
+  position:relative;
+  isolation:isolate;
+  min-height:40px;
+  padding:11px 11px 5px;
+  border:1px solid #c6a65f;
+  border-radius:7px;
+  color:#24354a;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #f8f8f4 0,
+      #f8f8f4 calc(14.285% - 1px),
+      #b7b7b5 calc(14.285% - 1px),
+      #b7b7b5 14.285%
+    );
+  box-shadow:inset 0 -4px 6px #89939d35,0 2px 6px #0005;
+}
+#hp-home-screen .hp-ranking-self-name-button::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:0;
+  left:7.5%;
+  right:7.5%;
+  height:43%;
+  background:
+    linear-gradient(90deg,
+      transparent 0 7%,
+      #20242c 7% 13%,
+      transparent 13% 21%,
+      #20242c 21% 27%,
+      transparent 27% 42%,
+      #20242c 42% 48%,
+      transparent 48% 56%,
+      #20242c 56% 62%,
+      transparent 62% 70%,
+      #20242c 70% 76%,
+      transparent 76% 100%);
+  pointer-events:none;
+}
+#hp-home-screen .hp-ranking-self-name-button > span {
+  position:relative;
+  z-index:2;
+  padding-top:4px;
+  color:#25374b;
+  text-shadow:0 1px 0 #fff;
+}
+
+@container (max-width:760px) {
+  #hp-home-screen .hp-home-footer {
+    grid-template-columns:minmax(72px,104fr) minmax(0,1131fr);
+  }
+  #hp-home-screen .hp-home-bottom {
+    gap:calc(9 * var(--home-width-unit));
+  }
+  #hp-home-screen .hp-home-standard-copy small { display:none; }
+  #hp-home-screen .hp-home-campaign .hp-home-reference-art {
+    width:345%;
+  }
+}
