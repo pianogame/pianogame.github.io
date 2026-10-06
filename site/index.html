@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-gacha-touch-piano-v3">
+  <link rel="stylesheet" href="/home.css?v=20261006-gacha-sequential-real-piano-v4">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261006-gacha-touch-piano-v3"></script>
+  <script defer src="/home.js?v=20261006-gacha-sequential-real-piano-v4"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -402,8 +402,8 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
       <div class="hp-gacha-pickup">
         <div class="hp-gacha-pickup-ribbon"><span>✦</span><b>PICK UP</b><span>✦</span></div>
         <article class="hp-gacha-pickup-character is-touka">
-          <div class="hp-gacha-motion-portrait" data-gacha-motion aria-hidden="true"></div>
-          <div class="hp-gacha-pickup-caption"><small>PIANIST</small><strong>神代 透花</strong><span>かみしろ とうか</span></div>
+          <div class="hp-gacha-touka-card-visual" aria-hidden="true"></div>
+          <div class="hp-gacha-pickup-caption"><small>PICK UP PIANIST</small><strong>神代 透花</strong><span>かみしろ とうか</span></div>
         </article>
         <article class="hp-gacha-pickup-character is-kanato">
           <img data-gacha-character-image="character02" src="/assets/home/profile-default.svg" alt="桐生 奏斗">
@@ -423,21 +423,18 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     <div class="hp-gacha-animation-staff" aria-hidden="true"></div>
     <div class="hp-gacha-animation-title"><small>PIANO DREAM STAGE</small><strong data-gacha-animation-label>運命の一音を奏でる——</strong></div>
     <button type="button" class="hp-gacha-grand-piano" data-gacha-piano-touch aria-label="グランドピアノをタップして演出を進める">
-      <span class="hp-gacha-piano-lid"></span>
-      <span class="hp-gacha-piano-body"></span>
-      <span class="hp-gacha-piano-rim"></span>
-      <span class="hp-gacha-piano-leg is-left"></span>
-      <span class="hp-gacha-piano-leg is-right"></span>
-      <span class="hp-gacha-piano-pedal"></span>
-      <span class="hp-gacha-piano-keybed">
-        <span class="hp-gacha-animation-keys">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-        </span>
-        <span class="hp-gacha-black-keys" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-        </span>
+      <span class="hp-gacha-piano-photo-frame">
+        <img
+          class="hp-gacha-piano-photo"
+          data-gacha-piano-photo
+          src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Grand%20Piano%20MET%20DT7057.jpg?width=1280"
+          alt=""
+          decoding="async"
+          referrerpolicy="no-referrer"
+        >
+        <span class="hp-gacha-piano-photo-vignette" aria-hidden="true"></span>
+        <span class="hp-gacha-piano-gold-glow" aria-hidden="true"></span>
       </span>
-      <span class="hp-gacha-piano-reflection"></span>
     </button>
     <div class="hp-gacha-piano-touch-guide" data-gacha-piano-guide>ピアノをタップ</div>
     <div class="hp-gacha-note-burst" aria-hidden="true">
@@ -448,10 +445,18 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   </div>
   <div class="hp-gacha-result-overlay" data-gacha-result-overlay hidden>
     <button type="button" class="hp-gacha-result-backdrop" data-gacha-result-close aria-label="ガチャ結果を閉じる"></button>
-    <section class="hp-gacha-result-panel" role="dialog" aria-modal="true" aria-label="ガチャ抽選結果">
-      <header><span>STAGING GACHA</span><h3>抽選結果</h3></header>
+    <section class="hp-gacha-result-panel" data-gacha-result-panel role="dialog" aria-modal="true" aria-label="ガチャ抽選結果">
+      <header>
+        <span>STAGING GACHA</span>
+        <h3 data-gacha-result-title>抽選結果</h3>
+        <small class="hp-gacha-result-progress" data-gacha-result-progress></small>
+      </header>
       <div class="hp-gacha-result-list" data-gacha-result-list></div>
-      <button type="button" class="hp-gacha-result-ok" data-gacha-result-close>OK</button>
+      <div class="hp-gacha-result-actions">
+        <button type="button" class="hp-gacha-result-skip" data-gacha-result-skip hidden>SKIP</button>
+        <button type="button" class="hp-gacha-result-next" data-gacha-result-next hidden>次へ</button>
+        <button type="button" class="hp-gacha-result-ok" data-gacha-result-close hidden>OK</button>
+      </div>
     </section>
   </div>
 </section>
