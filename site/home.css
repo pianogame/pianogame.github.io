@@ -3557,3 +3557,107 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-ranking-profile-body { grid-template-columns:78px minmax(0,1fr); }
   #hp-home-screen .hp-ranking-profile-avatar { width:68px; }
 }
+
+
+/* 2026-10-06: top profile save + stronger silver rank + scalable score frames */
+#hp-home-screen .hp-player-profile-summary {
+  position: relative;
+  padding-right: 118px;
+}
+#hp-home-screen .hp-player-profile-save-top {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  min-width: 92px;
+  transform: translateY(-50%);
+}
+#hp-home-screen .hp-player-profile-save-top:active {
+  transform: translateY(calc(-50% + 1px));
+}
+
+/* Make 2nd place unmistakably silver. */
+#hp-home-screen .hp-ranking-row.is-top-2 {
+  border-color: #aeb8c2;
+  background:
+    linear-gradient(110deg,
+      #fbfdfe 0%,
+      #dce3e8 24%,
+      #b9c3cc 48%,
+      #eef2f5 72%,
+      #c8d0d6 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 #929da766,
+    0 0 12px #c9d1d84a;
+}
+#hp-home-screen .hp-ranking-row.is-top-2 b {
+  color: #586875;
+  text-shadow: 0 1px 0 #fff;
+}
+
+/* Ranking scores get a transparent dedicated frame; large by default, shrink only when needed. */
+#hp-home-screen .hp-ranking-score-display {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 5px 9px;
+  border: 1px solid #7890a33d;
+  border-radius: 8px;
+  color: #233e59;
+  background: #ffffff38;
+  box-shadow: inset 0 1px 0 #ffffff75;
+  font: 700 20px/1 "Times New Roman", serif;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: right;
+}
+#hp-home-screen .hp-ranking-self-score {
+  min-width: 0;
+}
+#hp-home-screen .hp-ranking-self-score strong {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 9px;
+  border: 1px solid #d5bd8054;
+  border-radius: 9px;
+  background: #ffffff0c;
+  box-shadow: inset 0 1px 0 #fff2ca20;
+  color: #fff2ce;
+  font: 700 28px/1 "Times New Roman", serif;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+@container (max-width: 760px) {
+  #hp-home-screen .hp-player-profile-summary {
+    padding-right: 96px;
+  }
+  #hp-home-screen .hp-player-profile-save-top {
+    right: 9px;
+    min-width: 76px;
+    padding-inline: 10px;
+  }
+  #hp-home-screen .hp-ranking-score-display {
+    min-height: 32px;
+    padding-inline: 6px;
+    font-size: 17px;
+  }
+  #hp-home-screen .hp-ranking-self-score strong {
+    font-size: 23px;
+  }
+}
+@container (max-height: 520px) {
+  #hp-home-screen .hp-player-profile-save-top {
+    min-height: 34px;
+  }
+}
