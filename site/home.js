@@ -748,7 +748,19 @@
     });
   }
 
-  function openRankingProfile(entry, rankValue) {
+  function fitRankingScore(node) {
+    if (!node) return;
+    node.style.removeProperty('font-size');
+    requestAnimationFrame(() => {
+      const available = Math.max(1, node.clientWidth - 12);
+      const required = node.scrollWidth;
+      if (required <= available) return;
+      const base = parseFloat(getComputedStyle(node).fontSize) || 20;
+      node.style.fontSize = Math.max(base * .58, base * available / required * .96) + 'px';
+    });
+  }
+
+    function openRankingProfile(entry, rankValue) {
     const overlay = home.querySelector('[data-ranking-profile-overlay]');
     if (!overlay) return;
     const isSelf = !!entry?.isSelf;
@@ -818,10 +830,14 @@
         name.appendChild(nameLabel);
         name.addEventListener('click', () => openRankingProfile(entry, numericRank));
         const score = document.createElement('span');
+        score.className = 'hp-ranking-score-display';
         const numericScore = Number(entry?.score);
         score.textContent = Number.isFinite(numericScore) ? numericScore.toLocaleString('ja-JP') : '—';
         row.append(rank,avatar,name,score);
-        requestAnimationFrame(() => fitRankingName(name));
+        requestAnimationFrame(() => {
+          fitRankingName(name);
+          fitRankingScore(score);
+        });
         return row;
       }));
     }
@@ -832,7 +848,10 @@
     const selfScore = home.querySelector('[data-ranking-self-score]');
     const selfStatus = home.querySelector('[data-ranking-self-status]');
     if (selfRank) selfRank.textContent = self?.rank ? String(self.rank) : '—';
-    if (selfScore) selfScore.textContent = Number.isFinite(Number(self?.score)) ? Number(self.score).toLocaleString('ja-JP') : '—';
+    if (selfScore) {
+      selfScore.textContent = Number.isFinite(Number(self?.score)) ? Number(self.score).toLocaleString('ja-JP') : '—';
+      requestAnimationFrame(() => fitRankingScore(selfScore));
+    }
     if (selfStatus) selfStatus.textContent = demo
       ? 'STAGING用の仮ランキングを表示中です。'
       : self?.rank ? 'ランキングに参加中です。' : 'まだランキング記録がありません。';
