@@ -251,12 +251,16 @@
   const profileNameInput = home.querySelector('[data-profile-name]');
   const profileMessageInput = home.querySelector('[data-profile-message]');
   const profileInstrumentInput = home.querySelector('[data-profile-instrument]');
+  const profileImageInput = home.querySelector('[data-profile-image-input]');
+  const profileImageRemove = home.querySelector('[data-profile-image-remove]');
+  const profilePreviewImage = home.querySelector('[data-profile-preview-image]');
   const profileStatus = home.querySelector('[data-profile-status]');
   const profilePreviewName = home.querySelector('[data-profile-preview-name]');
   const profilePreviewMessage = home.querySelector('[data-profile-preview-message]');
   const profileLevel = home.querySelector('[data-profile-level]');
   const homeLevel = home.querySelector('[data-home-level]');
-  const profileDefaults = { name: 'ドリステP', message: 'ピアノを楽しもう♪', instrument: 'piano' };
+  const profileDefaults = { name: 'ドリステP', message: 'ピアノを楽しもう♪', instrument: 'piano', image: '' };
+  const defaultProfileImage = '/assets/home/profile-default.svg';
 
   function loadPlayerProfile() {
     try {
@@ -266,6 +270,7 @@
         name: String(saved.name || profileDefaults.name).slice(0, 12),
         message: String(saved.message || profileDefaults.message).slice(0, 40),
         instrument: ['piano','violin','bass','guitar'].includes(saved.instrument) ? saved.instrument : 'piano',
+        image: typeof saved.image === 'string' && (saved.image.startsWith('data:image/') || saved.image.startsWith('/')) ? saved.image : '',
       };
     } catch (_) {
       return { ...profileDefaults };
@@ -273,6 +278,56 @@
   }
 
   let playerProfile = loadPlayerProfile();
+  let profileImageDraft = playerProfile.image || '';
+
+  function safeProfileImage(value) {
+    return typeof value === 'string' && value ? value : defaultProfileImage;
+  }
+
+  function attachProfileImageFallback(img) {
+    if (!img || img.dataset.profileFallbackBound === 'true') return;
+    img.dataset.profileFallbackBound = 'true';
+    img.addEventListener('error', () => {
+      if (!img.src.endsWith('/assets/home/profile-default.svg')) img.src = defaultProfileImage;
+    });
+  }
+
+  async function prepareProfileImage(file) {
+    if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) throw new Error('JPEG・PNG・WebP画像を選んでください。');
+    if (file.size > 12 * 1024 * 1024) throw new Error('画像は12MB以下にしてください。');
+
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const source = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('画像を読み込めませんでした。'));
+        img.src = objectUrl;
+      });
+      const size = 256;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const context = canvas.getContext('2d', { alpha:false });
+      context.fillStyle = '#f3efe5';
+      context.fillRect(0,0,size,size);
+      const sw = source.naturalWidth || source.width, sh = source.naturalHeight || source.height;
+      const scale = Math.max(size / sw, size / sh);
+      const dw = sw * scale, dh = sh * scale;
+      context.drawImage(source, (size-dw)/2, (size-dh)/2, dw, dh);
+      const dataUrl = canvas.toDataURL('image/jpeg', .84);
+
+      // Production sharing can attach a server-side image moderation implementation here.
+      // Expected result: { allowed:boolean }. If no checker exists, image remains local-only.
+      const checker = window.PDS_PROFILE_IMAGE_MODERATOR?.check;
+      if (typeof checker === 'function') {
+        const result = await checker(dataUrl);
+        if (result && result.allowed === false) throw new Error('この画像はプロフィール画像として使用できません。');
+      }
+      return dataUrl;
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
 
   function fitHomePlayerName() {
     if (!playerNameDisplay) return;
@@ -299,8 +354,15 @@
     }
     if (profilePreviewName) profilePreviewName.textContent = name;
     const rankingName = home.querySelector('[data-ranking-player-name]');
-    if (rankingName) rankingName.textContent = name;
+    if (rankingName) {
+      const label = rankingName.querySelector('span') || rankingName;
+      label.textContent = name;
+    }
     if (profilePreviewMessage) profilePreviewMessage.textContent = message;
+    if (profilePreviewImage) {
+      profilePreviewImage.src = safeProfileImage(profileImageDraft || playerProfile.image);
+      attachProfileImageFallback(profilePreviewImage);
+    }
     if (profileNameInput) profileNameInput.value = name;
     if (profileMessageInput) profileMessageInput.value = message;
     if (profileInstrumentInput) profileInstrumentInput.value = playerProfile.instrument;
@@ -320,6 +382,7 @@
     if (action === 'settings') renderGlobalCharacterCredits();
     if (action === 'notice') renderNoticePage(0);
     if (action === 'profile') {
+      profileImageDraft = playerProfile.image || '';
       syncPlayerProfileUI();
       if (profileStatus) profileStatus.textContent = '';
     }
@@ -362,7 +425,33 @@
     openHomePanel('settings', settingsProfileButton || levelProfileButton);
   });
 
-  home.querySelector('[data-player-profile-form]')?.addEventListener('submit', event => {
+  profileImageInput?.addEventListener('change', async () => {
+    const file = profileImageInput.files?.[0];
+    if (!file) return;
+    if (profileStatus) profileStatus.textContent = '画像を準備しています…';
+    try {
+      profileImageDraft = await prepareProfileImage(file);
+      if (profilePreviewImage) {
+        profilePreviewImage.src = safeProfileImage(profileImageDraft);
+        attachProfileImageFallback(profilePreviewImage);
+      }
+      if (profileStatus) profileStatus.textContent = window.PDS_PROFILE_IMAGE_MODERATOR?.check
+        ? '画像を確認しました。保存するとプロフィール画像に反映されます。'
+        : '画像を準備しました。現在は端末内のみで使用します。';
+    } catch (error) {
+      if (profileStatus) profileStatus.textContent = error?.message || '画像を設定できませんでした。';
+    } finally {
+      profileImageInput.value = '';
+    }
+  });
+
+  profileImageRemove?.addEventListener('click', () => {
+    profileImageDraft = '';
+    if (profilePreviewImage) profilePreviewImage.src = defaultProfileImage;
+    if (profileStatus) profileStatus.textContent = 'プロフィール画像を外しました。保存すると反映されます。';
+  });
+
+    home.querySelector('[data-player-profile-form]')?.addEventListener('submit', event => {
     event.preventDefault();
     const name = (profileNameInput?.value || '').trim().slice(0, 12);
     const message = (profileMessageInput?.value || '').trim().slice(0, 40);
@@ -375,6 +464,7 @@
       name,
       message: message || profileDefaults.message,
       instrument: profileInstrumentInput?.value || 'piano',
+      image: profileImageDraft || '',
     };
     try { localStorage.setItem(playerProfileKey, JSON.stringify(playerProfile)); } catch (_) {}
     syncPlayerProfileUI();
@@ -615,8 +705,8 @@
     const selfName = playerProfile.name || profileDefaults.name;
     return {
       overall: [
-        { rank:1, name:'Nocturne', score:982430, profile:{level:96,message:'夜の曲を中心に弾いています。',instrument:'ピアノ'} },
-        { rank:2, name:'みずいろ鍵盤', score:951820, profile:{level:91,message:'今日も一音ずつ。',instrument:'ピアノ'} },
+        { rank:1, name:'Nocturne', score:982430, profile:{level:96,message:'夜の曲を中心に弾いています。',instrument:'ピアノ',image:'/characters/character02/list-art.jpg'} },
+        { rank:2, name:'みずいろ鍵盤', score:951820, profile:{level:91,message:'今日も一音ずつ。',instrument:'ピアノ',image:'/characters/character01/list-art.jpg'} },
         { rank:3, name:'Aria_P', score:927560, profile:{level:89,message:'音楽は自由に。',instrument:'バイオリン'} },
         { rank:4, name:'月灯り', score:901240, profile:{level:87,message:'ゆっくり遊んでます。',instrument:'ピアノ'} },
         { rank:5, name:'Fortissimo', score:879630, profile:{level:85,message:'強く、楽しく。',instrument:'エレキギター'} },
@@ -627,8 +717,8 @@
         { rank:10, name:'鍵盤ねこ', score:748860, profile:{level:72,message:'ねことピアノ。',instrument:'ピアノ'} },
       ],
       monthly: [
-        { rank:1, name:'Aria_P', score:316420, profile:{level:89,message:'音楽は自由に。',instrument:'バイオリン'} },
-        { rank:2, name:'Nocturne', score:301780, profile:{level:96,message:'夜の曲を中心に弾いています。',instrument:'ピアノ'} },
+        { rank:1, name:'Aria_P', score:316420, profile:{level:89,message:'音楽は自由に。',instrument:'バイオリン',image:'/characters/character01/list-art.jpg'} },
+        { rank:2, name:'Nocturne', score:301780, profile:{level:96,message:'夜の曲を中心に弾いています。',instrument:'ピアノ',image:'/characters/character02/list-art.jpg'} },
         { rank:3, name:'星屑ピアノ', score:289560, profile:{level:77,message:'星空みたいな音が好き。',instrument:'ピアノ'} },
         { rank:4, name:selfName, score:271930, isSelf:true },
         { rank:5, name:'月灯り', score:263480, profile:{level:87,message:'ゆっくり遊んでます。',instrument:'ピアノ'} },
@@ -667,6 +757,7 @@
           level: Number(home.querySelector('[data-home-level]')?.textContent) || null,
           message: playerProfile.message || profileDefaults.message,
           instrument: ({piano:'ピアノ',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
+          image: playerProfile.image || '',
         }
       : (entry?.profile || {});
     const setText = (selector, value) => {
@@ -680,6 +771,11 @@
     setText('[data-ranking-profile-score]', Number.isFinite(score) ? score.toLocaleString('ja-JP') : '—');
     setText('[data-ranking-profile-instrument]', profile.instrument || '未設定');
     setText('[data-ranking-profile-message]', profile.message || 'プロフィール情報未連携');
+    const profileImage = overlay.querySelector('[data-ranking-profile-image]');
+    if (profileImage) {
+      profileImage.src = safeProfileImage(profile.image);
+      attachProfileImageFallback(profileImage);
+    }
     overlay.hidden = false;
     overlay.querySelector('[data-ranking-profile-close]:not(.hp-ranking-profile-backdrop)')?.focus({preventScroll:true});
   }
@@ -708,6 +804,12 @@
           + (numericRank <= 3 ? ' is-top-' + numericRank : '');
         const rank = document.createElement('b');
         rank.textContent = String(numericRank);
+        const avatar = document.createElement('img');
+        avatar.className = 'hp-ranking-avatar';
+        avatar.alt = '';
+        avatar.src = safeProfileImage(entry?.isSelf ? playerProfile.image : entry?.profile?.image);
+        attachProfileImageFallback(avatar);
+
         const name = document.createElement('button');
         name.type = 'button';
         name.className = 'hp-ranking-name-button';
@@ -718,7 +820,7 @@
         const score = document.createElement('span');
         const numericScore = Number(entry?.score);
         score.textContent = Number.isFinite(numericScore) ? numericScore.toLocaleString('ja-JP') : '—';
-        row.append(rank,name,score);
+        row.append(rank,avatar,name,score);
         requestAnimationFrame(() => fitRankingName(name));
         return row;
       }));
@@ -742,12 +844,20 @@
         button.type = 'button';
         button.className = 'hp-ranking-self-name-button';
         button.setAttribute('data-ranking-player-name','');
+        const avatar = document.createElement('img');
+        avatar.className = 'hp-ranking-self-avatar';
+        avatar.alt = '';
+        avatar.src = safeProfileImage(playerProfile.image);
+        attachProfileImageFallback(avatar);
         const label = document.createElement('span');
-        button.appendChild(label);
+        button.append(avatar,label);
         rankingName.replaceWith(button);
         rankingName = button;
       }
-      rankingName.firstElementChild.textContent = selfName;
+      const selfAvatar = rankingName.querySelector('.hp-ranking-self-avatar');
+      if (selfAvatar) selfAvatar.src = safeProfileImage(playerProfile.image);
+      const selfLabel = rankingName.querySelector('span');
+      if (selfLabel) selfLabel.textContent = selfName;
       rankingName.onclick = () => openRankingProfile({
         name:selfName,
         score:self?.score,
