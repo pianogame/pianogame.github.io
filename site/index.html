@@ -59,7 +59,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/white-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/black-key-v4.webp">
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
-  <link rel="stylesheet" href="/home.css?v=20261006-profile-images">
+  <link rel="stylesheet" href="/home.css?v=20261006-profile-save-score-polish">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -77,7 +77,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261006-profile-images"></script>
+  <script defer src="/home.js?v=20261006-profile-save-score-polish"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -225,8 +225,9 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
             <strong data-profile-preview-name>ドリステP</strong>
             <p data-profile-preview-message>ピアノを楽しもう♪</p>
           </div>
+          <button type="submit" class="hp-player-profile-save hp-player-profile-save-top" form="pds-player-profile-form">保存する</button>
         </div>
-        <form class="hp-player-profile-form" data-player-profile-form>
+        <form id="pds-player-profile-form" class="hp-player-profile-form" data-player-profile-form>
           <div class="hp-player-profile-image-field">
             <span>プロフィール画像</span>
             <div class="hp-player-profile-image-controls">
