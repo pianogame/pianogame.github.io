@@ -5738,3 +5738,76 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     padding-block:3px;
   }
 }
+
+
+/* ===== 2026-10-06 Gacha cleanup v9 ===== */
+
+/* Remove obsolete decorative pseudo layers that were leaving a dark/rotated block over Touka. */
+#hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-touka-card-visual::before {
+  content:none !important;
+  display:none !important;
+}
+#hp-home-screen .hp-gacha-pickup-character.is-touka .hp-gacha-touka-card-visual::after {
+  content:"" !important;
+  display:block !important;
+  position:absolute !important;
+  z-index:3 !important;
+  inset:0 !important;
+  left:0 !important;
+  top:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  width:auto !important;
+  height:auto !important;
+  aspect-ratio:auto !important;
+  transform:none !important;
+  border:0 !important;
+  box-shadow:none !important;
+  color:transparent !important;
+  font-size:0 !important;
+  text-shadow:none !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(180deg,transparent 56%,#07101d9b 82%,#07101de7),
+    linear-gradient(90deg,#07101d21,transparent 30% 74%,#07101d2b) !important;
+}
+
+/* The selected intro artwork already contains the piano motif. Remove the extra mismatched piano layer. */
+#hp-home-screen .hp-gacha-cinematic-piano {
+  display:none !important;
+}
+
+/* Touch target follows the large piano motif in the selected background itself. */
+#hp-home-screen .hp-gacha-piano-hotspot {
+  right:18%;
+  top:9%;
+  width:62%;
+  height:66%;
+  border-radius:42%;
+}
+#hp-home-screen .hp-gacha-piano-touch-guide {
+  right:12%;
+  bottom:7%;
+}
+
+/* Cleaner result cards: no sequence number / ITEM / CHARACTER corner labels. */
+#hp-home-screen .hp-gacha-result-card > small,
+#hp-home-screen .hp-gacha-result-card > span {
+  display:none !important;
+}
+
+/* Keep text comfortably above the bottom edge after removing the labels. */
+#hp-home-screen .hp-gacha-result-card strong {
+  position:relative;
+  z-index:2;
+  margin-top:auto;
+}
+#hp-home-screen .hp-gacha-result-card em {
+  position:relative;
+  z-index:2;
+}
+
+/* SKIP is a true skip: it always lands on the final 10-result summary. */
+#hp-home-screen .hp-gacha-result-skip {
+  min-width:96px !important;
+}
