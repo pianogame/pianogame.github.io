@@ -5288,3 +5288,35 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-stage-keyboard { bottom:3%;height:17%; }
   #hp-home-screen .hp-gacha-reveal-card { width:min(21vw,185px); }
 }
+
+
+/* v6 dedicated Touka pickup image — non-standing card art. */
+#hp-home-screen .hp-gacha-touka-card-art {
+  left:50%;
+  top:47%;
+  width:86%;
+  height:73%;
+  object-fit:cover;
+  object-position:center 52%;
+  transform:translate(-50%,-50%) scale(1.02);
+  border:0;
+  border-radius:14px;
+  box-shadow:
+    0 12px 28px #02050e9c,
+    0 0 0 1px #e6c8766b,
+    0 0 30px #9b65dc5c;
+}
+#hp-home-screen .hp-gacha-touka-card-halo {
+  width:72%;
+  opacity:.75;
+}
+#hp-home-screen .hp-gacha-touka-card-visual::after {
+  content:"";
+  position:absolute;
+  z-index:3;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,transparent 50%,#06101bc4 82%,#06101bed),
+    linear-gradient(90deg,#07101e5e,transparent 22% 76%,#07101e44);
+}
