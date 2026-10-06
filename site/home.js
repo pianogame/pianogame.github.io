@@ -1485,12 +1485,20 @@
     saveMissionState();
     renderGachaScreen();
 
-    const results = Array.from({length:cost}, (_,index) =>
+    let results = Array.from({length:cost}, (_,index) =>
       drawTrialResult({
         forceItem: cost === 10 && index === 0,
-        forceCharacter: cost === 10 && index === cost - 1,
       })
     ).filter(Boolean);
+
+    // Staging QA: a 10-pull always contains at least one rainbow character,
+    // but its position is random so post-rainbow skip behavior can actually be tested.
+    if (cost === 10 && !results.some(result => result?.rarity === 'rainbow')) {
+      const pool = gachaPool();
+      const character = pool[Math.floor(Math.random() * pool.length)];
+      const rainbowIndex = 1 + Math.floor(Math.random() * Math.max(1, results.length - 1));
+      if (character && results.length) results[Math.min(rainbowIndex, results.length - 1)] = makeCharacterResult(character);
+    }
 
     grantGachaResults(results);
 
