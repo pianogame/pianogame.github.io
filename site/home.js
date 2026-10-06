@@ -924,7 +924,6 @@
     || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
   const gachaTrialKey = 'pds-gacha-trial-v1';
   const gachaTrialTicketCap = 9999;
-  const gachaTrialMaxProfileName = 'Proゲーマー園児ベアー';
   let gachaDrawing = false;
 
   function loadGachaTrialState() {
@@ -984,7 +983,87 @@
     overlay.querySelector('.hp-gacha-result-ok')?.focus({preventScroll:true});
   }
 
-  async function runTrialGacha(count) {
+  let gachaAnimationTimer = 0;
+  let gachaAnimationResolve = null;
+  let gachaFlourishGraph = null;
+  let gachaFlourishBuffer = null;
+  let gachaFlourishLoading = null;
+
+  function prepareGachaFlourish() {
+    if (gachaFlourishBuffer) return Promise.resolve();
+    if (gachaFlourishLoading) return gachaFlourishLoading;
+    try {
+      const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+      if (!bridge) return Promise.resolve();
+      if (!gachaFlourishGraph) {
+        const gain = bridge.context.createGain();
+        gain.gain.value = .95;
+        window.HP_SOUND_SETTINGS?.bind?.('effects', gain);
+        gain.connect(bridge.output);
+        gachaFlourishGraph = { context:bridge.context, gain };
+      }
+      gachaFlourishLoading = fetch('/audio/pororoponponpin.m4a?v=gacha1')
+        .then(response => response.ok ? response.arrayBuffer() : Promise.reject(new Error('gacha sound unavailable')))
+        .then(buffer => gachaFlourishGraph.context.decodeAudioData(buffer))
+        .then(buffer => { gachaFlourishBuffer = buffer; })
+        .catch(() => {})
+        .finally(() => { gachaFlourishLoading = null; });
+      return gachaFlourishLoading;
+    } catch (_) {
+      return Promise.resolve();
+    }
+  }
+
+  function playGachaFlourish() {
+    try {
+      if (!gachaFlourishBuffer || !gachaFlourishGraph) return;
+      window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      const source = gachaFlourishGraph.context.createBufferSource();
+      const gain = gachaFlourishGraph.context.createGain();
+      gain.gain.value = .96;
+      source.buffer = gachaFlourishBuffer;
+      source.connect(gain);
+      gain.connect(gachaFlourishGraph.gain);
+      source.onended = () => { try { source.disconnect(); gain.disconnect(); } catch (_) {} };
+      source.start();
+    } catch (_) {}
+  }
+
+  function finishGachaAnimation() {
+    clearTimeout(gachaAnimationTimer);
+    gachaAnimationTimer = 0;
+    const overlay = home.querySelector('[data-gacha-animation-overlay]');
+    if (overlay) {
+      overlay.classList.remove('is-playing','is-ten','is-special');
+      overlay.hidden = true;
+    }
+    const resolve = gachaAnimationResolve;
+    gachaAnimationResolve = null;
+    resolve?.();
+  }
+
+  function playGachaAnimation(count) {
+    const overlay = home.querySelector('[data-gacha-animation-overlay]');
+    if (!overlay) return Promise.resolve();
+    clearTimeout(gachaAnimationTimer);
+    const isTen = count === 10;
+    const isSpecial = isTen || Math.random() < .28;
+    overlay.hidden = false;
+    overlay.classList.toggle('is-ten', isTen);
+    overlay.classList.toggle('is-special', isSpecial);
+    const label = overlay.querySelector('[data-gacha-animation-label]');
+    if (label) label.textContent = isSpecial ? '星の旋律が、強く輝く——' : '運命の一音を奏でる——';
+    requestAnimationFrame(() => {
+      overlay.classList.add('is-playing');
+      playGachaFlourish();
+    });
+    return new Promise(resolve => {
+      gachaAnimationResolve = resolve;
+      gachaAnimationTimer = setTimeout(finishGachaAnimation, isTen ? 3300 : 2850);
+    });
+  }
+
+    async function runTrialGacha(count) {
     if (!gachaTrialEnabled || gachaDrawing) return;
     const cost = count === 10 ? 10 : 1;
     if (missionState.tickets < cost) {
@@ -1011,7 +1090,7 @@
     saveGachaTrialState();
 
     gachaScreen?.classList.add('is-drawing');
-    await new Promise(resolve => setTimeout(resolve, 520));
+    await playGachaAnimation(cost);
     gachaScreen?.classList.remove('is-drawing');
     showGachaResult(results);
     gachaDrawing = false;
@@ -1019,7 +1098,7 @@
   }
 
   function renderGachaScreen() {
-    if (gachaTrialEnabled && (playerProfile.name || '').trim() === gachaTrialMaxProfileName && missionState.tickets !== gachaTrialTicketCap) {
+    if (gachaTrialEnabled && missionState.tickets !== gachaTrialTicketCap) {
       missionState.tickets = gachaTrialTicketCap;
       saveMissionState();
     }
@@ -1042,8 +1121,6 @@
       }
     });
 
-    const tools = home.querySelector('[data-gacha-test-tools]');
-    if (tools) tools.hidden = !gachaTrialEnabled;
     home.querySelectorAll('[data-gacha-pull]').forEach(button => {
       const cost = Number(button.dataset.gachaPull) === 10 ? 10 : 1;
       const state = button.querySelector('[data-gacha-button-state]');
@@ -1065,6 +1142,7 @@
     if (missionScreen && !missionScreen.hidden) closeMissionScreen();
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
+    void prepareGachaFlourish();
     canvas.inert = true;
     gachaScreen.hidden = false;
     stopCharacterVoice();
@@ -1075,6 +1153,7 @@
   function closeGachaScreen() {
     if (!gachaScreen || gachaScreen.hidden) return;
     closeGachaResult();
+    finishGachaAnimation();
     gachaScreen.hidden = true;
     canvas.inert = false;
     syncCharacterVoice();
@@ -1086,13 +1165,8 @@
   home.querySelectorAll('[data-gacha-pull]').forEach(button => button.addEventListener('click', () => {
     void runTrialGacha(Number(button.dataset.gachaPull) === 10 ? 10 : 1);
   }));
-  home.querySelector('[data-gacha-test-ticket]')?.addEventListener('click', () => {
-    if (!gachaTrialEnabled) return;
-    missionState.tickets = Math.min(gachaTrialTicketCap, missionState.tickets + 10);
-    saveMissionState();
-    renderGachaScreen();
-  });
   home.querySelectorAll('[data-gacha-result-close]').forEach(button => button.addEventListener('click', closeGachaResult));
+  home.querySelector('[data-gacha-animation-skip]')?.addEventListener('click', finishGachaAnimation);
 
     window.HP_HOME_RANKING = {
     set(data = {}) {
