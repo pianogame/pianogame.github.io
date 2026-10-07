@@ -406,9 +406,49 @@
     if (layer.getAttribute('src') !== source) layer.src = source;
   }
 
+  function syncFrameSelectionPreview() {
+    if (!profileFrameInput) return;
+    const preview = home.querySelector('[data-profile-frame-preview]');
+    if (!preview) return;
+
+    const id = profileFrameCatalog[profileFrameInput.value] ? profileFrameInput.value : 'default';
+    const item = profileFrameCatalog[id] || profileFrameCatalog.default;
+    const avatar = preview.querySelector('.hp-customization-frame-avatar');
+    const art = preview.querySelector('.hp-customization-frame-art');
+    const label = preview.querySelector('.hp-customization-preview-copy strong');
+
+    if (label) label.textContent = item?.name || '標準フレーム';
+
+    if (avatar) {
+      const avatarSource = safeProfileImage(profileImageDraft || playerProfile.image);
+      avatar.hidden = false;
+      if (avatar.getAttribute('src') !== avatarSource) avatar.src = avatarSource;
+    }
+
+    const source = item?.image || '';
+    if (art) {
+      if (source) {
+        art.hidden = false;
+        art.style.display = 'block';
+        art.style.visibility = 'visible';
+        art.style.opacity = '1';
+        if (art.getAttribute('src') !== source) art.src = source;
+      } else {
+        art.hidden = true;
+        art.removeAttribute('src');
+      }
+    }
+
+    preview.hidden = false;
+    preview.style.display = 'flex';
+    preview.style.visibility = 'visible';
+    preview.style.opacity = '1';
+  }
+
   function syncCustomizationInputs() {
     fillOwnedSelect(profileHomeBackgroundInput, homeBackgroundCatalog, gachaInventory.backgrounds, playerProfile.homeBackground);
     fillOwnedSelect(profileFrameInput, profileFrameCatalog, gachaInventory.frames, playerProfile.frame);
+    syncFrameSelectionPreview();
   }
 
   function loadPlayerProfile() {
@@ -568,6 +608,18 @@
     });
   }
 
+  const syncFramePreviewFromEvent = (event) => {
+    if (event?.target !== profileFrameInput) return;
+    syncFrameSelectionPreview();
+    requestAnimationFrame(syncFrameSelectionPreview);
+  };
+  profileFrameInput?.addEventListener('input', syncFramePreviewFromEvent);
+  profileFrameInput?.addEventListener('change', syncFramePreviewFromEvent);
+  profileFrameInput?.addEventListener('blur', syncFrameSelectionPreview);
+  home.addEventListener('change', event => {
+    if (event.target === profileFrameInput) syncFrameSelectionPreview();
+  }, true);
+
   const settingsProfileButton = home.querySelector('[data-home-action="profile-settings"]');
   settingsProfileButton?.addEventListener('click', () => openHomePanel('profile', settingsProfileButton));
 
@@ -588,6 +640,7 @@
         profilePreviewImage.src = safeProfileImage(profileImageDraft);
         attachProfileImageFallback(profilePreviewImage);
       }
+      syncFrameSelectionPreview();
       if (profileStatus) profileStatus.textContent = window.PDS_PROFILE_IMAGE_MODERATOR?.check
         ? '画像を確認しました。保存するとプロフィール画像に反映されます。'
         : '画像を準備しました。現在は端末内のみで使用します。';
@@ -601,6 +654,7 @@
   profileImageRemove?.addEventListener('click', () => {
     profileImageDraft = '';
     if (profilePreviewImage) profilePreviewImage.src = defaultProfileImage;
+    syncFrameSelectionPreview();
     if (profileStatus) profileStatus.textContent = 'プロフィール画像を外しました。保存すると反映されます。';
   });
 
