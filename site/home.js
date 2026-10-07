@@ -436,9 +436,13 @@
   });
   const profileEffectCatalog = Object.freeze({
     default: { name:'エフェクトなし' },
-    starlightNotes: {
-      name:'スターライトノーツ',
-      description:'金色の光粒と音符がプロフィール背景をゆっくり流れるエフェクト',
+    starlightElegant: {
+      name:'スターライトノーツ・上品',
+      description:'小さな金色の光粒と淡い音符がカード全体を静かに漂うエフェクト',
+    },
+    starlightBrilliant: {
+      name:'スターライトノーツ・華やか',
+      description:'光の帯・星粒・音符がカード全体をきらびやかに巡るエフェクト',
     },
   });
 
@@ -1489,8 +1493,9 @@
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
       const art = document.createElement('div');
       art.className = 'hp-gacha-result-profile-effect-art';
+      art.dataset.effectId = result.customizationId || '';
       art.setAttribute('aria-hidden','true');
-      art.innerHTML = '<i>♪</i><i>✦</i><i>♫</i><i>✧</i><i>♪</i>';
+      art.innerHTML = '<i>♪</i><i>✦</i><i>♫</i><i>✧</i><i>♪</i><i>✦</i><i>♫</i>';
       card.appendChild(art);
     } else {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
@@ -2042,6 +2047,15 @@
         forceItem: cost === 10 && index === 0,
       })
     ).filter(Boolean);
+
+    // Staging QA: put both profile-effect comparison variants into the first
+    // two slots of a 10-pull so they can be compared immediately.
+    if (cost === 10 && results.length >= 2) {
+      const comparisonEffects = gachaTrialItems.filter(item => item.kind === 'profileEffect').slice(0,2);
+      comparisonEffects.forEach((item, index) => {
+        if (item && index < results.length) results[index] = { ...item };
+      });
+    }
 
     // Staging QA: a 10-pull always contains at least one rainbow character,
     // but its position is random so post-rainbow skip behavior can actually be tested.
