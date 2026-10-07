@@ -48,18 +48,25 @@
   let audioNeedsGestureUnlock = true;
   const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
-  const trialInstrumentIds = new Set(['trialChip8','trialKoto','trialTrumpet']);
-  const isPianoLike = id => id === 'piano';
-  const effectsInstrumentId = id => trialInstrumentIds.has(id) ? 'piano' : id;
+  const finalInstrumentIds = new Set(['finalChip8','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone']);
+  const ambienceInstrumentIds = new Set(['piano','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone']);
+  const supportsAmbience = id => ambienceInstrumentIds.has(id);
+  const effectsInstrumentId = id => finalInstrumentIds.has(id) ? 'piano' : id;
   const ambience = {
     piano:{amount:35,decay:.05},
+    finalKoto:{amount:18,decay:1.05},
+    finalTrumpet:{amount:20,decay:1.35},
+    finalPipeOrgan:{amount:54,decay:4.8},
+    finalVibraphone:{amount:28,decay:1.9},
     bass:{amount:4,decay:.3}
   };
   const articulation={
     piano:{release:.07,sustain:true},
-    trialChip8:{release:.045,sustain:false},
-    trialKoto:{release:.26,sustain:true},
-    trialTrumpet:{release:.16,sustain:false},
+    finalChip8:{release:.055,sustain:false},
+    finalKoto:{release:.34,sustain:true},
+    finalTrumpet:{release:.19,sustain:false},
+    finalPipeOrgan:{release:.75,sustain:false},
+    finalVibraphone:{release:1.6,sustain:true},
     guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}
   };
   const releaseControl=root.querySelector('[data-control="release"]');
@@ -276,7 +283,7 @@
         reverbInput.connect(reverb); reverb.connect(rumble); rumble.connect(damping); damping.connect(wet); wet.connect(master);
         effects=effectUI.attach(ctx); ambienceSend=ctx.createGain();
         violinSpace=window.HP_VIOLIN.createSpace(ctx,effects.input);
-        ambienceSend.gain.value=!isPianoLike(currentInstrument)?0:1;
+        ambienceSend.gain.value=!supportsAmbience(currentInstrument)?0:1;
         effects.output.connect(master); effects.output.connect(ambienceSend); ambienceSend.connect(reverbInput);
         updateReverb();
       }
@@ -383,7 +390,7 @@
   reverbControl.addEventListener('input', () => {
     if(ambience[ambienceInstrument])ambience[ambienceInstrument].amount=Number(reverbControl.value);
     root.querySelector('[data-output="reverb"]').textContent = reverbControl.value+'%';
-    if (wet) wet.gain.setTargetAtTime(!isPianoLike(currentInstrument)?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.045);
+    if (wet) wet.gain.setTargetAtTime(!supportsAmbience(currentInstrument)?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.045);
   });
   decayControl.addEventListener('input', () => { if(ambience[ambienceInstrument])ambience[ambienceInstrument].decay=Number(decayControl.value); root.querySelector('[data-output="decay"]').textContent = Number(decayControl.value).toFixed(1)+'秒'; });
   decayControl.addEventListener('change', updateReverb);
@@ -414,9 +421,9 @@
     root.querySelector('.hp-surface').setAttribute('aria-label',preset.name);
     effectUI.setReady(samplesReady);
     void effectUI.setInstrument(effectsInstrumentId(currentInstrument));
-    root.querySelectorAll('[data-common-ambience]').forEach(label=>label.hidden=!isPianoLike(currentInstrument));
-    if(ambienceSend)ambienceSend.gain.setTargetAtTime(!isPianoLike(currentInstrument)?0:1,ctx.currentTime,.03);
-    if(wet)wet.gain.setTargetAtTime(!isPianoLike(currentInstrument)?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.03);
+    root.querySelectorAll('[data-common-ambience]').forEach(label=>label.hidden=!supportsAmbience(currentInstrument));
+    if(ambienceSend)ambienceSend.gain.setTargetAtTime(!supportsAmbience(currentInstrument)?0:1,ctx.currentTime,.03);
+    if(wet)wet.gain.setTargetAtTime(!supportsAmbience(currentInstrument)?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.03);
     if(ambienceInstrument!==currentInstrument) {
       ambienceInstrument=currentInstrument;
       if(ambience[currentInstrument]) {
@@ -430,7 +437,7 @@
   }
   async function loadBank(id, generation) {
     const preset=instruments[id];
-    if(preset.engine)return new Map();
+    if(preset.engine && !preset.samples?.length)return new Map();
     if(!bankCache.has(id))bankCache.set(id,new Map());
     const decoded=bankCache.get(id);
     if(!bankLoads.has(id)) {
@@ -508,7 +515,8 @@
 
   const chipWaveCache = new Map();
   const kotoBufferCache = new Map();
-  let trumpetWave = null;
+  const organWaveCache = new Map();
+  const trumpetWaveCache = new Map();
   let breathNoiseBuffer = null;
 
   function midiHz(midi) {
@@ -518,7 +526,7 @@
   function pulseWave(duty) {
     const key=String(duty);
     if(chipWaveCache.has(key))return chipWaveCache.get(key);
-    const harmonics=48,real=new Float32Array(harmonics+1),imag=new Float32Array(harmonics+1);
+    const harmonics=56,real=new Float32Array(harmonics+1),imag=new Float32Array(harmonics+1);
     for(let n=1;n<=harmonics;n++){
       real[n]=2*Math.sin(2*Math.PI*n*duty)/(Math.PI*n);
       imag[n]=2*(1-Math.cos(2*Math.PI*n*duty))/(Math.PI*n);
@@ -528,18 +536,9 @@
     return wave;
   }
 
-  function trumpetPeriodicWave() {
-    if(trumpetWave)return trumpetWave;
-    const real=new Float32Array(13),imag=new Float32Array(13);
-    const weights=[0,1,.78,.58,.43,.31,.23,.17,.13,.10,.075,.055,.04];
-    for(let i=1;i<weights.length;i++)imag[i]=weights[i];
-    trumpetWave=ctx.createPeriodicWave(real,imag,{disableNormalization:false});
-    return trumpetWave;
-  }
-
   function getBreathNoiseBuffer() {
     if(breathNoiseBuffer)return breathNoiseBuffer;
-    const length=Math.max(1,Math.floor(ctx.sampleRate*.6));
+    const length=Math.max(1,Math.floor(ctx.sampleRate*.8));
     const buffer=ctx.createBuffer(1,length,ctx.sampleRate);
     const data=buffer.getChannelData(0);
     let seed=0x51f15e;
@@ -552,93 +551,92 @@
   }
 
   function createChip8Voice(midi,when,onEnded) {
-    const preset=instruments.trialChip8;
-    const level=preset.gain;
-    const bus=ctx.createGain(),tone=ctx.createBiquadFilter();
-    tone.type='lowpass'; tone.frequency.setValueAtTime(midi>78?9200:10800,when); tone.Q.value=.15;
-    bus.gain.setValueAtTime(.00001,when);
-    bus.gain.linearRampToValueAtTime(level,when+.004);
-    tone.connect(bus); bus.connect(effects.input);
+    const preset=instruments.finalChip8,level=preset.gain;
+    const bus=ctx.createGain(),tone=ctx.createBiquadFilter(),pan=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();
+    tone.type='lowpass';tone.frequency.setValueAtTime(midi>84?8200:midi<48?6900:10400,when);tone.Q.value=.18;
+    if('pan' in pan)pan.pan.value=Math.max(-.08,Math.min(.08,(midi-64)/300));
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(level,when+.0035);
+    tone.connect(pan);pan.connect(bus);bus.connect(effects.input);
 
-    const duty=midi>=76?.125:midi>=58?.25:.5;
-    const main=ctx.createOscillator(),second=ctx.createOscillator(),tri=ctx.createOscillator();
-    const mainGain=ctx.createGain(),secondGain=ctx.createGain(),triGain=ctx.createGain();
+    const duty=midi>=84?.125:midi>=60?.25:.5;
+    const main=ctx.createOscillator(),color=ctx.createOscillator(),tri=ctx.createOscillator();
+    const mainGain=ctx.createGain(),colorGain=ctx.createGain(),triGain=ctx.createGain();
     const f=midiHz(midi);
     main.setPeriodicWave(pulseWave(duty));
-    second.setPeriodicWave(pulseWave(duty===.125?.25:.125));
+    color.setPeriodicWave(pulseWave(duty===.125?.25:.125));
     tri.type='triangle';
-    main.frequency.setValueAtTime(f,when);
-    second.frequency.setValueAtTime(f*2,when);
-    tri.frequency.setValueAtTime(f/2,when);
-    mainGain.gain.value=.72; secondGain.gain.value=midi>74?.11:.16; triGain.gain.value=midi<67?.10:.045;
-    main.connect(mainGain);second.connect(secondGain);tri.connect(triGain);
-    mainGain.connect(tone);secondGain.connect(tone);triGain.connect(tone);
+    main.frequency.setValueAtTime(f,when);color.frequency.setValueAtTime(f*2,when);tri.frequency.setValueAtTime(f/2,when);
+    mainGain.gain.value=.76;colorGain.gain.value=midi>80?.08:.14;triGain.gain.value=midi<60?.14:.045;
+    main.connect(mainGain);color.connect(colorGain);tri.connect(triGain);
+    mainGain.connect(tone);colorGain.connect(tone);triGain.connect(tone);
 
     const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
-    lfo.type='sine';lfo.frequency.value=5.4;
-    lfoGain.gain.setValueAtTime(0,when);lfoGain.gain.linearRampToValueAtTime(2.2,when+.18);
-    lfo.connect(lfoGain);lfoGain.connect(main.detune);lfoGain.connect(second.detune);
-    main.detune.setValueAtTime(-5,when);main.detune.linearRampToValueAtTime(0,when+.035);
-    second.detune.setValueAtTime(2.5,when);
+    lfo.type='sine';lfo.frequency.value=5.35;
+    lfoGain.gain.setValueAtTime(0,when);lfoGain.gain.linearRampToValueAtTime(1.8,when+.22);
+    lfo.connect(lfoGain);lfoGain.connect(main.detune);lfoGain.connect(color.detune);
+    main.detune.setValueAtTime(-4.5,when);main.detune.linearRampToValueAtTime(0,when+.028);
+    color.detune.value=2;
 
     let cleaned=false;
     const cleanup=()=>{
       if(cleaned)return;cleaned=true;
-      try{main.disconnect();second.disconnect();tri.disconnect();lfo.disconnect();mainGain.disconnect();secondGain.disconnect();triGain.disconnect();lfoGain.disconnect();tone.disconnect();bus.disconnect();}catch(_){}
+      try{main.disconnect();color.disconnect();tri.disconnect();lfo.disconnect();mainGain.disconnect();colorGain.disconnect();triGain.disconnect();lfoGain.disconnect();tone.disconnect();pan.disconnect();bus.disconnect();}catch(_){}
       onEnded?.();
     };
     main.onended=cleanup;
-    main.start(when);second.start(when);tri.start(when);lfo.start(when);
-    const voice={release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.trialChip8.release){
-      if(cleaned)return;
-      if(!Number.isFinite(seconds))return;
-      const start=Math.max(when+.006,at),end=start+Math.max(.02,seconds);
-      bus.gain.cancelScheduledValues(start);
-      bus.gain.setTargetAtTime(.00001,start,Math.max(.006,seconds/4));
-      try{main.stop(end+.035);second.stop(end+.035);tri.stop(end+.035);lfo.stop(end+.035);}catch(_){}
+    main.start(when);color.start(when);tri.start(when);lfo.start(when);
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.finalChip8.release){
+      if(cleaned||!Number.isFinite(seconds))return;
+      const start=Math.max(when+.006,at),end=start+Math.max(.025,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.006,seconds/4));
+      try{main.stop(end+.04);color.stop(end+.04);tri.stop(end+.04);lfo.stop(end+.04);}catch(_){}
     }};
-    return voice;
   }
 
-  function createKotoBuffer(midi) {
-    const key=ctx.sampleRate+':'+midi;
+  function createKotoBuffer(midi,variant=0) {
+    const key=ctx.sampleRate+':'+midi+':'+variant;
     if(kotoBufferCache.has(key))return kotoBufferCache.get(key);
     const sr=ctx.sampleRate,f=midiHz(midi);
-    const duration=Math.max(2.2,4.15-(midi-48)*.045);
-    const length=Math.ceil(duration*sr),period=Math.max(3,Math.round(sr/f));
-    const ring=new Float32Array(period),out=new Float32Array(length);
-    let seed=(0x9e3779b9^(midi*2654435761))>>>0;
-    const pick=Math.max(2,Math.floor(period*.23));
-    for(let i=0;i<period;i++){
-      seed=(Math.imul(seed,1664525)+1013904223)>>>0;
-      const n=seed/2147483648-1;
-      seed=(Math.imul(seed,1664525)+1013904223)>>>0;
-      const n2=seed/2147483648-1;
-      ring[i]=(n*.72+n2*.28);
-    }
-    for(let i=0;i<period;i++)ring[i]=ring[i]-(ring[(i+pick)%period]*.58);
-    const damping=Math.max(.9968,.99905-(midi-48)*.000035);
-    let idx=0,prev=0;
+    const duration=Math.max(2.45,4.65-(midi-48)*.045);
+    const length=Math.ceil(duration*sr);
+    const period=Math.max(3,Math.round(sr/f));
+    const ringA=new Float32Array(period);
+    const ringB=new Float32Array(Math.max(3,Math.round(period*(1+(variant?0.0021:-0.0017)))));
+    const out=new Float32Array(length);
+    let seed=(0x9e3779b9^(midi*2654435761)^(variant*0x85ebca6b))>>>0;
+    const rnd=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/2147483648-1;};
+    const pick=.16+variant*.055+(midi%3)*.012;
+    const excite=(ring,amount)=>{
+      const pickOffset=Math.max(1,Math.floor(ring.length*pick));
+      for(let i=0;i<ring.length;i++)ring[i]=rnd();
+      for(let i=0;i<ring.length;i++)ring[i]=(ring[i]-ring[(i+pickOffset)%ring.length]*.62)*amount;
+    };
+    excite(ringA,.82);excite(ringB,.31);
+    const dampA=Math.max(.9967,.99912-(midi-48)*.000034);
+    const dampB=Math.max(.9964,.99894-(midi-48)*.000037);
+    let ia=0,ib=0,prevA=0,prevB=0;
+    let body1=0,body2=0,body3=0;
+    const c1=Math.exp(-2*Math.PI*360/sr),c2=Math.exp(-2*Math.PI*760/sr),c3=Math.exp(-2*Math.PI*1320/sr);
     for(let i=0;i<length;i++){
-      const y=ring[idx];
-      const nextIdx=(idx+1)%period;
-      const averaged=(y+ring[nextIdx])*.5;
-      const dispersion=averaged*.985+prev*.015;
-      ring[idx]=dispersion*damping;
-      prev=dispersion;
-      let value=y;
-      if(i<sr*.014){
-        seed=(Math.imul(seed,1664525)+1013904223)>>>0;
-        value+=(seed/2147483648-1)*.16*(1-i/(sr*.014));
-      }
+      const na=(ia+1)%ringA.length,nb=(ib+1)%ringB.length;
+      const a=ringA[ia],b=ringB[ib];
+      const da=((a+ringA[na])*.5*.982+prevA*.018)*dampA;
+      const db=((b+ringB[nb])*.5*.974+prevB*.026)*dampB;
+      ringA[ia]=da;ringB[ib]=db;prevA=da;prevB=db;
       const t=i/sr;
-      value*=Math.exp(-t*(midi>72?.20:.11));
-      out[i]=value;
-      idx=nextIdx;
+      let raw=a+b*.52;
+      if(i<sr*.018)raw+=rnd()*.20*(1-i/(sr*.018));
+      body1=(1-c1)*raw+c1*body1;
+      body2=(1-c2)*raw+c2*body2;
+      body3=(1-c3)*raw+c3*body3;
+      const resonant=(raw-body1)*.48+(raw-body2)*.22+(raw-body3)*.11;
+      const tail=Math.exp(-t*(midi>72?.20:.115));
+      out[i]=(raw*.72+resonant*.36)*tail;
+      ia=na;ib=nb;
     }
     let peak=.0001;
     for(let i=0;i<out.length;i++)peak=Math.max(peak,Math.abs(out[i]));
-    const scale=.88/peak;
+    const scale=.86/peak;
     const buffer=ctx.createBuffer(1,length,sr),data=buffer.getChannelData(0);
     for(let i=0;i<length;i++)data[i]=out[i]*scale;
     kotoBufferCache.set(key,buffer);
@@ -646,82 +644,187 @@
   }
 
   function createKotoVoice(midi,when,onEnded) {
-    const preset=instruments.trialKoto;
-    const source=ctx.createBufferSource(),bodyLow=ctx.createBiquadFilter(),bodyHigh=ctx.createBiquadFilter();
+    const preset=instruments.finalKoto;
+    const count=sampleCounters.get('koto:'+midi)||0;sampleCounters.set('koto:'+midi,count+1);
+    const source=ctx.createBufferSource(),body=ctx.createBiquadFilter(),air=ctx.createBiquadFilter();
     const pan=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();
-    const bus=ctx.createGain(),reflection=ctx.createDelay(.08),reflectionGain=ctx.createGain();
-    source.buffer=createKotoBuffer(midi);
-    bodyLow.type='peaking';bodyLow.frequency.value=430;bodyLow.Q.value=.85;bodyLow.gain.value=3.2;
-    bodyHigh.type='peaking';bodyHigh.frequency.value=1180;bodyHigh.Q.value=1.1;bodyHigh.gain.value=2.1;
-    if('pan' in pan)pan.pan.value=Math.max(-.12,Math.min(.12,(midi-66)/160));
+    const bus=ctx.createGain(),reflection=ctx.createDelay(.09),reflectionGain=ctx.createGain();
+    source.buffer=createKotoBuffer(midi,count%2);
+    source.playbackRate.setValueAtTime(1.007,when);source.playbackRate.exponentialRampToValueAtTime(1,when+.032);
+    body.type='peaking';body.frequency.value=510;body.Q.value=.7;body.gain.value=2.8;
+    air.type='peaking';air.frequency.value=2400;air.Q.value=.9;air.gain.value=1.6;
+    if('pan' in pan)pan.pan.value=Math.max(-.14,Math.min(.14,(midi-66)/120));
     bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.0025);
-    source.connect(bodyLow);bodyLow.connect(bodyHigh);bodyHigh.connect(pan);pan.connect(bus);
-    bodyHigh.connect(reflection);reflection.delayTime.value=.022;reflection.connect(reflectionGain);reflectionGain.gain.value=.075;reflectionGain.connect(bus);
+    source.connect(body);body.connect(air);air.connect(pan);pan.connect(bus);
+    air.connect(reflection);reflection.delayTime.value=.026;reflection.connect(reflectionGain);reflectionGain.gain.value=.09;reflectionGain.connect(bus);
     bus.connect(effects.input);
     let cleaned=false;
     const cleanup=()=>{
       if(cleaned)return;cleaned=true;
-      try{source.disconnect();bodyLow.disconnect();bodyHigh.disconnect();pan.disconnect();reflection.disconnect();reflectionGain.disconnect();bus.disconnect();}catch(_){}
+      try{source.disconnect();body.disconnect();air.disconnect();pan.disconnect();reflection.disconnect();reflectionGain.disconnect();bus.disconnect();}catch(_){}
       onEnded?.();
     };
     source.onended=cleanup;source.start(when);
-    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.trialKoto.release){
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.finalKoto.release){
       if(cleaned||!Number.isFinite(seconds))return;
-      const start=Math.max(when+.004,at),end=start+Math.max(.035,seconds);
-      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.008,seconds/4));
-      try{source.stop(end+.05);}catch(_){}
+      const start=Math.max(when+.004,at),end=start+Math.max(.05,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.01,seconds/4));
+      try{source.stop(end+.06);}catch(_){}
     }};
   }
 
+  function trumpetPeriodicWave(register) {
+    if(trumpetWaveCache.has(register))return trumpetWaveCache.get(register);
+    const real=new Float32Array(19),imag=new Float32Array(19);
+    const base=register==='high'
+      ? [0,1,.88,.71,.58,.48,.39,.31,.25,.20,.16,.13,.105,.082,.064,.05,.039,.03,.023]
+      : register==='low'
+      ? [0,1,.67,.50,.37,.28,.21,.16,.12,.09,.07,.052,.039,.03,.022,.017,.013,.010,.008]
+      : [0,1,.78,.60,.46,.35,.27,.21,.16,.125,.098,.076,.059,.046,.035,.027,.021,.016,.012];
+    for(let i=1;i<base.length;i++)imag[i]=base[i];
+    const wave=ctx.createPeriodicWave(real,imag,{disableNormalization:false});
+    trumpetWaveCache.set(register,wave);
+    return wave;
+  }
+
   function createTrumpetVoice(midi,when,onEnded) {
-    const preset=instruments.trialTrumpet;
-    const f=midiHz(midi),wave=trumpetPeriodicWave();
+    const preset=instruments.finalTrumpet,f=midiHz(midi);
+    const register=midi>=74?'high':midi<=61?'low':'mid',wave=trumpetPeriodicWave(register);
     const osc1=ctx.createOscillator(),osc2=ctx.createOscillator();
     osc1.setPeriodicWave(wave);osc2.setPeriodicWave(wave);
     osc1.frequency.value=f;osc2.frequency.value=f;
-    osc1.detune.setValueAtTime(-13,when);osc1.detune.linearRampToValueAtTime(0,when+.075);
-    osc2.detune.setValueAtTime(-8.5,when);osc2.detune.linearRampToValueAtTime(3.2,when+.082);
-    const g1=ctx.createGain(),g2=ctx.createGain();g1.gain.value=.72;g2.gain.value=.22;
+    const attackBend=midi>=76?-16:-11;
+    osc1.detune.setValueAtTime(attackBend,when);osc1.detune.linearRampToValueAtTime(0,when+.085);
+    osc2.detune.setValueAtTime(attackBend+3,when);osc2.detune.linearRampToValueAtTime(2.6,when+.092);
+    const g1=ctx.createGain(),g2=ctx.createGain();g1.gain.value=.75;g2.gain.value=.19;
 
-    const mix=ctx.createGain(),filter=ctx.createBiquadFilter(),presence=ctx.createBiquadFilter(),bus=ctx.createGain();
-    filter.type='lowpass';filter.Q.value=.7;
-    const open=Math.min(7200,2500+f*4.5);
-    filter.frequency.setValueAtTime(Math.max(900,open*.38),when);
-    filter.frequency.exponentialRampToValueAtTime(open,when+.095);
-    filter.frequency.setTargetAtTime(open*.84,when+.13,.12);
-    presence.type='peaking';presence.frequency.value=1850;presence.Q.value=.8;presence.gain.value=2.8;
-    bus.gain.setValueAtTime(.00001,when);
-    bus.gain.exponentialRampToValueAtTime(Math.max(.0001,preset.gain),when+.038);
-    bus.gain.setTargetAtTime(preset.gain*.9,when+.11,.07);
+    const mix=ctx.createGain(),drive=ctx.createWaveShaper(),filter=ctx.createBiquadFilter(),presence=ctx.createBiquadFilter(),warmth=ctx.createBiquadFilter();
+    const pan=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain(),bus=ctx.createGain();
+    const curve=new Float32Array(257);
+    for(let i=0;i<curve.length;i++){const x=i/(curve.length-1)*2-1;curve[i]=Math.tanh(x*1.45)/Math.tanh(1.45);}
+    drive.curve=curve;drive.oversample='2x';
+    filter.type='lowpass';filter.Q.value=.62;
+    const open=Math.min(8200,2850+f*5.0);
+    filter.frequency.setValueAtTime(Math.max(1050,open*.32),when);
+    filter.frequency.exponentialRampToValueAtTime(open,when+.11);
+    filter.frequency.setTargetAtTime(open*.86,when+.18,.13);
+    presence.type='peaking';presence.frequency.value=1850;presence.Q.value=.82;presence.gain.value=3.1;
+    warmth.type='peaking';warmth.frequency.value=720;warmth.Q.value=.72;warmth.gain.value=register==='low'?2.1:1.2;
+    if('pan' in pan)pan.pan.value=(midi%2?-.035:.035);
+    bus.gain.setValueAtTime(.00001,when);bus.gain.exponentialRampToValueAtTime(Math.max(.0001,preset.gain),when+.04);bus.gain.setTargetAtTime(preset.gain*.9,when+.13,.08);
 
-    osc1.connect(g1);osc2.connect(g2);g1.connect(mix);g2.connect(mix);mix.connect(filter);filter.connect(presence);presence.connect(bus);
+    osc1.connect(g1);osc2.connect(g2);g1.connect(mix);g2.connect(mix);mix.connect(drive);drive.connect(filter);filter.connect(presence);presence.connect(warmth);warmth.connect(pan);pan.connect(bus);
 
     const breath=ctx.createBufferSource(),breathFilter=ctx.createBiquadFilter(),breathGain=ctx.createGain();
     breath.buffer=getBreathNoiseBuffer();breath.loop=true;
-    breathFilter.type='bandpass';breathFilter.frequency.value=3300;breathFilter.Q.value=.62;
-    breathGain.gain.setValueAtTime(.0001,when);breathGain.gain.linearRampToValueAtTime(.022,when+.045);breathGain.gain.setTargetAtTime(.012,when+.16,.08);
+    breathFilter.type='bandpass';breathFilter.frequency.value=register==='high'?4200:3300;breathFilter.Q.value=.7;
+    breathGain.gain.setValueAtTime(.0001,when);breathGain.gain.linearRampToValueAtTime(.026,when+.05);breathGain.gain.setTargetAtTime(.011,when+.18,.09);
     breath.connect(breathFilter);breathFilter.connect(breathGain);breathGain.connect(bus);
 
     const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
-    lfo.type='sine';lfo.frequency.value=5.15;
-    lfoGain.gain.setValueAtTime(0,when);lfoGain.gain.linearRampToValueAtTime(4.3,when+.38);
+    lfo.type='sine';lfo.frequency.value=5.2;
+    lfoGain.gain.setValueAtTime(0,when);lfoGain.gain.setValueAtTime(0,when+.22);lfoGain.gain.linearRampToValueAtTime(register==='high'?5.0:4.1,when+.52);
     lfo.connect(lfoGain);lfoGain.connect(osc1.detune);lfoGain.connect(osc2.detune);
 
+    const reflection=ctx.createDelay(.09),reflectionGain=ctx.createGain();
+    reflection.delayTime.value=.031;reflectionGain.gain.value=.055;warmth.connect(reflection);reflection.connect(reflectionGain);reflectionGain.connect(bus);
     bus.connect(effects.input);
+
     let cleaned=false;
     const cleanup=()=>{
       if(cleaned)return;cleaned=true;
-      try{osc1.disconnect();osc2.disconnect();g1.disconnect();g2.disconnect();mix.disconnect();filter.disconnect();presence.disconnect();breath.disconnect();breathFilter.disconnect();breathGain.disconnect();lfo.disconnect();lfoGain.disconnect();bus.disconnect();}catch(_){}
+      try{osc1.disconnect();osc2.disconnect();g1.disconnect();g2.disconnect();mix.disconnect();drive.disconnect();filter.disconnect();presence.disconnect();warmth.disconnect();pan.disconnect();breath.disconnect();breathFilter.disconnect();breathGain.disconnect();lfo.disconnect();lfoGain.disconnect();reflection.disconnect();reflectionGain.disconnect();bus.disconnect();}catch(_){}
       onEnded?.();
     };
-    osc1.onended=cleanup;
-    osc1.start(when);osc2.start(when);breath.start(when);lfo.start(when);
-    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.trialTrumpet.release){
+    osc1.onended=cleanup;osc1.start(when);osc2.start(when);breath.start(when);lfo.start(when);
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.finalTrumpet.release){
       if(cleaned||!Number.isFinite(seconds))return;
-      const start=Math.max(when+.04,at),end=start+Math.max(.06,seconds);
-      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.012,seconds/4));
-      breathGain.gain.cancelScheduledValues(start);breathGain.gain.setTargetAtTime(.00001,start,.025);
-      try{osc1.stop(end+.06);osc2.stop(end+.06);breath.stop(end+.06);lfo.stop(end+.06);}catch(_){}
+      const start=Math.max(when+.045,at),end=start+Math.max(.07,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.014,seconds/4));
+      breathGain.gain.cancelScheduledValues(start);breathGain.gain.setTargetAtTime(.00001,start,.03);
+      try{osc1.stop(end+.07);osc2.stop(end+.07);breath.stop(end+.07);lfo.stop(end+.07);}catch(_){}
+    }};
+  }
+
+  function organPeriodicWave(kind) {
+    if(organWaveCache.has(kind))return organWaveCache.get(kind);
+    const weights=kind==='principal'
+      ? [0,1,.48,.31,.20,.15,.105,.075,.052,.038,.028,.020,.015,.011,.008]
+      : [0,1,.18,.055,.025,.014,.008,.005,.003];
+    const real=new Float32Array(weights.length),imag=new Float32Array(weights.length);
+    for(let i=1;i<weights.length;i++)imag[i]=weights[i];
+    const wave=ctx.createPeriodicWave(real,imag,{disableNormalization:false});
+    organWaveCache.set(kind,wave);return wave;
+  }
+
+  function createPipeOrganVoice(midi,when,onEnded) {
+    const preset=instruments.finalPipeOrgan,f=midiHz(midi);
+    const bus=ctx.createGain(),low=ctx.createBiquadFilter(),panA=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain(),panB=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();
+    low.type='lowpass';low.frequency.value=Math.min(12500,4200+f*8);low.Q.value=.12;
+    if('pan' in panA){panA.pan.value=-.10;panB.pan.value=.10;}
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.026);
+    low.connect(bus);bus.connect(effects.input);
+
+    const principal=ctx.createOscillator(),flute=ctx.createOscillator(),oct=ctx.createOscillator();
+    const gp=ctx.createGain(),gf=ctx.createGain(),go=ctx.createGain();
+    principal.setPeriodicWave(organPeriodicWave('principal'));flute.setPeriodicWave(organPeriodicWave('flute'));oct.setPeriodicWave(organPeriodicWave('flute'));
+    principal.frequency.value=f;flute.frequency.value=f*.5;oct.frequency.value=f*2;
+    principal.detune.value=-1.2;flute.detune.value=1.1;oct.detune.value=.5;
+    gp.gain.value=.68;gf.gain.value=midi<60?.32:.18;go.gain.value=midi>76?.08:.17;
+    principal.connect(gp);flute.connect(gf);oct.connect(go);gp.connect(panA);gf.connect(panB);go.connect(panB);panA.connect(low);panB.connect(low);
+
+    const chiff=ctx.createBufferSource(),chiffFilter=ctx.createBiquadFilter(),chiffGain=ctx.createGain();
+    chiff.buffer=getBreathNoiseBuffer();chiff.loop=true;chiffFilter.type='bandpass';chiffFilter.frequency.value=Math.min(5400,1500+f*3);chiffFilter.Q.value=.8;
+    chiffGain.gain.setValueAtTime(.035,when);chiffGain.gain.exponentialRampToValueAtTime(.0001,when+.075);
+    chiff.connect(chiffFilter);chiffFilter.connect(chiffGain);chiffGain.connect(low);
+
+    const drift=ctx.createOscillator(),driftGain=ctx.createGain();
+    drift.type='sine';drift.frequency.value=.22;driftGain.gain.value=1.0;drift.connect(driftGain);driftGain.connect(principal.detune);driftGain.connect(flute.detune);
+
+    let cleaned=false;
+    const cleanup=()=>{
+      if(cleaned)return;cleaned=true;
+      try{principal.disconnect();flute.disconnect();oct.disconnect();gp.disconnect();gf.disconnect();go.disconnect();panA.disconnect();panB.disconnect();low.disconnect();chiff.disconnect();chiffFilter.disconnect();chiffGain.disconnect();drift.disconnect();driftGain.disconnect();bus.disconnect();}catch(_){}
+      onEnded?.();
+    };
+    principal.onended=cleanup;principal.start(when);flute.start(when);oct.start(when);chiff.start(when);drift.start(when);
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.finalPipeOrgan.release){
+      if(cleaned||!Number.isFinite(seconds))return;
+      const start=Math.max(when+.03,at),end=start+Math.max(.12,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.03,seconds/4));
+      try{principal.stop(end+.12);flute.stop(end+.12);oct.stop(end+.12);chiff.stop(end+.12);drift.stop(end+.12);}catch(_){}
+    }};
+  }
+
+  function createVibraphoneVoice(midi,when,onEnded) {
+    const preset=instruments.finalVibraphone;
+    const anchor=Array.from(sampleBuffers.keys()).reduce((best,note)=>Math.abs(note-midi)<Math.abs(best-midi)?note:best);
+    const variants=sampleBuffers.get(anchor),index=sampleCounters.get(anchor)||0;
+    const sample=variants[index%variants.length];sampleCounters.set(anchor,index+1);
+    const source=ctx.createBufferSource(),tone=ctx.createBiquadFilter(),motor=ctx.createGain(),pan=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain(),bus=ctx.createGain();
+    source.buffer=sample.buffer;source.playbackRate.value=Math.pow(2,(midi-anchor)/12);
+    tone.type='highpass';tone.frequency.value=70;tone.Q.value=.15;
+    motor.gain.value=.87;if('pan' in pan)pan.pan.value=Math.max(-.16,Math.min(.16,(midi-71)/100));
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.004);
+    source.connect(tone);tone.connect(motor);motor.connect(pan);pan.connect(bus);bus.connect(effects.input);
+
+    const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
+    lfo.type='sine';lfo.frequency.value=5.65;lfoGain.gain.value=.13;lfo.connect(lfoGain);lfoGain.connect(motor.gain);
+
+    const naturalDuration=(sample.buffer.duration-sample.offset)/source.playbackRate.value;
+    let cleaned=false;
+    const cleanup=()=>{
+      if(cleaned)return;cleaned=true;
+      try{source.disconnect();tone.disconnect();motor.disconnect();pan.disconnect();bus.disconnect();lfo.disconnect();lfoGain.disconnect();}catch(_){}
+      onEnded?.();
+    };
+    source.onended=cleanup;source.start(when,sample.offset);lfo.start(when);
+    try{lfo.stop(when+naturalDuration+.1);}catch(_){}
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.finalVibraphone.release){
+      if(cleaned||!Number.isFinite(seconds))return;
+      const start=Math.max(when+.005,at),end=start+Math.max(.08,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.02,seconds/4));
+      try{source.stop(end+.08);lfo.stop(end+.08);}catch(_){}
     }};
   }
 
@@ -733,9 +836,11 @@
     if(engine){
       let voice=null;
       const onEnded=()=>{ if(voice){allVoices.delete(voice);liveVoices.delete(voice);} };
-      if(engine==='chip8')voice=createChip8Voice(midi,when,onEnded);
-      else if(engine==='koto')voice=createKotoVoice(midi,when,onEnded);
-      else if(engine==='trumpet')voice=createTrumpetVoice(midi,when,onEnded);
+      if(engine==='chip8Final')voice=createChip8Voice(midi,when,onEnded);
+      else if(engine==='kotoFinal')voice=createKotoVoice(midi,when,onEnded);
+      else if(engine==='trumpetFinal')voice=createTrumpetVoice(midi,when,onEnded);
+      else if(engine==='pipeOrganFinal')voice=createPipeOrganVoice(midi,when,onEnded);
+      else if(engine==='vibraphoneFinal')voice=createVibraphoneVoice(midi,when,onEnded);
       if(voice){allVoices.add(voice);if(live)liveVoices.add(voice);return voice;}
     }
     if(currentInstrument==='violin'){
