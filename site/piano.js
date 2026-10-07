@@ -796,6 +796,31 @@
     }};
   }
 
+  function createSampleOrganVoice(midi,when,onEnded) {
+    const preset=instruments.finalPipeOrgan;
+    const anchor=Array.from(sampleBuffers.keys()).reduce((best,note)=>Math.abs(note-midi)<Math.abs(best-midi)?note:best);
+    const variants=sampleBuffers.get(anchor),index=sampleCounters.get(anchor)||0;
+    const sample=variants[index%variants.length];sampleCounters.set(anchor,index+1);
+    const source=ctx.createBufferSource(),tone=ctx.createBiquadFilter(),bus=ctx.createGain();
+    source.buffer=sample.buffer;source.playbackRate.value=Math.pow(2,(midi-anchor)/12);
+    tone.type='lowpass';tone.frequency.value=Math.min(14500,6000+midiHz(midi)*6);tone.Q.value=.12;
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.012);
+    source.connect(tone);tone.connect(bus);bus.connect(effects.input);
+    let cleaned=false;
+    const cleanup=()=>{
+      if(cleaned)return;cleaned=true;
+      try{source.disconnect();tone.disconnect();bus.disconnect();}catch(_){}
+      onEnded?.();
+    };
+    source.onended=cleanup;source.start(when,sample.offset);
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.finalPipeOrgan.release){
+      if(cleaned||!Number.isFinite(seconds))return;
+      const start=Math.max(when+.015,at),end=start+Math.max(.12,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.03,seconds/4));
+      try{source.stop(end+.12);}catch(_){}
+    }};
+  }
+
   function createVibraphoneVoice(midi,when,onEnded) {
     const preset=instruments.finalVibraphone;
     const anchor=Array.from(sampleBuffers.keys()).reduce((best,note)=>Math.abs(note-midi)<Math.abs(best-midi)?note:best);
@@ -840,6 +865,7 @@
       else if(engine==='kotoFinal')voice=createKotoVoice(midi,when,onEnded);
       else if(engine==='trumpetFinal')voice=createTrumpetVoice(midi,when,onEnded);
       else if(engine==='pipeOrganFinal')voice=createPipeOrganVoice(midi,when,onEnded);
+      else if(engine==='sampleOrganFinal')voice=createSampleOrganVoice(midi,when,onEnded);
       else if(engine==='vibraphoneFinal')voice=createVibraphoneVoice(midi,when,onEnded);
       if(voice){allVoices.add(voice);if(live)liveVoices.add(voice);return voice;}
     }
