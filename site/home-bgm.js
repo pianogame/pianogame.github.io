@@ -131,3 +131,12 @@
   sync();
   scheduleBoundary();
 })();
+
+(() => {
+  if (document.querySelector('script[data-pds-gacha-profile-ui]')) return;
+  const script = document.createElement('script');
+  script.src = '/gacha-profile-ui.js?v=20261007-1';
+  script.defer = true;
+  script.dataset.pdsGachaProfileUi = '';
+  document.head.appendChild(script);
+})();
