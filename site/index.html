@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=82', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=83', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -80,7 +80,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
   <script defer src="/home.js?v=20261007-skip-frame-v23"></script>
-  <script defer src="/gacha-profile-ui.js?v=20261007-skip-frame-v23"></script>
+  <script defer src="/gacha-profile-ui.js?v=20261007-frame-preview-v24"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -260,9 +260,19 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
             <select data-profile-home-background></select>
             <small>ガチャで獲得した背景から選択できます。</small>
           </label>
-          <label class="hp-player-profile-field">
+          <label class="hp-player-profile-field has-custom-preview">
             <span>プロフィールフレーム</span>
             <select data-profile-frame></select>
+            <div class="hp-customization-preview is-frame" data-profile-frame-preview>
+              <div class="hp-customization-frame-visual">
+                <img class="hp-customization-frame-avatar" src="/assets/home/profile-default.svg" alt="プロフィール画像">
+                <img class="hp-customization-frame-art" alt="" aria-hidden="true" hidden>
+              </div>
+              <div class="hp-customization-preview-copy">
+                <small>SELECTED FRAME</small>
+                <strong>標準フレーム</strong>
+              </div>
+            </div>
             <small>ガチャで獲得したフレームから選択できます。</small>
           </label>
           <div class="hp-player-profile-actions">
