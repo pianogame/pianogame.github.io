@@ -6498,3 +6498,28 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     animation:none !important;
   }
 }
+
+
+/* ===== 2026-10-08 Profile save belongs beside Close ===== */
+#hp-home-screen .hp-home-dialog-profile-save {
+  display:none;
+}
+#hp-home-screen .hp-home-dialog-overlay[data-screen="profile"] .hp-home-dialog-profile-save {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+/* The header action is now the single visible save action. */
+#hp-home-screen .hp-player-profile-actions .hp-player-profile-save {
+  display:none !important;
+}
+/* No longer reserve preview-card space for the removed save button. */
+#hp-home-screen .hp-player-profile-summary {
+  padding-right:18px !important;
+}
+@container (max-width:760px) {
+  #hp-home-screen .hp-player-profile-summary {
+    padding-right:12px !important;
+  }
+}
