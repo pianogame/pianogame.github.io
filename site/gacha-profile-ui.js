@@ -46,14 +46,14 @@
     #hp-home-screen .hp-player-profile-field.has-custom-preview > small { white-space:normal; }
     #hp-home-screen .hp-customization-preview {
       min-width:0;
-      display:flex;
+      display:flex !important;
       align-items:center;
       gap:12px;
       padding:8px;
       border:1px solid #b89b6170;
       border-radius:10px;
       background:linear-gradient(135deg,#fffdf8e8,#eef3f8d9);
-      overflow:hidden;
+      overflow:visible;
     }
     #hp-home-screen .hp-customization-preview-copy {
       min-width:0;
@@ -81,18 +81,22 @@
       border:1px solid #ad8f55;
       box-shadow:0 2px 8px #15253b2b;
     }
+    #hp-home-screen .hp-customization-preview.is-frame {
+      min-height:94px;
+    }
     #hp-home-screen .hp-customization-frame-visual {
       position:relative;
-      width:82px;
-      height:82px;
-      flex:none;
+      width:84px;
+      height:84px;
+      flex:0 0 84px;
       border-radius:50%;
+      background:radial-gradient(circle,#f7f8fb 0 58%,#dce3ea 59% 100%);
     }
     #hp-home-screen .hp-customization-frame-visual .hp-customization-frame-avatar {
       position:absolute;
-      inset:10%;
-      width:80%;
-      height:80%;
+      inset:13%;
+      width:74%;
+      height:74%;
       object-fit:cover;
       border-radius:50%;
       background:#e9edf2;
@@ -104,11 +108,14 @@
       height:100%;
       object-fit:contain;
       z-index:2;
+      display:block !important;
     }
+    #hp-home-screen .hp-customization-frame-visual .hp-customization-frame-art[hidden] { display:none !important; }
     @container (max-height:520px) {
       #hp-home-screen .hp-customization-preview { padding:5px; gap:8px; }
       #hp-home-screen .hp-customization-preview.is-background > img { width:min(34%,150px); }
-      #hp-home-screen .hp-customization-frame-visual { width:62px; height:62px; }
+      #hp-home-screen .hp-customization-preview.is-frame { min-height:70px; }
+      #hp-home-screen .hp-customization-frame-visual { width:62px; height:62px; flex-basis:62px; }
       #hp-home-screen .hp-player-profile-field.has-custom-preview > span { padding-top:6px; }
     }
   `;
@@ -118,9 +125,17 @@
   const backgroundSelect = home.querySelector('[data-profile-home-background]');
   const frameSelect = home.querySelector('[data-profile-frame]');
 
+  function cleanOwnedPrefix(select) {
+    if (!select) return;
+    for (const option of select.options) {
+      const cleaned = (option.textContent || '').replace(/^\s*所持\s*[｜|:：]\s*/, '');
+      if (option.textContent !== cleaned) option.textContent = cleaned;
+    }
+  }
+
   function optionName(select) {
-    const text = select?.selectedOptions?.[0]?.textContent || '';
-    return text.replace(/^所持｜/, '').trim();
+    cleanOwnedPrefix(select);
+    return (select?.selectedOptions?.[0]?.textContent || '').trim();
   }
 
   function buildBackgroundPreview(select) {
@@ -135,6 +150,8 @@
       preview.innerHTML = '<img alt="選択中のホーム背景"><div class="hp-customization-preview-copy"><small>SELECTED BACKGROUND</small><strong></strong></div>';
       select.insertAdjacentElement('afterend', preview);
     }
+    preview.style.display = 'flex';
+    preview.style.gridColumn = '2';
     return preview;
   }
 
@@ -147,17 +164,23 @@
       preview = document.createElement('div');
       preview.className = 'hp-customization-preview is-frame';
       preview.dataset.profileFramePreview = '';
-      preview.innerHTML = '<div class="hp-customization-frame-visual"><img class="hp-customization-frame-avatar" alt="プロフィール画像"><img class="hp-customization-frame-art" alt="" aria-hidden="true" hidden></div><div class="hp-customization-preview-copy"><small>SELECTED FRAME</small><strong></strong></div>';
+      preview.innerHTML = '<div class="hp-customization-frame-visual"><img class="hp-customization-frame-avatar" alt="プロフィール画像"><img class="hp-customization-frame-art" alt="" aria-hidden="true"></div><div class="hp-customization-preview-copy"><small>SELECTED FRAME</small><strong></strong></div>';
       select.insertAdjacentElement('afterend', preview);
     }
+    preview.hidden = false;
+    preview.style.display = 'flex';
+    preview.style.gridColumn = '2';
+    preview.style.minHeight = '94px';
     return preview;
   }
 
-  const backgroundPreview = buildBackgroundPreview(backgroundSelect);
-  const framePreview = buildFramePreview(frameSelect);
+  let backgroundPreview = buildBackgroundPreview(backgroundSelect);
+  let framePreview = buildFramePreview(frameSelect);
 
   function syncBackgroundPreview() {
+    backgroundPreview = buildBackgroundPreview(backgroundSelect) || backgroundPreview;
     if (!backgroundSelect || !backgroundPreview) return;
+    cleanOwnedPrefix(backgroundSelect);
     const id = backgroundSelect.value || 'default';
     const img = backgroundPreview.querySelector('img');
     const label = backgroundPreview.querySelector('strong');
@@ -167,12 +190,14 @@
   }
 
   function syncFramePreview() {
+    framePreview = buildFramePreview(frameSelect) || framePreview;
     if (!frameSelect || !framePreview) return;
+    cleanOwnedPrefix(frameSelect);
     const id = frameSelect.value || 'default';
     const avatar = framePreview.querySelector('.hp-customization-frame-avatar');
     const art = framePreview.querySelector('.hp-customization-frame-art');
     const label = framePreview.querySelector('strong');
-    const avatarSource = profileImage?.getAttribute('src') || '/assets/home/profile-default.svg';
+    const avatarSource = profileImage?.currentSrc || profileImage?.getAttribute('src') || '/assets/home/profile-default.svg';
     if (avatar && avatar.getAttribute('src') !== avatarSource) avatar.src = avatarSource;
     const frameSource = frameImages[id] || '';
     if (art) {
@@ -187,6 +212,15 @@
   frameSelect?.addEventListener('change', syncFramePreview);
   syncBackgroundPreview();
   syncFramePreview();
+
+  for (const select of [backgroundSelect, frameSelect]) {
+    if (!select) continue;
+    new MutationObserver(() => {
+      cleanOwnedPrefix(select);
+      if (select === backgroundSelect) syncBackgroundPreview();
+      if (select === frameSelect) syncFramePreview();
+    }).observe(select, { childList:true, subtree:true, characterData:true });
+  }
 
   if (profileImage) {
     new MutationObserver(syncFramePreview).observe(profileImage, { attributes:true, attributeFilter:['src'] });
@@ -253,15 +287,18 @@
 
   const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
   let forwardingResultTap = false;
-  resultOverlay?.addEventListener('click', event => {
-    if (forwardingResultTap || resultOverlay.hidden || resultOverlay.dataset.mode !== 'sequence') return;
+  function forwardResultTap(event) {
+    if (forwardingResultTap || !resultOverlay || resultOverlay.hidden || resultOverlay.dataset.mode !== 'sequence') return;
     const count = Number(resultOverlay.dataset.count || '1');
-    if (count <= 1) return;
-    const next = home.querySelector('[data-gacha-result-next]');
-    if (!next) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
+    const target = count > 1
+      ? home.querySelector('[data-gacha-result-next]')
+      : home.querySelector('.hp-gacha-result-ok');
+    if (!target) return;
+    event?.preventDefault?.();
+    event?.stopImmediatePropagation?.();
     forwardingResultTap = true;
-    try { next.click(); } finally { forwardingResultTap = false; }
-  }, { capture:true });
+    try { target.click(); } finally { forwardingResultTap = false; }
+  }
+  resultOverlay?.addEventListener('pointerup', forwardResultTap, { capture:true });
+  resultOverlay?.addEventListener('click', forwardResultTap, { capture:true });
 })();
