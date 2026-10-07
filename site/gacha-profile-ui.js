@@ -262,8 +262,8 @@
     warmedGachaAssets = true;
     const common = [
       '/assets/gacha/visuals/piano-v1.webp',
-      '/assets/gacha/visuals/normal-v1.webp',
-      '/assets/gacha/visuals/special-v1.webp',
+      '/assets/gacha/visuals/result-normal-v2.webp?v=21',
+      '/assets/gacha/visuals/result-character-v2.webp?v=21',
       '/assets/gacha/visuals/ticket-v1.webp',
     ];
     await Promise.all(common.map(src => preloadImage(src, 'high')));
@@ -299,6 +299,5 @@
     forwardingResultTap = true;
     try { target.click(); } finally { forwardingResultTap = false; }
   }
-  resultOverlay?.addEventListener('pointerup', forwardResultTap, { capture:true });
   resultOverlay?.addEventListener('click', forwardResultTap, { capture:true });
 })();
