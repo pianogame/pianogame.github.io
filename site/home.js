@@ -366,6 +366,7 @@
   const profileInstrumentInput = home.querySelector('[data-profile-instrument]');
   const profileHomeBackgroundInput = home.querySelector('[data-profile-home-background]');
   const profileFrameInput = home.querySelector('[data-profile-frame]');
+  const profileEffectInput = home.querySelector('[data-profile-effect]');
   const profileImageInput = home.querySelector('[data-profile-image-input]');
   const profileImageRemove = home.querySelector('[data-profile-image-remove]');
   const profilePreviewImage = home.querySelector('[data-profile-preview-image]');
@@ -382,6 +383,7 @@
     image: '',
     homeBackground: 'default',
     frame: 'default',
+    profileEffect: 'default',
   };
   const defaultProfileImage = '/assets/home/profile-default.svg';
   const gachaInventoryKey = 'pds-gacha-inventory-v1';
@@ -432,15 +434,23 @@
     frame14: { name:'ノクターン', image:'/assets/gacha/frames/frame14-v1.webp' },
     frame15: { name:'セレブレーション', image:'/assets/gacha/frames/frame15-v1.webp' },
   });
+  const profileEffectCatalog = Object.freeze({
+    default: { name:'エフェクトなし' },
+    starlightNotes: {
+      name:'スターライトノーツ',
+      description:'金色の光粒と音符がプロフィール背景をゆっくり流れるエフェクト',
+    },
+  });
 
   function loadGachaInventory() {
-    const blank = { backgrounds:['default'], frames:['default'], voices:[], characters:[] };
+    const blank = { backgrounds:['default'], frames:['default'], profileEffects:['default'], voices:[], characters:[] };
     try {
       const saved = JSON.parse(localStorage.getItem(gachaInventoryKey) || 'null');
       if (!saved || typeof saved !== 'object') return blank;
       return {
         backgrounds:Array.from(new Set(['default', ...(Array.isArray(saved.backgrounds) ? saved.backgrounds : [])])),
         frames:Array.from(new Set(['default', ...(Array.isArray(saved.frames) ? saved.frames : [])])),
+        profileEffects:Array.from(new Set(['default', ...(Array.isArray(saved.profileEffects) ? saved.profileEffects : [])])),
         voices:Array.from(new Set(Array.isArray(saved.voices) ? saved.voices : [])),
         characters:Array.from(new Set(Array.isArray(saved.characters) ? saved.characters : [])),
       };
@@ -458,6 +468,7 @@
     if (id === 'default') return true;
     if (type === 'background') return gachaInventory.backgrounds.includes(id);
     if (type === 'frame') return gachaInventory.frames.includes(id);
+    if (type === 'profileEffect') return gachaInventory.profileEffects.includes(id);
     return false;
   }
 
@@ -485,6 +496,9 @@
       renderProfileFrame(img, frameId);
     });
     home.dataset.profileFrame = frameId;
+    const effectId = hasOwnedCustomization('profileEffect', playerProfile.profileEffect) ? playerProfile.profileEffect : 'default';
+    const profileSummary = home.querySelector('.hp-player-profile-summary');
+    if (profileSummary) profileSummary.dataset.profileEffect = effectId;
     const frameImage = profileFrameCatalog[frameId]?.image || '';
     home.style.setProperty('--profile-frame-image', frameImage ? 'url("' + frameImage.replace(/"/g,'%22') + '")' : 'none');
   }
@@ -558,10 +572,19 @@
     preview.style.opacity = '1';
   }
 
+  function syncProfileEffectPreview() {
+    const summary = home.querySelector('.hp-player-profile-summary');
+    if (!summary) return;
+    const id = profileEffectCatalog[profileEffectInput?.value] ? profileEffectInput.value : (playerProfile.profileEffect || 'default');
+    summary.dataset.profileEffect = id;
+  }
+
   function syncCustomizationInputs() {
     fillOwnedSelect(profileHomeBackgroundInput, homeBackgroundCatalog, gachaInventory.backgrounds, playerProfile.homeBackground);
     fillOwnedSelect(profileFrameInput, profileFrameCatalog, gachaInventory.frames, playerProfile.frame);
+    fillOwnedSelect(profileEffectInput, profileEffectCatalog, gachaInventory.profileEffects, playerProfile.profileEffect);
     syncFrameSelectionPreview();
+    syncProfileEffectPreview();
   }
 
   function loadPlayerProfile() {
@@ -575,6 +598,7 @@
         image: typeof saved.image === 'string' && (saved.image.startsWith('data:image/') || saved.image.startsWith('/')) ? saved.image : '',
         homeBackground: typeof saved.homeBackground === 'string' ? saved.homeBackground : 'default',
         frame: typeof saved.frame === 'string' ? saved.frame : 'default',
+        profileEffect: typeof saved.profileEffect === 'string' ? saved.profileEffect : 'default',
       };
     } catch (_) {
       return { ...profileDefaults };
@@ -732,6 +756,8 @@
   home.addEventListener('change', event => {
     if (event.target === profileFrameInput) syncFrameSelectionPreview();
   }, true);
+  profileEffectInput?.addEventListener('input', syncProfileEffectPreview);
+  profileEffectInput?.addEventListener('change', syncProfileEffectPreview);
 
   const settingsProfileButton = home.querySelector('[data-home-action="profile-settings"]');
   settingsProfileButton?.addEventListener('click', () => openHomePanel('profile', settingsProfileButton));
@@ -787,13 +813,15 @@
       image: profileImageDraft || '',
       homeBackground: hasOwnedCustomization('background', profileHomeBackgroundInput?.value) ? profileHomeBackgroundInput.value : 'default',
       frame: hasOwnedCustomization('frame', profileFrameInput?.value) ? profileFrameInput.value : 'default',
+      profileEffect: hasOwnedCustomization('profileEffect', profileEffectInput?.value) ? profileEffectInput.value : 'default',
     };
     try { localStorage.setItem(playerProfileKey, JSON.stringify(playerProfile)); } catch (_) {}
     syncPlayerProfileUI();
     if (profileStatus) {
       const bgName = homeBackgroundCatalog[playerProfile.homeBackground]?.name || homeBackgroundCatalog.default.name;
       const frameName = profileFrameCatalog[playerProfile.frame]?.name || profileFrameCatalog.default.name;
-      profileStatus.textContent = '保存しました｜背景：' + bgName + '／フレーム：' + frameName;
+      const effectName = profileEffectCatalog[playerProfile.profileEffect]?.name || profileEffectCatalog.default.name;
+      profileStatus.textContent = '保存しました｜背景：' + bgName + '／フレーム：' + frameName + '／エフェクト：' + effectName;
     }
   });
   const missionMenuButton = home.querySelector('[data-home-action="missions"]');
@@ -1096,12 +1124,15 @@
           message: playerProfile.message || profileDefaults.message,
           instrument: ({piano:'ピアノ',violin:'バイオリン',bass:'エレキベース',guitar:'エレキギター'})[playerProfile.instrument] || '未設定',
           image: playerProfile.image || '',
+          profileEffect: playerProfile.profileEffect || 'default',
         }
       : (entry?.profile || {});
     const setText = (selector, value) => {
       const node = overlay.querySelector(selector);
       if (node) node.textContent = value;
     };
+    const rankingCard = overlay.querySelector('.hp-ranking-profile-card');
+    if (rankingCard) rankingCard.dataset.profileEffect = profile.profileEffect || 'default';
     setText('[data-ranking-profile-name]', String(entry?.name || 'PLAYER'));
     setText('[data-ranking-profile-level]', profile.level ?? '—');
     setText('[data-ranking-profile-rank]', (rankValue || '—') + (rankValue ? '位' : ''));
@@ -1288,6 +1319,11 @@
       kind:'frame', id:'frame:' + id, customizationId:id,
       name:'プロフィールフレーム「' + item.name + '」', reading:'PROFILE FRAME', description:'プロフィールフレーム', image:item.image,
     })),
+    ...Object.entries(profileEffectCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
+      kind:'profileEffect', id:'profileEffect:' + id, customizationId:id,
+      name:'プロフィール背景エフェクト「' + item.name + '」', reading:'PROFILE EFFECT',
+      description:item.description || 'プロフィール背景エフェクト',
+    })),
   ];
 
   function gachaVoiceRewards() {
@@ -1309,6 +1345,7 @@
   function annotateGachaOwnership(results) {
     const seenBackgrounds = new Set(gachaInventory.backgrounds || []);
     const seenFrames = new Set(gachaInventory.frames || []);
+    const seenProfileEffects = new Set(gachaInventory.profileEffects || []);
     const seenVoices = new Set(gachaInventory.voices || []);
     const seenCharacters = new Set(gachaInventory.characters || []);
 
@@ -1324,6 +1361,10 @@
         alreadyOwned = seenFrames.has(result.customizationId);
         isNewReward = !alreadyOwned;
         seenFrames.add(result.customizationId);
+      } else if (result.kind === 'profileEffect' && result.customizationId) {
+        alreadyOwned = seenProfileEffects.has(result.customizationId);
+        isNewReward = !alreadyOwned;
+        seenProfileEffects.add(result.customizationId);
       } else if (result.kind === 'voice' && result.voiceId) {
         alreadyOwned = seenVoices.has(result.voiceId);
         isNewReward = !alreadyOwned;
@@ -1344,6 +1385,8 @@
         gachaInventory.backgrounds.push(result.customizationId); changed = true;
       } else if (result?.kind === 'frame' && result.customizationId && !gachaInventory.frames.includes(result.customizationId)) {
         gachaInventory.frames.push(result.customizationId); changed = true;
+      } else if (result?.kind === 'profileEffect' && result.customizationId && !gachaInventory.profileEffects.includes(result.customizationId)) {
+        gachaInventory.profileEffects.push(result.customizationId); changed = true;
       } else if (result?.kind === 'voice' && result.voiceId && !gachaInventory.voices.includes(result.voiceId)) {
         gachaInventory.voices.push(result.voiceId); changed = true;
       } else if (result?.kind === 'character' && result.characterId && !gachaInventory.characters.includes(result.characterId)) {
@@ -1374,6 +1417,14 @@
     const forceCharacter = !!options.forceCharacter;
     const forceItem = !!options.forceItem;
     if (!pool.length) return null;
+    if (forceItem) {
+      const trialEffect = gachaTrialItems.find(item =>
+        item.kind === 'profileEffect'
+        && item.customizationId
+        && !gachaInventory.profileEffects.includes(item.customizationId)
+      );
+      if (trialEffect) return { ...trialEffect };
+    }
     if (!forceItem && (forceCharacter || Math.random() < .34)) {
       return makeCharacterResult(pool[Math.floor(Math.random() * pool.length)]);
     }
@@ -1433,6 +1484,13 @@
       art.className = 'hp-gacha-result-voice-art';
       art.setAttribute('aria-hidden','true');
       art.innerHTML = '<span>♪</span><i>♫</i><b>♪</b>';
+      card.appendChild(art);
+    } else if (result?.kind === 'profileEffect') {
+      card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
+      const art = document.createElement('div');
+      art.className = 'hp-gacha-result-profile-effect-art';
+      art.setAttribute('aria-hidden','true');
+      art.innerHTML = '<i>♪</i><i>✦</i><i>♫</i><i>✧</i><i>♪</i>';
       card.appendChild(art);
     } else {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
