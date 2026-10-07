@@ -1086,8 +1086,8 @@
   const gachaTrialTicketCap = 9999;
   const gachaVisuals = {
     piano: '/assets/gacha/visuals/piano-v1.webp',
-    normal: '/assets/gacha/visuals/normal-v1.webp',
-    special: '/assets/gacha/visuals/special-v1.webp',
+    normal: '/assets/gacha/visuals/result-normal-v2.webp?v=21',
+    special: '/assets/gacha/visuals/result-character-v2.webp?v=21',
     ticket: '/assets/gacha/visuals/ticket-v1.webp',
   };
   let gachaDrawing = false;
@@ -1252,9 +1252,7 @@
       const character = registry?.get?.(result.characterId);
       card.dataset.characterId = character?.id || '';
       card.classList.toggle('is-new-character', result?.isNewCharacter === true);
-      if (character?.profileBackground) {
-        card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
-      }
+      card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.special + '")');
       const art = document.createElement('div');
       art.className = 'hp-gacha-result-motion';
       art.dataset.gachaResultMotion = character?.id || '';
@@ -1312,6 +1310,10 @@
     const { results, index, summary } = gachaResultState;
     overlay.dataset.count = String(results.length);
     overlay.dataset.mode = summary ? 'summary' : 'sequence';
+    const screenResult = summary ? null : results[index];
+    const screenBackground = screenResult?.kind === 'character' ? gachaVisuals.special : gachaVisuals.normal;
+    overlay.dataset.resultKind = summary ? 'summary' : (screenResult?.kind || 'item');
+    overlay.style.setProperty('--gacha-result-screen-bg', 'url("' + screenBackground + '")');
 
     if (summary) {
       if (title) title.textContent = '10連結果';
@@ -1545,7 +1547,7 @@
     overlay.classList.toggle('is-mandatory-special', mandatory);
     const isCharacter = result?.kind === 'character';
     const isRainbow = result?.rarity === 'rainbow';
-    overlay.style.setProperty('--gacha-stage-bg','url("' + (isRainbow ? gachaVisuals.special : gachaVisuals.normal) + '")');
+    overlay.style.setProperty('--gacha-stage-bg','url("' + (isCharacter ? gachaVisuals.special : gachaVisuals.normal) + '")');
     overlay.classList.add('is-playing','is-draw-reveal','is-revealing');
     overlay.classList.toggle('is-character-hit', isCharacter);
     overlay.classList.toggle('is-item-hit', !isCharacter);
