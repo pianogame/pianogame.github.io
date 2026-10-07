@@ -1698,7 +1698,7 @@
       window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
       const source = gachaFlourishGraph.context.createBufferSource();
       const gain = gachaFlourishGraph.context.createGain();
-      gain.gain.value = .96;
+      gain.gain.value = .82;
       source.buffer = gachaFlourishBuffer;
       source.connect(gain);
       gain.connect(gachaFlourishGraph.gain);
@@ -2159,12 +2159,18 @@
   }
   gachaResultOverlay?.addEventListener('pointerup', handleGachaResultSurface, { capture:true });
   gachaResultOverlay?.addEventListener('click', handleGachaResultSurface, { capture:true });
-  home.querySelector('[data-gacha-piano-touch]')?.addEventListener('click', event => {
-    event.stopPropagation();
-    touchGachaPiano();
-  });
-  home.querySelector('[data-gacha-animation-overlay]')?.addEventListener('click', event => {
-    if (gachaAnimationAwaitingTouch && !event.target.closest('[data-gacha-animation-skip]')) touchGachaPiano();
+  const gachaAnimationOverlay = home.querySelector('[data-gacha-animation-overlay]');
+  gachaAnimationOverlay?.addEventListener('pointerdown', event => {
+    if (event.button > 0) return;
+    if (gachaAnimationAwaitingTouch && !event.target.closest('[data-gacha-animation-skip]')) {
+      touchGachaPiano();
+    }
+  }, { passive:true });
+  gachaAnimationOverlay?.addEventListener('click', event => {
+    // Keyboard / assistive-tech fallback. Pointer taps already run on pointerdown.
+    if (event.detail === 0 && gachaAnimationAwaitingTouch && !event.target.closest('[data-gacha-animation-skip]')) {
+      touchGachaPiano();
+    }
   });
   home.querySelector('[data-gacha-animation-skip]')?.addEventListener('pointerdown', event => {
     event.preventDefault();
