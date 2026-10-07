@@ -576,11 +576,50 @@
     preview.style.opacity = '1';
   }
 
+  function ensureProfileEffectLayer(summary) {
+    if (!summary) return null;
+    let layer = summary.querySelector(':scope > .hp-profile-effect-layer');
+    if (layer) return layer;
+
+    layer = document.createElement('div');
+    layer.className = 'hp-profile-effect-layer';
+    layer.setAttribute('aria-hidden','true');
+
+    const particles = [
+      ['✦',  6, 20,  .0, .86], ['♪', 15, 72, -.8, .92], ['✧', 25, 38, -1.6, .72],
+      ['♫', 34, 82, -.3, .84], ['•', 43, 18, -2.0, .56], ['✦', 51, 58, -1.1, .76],
+      ['♪', 60, 31, -.5, .88], ['✧', 69, 76, -1.8, .72], ['♫', 78, 45, -.9, .82],
+      ['✦', 88, 22, -2.2, .72], ['♪', 94, 68, -.2, .86], ['•', 11, 46, -1.4, .52],
+      ['✧', 31, 12, -.7, .66], ['✦', 47, 88, -2.5, .70], ['♪', 72, 14, -1.0, .80],
+      ['•', 84, 86, -1.7, .48], ['♫', 21, 91, -2.1, .70], ['✧', 57, 93, -.4, .64],
+    ];
+
+    particles.forEach(([glyph, x, y, delay, scale], index) => {
+      const particle = document.createElement('span');
+      particle.className = 'hp-profile-effect-particle';
+      particle.textContent = glyph;
+      particle.style.setProperty('--effect-x', x + '%');
+      particle.style.setProperty('--effect-y', y + '%');
+      particle.style.setProperty('--effect-delay', delay + 's');
+      particle.style.setProperty('--effect-scale', String(scale));
+      particle.dataset.effectParticle = String(index + 1);
+      layer.appendChild(particle);
+    });
+
+    summary.prepend(layer);
+    return layer;
+  }
+
   function syncProfileEffectPreview() {
     const summary = home.querySelector('.hp-player-profile-summary');
     if (!summary) return;
     const id = profileEffectCatalog[profileEffectInput?.value] ? profileEffectInput.value : (playerProfile.profileEffect || 'default');
     summary.dataset.profileEffect = id;
+    const layer = ensureProfileEffectLayer(summary);
+    if (layer) {
+      layer.dataset.effectId = id;
+      layer.hidden = id === 'default';
+    }
   }
 
   function syncCustomizationInputs() {
