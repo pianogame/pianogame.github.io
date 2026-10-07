@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-         .register('/sw.js?v=97', { scope: '/', updateViaCache: 'none' })
+         .register('/sw.js?v=98', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -66,7 +66,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
   <script defer src="/sound-settings.js?v=1"></script>
-  <script defer src="/instruments.js?v=10"></script>
+  <script defer src="/instruments.js?v=11"></script>
   <link rel="stylesheet" href="/effects.css?v=9">
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=10"></script>
