@@ -9,6 +9,7 @@ import shutil
 import zipfile
 import re
 import subprocess
+import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
@@ -249,8 +250,21 @@ def _restore_embedded_swipe_sound():
     target.write_bytes(data)
 
 
+def _restore_external_gacha_touch_sound():
+    target = ROOT / "site" / "audio" / "gacha-touch-orchestra-v1.mp3"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    url = "https://dnznrvs05pmza.cloudfront.net/audio_sfx/8062bee3-bcd6-4f38-9382-ef8b222e52cd/____________2____.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzkwM2U4MTgwYzBhNDUxYyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTUyNjkzNn0.A8XHVA6riZWZUWDVyK56gQUhaKTj3UZfAzw_gbzLSJo"
+    with urllib.request.urlopen(url, timeout=30) as response:
+        data = response.read()
+    if len(data) < 1024 or data[:3] != b"ID3":
+        raise ValueError(f"Downloaded gacha touch sound is invalid: size={len(data)}")
+    target.write_bytes(data)
+    print(f"Restored external gacha touch sound: size={len(data)}, sha256={hashlib.sha256(data).hexdigest()}")
+
+
 _restore_embedded_swipe_sound()
 _restore_embedded_gacha_result_backgrounds()
+_restore_external_gacha_touch_sound()
 _verify_app_sources()
 
 if OUT.exists():
