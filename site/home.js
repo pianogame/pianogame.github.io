@@ -77,23 +77,43 @@
   }
 
   function playHomeTapSound() {
+    const start = () => {
+      try {
+        if (!homeTapBuffer || !homeTapGraph) return false;
+        stopHomeTapSound();
+        const { context } = homeTapGraph;
+        const source = context.createBufferSource(), gain = context.createGain();
+        source.buffer = homeTapBuffer;
+        source.connect(gain); gain.connect(homeTapGraph.gain);
+        const current = { source, gain };
+        homeTapCurrent = current;
+        source.onended = () => {
+          try { source.disconnect(); gain.disconnect(); } catch (_) {}
+          if (homeTapCurrent === current) homeTapCurrent = null;
+        };
+        source.start();
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
     try {
-      if (!homeTapBuffer) { void prepareHomeTapSound(); return; }
-      window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
-      stopHomeTapSound();
-      const { context } = homeTapGraph;
-      const source = context.createBufferSource(), gain = context.createGain();
-      source.buffer = homeTapBuffer;
-      source.connect(gain); gain.connect(homeTapGraph.gain);
-      const current = { source, gain };
-      homeTapCurrent = current;
-      source.onended = () => {
-        source.disconnect(); gain.disconnect();
-        if (homeTapCurrent === current) homeTapCurrent = null;
-      };
-      // Start in the gesture itself: no asynchronous play/seek queue on rapid taps.
-      source.start();
-    } catch (_) {}
+      // Resume from the real user gesture first. On iOS/PWA the context can
+      // become suspended again after screen/app changes.
+      const resumed = window.HP_AUDIO_BRIDGE?.resume?.();
+      if (homeTapBuffer && homeTapGraph?.context?.state === 'running') {
+        start();
+        return;
+      }
+      void Promise.resolve(resumed)
+        .catch(() => {})
+        .then(() => prepareHomeTapSound())
+        .then(() => { start(); })
+        .catch(() => {});
+    } catch (_) {
+      void prepareHomeTapSound().then(() => { start(); }).catch(() => {});
+    }
   }
 
   function playGachaMenuTapSound() {
@@ -238,23 +258,17 @@
   }, { capture:true, passive:true });
 
   home.querySelectorAll('button').forEach((button) => {
-    // Voice actions remain silent. Gacha entry/pull actions use dedicated cues.
     const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
-    const gachaMenuAction = button.dataset.homeAction === 'gacha';
-    const gachaPullAction = button.hasAttribute('data-gacha-pull');
-    if (!voiceAction) button.addEventListener('pointerdown', event => {
+    const gachaPianoTouchAction = button.hasAttribute('data-gacha-piano-touch');
+    // The Gacha piano prompt owns its sound in touchGachaPiano() so taps on
+    // either the piano hotspot or the surrounding overlay behave identically.
+    if (!voiceAction && !gachaPianoTouchAction) button.addEventListener('pointerdown', event => {
       if (event.button !== 0) return;
-      if (gachaPullAction) playGachaPullTapSound();
-      else if (gachaMenuAction) playGachaMenuTapSound();
-      else playHomeTapSound();
+      playHomeTapSound();
     }, { passive:true });
     button.addEventListener('click', (event) => {
       if (event.detail === 0) {
-        if (!voiceAction) {
-          if (gachaPullAction) playGachaPullTapSound();
-          else if (gachaMenuAction) playGachaMenuTapSound();
-          else playHomeTapSound();
-        }
+        if (!voiceAction && !gachaPianoTouchAction) playHomeTapSound();
         const bounds = button.getBoundingClientRect();
         showTouchEffect(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
       }
@@ -1748,6 +1762,7 @@
     if (!overlay || gachaAnimationMode !== 'intro' || !gachaAnimationAwaitingTouch) return;
     gachaAnimationAwaitingTouch = false;
     overlay.classList.remove('is-awaiting-touch');
+    playHomeTapSound();
     playGachaPianoChord();
     const label = overlay.querySelector('[data-gacha-animation-label]');
     if (label) label.textContent = 'さあ、運命の演奏を——';
@@ -2088,6 +2103,7 @@
     if (missionScreen && !missionScreen.hidden) closeMissionScreen();
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
+    void prepareHomeTapSound();
     void prepareGachaFlourish();
     for (const character of gachaPool()) {
       void window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => {});
