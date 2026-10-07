@@ -1252,7 +1252,9 @@
       const character = registry?.get?.(result.characterId);
       card.dataset.characterId = character?.id || '';
       card.classList.toggle('is-new-character', result?.isNewCharacter === true);
-      card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.special + '")');
+      if (character?.profileBackground) {
+        card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
+      }
       const art = document.createElement('div');
       art.className = 'hp-gacha-result-motion';
       art.dataset.gachaResultMotion = character?.id || '';
@@ -1887,9 +1889,32 @@
   home.querySelectorAll('[data-gacha-result-close]').forEach(button => button.addEventListener('click', closeGachaResult));
   home.querySelector('[data-gacha-result-next]')?.addEventListener('click', advanceGachaResult);
   home.querySelector('[data-gacha-result-skip]')?.addEventListener('click', () => { void skipGachaResultSequence(); });
-  home.querySelector('[data-gacha-result-list]')?.addEventListener('click', () => {
-    if (gachaResultState && gachaResultState.results.length > 1 && !gachaResultState.summary) advanceGachaResult();
-  });
+
+  const gachaResultOverlay = home.querySelector('[data-gacha-result-overlay]');
+  let lastGachaResultPointerActionAt = -Infinity;
+  function handleGachaResultSurface(event) {
+    if (!gachaResultOverlay || gachaResultOverlay.hidden || !gachaResultState || gachaResultState.summary) return;
+    if (event.target?.closest?.('[data-gacha-result-skip]')) return;
+    const now = performance.now();
+    if (event.type === 'click' && now - lastGachaResultPointerActionAt < 700) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    if (event.type === 'pointerup') {
+      if (event.button > 0) return;
+      lastGachaResultPointerActionAt = now;
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (gachaResultState.results.length > 1) {
+      void advanceGachaResult();
+    } else {
+      closeGachaResult();
+    }
+  }
+  gachaResultOverlay?.addEventListener('pointerup', handleGachaResultSurface, { capture:true });
+  gachaResultOverlay?.addEventListener('click', handleGachaResultSurface, { capture:true });
   home.querySelector('[data-gacha-piano-touch]')?.addEventListener('click', event => {
     event.stopPropagation();
     touchGachaPiano();
