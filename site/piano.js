@@ -48,25 +48,18 @@
   let audioNeedsGestureUnlock = true;
   const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
-  const reviewPianoIds = new Set(['reviewSplendid','reviewOldPiano','reviewPianet','reviewCP80','reviewWurlitzer']);
-  const isPianoLike = id => id === 'piano' || reviewPianoIds.has(id);
-  const effectsInstrumentId = id => isPianoLike(id) ? 'piano' : id;
+  const trialInstrumentIds = new Set(['trialChip8','trialKoto','trialTrumpet']);
+  const isPianoLike = id => id === 'piano';
+  const effectsInstrumentId = id => trialInstrumentIds.has(id) ? 'piano' : id;
   const ambience = {
     piano:{amount:35,decay:.05},
-    reviewSplendid:{amount:28,decay:.18},
-    reviewOldPiano:{amount:18,decay:.12},
-    reviewPianet:{amount:16,decay:.16},
-    reviewCP80:{amount:14,decay:.12},
-    reviewWurlitzer:{amount:12,decay:.10},
     bass:{amount:4,decay:.3}
   };
   const articulation={
     piano:{release:.07,sustain:true},
-    reviewSplendid:{release:.42,sustain:true},
-    reviewOldPiano:{release:.38,sustain:true},
-    reviewPianet:{release:.48,sustain:true},
-    reviewCP80:{release:.34,sustain:true},
-    reviewWurlitzer:{release:.36,sustain:true},
+    trialChip8:{release:.045,sustain:false},
+    trialKoto:{release:.26,sustain:true},
+    trialTrumpet:{release:.16,sustain:false},
     guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}
   };
   const releaseControl=root.querySelector('[data-control="release"]');
@@ -82,6 +75,16 @@
   let eventCount = 0;
 
   const pitchName = midi => noteNames[midi % 12] + (Math.floor(midi / 12) - 1);
+  const isPlayableMidi = (midi,id=currentInstrument) => {
+    const range=instruments[id]?.range;
+    return !Array.isArray(range) || (midi>=range[0] && midi<=range[1]);
+  };
+  function updatePlayableKeys() {
+    buttons.forEach((list,midi)=>list.forEach(button=>{
+      button.disabled=!samplesReady || !isPlayableMidi(midi,currentInstrument);
+      button.classList.toggle('hp-key-out-of-range',samplesReady && !isPlayableMidi(midi,currentInstrument));
+    }));
+  }
   const say = (message, error = false) => {
     status.textContent = message; status.dataset.error = String(error);
     root.querySelector('[data-output="instrument-status"]').textContent = message;
@@ -423,9 +426,11 @@
         updateReverb();
       }
     }
+    updatePlayableKeys();
   }
   async function loadBank(id, generation) {
     const preset=instruments[id];
+    if(preset.engine)return new Map();
     if(!bankCache.has(id))bankCache.set(id,new Map());
     const decoded=bankCache.get(id);
     if(!bankLoads.has(id)) {
@@ -486,7 +491,7 @@
     } finally {
       if(generation===loadGeneration) {
         instrumentControl.disabled=false;
-        buttons.forEach(list=>list.forEach(button=>button.disabled=!samplesReady));
+        updatePlayableKeys();
         action('record').disabled=!samplesReady; action('play').disabled=!samplesReady||events.length===0;
       }
     }
@@ -501,9 +506,237 @@
     } else {void prepareSamples(id);}
   });
 
+  const chipWaveCache = new Map();
+  const kotoBufferCache = new Map();
+  let trumpetWave = null;
+  let breathNoiseBuffer = null;
+
+  function midiHz(midi) {
+    return 440*Math.pow(2,(midi-69)/12);
+  }
+
+  function pulseWave(duty) {
+    const key=String(duty);
+    if(chipWaveCache.has(key))return chipWaveCache.get(key);
+    const harmonics=48,real=new Float32Array(harmonics+1),imag=new Float32Array(harmonics+1);
+    for(let n=1;n<=harmonics;n++){
+      real[n]=2*Math.sin(2*Math.PI*n*duty)/(Math.PI*n);
+      imag[n]=2*(1-Math.cos(2*Math.PI*n*duty))/(Math.PI*n);
+    }
+    const wave=ctx.createPeriodicWave(real,imag,{disableNormalization:false});
+    chipWaveCache.set(key,wave);
+    return wave;
+  }
+
+  function trumpetPeriodicWave() {
+    if(trumpetWave)return trumpetWave;
+    const real=new Float32Array(13),imag=new Float32Array(13);
+    const weights=[0,1,.78,.58,.43,.31,.23,.17,.13,.10,.075,.055,.04];
+    for(let i=1;i<weights.length;i++)imag[i]=weights[i];
+    trumpetWave=ctx.createPeriodicWave(real,imag,{disableNormalization:false});
+    return trumpetWave;
+  }
+
+  function getBreathNoiseBuffer() {
+    if(breathNoiseBuffer)return breathNoiseBuffer;
+    const length=Math.max(1,Math.floor(ctx.sampleRate*.6));
+    const buffer=ctx.createBuffer(1,length,ctx.sampleRate);
+    const data=buffer.getChannelData(0);
+    let seed=0x51f15e;
+    for(let i=0;i<length;i++){
+      seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+      data[i]=(seed/2147483648)-1;
+    }
+    breathNoiseBuffer=buffer;
+    return buffer;
+  }
+
+  function createChip8Voice(midi,when,onEnded) {
+    const preset=instruments.trialChip8;
+    const level=preset.gain;
+    const bus=ctx.createGain(),tone=ctx.createBiquadFilter();
+    tone.type='lowpass'; tone.frequency.setValueAtTime(midi>78?9200:10800,when); tone.Q.value=.15;
+    bus.gain.setValueAtTime(.00001,when);
+    bus.gain.linearRampToValueAtTime(level,when+.004);
+    tone.connect(bus); bus.connect(effects.input);
+
+    const duty=midi>=76?.125:midi>=58?.25:.5;
+    const main=ctx.createOscillator(),second=ctx.createOscillator(),tri=ctx.createOscillator();
+    const mainGain=ctx.createGain(),secondGain=ctx.createGain(),triGain=ctx.createGain();
+    const f=midiHz(midi);
+    main.setPeriodicWave(pulseWave(duty));
+    second.setPeriodicWave(pulseWave(duty===.125?.25:.125));
+    tri.type='triangle';
+    main.frequency.setValueAtTime(f,when);
+    second.frequency.setValueAtTime(f*2,when);
+    tri.frequency.setValueAtTime(f/2,when);
+    mainGain.gain.value=.72; secondGain.gain.value=midi>74?.11:.16; triGain.gain.value=midi<67?.10:.045;
+    main.connect(mainGain);second.connect(secondGain);tri.connect(triGain);
+    mainGain.connect(tone);secondGain.connect(tone);triGain.connect(tone);
+
+    const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
+    lfo.type='sine';lfo.frequency.value=5.4;
+    lfoGain.gain.setValueAtTime(0,when);lfoGain.gain.linearRampToValueAtTime(2.2,when+.18);
+    lfo.connect(lfoGain);lfoGain.connect(main.detune);lfoGain.connect(second.detune);
+    main.detune.setValueAtTime(-5,when);main.detune.linearRampToValueAtTime(0,when+.035);
+    second.detune.setValueAtTime(2.5,when);
+
+    let cleaned=false;
+    const cleanup=()=>{
+      if(cleaned)return;cleaned=true;
+      try{main.disconnect();second.disconnect();tri.disconnect();lfo.disconnect();mainGain.disconnect();secondGain.disconnect();triGain.disconnect();lfoGain.disconnect();tone.disconnect();bus.disconnect();}catch(_){}
+      onEnded?.();
+    };
+    main.onended=cleanup;
+    main.start(when);second.start(when);tri.start(when);lfo.start(when);
+    const voice={release(at=ctx.currentTime,seconds=articulation.trialChip8.release){
+      if(cleaned)return;
+      if(!Number.isFinite(seconds))return;
+      const start=Math.max(when+.006,at),end=start+Math.max(.02,seconds);
+      bus.gain.cancelScheduledValues(start);
+      bus.gain.setTargetAtTime(.00001,start,Math.max(.006,seconds/4));
+      try{main.stop(end+.035);second.stop(end+.035);tri.stop(end+.035);lfo.stop(end+.035);}catch(_){}
+    }};
+    return voice;
+  }
+
+  function createKotoBuffer(midi) {
+    const key=ctx.sampleRate+':'+midi;
+    if(kotoBufferCache.has(key))return kotoBufferCache.get(key);
+    const sr=ctx.sampleRate,f=midiHz(midi);
+    const duration=Math.max(2.2,4.15-(midi-48)*.045);
+    const length=Math.ceil(duration*sr),period=Math.max(3,Math.round(sr/f));
+    const ring=new Float32Array(period),out=new Float32Array(length);
+    let seed=(0x9e3779b9^(midi*2654435761))>>>0;
+    const pick=Math.max(2,Math.floor(period*.23));
+    for(let i=0;i<period;i++){
+      seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+      const n=seed/2147483648-1;
+      seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+      const n2=seed/2147483648-1;
+      ring[i]=(n*.72+n2*.28);
+    }
+    for(let i=0;i<period;i++)ring[i]=ring[i]-(ring[(i+pick)%period]*.58);
+    const damping=Math.max(.9968,.99905-(midi-48)*.000035);
+    let idx=0,prev=0;
+    for(let i=0;i<length;i++){
+      const y=ring[idx];
+      const nextIdx=(idx+1)%period;
+      const averaged=(y+ring[nextIdx])*.5;
+      const dispersion=averaged*.985+prev*.015;
+      ring[idx]=dispersion*damping;
+      prev=dispersion;
+      let value=y;
+      if(i<sr*.014){
+        seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+        value+=(seed/2147483648-1)*.16*(1-i/(sr*.014));
+      }
+      const t=i/sr;
+      value*=Math.exp(-t*(midi>72?.20:.11));
+      out[i]=value;
+      idx=nextIdx;
+    }
+    let peak=.0001;
+    for(let i=0;i<out.length;i++)peak=Math.max(peak,Math.abs(out[i]));
+    const scale=.88/peak;
+    const buffer=ctx.createBuffer(1,length,sr),data=buffer.getChannelData(0);
+    for(let i=0;i<length;i++)data[i]=out[i]*scale;
+    kotoBufferCache.set(key,buffer);
+    return buffer;
+  }
+
+  function createKotoVoice(midi,when,onEnded) {
+    const preset=instruments.trialKoto;
+    const source=ctx.createBufferSource(),bodyLow=ctx.createBiquadFilter(),bodyHigh=ctx.createBiquadFilter();
+    const pan=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();
+    const bus=ctx.createGain(),reflection=ctx.createDelay(.08),reflectionGain=ctx.createGain();
+    source.buffer=createKotoBuffer(midi);
+    bodyLow.type='peaking';bodyLow.frequency.value=430;bodyLow.Q.value=.85;bodyLow.gain.value=3.2;
+    bodyHigh.type='peaking';bodyHigh.frequency.value=1180;bodyHigh.Q.value=1.1;bodyHigh.gain.value=2.1;
+    if('pan' in pan)pan.pan.value=Math.max(-.12,Math.min(.12,(midi-66)/160));
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.0025);
+    source.connect(bodyLow);bodyLow.connect(bodyHigh);bodyHigh.connect(pan);pan.connect(bus);
+    bodyHigh.connect(reflection);reflection.delayTime.value=.022;reflection.connect(reflectionGain);reflectionGain.gain.value=.075;reflectionGain.connect(bus);
+    bus.connect(effects.input);
+    let cleaned=false;
+    const cleanup=()=>{
+      if(cleaned)return;cleaned=true;
+      try{source.disconnect();bodyLow.disconnect();bodyHigh.disconnect();pan.disconnect();reflection.disconnect();reflectionGain.disconnect();bus.disconnect();}catch(_){}
+      onEnded?.();
+    };
+    source.onended=cleanup;source.start(when);
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.trialKoto.release){
+      if(cleaned||!Number.isFinite(seconds))return;
+      const start=Math.max(when+.004,at),end=start+Math.max(.035,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.008,seconds/4));
+      try{source.stop(end+.05);}catch(_){}
+    }};
+  }
+
+  function createTrumpetVoice(midi,when,onEnded) {
+    const preset=instruments.trialTrumpet;
+    const f=midiHz(midi),wave=trumpetPeriodicWave();
+    const osc1=ctx.createOscillator(),osc2=ctx.createOscillator();
+    osc1.setPeriodicWave(wave);osc2.setPeriodicWave(wave);
+    osc1.frequency.value=f;osc2.frequency.value=f;
+    osc1.detune.setValueAtTime(-13,when);osc1.detune.linearRampToValueAtTime(0,when+.075);
+    osc2.detune.setValueAtTime(-8.5,when);osc2.detune.linearRampToValueAtTime(3.2,when+.082);
+    const g1=ctx.createGain(),g2=ctx.createGain();g1.gain.value=.72;g2.gain.value=.22;
+
+    const mix=ctx.createGain(),filter=ctx.createBiquadFilter(),presence=ctx.createBiquadFilter(),bus=ctx.createGain();
+    filter.type='lowpass';filter.Q.value=.7;
+    const open=Math.min(7200,2500+f*4.5);
+    filter.frequency.setValueAtTime(Math.max(900,open*.38),when);
+    filter.frequency.exponentialRampToValueAtTime(open,when+.095);
+    filter.frequency.setTargetAtTime(open*.84,when+.13,.12);
+    presence.type='peaking';presence.frequency.value=1850;presence.Q.value=.8;presence.gain.value=2.8;
+    bus.gain.setValueAtTime(.00001,when);
+    bus.gain.exponentialRampToValueAtTime(Math.max(.0001,preset.gain),when+.038);
+    bus.gain.setTargetAtTime(preset.gain*.9,when+.11,.07);
+
+    osc1.connect(g1);osc2.connect(g2);g1.connect(mix);g2.connect(mix);mix.connect(filter);filter.connect(presence);presence.connect(bus);
+
+    const breath=ctx.createBufferSource(),breathFilter=ctx.createBiquadFilter(),breathGain=ctx.createGain();
+    breath.buffer=getBreathNoiseBuffer();breath.loop=true;
+    breathFilter.type='bandpass';breathFilter.frequency.value=3300;breathFilter.Q.value=.62;
+    breathGain.gain.setValueAtTime(.0001,when);breathGain.gain.linearRampToValueAtTime(.022,when+.045);breathGain.gain.setTargetAtTime(.012,when+.16,.08);
+    breath.connect(breathFilter);breathFilter.connect(breathGain);breathGain.connect(bus);
+
+    const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
+    lfo.type='sine';lfo.frequency.value=5.15;
+    lfoGain.gain.setValueAtTime(0,when);lfoGain.gain.linearRampToValueAtTime(4.3,when+.38);
+    lfo.connect(lfoGain);lfoGain.connect(osc1.detune);lfoGain.connect(osc2.detune);
+
+    bus.connect(effects.input);
+    let cleaned=false;
+    const cleanup=()=>{
+      if(cleaned)return;cleaned=true;
+      try{osc1.disconnect();osc2.disconnect();g1.disconnect();g2.disconnect();mix.disconnect();filter.disconnect();presence.disconnect();breath.disconnect();breathFilter.disconnect();breathGain.disconnect();lfo.disconnect();lfoGain.disconnect();bus.disconnect();}catch(_){}
+      onEnded?.();
+    };
+    osc1.onended=cleanup;
+    osc1.start(when);osc2.start(when);breath.start(when);lfo.start(when);
+    return {release(at=ctx.currentTime,seconds=articulation.trialTrumpet.release){
+      if(cleaned||!Number.isFinite(seconds))return;
+      const start=Math.max(when+.04,at),end=start+Math.max(.06,seconds);
+      bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.012,seconds/4));
+      breathGain.gain.cancelScheduledValues(start);breathGain.gain.setTargetAtTime(.00001,start,.025);
+      try{osc1.stop(end+.06);osc2.stop(end+.06);breath.stop(end+.06);lfo.stop(end+.06);}catch(_){}
+    }};
+  }
+
   function synth(midi, when = ctx.currentTime, live = true) {
     while (allVoices.size >= 48) {
       const oldest = allVoices.values().next().value; oldest.release(ctx.currentTime,.04); allVoices.delete(oldest);
+    }
+    const engine=instruments[currentInstrument]?.engine;
+    if(engine){
+      let voice=null;
+      const onEnded=()=>{ if(voice){allVoices.delete(voice);liveVoices.delete(voice);} };
+      if(engine==='chip8')voice=createChip8Voice(midi,when,onEnded);
+      else if(engine==='koto')voice=createKotoVoice(midi,when,onEnded);
+      else if(engine==='trumpet')voice=createTrumpetVoice(midi,when,onEnded);
+      if(voice){allVoices.add(voice);if(live)liveVoices.add(voice);return voice;}
     }
     if(currentInstrument==='violin'){
       const state=window.HP_VIOLIN.snapshot(),d=window.HP_VIOLIN.descriptor(instruments.violin.samples,midi,state);
@@ -613,7 +846,7 @@
     if (remaining) pressReleaseTimers.set(midi,setTimeout(finish,remaining)); else finish();
   }
   function noteOn(token, midi) {
-    if (!samplesReady || held.has(token) || pendingNoteOns.has(token)) return;
+    if (!samplesReady || !isPlayableMidi(midi,currentInstrument) || held.has(token) || pendingNoteOns.has(token)) return;
     pressKey(token,midi);
     if (!ensureAudio()) return;
     if (ctx.state === 'running') {
