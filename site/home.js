@@ -242,7 +242,8 @@
     const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
     const gachaMenuAction = button.dataset.homeAction === 'gacha';
     const gachaPullAction = button.hasAttribute('data-gacha-pull');
-    if (!voiceAction) button.addEventListener('pointerdown', event => {
+    const gachaPianoTouchAction = button.hasAttribute('data-gacha-piano-touch');
+    if (!voiceAction && !gachaPianoTouchAction) button.addEventListener('pointerdown', event => {
       if (event.button !== 0) return;
       if (gachaPullAction) playGachaPullTapSound();
       else if (gachaMenuAction) playGachaMenuTapSound();
@@ -250,7 +251,7 @@
     }, { passive:true });
     button.addEventListener('click', (event) => {
       if (event.detail === 0) {
-        if (!voiceAction) {
+        if (!voiceAction && !gachaPianoTouchAction) {
           if (gachaPullAction) playGachaPullTapSound();
           else if (gachaMenuAction) playGachaMenuTapSound();
           else playHomeTapSound();
@@ -1520,6 +1521,10 @@
   let gachaFlourishGraph = null;
   let gachaFlourishBuffer = null;
   let gachaFlourishLoading = null;
+  let gachaTouchOrchestraGraph = null;
+  let gachaTouchOrchestraBuffer = null;
+  let gachaTouchOrchestraLoading = null;
+  let gachaTouchOrchestraSource = null;
 
   function prepareGachaFlourish() {
     if (gachaFlourishBuffer) return Promise.resolve();
@@ -1543,6 +1548,66 @@
       return gachaFlourishLoading;
     } catch (_) {
       return Promise.resolve();
+    }
+  }
+
+  function prepareGachaTouchOrchestra() {
+    if (gachaTouchOrchestraBuffer) return Promise.resolve();
+    if (gachaTouchOrchestraLoading) return gachaTouchOrchestraLoading;
+    try {
+      const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+      if (!bridge) return Promise.resolve();
+      if (!gachaTouchOrchestraGraph) {
+        const gain = bridge.context.createGain();
+        gain.gain.value = .96;
+        window.HP_SOUND_SETTINGS?.bind?.('effects', gain);
+        gain.connect(bridge.output);
+        gachaTouchOrchestraGraph = { context:bridge.context, gain };
+      }
+      gachaTouchOrchestraLoading = fetch('/audio/gacha-touch-orchestra-v1.mp3?v=1', { cache:'force-cache' })
+        .then(response => response.ok ? response.arrayBuffer() : Promise.reject(new Error('gacha touch orchestra unavailable')))
+        .then(buffer => gachaTouchOrchestraGraph.context.decodeAudioData(buffer))
+        .then(buffer => { gachaTouchOrchestraBuffer = buffer; })
+        .catch(() => {})
+        .finally(() => { gachaTouchOrchestraLoading = null; });
+      return gachaTouchOrchestraLoading;
+    } catch (_) {
+      return Promise.resolve();
+    }
+  }
+
+  function stopGachaTouchOrchestra() {
+    const source = gachaTouchOrchestraSource;
+    gachaTouchOrchestraSource = null;
+    if (!source) return;
+    try { source.stop(); } catch (_) {}
+    try { source.disconnect(); } catch (_) {}
+  }
+
+  function playGachaTouchOrchestra() {
+    try {
+      if (!gachaTouchOrchestraBuffer || !gachaTouchOrchestraGraph) {
+        void prepareGachaTouchOrchestra();
+        return 0;
+      }
+      void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      stopHomeTapSound();
+      stopGachaTouchOrchestra();
+      const source = gachaTouchOrchestraGraph.context.createBufferSource();
+      const gain = gachaTouchOrchestraGraph.context.createGain();
+      gain.gain.value = 1;
+      source.buffer = gachaTouchOrchestraBuffer;
+      source.connect(gain);
+      gain.connect(gachaTouchOrchestraGraph.gain);
+      gachaTouchOrchestraSource = source;
+      source.onended = () => {
+        try { source.disconnect(); gain.disconnect(); } catch (_) {}
+        if (gachaTouchOrchestraSource === source) gachaTouchOrchestraSource = null;
+      };
+      source.start();
+      return gachaTouchOrchestraBuffer.duration || 0;
+    } catch (_) {
+      return 0;
     }
   }
 
@@ -1684,10 +1749,15 @@
     if (!overlay || gachaAnimationMode !== 'intro' || !gachaAnimationAwaitingTouch) return;
     gachaAnimationAwaitingTouch = false;
     overlay.classList.remove('is-awaiting-touch');
-    playGachaPianoChord();
+    const orchestraDuration = playGachaTouchOrchestra();
+    if (!orchestraDuration) playGachaPianoChord();
     const label = overlay.querySelector('[data-gacha-animation-label]');
     if (label) label.textContent = 'さあ、運命の演奏を——';
-    gachaAnimationTimer = setTimeout(() => finishGachaAnimation('touch'), 520);
+    // Let the selected orchestral rise reach its final chord before the reveal.
+    const revealDelay = orchestraDuration
+      ? Math.max(1850, Math.min(2550, (orchestraDuration - .22) * 1000))
+      : 520;
+    gachaAnimationTimer = setTimeout(() => finishGachaAnimation('touch'), revealDelay);
   }
 
   function playGachaDrawReveal(result, index, total, { mandatory = false } = {}) {
@@ -2025,6 +2095,7 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareGachaFlourish();
+    void prepareGachaTouchOrchestra();
     for (const character of gachaPool()) {
       void window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => {});
     }
