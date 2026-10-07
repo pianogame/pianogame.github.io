@@ -139,6 +139,52 @@
       }, 650);
     } catch (_) {}
   }
+
+  function playGachaPullTapSound() {
+    try {
+      const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+      if (!bridge) return;
+      void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      stopHomeTapSound();
+      const ctx = bridge.context;
+      const now = ctx.currentTime;
+
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(.0001, now);
+      master.gain.exponentialRampToValueAtTime(.58, now + .008);
+      master.gain.exponentialRampToValueAtTime(.0001, now + .68);
+      window.HP_SOUND_SETTINGS?.bind?.('effects', master);
+      master.connect(bridge.output);
+
+      // Gacha pull cue: deeper "don" impact + sparkling upward sweep.
+      // This intentionally does not reuse the title/home button tap.
+      const tones = [
+        { frequency:130.81, start:0,    peak:.28, end:.22, type:'sine' },
+        { frequency:523.25, start:.045, peak:.20, end:.27, type:'triangle' },
+        { frequency:783.99, start:.105, peak:.17, end:.36, type:'sine' },
+        { frequency:1046.50,start:.165, peak:.14, end:.47, type:'sine' },
+        { frequency:1567.98,start:.245, peak:.10, end:.60, type:'triangle' },
+      ];
+
+      tones.forEach(({ frequency, start, peak, end, type }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, now + start);
+        gain.gain.setValueAtTime(.0001, now + start);
+        gain.gain.exponentialRampToValueAtTime(peak, now + start + .012);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + end);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now + start);
+        osc.stop(now + end + .025);
+      });
+
+      setTimeout(() => {
+        try { master.disconnect(); } catch (_) {}
+      }, 850);
+    } catch (_) {}
+  }
   void prepareHomeTapSound();
   window.addEventListener('hp-curtain-start', () => { void prepareHomeTapSound(); });
   window.addEventListener('pagehide', stopHomeTapSound);
@@ -192,18 +238,21 @@
   }, { capture:true, passive:true });
 
   home.querySelectorAll('button').forEach((button) => {
-    // Voice actions remain silent. The Gacha home button has its own premium cue.
+    // Voice actions remain silent. Gacha entry/pull actions use dedicated cues.
     const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
     const gachaMenuAction = button.dataset.homeAction === 'gacha';
+    const gachaPullAction = button.hasAttribute('data-gacha-pull');
     if (!voiceAction) button.addEventListener('pointerdown', event => {
       if (event.button !== 0) return;
-      if (gachaMenuAction) playGachaMenuTapSound();
+      if (gachaPullAction) playGachaPullTapSound();
+      else if (gachaMenuAction) playGachaMenuTapSound();
       else playHomeTapSound();
     }, { passive:true });
     button.addEventListener('click', (event) => {
       if (event.detail === 0) {
         if (!voiceAction) {
-          if (gachaMenuAction) playGachaMenuTapSound();
+          if (gachaPullAction) playGachaPullTapSound();
+          else if (gachaMenuAction) playGachaMenuTapSound();
           else playHomeTapSound();
         }
         const bounds = button.getBoundingClientRect();
