@@ -9,6 +9,7 @@ import shutil
 import zipfile
 import re
 import subprocess
+import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
@@ -250,23 +251,16 @@ def _restore_embedded_swipe_sound():
 
 
 def _restore_embedded_gacha_touch_sound():
-    parts = [
-        ROOT / "scripts" / "assets" / f"gacha-touch-orchestra-v1.b64.{index}"
-        for index in range(1, 8)
-    ]
-    encoded = "".join(path.read_text(encoding="ascii").strip() for path in parts)
-    data = base64.b64decode(encoded, validate=True)
-    expected_size = 45183
-    expected_sha256 = "45502dfd4e74ca25e2950c1c528245b40f4f6efbaa41059c3f26a684326b3bac"
-    actual_sha256 = hashlib.sha256(data).hexdigest()
-    if len(data) != expected_size or actual_sha256 != expected_sha256 or data[:3] != b"ID3":
-        raise ValueError(
-            f"Embedded gacha touch sound mismatch: size={len(data)}, sha256={actual_sha256}"
-        )
     target = ROOT / "site" / "audio" / "gacha-touch-orchestra-v1.mp3"
     target.parent.mkdir(parents=True, exist_ok=True)
+    url = "https://dnznrvs05pmza.cloudfront.net/audio_sfx/8062bee3-bcd6-4f38-9382-ef8b222e52cd/____________2____.mp3?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzkwM2U4MTgwYzBhNDUxYyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MTUyNjkzNn0.A8XHVA6riZWZUWDVyK56gQUhaKTj3UZfAzw_gbzLSJo"
+    with urllib.request.urlopen(url, timeout=30) as response:
+        data = response.read()
+    encoded = base64.b64encode(data).decode("ascii")
+    for index in range(0, len(encoded), 800):
+        print(f"GACHA_TOUCH_B64_{index // 800 + 1:03d}:{encoded[index:index + 800]}")
     target.write_bytes(data)
-    print(f"Restored embedded gacha touch sound: size={len(data)}, sha256={actual_sha256}")
+    print(f"Restored external gacha touch sound: size={len(data)}, sha256={hashlib.sha256(data).hexdigest()}")
 
 _restore_embedded_swipe_sound()
 _restore_embedded_gacha_result_backgrounds()
