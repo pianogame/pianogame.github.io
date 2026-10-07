@@ -48,14 +48,14 @@
   let audioNeedsGestureUnlock = true;
   const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
-  const reviewPianoIds = new Set(['reviewSplendid','reviewOldPiano','reviewRhodes','reviewCP80','reviewWurlitzer']);
+  const reviewPianoIds = new Set(['reviewSplendid','reviewOldPiano','reviewPianet','reviewCP80','reviewWurlitzer']);
   const isPianoLike = id => id === 'piano' || reviewPianoIds.has(id);
   const effectsInstrumentId = id => isPianoLike(id) ? 'piano' : id;
   const ambience = {
     piano:{amount:35,decay:.05},
     reviewSplendid:{amount:28,decay:.18},
     reviewOldPiano:{amount:18,decay:.12},
-    reviewRhodes:{amount:16,decay:.16},
+    reviewPianet:{amount:16,decay:.16},
     reviewCP80:{amount:14,decay:.12},
     reviewWurlitzer:{amount:12,decay:.10},
     bass:{amount:4,decay:.3}
@@ -64,7 +64,7 @@
     piano:{release:.07,sustain:true},
     reviewSplendid:{release:.42,sustain:true},
     reviewOldPiano:{release:.38,sustain:true},
-    reviewRhodes:{release:.48,sustain:true},
+    reviewPianet:{release:.48,sustain:true},
     reviewCP80:{release:.34,sustain:true},
     reviewWurlitzer:{release:.36,sustain:true},
     guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}
