@@ -402,3 +402,14 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
     animation:none !important;
   }
 }
+
+
+/* ===== 2026-10-08 Trial instrument playable-range feedback ===== */
+#hp-four88 .hp-key.hp-key-out-of-range {
+  opacity:.24 !important;
+  filter:saturate(.2) brightness(.72);
+  pointer-events:none;
+}
+#hp-four88 .hp-key.hp-key-out-of-range .hp-key-face {
+  box-shadow:none !important;
+}
