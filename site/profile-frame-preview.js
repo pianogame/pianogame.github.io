@@ -8,7 +8,8 @@
   const preview = home.querySelector('[data-profile-frame-preview]');
   const art = home.querySelector('[data-profile-frame-preview-image]');
   const defaultRing = home.querySelector('[data-profile-frame-default-ring]');
-  if (!select || !preview || !art || !defaultRing) return;
+  const name = home.querySelector('[data-profile-frame-preview-name]');
+  if (!select || !preview || !art || !defaultRing || !name) return;
 
   const frameImages = Object.fromEntries(
     Array.from({ length: 15 }, (_, index) => {
@@ -16,6 +17,25 @@
       return ['frame' + id, '/assets/gacha/frames/frame' + id + '-v1.webp'];
     })
   );
+  const frameNames = {
+    default:'標準フレーム',
+    starlight:'スターライトフレーム',
+    frame01:'星空ゴールド',
+    frame02:'ロイヤルブルー',
+    frame03:'クリスタルシルバー',
+    frame04:'ローズゴールド',
+    frame05:'エメラルド',
+    frame06:'アメジスト',
+    frame07:'サファイア',
+    frame08:'ルビー',
+    frame09:'ムーンライト',
+    frame10:'フェアリー',
+    frame11:'クラシック',
+    frame12:'オーロラ',
+    frame13:'スノークリスタル',
+    frame14:'ノクターン',
+    frame15:'セレブレーション',
+  };
 
   const style = document.createElement('style');
   style.dataset.pdsFrameOnlyPreview = '';
@@ -25,8 +45,9 @@
       min-height:116px !important;
       display:flex !important;
       align-items:center !important;
-      justify-content:center !important;
-      padding:10px !important;
+      justify-content:flex-start !important;
+      gap:14px !important;
+      padding:10px 16px !important;
       overflow:visible !important;
       border:1px solid #b89b6170 !important;
       border-radius:10px !important;
@@ -36,9 +57,28 @@
       position:relative;
       width:96px;
       height:96px;
+      flex:0 0 96px;
       display:grid;
       place-items:center;
       overflow:visible;
+    }
+    #hp-home-screen .hp-frame-only-copy {
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:3px;
+      color:#263c53;
+      text-align:left;
+    }
+    #hp-home-screen .hp-frame-only-copy small {
+      color:#90723c;
+      font:700 10px/1.2 "Hiragino Sans","Yu Gothic",sans-serif;
+      letter-spacing:.08em;
+    }
+    #hp-home-screen .hp-frame-only-copy strong {
+      font:700 13px/1.35 "Hiragino Sans","Yu Gothic",sans-serif;
+      overflow-wrap:anywhere;
     }
     #hp-home-screen [data-profile-frame-preview-image] {
       position:absolute;
@@ -87,6 +127,7 @@
     preview.hidden = false;
     preview.style.display = 'flex';
     preview.dataset.frameId = id;
+    name.textContent = frameNames[id] || select.selectedOptions?.[0]?.textContent?.replace(/^\s*所持\s*[｜|:：]\s*/, '') || '標準フレーム';
 
     if (src) {
       defaultRing.hidden = true;
