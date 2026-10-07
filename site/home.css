@@ -6076,3 +6076,35 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   background:none;
   pointer-events:none;
 }
+
+
+/* ===== 2026-10-07 Gacha result background v21 ===== */
+#hp-home-screen .hp-gacha-result-backdrop {
+  background:
+    linear-gradient(180deg,rgba(4,9,20,.26),rgba(4,9,20,.52)),
+    var(--gacha-result-screen-bg,linear-gradient(#172845,#0c1428)) center / cover no-repeat !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+#hp-home-screen .hp-gacha-result-panel {
+  background:
+    radial-gradient(circle at 50% 0,rgba(236,213,139,.12),transparent 36%),
+    linear-gradient(145deg,rgba(20,34,59,.72),rgba(9,17,33,.76) 58%,rgba(40,29,56,.72)) !important;
+  -webkit-backdrop-filter:blur(2px);
+  backdrop-filter:blur(2px);
+}
+#hp-home-screen .hp-gacha-result-overlay[data-result-kind="character"] .hp-gacha-result-panel {
+  background:
+    radial-gradient(circle at 50% 0,rgba(255,244,202,.16),transparent 38%),
+    linear-gradient(145deg,rgba(30,36,69,.56),rgba(18,26,48,.62) 58%,rgba(60,39,76,.56)) !important;
+}
+#hp-home-screen .hp-gacha-result-card {
+  background:
+    linear-gradient(180deg,rgba(5,12,23,.04),rgba(5,12,23,.76) 82%),
+    var(--gacha-result-bg,linear-gradient(#293b5a,#111d35)) center / cover no-repeat !important;
+}
+#hp-home-screen .hp-gacha-result-card.is-character-result {
+  background:
+    linear-gradient(180deg,rgba(7,13,25,.01),rgba(7,13,25,.56) 82%),
+    var(--gacha-result-bg,linear-gradient(#293b5a,#111d35)) center / cover no-repeat !important;
+}
