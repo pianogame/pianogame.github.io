@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-         .register('/sw.js?v=101', { scope: '/', updateViaCache: 'none' })
+         .register('/sw.js?v=102', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -66,14 +66,14 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
   <script defer src="/sound-settings.js?v=1"></script>
-  <script defer src="/instruments.js?v=13"></script>
+  <script defer src="/instruments.js?v=14"></script>
   <link rel="stylesheet" href="/effects.css?v=9">
   <script defer src="/effects.js?v=9"></script>
   <script defer src="/effects-ui.js?v=10"></script>
   <script defer src="/violin-samples.js?v=1"></script>
   <script defer src="/violin.js?v=1"></script>
   <script defer src="/key-layout.js?v=14"></script>
-  <script defer src="/piano.js?v=42"></script>
+  <script defer src="/piano.js?v=43"></script>
   <script defer src="/home-news.js?v=20261005-same-origin-news"></script>
   <script defer src="/characters.js?v=20261007-image-recovery-v20"></script>
   <script defer src="/character-settings.js?v=2"></script>
@@ -545,7 +545,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
 <label class="hp-setting"><span class="hp-setting-heading">画面端からの余白<output data-size-output="edge"></output></span><input type="range" data-key-size="edge" min="0" max="48" value="8" aria-label="画面端からの余白"></label>
 <button type="button" class="hp-control" data-action="key-size-reset">標準のピアノ鍵盤サイズに戻す</button>
 <p class="hp-setting-help">時計やホームバーがある部分は、余白を0にしても避けます。</p></section>
-        <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option><option value="violin">バイオリン</option><optgroup label="STAGING｜本採用音源 最終確認"><option value="finalChip8">本採用確認｜8bitゲームシンセ</option><option value="finalKoto">本採用確認｜琴</option><option value="finalTrumpet">本採用確認｜トランペット</option><option value="finalPipeOrgan">本採用確認｜パイプオルガン</option><option value="finalVibraphone">本採用確認｜ヴィブラフォン</option></optgroup></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span><span class="hp-setting-help hp-audio-review-note">正式採用予定5音源の最終試奏です。まだガチャ獲得枠には入れていません。5種類を実際の鍵盤で確認後に本採用します。</span><span class="hp-setting-help hp-audio-review-credit">ヴィブラフォン実録素材：Versilian Studios VCSL（CC0）。その他4音源はドリステ用リアルタイム音源エンジンで生成しています。</span></label>
+        <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option><option value="violin">バイオリン</option><optgroup label="STAGING｜本採用音源 最終確認"><option value="finalChip8">本採用確認｜8bitゲームシンセ</option><option value="finalKoto">本採用確認｜琴</option><option value="finalTrumpet">本採用確認｜トランペット</option><option value="finalPipeOrgan">本採用確認｜パイプオルガン</option><option value="finalVibraphone">本採用確認｜ヴィブラフォン</option></optgroup></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span><span class="hp-setting-help hp-audio-review-note">正式採用予定5音源の最終試奏です。まだガチャ獲得枠には入れていません。5種類を実際の鍵盤で確認後に本採用します。</span><span class="hp-setting-help hp-audio-review-credit">パイプオルガン／ヴィブラフォン実録素材：Versilian Studios VCSL（CC0）。8bit・琴・トランペットはドリステ用の高品質リアルタイム音源エンジンで生成しています。</span></label>
         <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">幕をタップすると音源を準備</p>
         <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button></div>
         <label class="hp-setting"><span class="hp-setting-heading"><span>① 音量</span><output data-output="volume">75%</output></span><span class="hp-setting-help">楽器と響き、両方の音の大きさ。</span><input type="range" data-control="volume" min="0" max="100" value="75" aria-label="音量"><span class="hp-scale-ends"><span>小さい</span><span>大きい</span></span></label>
