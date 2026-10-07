@@ -206,6 +206,29 @@ def _verify_app_sources():
         raise ValueError("Unexpected undefined line in rotation-guide.js")
 
 
+
+def _restore_embedded_gacha_result_backgrounds():
+    assets = [
+        ("result-normal-v2", 5, 29848, "08fdff1b2fb0c12572c4b0a1000acbb885eadd50b7825e1d3cbc639a69cdcc0e"),
+        ("result-character-v2", 9, 52444, "230b4a260456974064d6af43a1c3eb634b353f01d43a7d3931bb40892823059e"),
+    ]
+    for name, part_count, expected_size, expected_sha256 in assets:
+        parts = [
+            ROOT / "scripts" / "assets" / f"{name}.b64.{index}"
+            for index in range(1, part_count + 1)
+        ]
+        encoded = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+        data = base64.b64decode(encoded, validate=True)
+        actual_sha256 = hashlib.sha256(data).hexdigest()
+        if len(data) != expected_size or actual_sha256 != expected_sha256:
+            raise ValueError(
+                f"Embedded gacha result background mismatch: {name}, "
+                f"size={len(data)}, sha256={actual_sha256}"
+            )
+        target = ROOT / "site" / "assets" / "gacha" / "visuals" / f"{name}.webp"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+
 def _restore_embedded_swipe_sound():
     parts = [
         ROOT / "scripts" / "assets" / f"pororoponponpin.b64.{index}"
@@ -226,6 +249,7 @@ def _restore_embedded_swipe_sound():
 
 
 _restore_embedded_swipe_sound()
+_restore_embedded_gacha_result_backgrounds()
 _verify_app_sources()
 
 if OUT.exists():
