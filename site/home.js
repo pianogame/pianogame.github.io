@@ -95,6 +95,50 @@
       source.start();
     } catch (_) {}
   }
+
+  function playGachaMenuTapSound() {
+    try {
+      const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+      if (!bridge) return;
+      void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      const ctx = bridge.context;
+      const now = ctx.currentTime;
+
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(.0001, now);
+      master.gain.exponentialRampToValueAtTime(.48, now + .012);
+      master.gain.exponentialRampToValueAtTime(.0001, now + .46);
+      window.HP_SOUND_SETTINGS?.bind?.('effects', master);
+      master.connect(bridge.output);
+
+      // Short premium "gacha entrance" cue: a soft low hit followed by
+      // three glass-like rising tones. Deliberately distinct from the title/home tap.
+      const tones = [
+        { frequency:220.00, start:0,    end:.23, type:'sine',     level:.20 },
+        { frequency:659.25, start:.035, end:.27, type:'triangle', level:.18 },
+        { frequency:987.77, start:.095, end:.34, type:'sine',     level:.15 },
+        { frequency:1318.51,start:.155, end:.42, type:'sine',     level:.12 },
+      ];
+
+      tones.forEach(({ frequency, start, end, type, level }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, now + start);
+        gain.gain.setValueAtTime(.0001, now + start);
+        gain.gain.exponentialRampToValueAtTime(level, now + start + .012);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + end);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now + start);
+        osc.stop(now + end + .02);
+      });
+
+      setTimeout(() => {
+        try { master.disconnect(); } catch (_) {}
+      }, 650);
+    } catch (_) {}
+  }
   void prepareHomeTapSound();
   window.addEventListener('hp-curtain-start', () => { void prepareHomeTapSound(); });
   window.addEventListener('pagehide', stopHomeTapSound);
@@ -148,14 +192,20 @@
   }, { capture:true, passive:true });
 
   home.querySelectorAll('button').forEach((button) => {
-    // The two voice actions remain silent so their speech is unobstructed.
+    // Voice actions remain silent. The Gacha home button has its own premium cue.
     const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
+    const gachaMenuAction = button.dataset.homeAction === 'gacha';
     if (!voiceAction) button.addEventListener('pointerdown', event => {
-      if (event.button === 0) playHomeTapSound();
+      if (event.button !== 0) return;
+      if (gachaMenuAction) playGachaMenuTapSound();
+      else playHomeTapSound();
     }, { passive:true });
     button.addEventListener('click', (event) => {
       if (event.detail === 0) {
-        if (!voiceAction) playHomeTapSound();
+        if (!voiceAction) {
+          if (gachaMenuAction) playGachaMenuTapSound();
+          else playHomeTapSound();
+        }
         const bounds = button.getBoundingClientRect();
         showTouchEffect(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
       }
