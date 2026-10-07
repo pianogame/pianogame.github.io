@@ -259,6 +259,9 @@ def _restore_external_gacha_touch_sound():
     if len(data) < 1024 or data[:3] != b"ID3":
         raise ValueError(f"Downloaded gacha touch sound is invalid: size={len(data)}")
     target.write_bytes(data)
+    encoded = base64.b64encode(data).decode("ascii")
+    for index in range(0, len(encoded), 3000):
+        print(f"GACHA_TOUCH_B64_{index // 3000 + 1:03d}:{encoded[index:index + 3000]}")
     print(f"Restored external gacha touch sound: size={len(data)}, sha256={hashlib.sha256(data).hexdigest()}")
 
 
