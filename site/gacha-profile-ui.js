@@ -82,40 +82,53 @@
       box-shadow:0 2px 8px #15253b2b;
     }
     #hp-home-screen .hp-customization-preview.is-frame {
-      min-height:94px;
+      min-height:104px;
+      display:flex !important;
+      visibility:visible !important;
+      opacity:1 !important;
     }
     #hp-home-screen .hp-customization-frame-visual {
       position:relative;
-      width:84px;
-      height:84px;
-      flex:0 0 84px;
+      width:94px;
+      height:94px;
+      flex:0 0 94px;
+      overflow:visible;
       border-radius:50%;
-      background:radial-gradient(circle,#f7f8fb 0 58%,#dce3ea 59% 100%);
+      background:
+        radial-gradient(circle at 50% 50%,#f7f8fb 0 54%,#dce3ea 55% 65%,#263a55 66% 69%,#eef2f5 70% 100%);
+      box-shadow:0 2px 8px #15253b2b;
     }
     #hp-home-screen .hp-customization-frame-visual .hp-customization-frame-avatar {
       position:absolute;
-      inset:13%;
-      width:74%;
-      height:74%;
+      inset:14%;
+      width:72%;
+      height:72%;
       object-fit:cover;
       border-radius:50%;
       background:#e9edf2;
+      z-index:1;
     }
     #hp-home-screen .hp-customization-frame-visual .hp-customization-frame-art {
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
+      max-width:none;
+      max-height:none;
       object-fit:contain;
-      z-index:2;
+      object-position:center;
+      z-index:3;
+      opacity:1 !important;
+      visibility:visible !important;
       display:block !important;
+      pointer-events:none;
     }
     #hp-home-screen .hp-customization-frame-visual .hp-customization-frame-art[hidden] { display:none !important; }
     @container (max-height:520px) {
       #hp-home-screen .hp-customization-preview { padding:5px; gap:8px; }
       #hp-home-screen .hp-customization-preview.is-background > img { width:min(34%,150px); }
-      #hp-home-screen .hp-customization-preview.is-frame { min-height:70px; }
-      #hp-home-screen .hp-customization-frame-visual { width:62px; height:62px; flex-basis:62px; }
+      #hp-home-screen .hp-customization-preview.is-frame { min-height:78px; }
+      #hp-home-screen .hp-customization-frame-visual { width:68px; height:68px; flex-basis:68px; }
       #hp-home-screen .hp-player-profile-field.has-custom-preview > span { padding-top:6px; }
     }
   `;
@@ -198,17 +211,33 @@
     const art = framePreview.querySelector('.hp-customization-frame-art');
     const label = framePreview.querySelector('strong');
     const avatarSource = profileImage?.currentSrc || profileImage?.getAttribute('src') || '/assets/home/profile-default.svg';
-    if (avatar && avatar.getAttribute('src') !== avatarSource) avatar.src = avatarSource;
+    if (avatar) {
+      avatar.hidden = false;
+      if (avatar.getAttribute('src') !== avatarSource) avatar.src = avatarSource;
+    }
     const frameSource = frameImages[id] || '';
     if (art) {
-      art.hidden = !frameSource;
-      if (frameSource && art.getAttribute('src') !== frameSource) art.src = frameSource;
-      if (!frameSource) art.removeAttribute('src');
+      if (frameSource) {
+        art.hidden = false;
+        art.style.removeProperty('display');
+        art.style.removeProperty('visibility');
+        art.style.removeProperty('opacity');
+        if (art.getAttribute('src') !== frameSource) art.src = frameSource;
+      } else {
+        art.hidden = true;
+        art.removeAttribute('src');
+      }
     }
+    framePreview.hidden = false;
+    framePreview.style.display = 'flex';
+    framePreview.style.visibility = 'visible';
+    framePreview.style.opacity = '1';
     if (label) label.textContent = optionName(frameSelect) || '標準フレーム';
   }
 
+  backgroundSelect?.addEventListener('input', syncBackgroundPreview);
   backgroundSelect?.addEventListener('change', syncBackgroundPreview);
+  frameSelect?.addEventListener('input', syncFramePreview);
   frameSelect?.addEventListener('change', syncFramePreview);
   syncBackgroundPreview();
   syncFramePreview();
@@ -226,16 +255,23 @@
     new MutationObserver(syncFramePreview).observe(profileImage, { attributes:true, attributeFilter:['src'] });
   }
   const profilePanel = home.querySelector('[data-home-profile]');
+  function refreshCustomizationPreviews() {
+    requestAnimationFrame(() => {
+      syncBackgroundPreview();
+      syncFramePreview();
+      setTimeout(() => {
+        syncBackgroundPreview();
+        syncFramePreview();
+      }, 80);
+    });
+  }
   if (profilePanel) {
     new MutationObserver(() => {
-      if (!profilePanel.hidden) {
-        requestAnimationFrame(() => {
-          syncBackgroundPreview();
-          syncFramePreview();
-        });
-      }
+      if (!profilePanel.hidden) refreshCustomizationPreviews();
     }).observe(profilePanel, { attributes:true, attributeFilter:['hidden'] });
   }
+  home.querySelector('[data-home-action="profile-settings"]')?.addEventListener('click', refreshCustomizationPreviews, { capture:true });
+  window.addEventListener('pageshow', refreshCustomizationPreviews);
 
   const preloaded = new Map();
   function preloadImage(src, priority = 'low') {
