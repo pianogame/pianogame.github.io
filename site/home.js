@@ -1352,7 +1352,7 @@
   function showGachaResult(results, index = 0) {
     const overlay = home.querySelector('[data-gacha-result-overlay]');
     if (!overlay || !results.length) return;
-    gachaResultState = { results:[...results], index, summary:false };
+    gachaResultState = { results:[...results], index, summary:false, skipMode:false, seenNewCharacterIndexes:new Set() };
     overlay.hidden = false;
     renderGachaResultStep();
   }
@@ -1698,8 +1698,17 @@
     const { results, index } = gachaResultState;
     if (results.length <= 1) return;
 
-    // Every result in a ten-pull is revealed one by one.
-    // Only the explicit SKIP action may jump ahead to the remaining mandatory NEW character reveals / summary.
+    // Once SKIP is chosen for a ten-pull, keep that choice active after a
+    // mandatory rainbow stop. A tap on the rainbow result resumes skipping
+    // to the next unseen NEW character; if there is none, show the summary.
+    if (gachaResultState.skipMode === true) {
+      gachaResultTransitioning = true;
+      const stoppedOnNewCharacter = await revealNextPendingNewCharacter(index);
+      if (!stoppedOnNewCharacter) showFinalGachaSummary();
+      return;
+    }
+
+    // Normal mode reveals every result one by one.
     if (index < results.length - 1) {
       await transitionToGachaResultIndex(index + 1);
     } else {
@@ -1710,6 +1719,7 @@
 
   async function skipGachaResultSequence() {
     if (!gachaResultState || gachaResultState.results.length <= 1 || gachaResultState.summary || gachaResultTransitioning) return;
+    gachaResultState.skipMode = true;
     gachaResultTransitioning = true;
     const stoppedOnNewCharacter = await revealNextPendingNewCharacter(gachaResultState.index);
     if (!stoppedOnNewCharacter) showFinalGachaSummary();
@@ -1717,6 +1727,7 @@
 
   function skipGachaAnimationToLast() {
     if (gachaAnimationMandatory) return;
+    if (gachaResultState?.results?.length > 1) gachaResultState.skipMode = true;
     finishGachaAnimation(gachaResultState?.results?.length > 1 ? 'summary' : 'result');
   }
 
@@ -1762,7 +1773,7 @@
         return character ? window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => null) : null;
       }));
 
-    gachaResultState = { results:[...results], index:0, summary:false, seenNewCharacterIndexes:new Set() };
+    gachaResultState = { results:[...results], index:0, summary:false, skipMode:false, seenNewCharacterIndexes:new Set() };
     gachaTrialState.history.unshift({
       at:new Date().toISOString(),
       count:cost,
