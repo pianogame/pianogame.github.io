@@ -589,7 +589,7 @@
     };
     main.onended=cleanup;
     main.start(when);second.start(when);tri.start(when);lfo.start(when);
-    const voice={release(at=ctx.currentTime,seconds=articulation.trialChip8.release){
+    const voice={release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.trialChip8.release){
       if(cleaned)return;
       if(!Number.isFinite(seconds))return;
       const start=Math.max(when+.006,at),end=start+Math.max(.02,seconds);
@@ -716,7 +716,7 @@
     };
     osc1.onended=cleanup;
     osc1.start(when);osc2.start(when);breath.start(when);lfo.start(when);
-    return {release(at=ctx.currentTime,seconds=articulation.trialTrumpet.release){
+    return {release(at=ctx.currentTime,seconds=sustain?Infinity:articulation.trialTrumpet.release){
       if(cleaned||!Number.isFinite(seconds))return;
       const start=Math.max(when+.04,at),end=start+Math.max(.06,seconds);
       bus.gain.cancelScheduledValues(start);bus.gain.setTargetAtTime(.00001,start,Math.max(.012,seconds/4));
