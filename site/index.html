@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-          .register('/sw.js?v=85', { scope: '/', updateViaCache: 'none' })
+          .register('/sw.js?v=86', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -81,7 +81,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/motion-character.js?v=20261004-character4"></script>
   <script defer src="/home.js?v=20261007-frame-live-v25"></script>
   <script defer src="/gacha-profile-ui.js?v=20261007-frame-preview-v24"></script>
-  <script defer src="/profile-frame-preview.js?v=20261007-frame-only-v1"></script>
+  <script defer src="/profile-frame-preview.js?v=20261007-frame-only-v2"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
   <script defer src="/multitrack.js?v=29"></script>
@@ -268,6 +268,10 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
               <div class="hp-frame-only-stage" aria-label="選択中のプロフィールフレーム">
                 <span data-profile-frame-default-ring aria-hidden="true"></span>
                 <img class="hp-customization-frame-art hp-frame-only-art" data-profile-frame-preview-image alt="選択中のプロフィールフレーム" hidden>
+              </div>
+              <div class="hp-customization-preview-copy hp-frame-only-copy">
+                <small>SELECTED FRAME</small>
+                <strong data-profile-frame-preview-name>標準フレーム</strong>
               </div>
             </div>
             <small>ガチャで獲得したフレームから選択できます。</small>
