@@ -320,3 +320,85 @@ html[data-hp-rotated="true"] #hp-four88 .hp-header, html[data-hp-wide="true"][da
   #hp-four88[data-wallpaper="photo"] .hp-header .hp-control:not([aria-pressed="true"]) { background: transparent; }
   #hp-four88[data-wallpaper="photo"] .hp-header .hp-control:not([aria-pressed="true"])::before { background: linear-gradient(#18263f99, #0a1326b3); }
 }
+
+
+/* ===== 2026-10-08 Gacha piano customization prototypes ===== */
+/* Piano-mode background reward. */
+#hp-four88[data-piano-background="moonlightHall"] .hp-surface {
+  background:
+    linear-gradient(180deg,rgba(3,10,28,.18),rgba(3,7,18,.58)),
+    url('/assets/gacha/backgrounds/moonlight-v1.webp') center 46% / cover no-repeat !important;
+  background-color:#071126 !important;
+}
+
+/* Keyboard skin reward: keep the realistic key artwork, then tint/materialize it. */
+#hp-four88[data-piano-skin="moonlightIvory"] .hp-register-section::before {
+  filter:saturate(.62) hue-rotate(174deg) brightness(.9);
+  box-shadow:0 0 14px rgba(155,190,255,.18);
+}
+#hp-four88[data-piano-skin="moonlightIvory"] .hp-key:not(.hp-sharp) .hp-key-face {
+  background-image:
+    linear-gradient(165deg,rgba(255,255,255,.34),rgba(205,225,244,.16) 48%,rgba(119,153,187,.18)),
+    var(--key-art);
+  background-blend-mode:screen,normal;
+  background-color:#d9e3ea;
+  box-shadow:
+    inset 1px 0 rgba(255,255,255,.92),
+    inset -1px 0 rgba(122,148,168,.55),
+    inset 0 -4px 7px rgba(75,104,130,.18),
+    0 0 5px rgba(184,218,255,.18);
+}
+#hp-four88[data-piano-skin="moonlightIvory"] .hp-key.hp-sharp .hp-key-face {
+  background-image:
+    linear-gradient(160deg,rgba(81,117,158,.28),rgba(5,15,32,.38)),
+    var(--key-art);
+  background-blend-mode:screen,normal;
+  background-color:#08172a;
+  box-shadow:
+    inset 0 1px rgba(206,230,255,.42),
+    inset 1px 0 rgba(132,169,207,.25),
+    0 0 6px rgba(113,167,230,.24);
+}
+#hp-four88[data-piano-skin="moonlightIvory"] .hp-register-section::after {
+  background:linear-gradient(90deg,#506b88,#d9eaff 45%,#7895b2,#27384b);
+}
+
+/* Touch-effect reward: crystal particles plus a brief expanding ring. */
+#hp-four88[data-touch-effect="crystalBloom"] .hp-spark {
+  color:#c6e8ff;
+  opacity:.92;
+  text-shadow:0 0 5px #fff,0 0 11px #82c8ff,0 0 17px #b88cff;
+  animation:hp-crystal-spark .72s cubic-bezier(.12,.66,.25,1) forwards;
+}
+#hp-four88[data-touch-effect="crystalBloom"] .hp-spark:nth-child(3n) {
+  color:#e7c9ff;
+}
+#hp-four88[data-touch-effect="crystalBloom"] .hp-spark-burst::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:54%;
+  width:18px;
+  height:18px;
+  border:2px solid rgba(185,225,255,.88);
+  border-radius:50%;
+  box-shadow:0 0 8px #86cfff,0 0 14px #c9a3ff;
+  transform:translate(-50%,-50%) scale(.35);
+  opacity:.95;
+  pointer-events:none;
+  animation:hp-crystal-ring .62s ease-out forwards;
+}
+@keyframes hp-crystal-spark {
+  0% { transform:translate(0,0) scale(.45) rotate(0deg); opacity:0; }
+  18% { opacity:1; }
+  100% { transform:translate(var(--spark-x),var(--spark-y)) scale(1.05) rotate(48deg); opacity:0; }
+}
+@keyframes hp-crystal-ring {
+  to { transform:translate(-50%,-50%) scale(3.2); opacity:0; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #hp-four88[data-touch-effect="crystalBloom"] .hp-spark,
+  #hp-four88[data-touch-effect="crystalBloom"] .hp-spark-burst::after {
+    animation:none !important;
+  }
+}
