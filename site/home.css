@@ -6219,3 +6219,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     animation:none !important;
   }
 }
+
+#hp-home-screen .hp-profile-effect-field > small {
+  max-width:240px;
+  white-space:normal;
+  line-height:1.35;
+}
