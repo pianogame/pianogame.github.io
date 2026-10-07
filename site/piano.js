@@ -48,8 +48,27 @@
   let audioNeedsGestureUnlock = true;
   const isStandalone = window.matchMedia?.('(display-mode: standalone)')?.matches || window.navigator.standalone === true;
   const effectUI = window.HP_EFFECTS_UI;
-  const ambience = {piano:{amount:35,decay:.05},bass:{amount:4,decay:.3}};
-  const articulation={piano:{release:.07,sustain:true},guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}};
+  const reviewPianoIds = new Set(['reviewSplendid','reviewOldPiano','reviewRhodes','reviewCP80','reviewWurlitzer']);
+  const isPianoLike = id => id === 'piano' || reviewPianoIds.has(id);
+  const effectsInstrumentId = id => isPianoLike(id) ? 'piano' : id;
+  const ambience = {
+    piano:{amount:35,decay:.05},
+    reviewSplendid:{amount:28,decay:.18},
+    reviewOldPiano:{amount:18,decay:.12},
+    reviewRhodes:{amount:16,decay:.16},
+    reviewCP80:{amount:14,decay:.12},
+    reviewWurlitzer:{amount:12,decay:.10},
+    bass:{amount:4,decay:.3}
+  };
+  const articulation={
+    piano:{release:.07,sustain:true},
+    reviewSplendid:{release:.42,sustain:true},
+    reviewOldPiano:{release:.38,sustain:true},
+    reviewRhodes:{release:.48,sustain:true},
+    reviewCP80:{release:.34,sustain:true},
+    reviewWurlitzer:{release:.36,sustain:true},
+    guitar:{release:.05,sustain:true},bass:{release:.06,sustain:true},violin:{release:.3,sustain:false}
+  };
   const releaseControl=root.querySelector('[data-control="release"]');
   let ambienceInstrument = 'piano';
   let samplesReady = false, sampleBuffers = new Map(), currentInstrument = 'piano', loadGeneration = 0;
@@ -254,7 +273,7 @@
         reverbInput.connect(reverb); reverb.connect(rumble); rumble.connect(damping); damping.connect(wet); wet.connect(master);
         effects=effectUI.attach(ctx); ambienceSend=ctx.createGain();
         violinSpace=window.HP_VIOLIN.createSpace(ctx,effects.input);
-        ambienceSend.gain.value=currentInstrument!=='piano'?0:1;
+        ambienceSend.gain.value=!isPianoLike(currentInstrument)?0:1;
         effects.output.connect(master); effects.output.connect(ambienceSend); ambienceSend.connect(reverbInput);
         updateReverb();
       }
@@ -361,7 +380,7 @@
   reverbControl.addEventListener('input', () => {
     if(ambience[ambienceInstrument])ambience[ambienceInstrument].amount=Number(reverbControl.value);
     root.querySelector('[data-output="reverb"]').textContent = reverbControl.value+'%';
-    if (wet) wet.gain.setTargetAtTime(currentInstrument!=='piano'?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.045);
+    if (wet) wet.gain.setTargetAtTime(!isPianoLike(currentInstrument)?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.045);
   });
   decayControl.addEventListener('input', () => { if(ambience[ambienceInstrument])ambience[ambienceInstrument].decay=Number(decayControl.value); root.querySelector('[data-output="decay"]').textContent = Number(decayControl.value).toFixed(1)+'秒'; });
   decayControl.addEventListener('change', updateReverb);
@@ -391,10 +410,10 @@
     root.querySelector('[data-output="instrument-description"]').textContent=preset.description;
     root.querySelector('.hp-surface').setAttribute('aria-label',preset.name);
     effectUI.setReady(samplesReady);
-    void effectUI.setInstrument(currentInstrument);
-    root.querySelectorAll('[data-common-ambience]').forEach(label=>label.hidden=currentInstrument!=='piano');
-    if(ambienceSend)ambienceSend.gain.setTargetAtTime(currentInstrument!=='piano'?0:1,ctx.currentTime,.03);
-    if(wet)wet.gain.setTargetAtTime(currentInstrument!=='piano'?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.03);
+    void effectUI.setInstrument(effectsInstrumentId(currentInstrument));
+    root.querySelectorAll('[data-common-ambience]').forEach(label=>label.hidden=!isPianoLike(currentInstrument));
+    if(ambienceSend)ambienceSend.gain.setTargetAtTime(!isPianoLike(currentInstrument)?0:1,ctx.currentTime,.03);
+    if(wet)wet.gain.setTargetAtTime(!isPianoLike(currentInstrument)?0:Number(reverbControl.value)/100*1.25,ctx.currentTime,.03);
     if(ambienceInstrument!==currentInstrument) {
       ambienceInstrument=currentInstrument;
       if(ambience[currentInstrument]) {
@@ -453,7 +472,7 @@
       await ctx.resume();
       const bank=await loadBank(id,generation);
       if(generation!==loadGeneration)return;
-      await effectUI.setInstrument(id);
+      await effectUI.setInstrument(effectsInstrumentId(id));
       currentInstrument=id; sampleBuffers=bank; sampleCounters.clear(); samplesReady=true;
       build37(instruments[id].shift37); updateInstrumentUI();
       if(id!==previous)activeTopRow=defaultTopRow(id);
