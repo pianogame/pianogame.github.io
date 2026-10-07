@@ -1,4 +1,4 @@
-const CACHE_NAME = 'piano-dream-stage-shell-v97';
+const CACHE_NAME = 'piano-dream-stage-shell-v98';
 const LEGACY_CACHE_PREFIX = 'piano-palette-shell-';
 const CACHE_PREFIX = 'piano-dream-stage-shell-';
 
