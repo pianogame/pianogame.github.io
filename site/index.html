@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-         .register('/sw.js?v=99', { scope: '/', updateViaCache: 'none' })
+         .register('/sw.js?v=100', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -73,7 +73,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/violin-samples.js?v=1"></script>
   <script defer src="/violin.js?v=1"></script>
   <script defer src="/key-layout.js?v=14"></script>
-  <script defer src="/piano.js?v=40"></script>
+  <script defer src="/piano.js?v=41"></script>
   <script defer src="/home-news.js?v=20261005-same-origin-news"></script>
   <script defer src="/characters.js?v=20261007-image-recovery-v20"></script>
   <script defer src="/character-settings.js?v=2"></script>
@@ -90,7 +90,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/display-mode.js?v=18"></script>
   <link rel="stylesheet" href="/playability.css?v=10">
   <script defer src="/playability.js?v=10"></script>
-  <link rel="stylesheet" href="/piano-palace.css?v=15">
+  <link rel="stylesheet" href="/piano-palace.css?v=16">
   <script defer src="/piano-controls.js?v=4"></script>
 </head>
 <body class="hp-booting">
