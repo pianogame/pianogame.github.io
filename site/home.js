@@ -2178,7 +2178,8 @@
     if (cost === 10 && !results.some(result => result?.rarity === 'rainbow')) {
       const pool = gachaPool();
       const character = pool[Math.floor(Math.random() * pool.length)];
-      const rainbowIndex = 1 + Math.floor(Math.random() * Math.max(1, results.length - 1));
+      const qaReserved = cost === 10 ? Math.min(5, Math.max(0, results.length - 1)) : 1;
+      const rainbowIndex = qaReserved + Math.floor(Math.random() * Math.max(1, results.length - qaReserved));
       if (character && results.length) results[Math.min(rainbowIndex, results.length - 1)] = makeCharacterResult(character);
     }
 
