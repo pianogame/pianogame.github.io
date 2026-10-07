@@ -80,6 +80,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
   <script defer src="/home.js?v=20261008-profile-effect-spread-v35"></script>
+  <script defer src="/piano-gacha-customization.js?v=1"></script>
   <script defer src="/gacha-profile-ui.js?v=20261007-frame-preview-v24"></script>
   <script defer src="/profile-frame-preview.js?v=20261007-frame-only-v2"></script>
   <script defer src="/home-bgm.js?v=2"></script>
@@ -544,7 +545,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
 <label class="hp-setting"><span class="hp-setting-heading">画面端からの余白<output data-size-output="edge"></output></span><input type="range" data-key-size="edge" min="0" max="48" value="8" aria-label="画面端からの余白"></label>
 <button type="button" class="hp-control" data-action="key-size-reset">標準のピアノ鍵盤サイズに戻す</button>
 <p class="hp-setting-help">時計やホームバーがある部分は、余白を0にしても避けます。</p></section>
-        <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option><option value="violin">バイオリン</option></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span></label>
+        <label class="hp-setting"><span class="hp-setting-heading">音源</span><select data-control="instrument" aria-label="演奏する楽器"><option value="piano">グランドピアノ</option><option value="bass">エレキベース</option><option value="guitar">エレキギター</option><option value="violin">バイオリン</option><optgroup label="STAGING｜ガチャ追加音源候補"><option value="reviewSplendid">候補1｜コンサートグランド</option><option value="reviewOldPiano">候補2｜ヴィンテージ・アップライト</option><option value="reviewRhodes">候補3｜ステージ・エレクトリック</option><option value="reviewCP80">候補4｜エレクトリックグランド</option><option value="reviewWurlitzer">候補5｜リード・エレクトリック</option></optgroup></select><span class="hp-setting-help" data-output="instrument-description">豊かな余韻のグランドピアノ。37鍵はC3〜C6。</span><span class="hp-setting-help hp-audio-review-note">候補1〜5は本採用前の試聴用です。5種類すべて実際の鍵盤で確認してから、ガチャの超低確率枠へ入れます。</span></label>
         <p class="hp-instrument-status" data-output="instrument-status" role="status" aria-live="polite">幕をタップすると音源を準備</p>
         <label class="hp-setting"><span class="hp-setting-heading"><span>指を離した後の音の長さ</span><output data-output="release">0.07秒</output></span><span class="hp-setting-help">左ほど歯切れよく止まります。「音を伸ばす」がOFFのときに有効。リバーブの長さは別に調整できます。</span><input type="range" data-control="release" min="0.01" max="10" step="0.01" value="0.07" aria-label="指を離した後の音の長さ"></label><div class="hp-pedal"><div>鍵盤を離した後の音<span class="hp-setting-help">ONで、指を離しても音が自然に続きます。</span></div><button type="button" class="hp-control" data-action="sustain" aria-pressed="true">音を伸ばす：ON</button></div>
         <label class="hp-setting"><span class="hp-setting-heading"><span>① 音量</span><output data-output="volume">75%</output></span><span class="hp-setting-help">楽器と響き、両方の音の大きさ。</span><input type="range" data-control="volume" min="0" max="100" value="75" aria-label="音量"><span class="hp-scale-ends"><span>小さい</span><span>大きい</span></span></label>
@@ -558,6 +559,9 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
 <label class="hp-wide-label"><input type="checkbox" data-control="wide" checked> 画面の端まで広く使う</label>
 <p class="hp-setting-help">余白を減らして鍵盤を広げます。端が押しにくい場合はOFFにできます。</p>
 <label class="hp-setting">壁紙<select data-control="wallpaper" aria-label="壁紙"><option value="default">コンサートホール</option><option value="night">夜色</option><option value="blue">青</option><option value="photo">自分の写真</option></select></label>
+<label class="hp-setting hp-gacha-custom-setting"><span class="hp-setting-heading">ガチャ獲得｜ピアノモード背景</span><select data-piano-background aria-label="ガチャで獲得したピアノモード背景"></select><span class="hp-setting-help">獲得した背景だけ選べます。壁紙よりこちらを優先表示します。</span></label>
+<label class="hp-setting hp-gacha-custom-setting"><span class="hp-setting-heading">ガチャ獲得｜鍵盤スキン</span><select data-piano-skin aria-label="ガチャで獲得した鍵盤スキン"></select><span class="hp-setting-help">白鍵・黒鍵・鍵盤まわりの質感をまとめて変更します。</span></label>
+<label class="hp-setting hp-gacha-custom-setting"><span class="hp-setting-heading">ガチャ獲得｜タッチエフェクト</span><select data-piano-touch-effect aria-label="ガチャで獲得したタッチエフェクト"></select><span class="hp-setting-help">鍵盤を押した瞬間の光・粒子演出を変更します。</span></label>
 <label class="hp-photo-label">写真を選ぶ<input type="file" data-control="photo" accept="image/*"></label>
 <button type="button" class="hp-control" data-action="photo-remove">写真を削除</button>
 <p class="hp-setting-help" data-output="photo-status" role="status">写真はこの端末のブラウザ内に保存します。</p></section>
