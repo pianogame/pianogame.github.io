@@ -242,8 +242,7 @@
     const voiceAction = ['character-talk', 'voice-replay'].includes(button.dataset.homeAction);
     const gachaMenuAction = button.dataset.homeAction === 'gacha';
     const gachaPullAction = button.hasAttribute('data-gacha-pull');
-    const gachaPianoTouchAction = button.hasAttribute('data-gacha-piano-touch');
-    if (!voiceAction && !gachaPianoTouchAction) button.addEventListener('pointerdown', event => {
+    if (!voiceAction) button.addEventListener('pointerdown', event => {
       if (event.button !== 0) return;
       if (gachaPullAction) playGachaPullTapSound();
       else if (gachaMenuAction) playGachaMenuTapSound();
@@ -251,7 +250,7 @@
     }, { passive:true });
     button.addEventListener('click', (event) => {
       if (event.detail === 0) {
-        if (!voiceAction && !gachaPianoTouchAction) {
+        if (!voiceAction) {
           if (gachaPullAction) playGachaPullTapSound();
           else if (gachaMenuAction) playGachaMenuTapSound();
           else playHomeTapSound();
@@ -1539,7 +1538,7 @@
         gain.connect(bridge.output);
         gachaFlourishGraph = { context:bridge.context, gain };
       }
-      gachaFlourishLoading = fetch('/audio/pororoponponpin.m4a?v=gacha1')
+      gachaFlourishLoading = fetch('/audio/gacha-touch-orchestra-v1.mp3?v=2', { cache:'force-cache' })
         .then(response => response.ok ? response.arrayBuffer() : Promise.reject(new Error('gacha sound unavailable')))
         .then(buffer => gachaFlourishGraph.context.decodeAudioData(buffer))
         .then(buffer => { gachaFlourishBuffer = buffer; })
@@ -1749,15 +1748,10 @@
     if (!overlay || gachaAnimationMode !== 'intro' || !gachaAnimationAwaitingTouch) return;
     gachaAnimationAwaitingTouch = false;
     overlay.classList.remove('is-awaiting-touch');
-    const orchestraDuration = playGachaTouchOrchestra();
-    if (!orchestraDuration) playGachaPianoChord();
+    playGachaPianoChord();
     const label = overlay.querySelector('[data-gacha-animation-label]');
     if (label) label.textContent = 'さあ、運命の演奏を——';
-    // Let the selected orchestral rise reach its final chord before the reveal.
-    const revealDelay = orchestraDuration
-      ? Math.max(1850, Math.min(2550, (orchestraDuration - .22) * 1000))
-      : 520;
-    gachaAnimationTimer = setTimeout(() => finishGachaAnimation('touch'), revealDelay);
+    gachaAnimationTimer = setTimeout(() => finishGachaAnimation('touch'), 520);
   }
 
   function playGachaDrawReveal(result, index, total, { mandatory = false } = {}) {
@@ -2095,7 +2089,6 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareGachaFlourish();
-    void prepareGachaTouchOrchestra();
     for (const character of gachaPool()) {
       void window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => {});
     }
