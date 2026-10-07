@@ -140,3 +140,12 @@
   script.dataset.pdsGachaProfileUi = '';
   document.head.appendChild(script);
 })();
+
+(() => {
+  if (document.querySelector('script[data-pds-gacha-profile-hotfix]')) return;
+  const script = document.createElement('script');
+  script.src = '/gacha-profile-hotfix.js?v=20261007-1';
+  script.defer = true;
+  script.dataset.pdsGachaProfileHotfix = '';
+  document.head.appendChild(script);
+})();
