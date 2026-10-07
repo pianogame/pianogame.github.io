@@ -445,9 +445,26 @@
       description:'光の帯・星粒・音符がカード全体をきらびやかに巡るエフェクト',
     },
   });
+  const pianoSkinCatalog = Object.freeze({
+    default: { name:'標準・コンサートブラック' },
+    moonlightIvory: { name:'ムーンライト・アイボリー', description:'真珠のような白鍵と深い青黒鍵、銀色の縁取りを合わせた鍵盤スキン' },
+  });
+  const touchEffectCatalog = Object.freeze({
+    default: { name:'標準・ゴールドスパーク' },
+    crystalBloom: { name:'クリスタル・ブルーム', description:'鍵盤タッチから青紫の結晶光とリングが広がるエフェクト' },
+  });
+  const pianoBackgroundCatalog = Object.freeze({
+    default: { name:'標準・コンサートホール' },
+    moonlightHall: { name:'月明かりの幻想音楽堂', description:'青い月光と幻想的なホールを使ったピアノモード背景' },
+  });
+  window.HP_GACHA_CUSTOMIZATION_CATALOG = Object.freeze({
+    pianoSkins:pianoSkinCatalog,
+    touchEffects:touchEffectCatalog,
+    pianoBackgrounds:pianoBackgroundCatalog,
+  });
 
   function loadGachaInventory() {
-    const blank = { backgrounds:['default'], frames:['default'], profileEffects:['default'], voices:[], characters:[] };
+    const blank = { backgrounds:['default'], frames:['default'], profileEffects:['default'], pianoSkins:['default'], touchEffects:['default'], pianoBackgrounds:['default'], voices:[], characters:[] };
     try {
       const saved = JSON.parse(localStorage.getItem(gachaInventoryKey) || 'null');
       if (!saved || typeof saved !== 'object') return blank;
@@ -455,6 +472,9 @@
         backgrounds:Array.from(new Set(['default', ...(Array.isArray(saved.backgrounds) ? saved.backgrounds : [])])),
         frames:Array.from(new Set(['default', ...(Array.isArray(saved.frames) ? saved.frames : [])])),
         profileEffects:Array.from(new Set(['default', ...(Array.isArray(saved.profileEffects) ? saved.profileEffects : [])])),
+        pianoSkins:Array.from(new Set(['default', ...(Array.isArray(saved.pianoSkins) ? saved.pianoSkins : [])])),
+        touchEffects:Array.from(new Set(['default', ...(Array.isArray(saved.touchEffects) ? saved.touchEffects : [])])),
+        pianoBackgrounds:Array.from(new Set(['default', ...(Array.isArray(saved.pianoBackgrounds) ? saved.pianoBackgrounds : [])])),
         voices:Array.from(new Set(Array.isArray(saved.voices) ? saved.voices : [])),
         characters:Array.from(new Set(Array.isArray(saved.characters) ? saved.characters : [])),
       };
@@ -466,6 +486,7 @@
 
   function saveGachaInventory() {
     try { localStorage.setItem(gachaInventoryKey, JSON.stringify(gachaInventory)); } catch (_) {}
+    window.dispatchEvent(new CustomEvent('pds-gacha-inventory-change', { detail:gachaInventory }));
   }
 
   function hasOwnedCustomization(type, id) {
@@ -473,6 +494,9 @@
     if (type === 'background') return gachaInventory.backgrounds.includes(id);
     if (type === 'frame') return gachaInventory.frames.includes(id);
     if (type === 'profileEffect') return gachaInventory.profileEffects.includes(id);
+    if (type === 'pianoSkin') return gachaInventory.pianoSkins.includes(id);
+    if (type === 'touchEffect') return gachaInventory.touchEffects.includes(id);
+    if (type === 'pianoBackground') return gachaInventory.pianoBackgrounds.includes(id);
     return false;
   }
 
@@ -1367,6 +1391,21 @@
       name:'プロフィール背景エフェクト「' + item.name + '」', reading:'PROFILE EFFECT',
       description:item.description || 'プロフィール背景エフェクト',
     })),
+    ...Object.entries(pianoSkinCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
+      kind:'pianoSkin', id:'pianoSkin:' + id, customizationId:id,
+      name:'鍵盤スキン「' + item.name + '」', reading:'PIANO KEY SKIN',
+      description:item.description || 'ピアノモード鍵盤スキン',
+    })),
+    ...Object.entries(touchEffectCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
+      kind:'touchEffect', id:'touchEffect:' + id, customizationId:id,
+      name:'タッチエフェクト「' + item.name + '」', reading:'TOUCH EFFECT',
+      description:item.description || 'ピアノモードタッチエフェクト',
+    })),
+    ...Object.entries(pianoBackgroundCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
+      kind:'pianoBackground', id:'pianoBackground:' + id, customizationId:id,
+      name:'ピアノモード背景「' + item.name + '」', reading:'PIANO BACKGROUND',
+      description:item.description || 'ピアノモード背景',
+    })),
   ];
 
   function gachaVoiceRewards() {
@@ -1389,6 +1428,9 @@
     const seenBackgrounds = new Set(gachaInventory.backgrounds || []);
     const seenFrames = new Set(gachaInventory.frames || []);
     const seenProfileEffects = new Set(gachaInventory.profileEffects || []);
+    const seenPianoSkins = new Set(gachaInventory.pianoSkins || []);
+    const seenTouchEffects = new Set(gachaInventory.touchEffects || []);
+    const seenPianoBackgrounds = new Set(gachaInventory.pianoBackgrounds || []);
     const seenVoices = new Set(gachaInventory.voices || []);
     const seenCharacters = new Set(gachaInventory.characters || []);
 
@@ -1408,6 +1450,18 @@
         alreadyOwned = seenProfileEffects.has(result.customizationId);
         isNewReward = !alreadyOwned;
         seenProfileEffects.add(result.customizationId);
+      } else if (result.kind === 'pianoSkin' && result.customizationId) {
+        alreadyOwned = seenPianoSkins.has(result.customizationId);
+        isNewReward = !alreadyOwned;
+        seenPianoSkins.add(result.customizationId);
+      } else if (result.kind === 'touchEffect' && result.customizationId) {
+        alreadyOwned = seenTouchEffects.has(result.customizationId);
+        isNewReward = !alreadyOwned;
+        seenTouchEffects.add(result.customizationId);
+      } else if (result.kind === 'pianoBackground' && result.customizationId) {
+        alreadyOwned = seenPianoBackgrounds.has(result.customizationId);
+        isNewReward = !alreadyOwned;
+        seenPianoBackgrounds.add(result.customizationId);
       } else if (result.kind === 'voice' && result.voiceId) {
         alreadyOwned = seenVoices.has(result.voiceId);
         isNewReward = !alreadyOwned;
@@ -1430,6 +1484,12 @@
         gachaInventory.frames.push(result.customizationId); changed = true;
       } else if (result?.kind === 'profileEffect' && result.customizationId && !gachaInventory.profileEffects.includes(result.customizationId)) {
         gachaInventory.profileEffects.push(result.customizationId); changed = true;
+      } else if (result?.kind === 'pianoSkin' && result.customizationId && !gachaInventory.pianoSkins.includes(result.customizationId)) {
+        gachaInventory.pianoSkins.push(result.customizationId); changed = true;
+      } else if (result?.kind === 'touchEffect' && result.customizationId && !gachaInventory.touchEffects.includes(result.customizationId)) {
+        gachaInventory.touchEffects.push(result.customizationId); changed = true;
+      } else if (result?.kind === 'pianoBackground' && result.customizationId && !gachaInventory.pianoBackgrounds.includes(result.customizationId)) {
+        gachaInventory.pianoBackgrounds.push(result.customizationId); changed = true;
       } else if (result?.kind === 'voice' && result.voiceId && !gachaInventory.voices.includes(result.voiceId)) {
         gachaInventory.voices.push(result.voiceId); changed = true;
       } else if (result?.kind === 'character' && result.characterId && !gachaInventory.characters.includes(result.characterId)) {
@@ -1535,6 +1595,18 @@
       art.dataset.effectId = result.customizationId || '';
       art.setAttribute('aria-hidden','true');
       art.innerHTML = '<i>♪</i><i>✦</i><i>♫</i><i>✧</i><i>♪</i><i>✦</i><i>♫</i>';
+      card.appendChild(art);
+    } else if (['pianoSkin','touchEffect','pianoBackground'].includes(result?.kind)) {
+      card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
+      const art = document.createElement('div');
+      art.className = 'hp-gacha-result-piano-custom-art';
+      art.dataset.customKind = result.kind;
+      art.setAttribute('aria-hidden','true');
+      art.innerHTML = result.kind === 'pianoSkin'
+        ? '<span class="keys">▯▮▯▮▯▯▮▯</span>'
+        : result.kind === 'touchEffect'
+          ? '<span class="touch">✦<i>◇</i><b>✧</b></span>'
+          : '<span class="scene">☾<i>♪</i><b>✦</b></span>';
       card.appendChild(art);
     } else {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
@@ -2087,12 +2159,17 @@
       })
     ).filter(Boolean);
 
-    // Staging QA: put both profile-effect comparison variants into the first
-    // two slots of a 10-pull so they can be compared immediately.
-    if (cost === 10 && results.length >= 2) {
-      const comparisonEffects = gachaTrialItems.filter(item => item.kind === 'profileEffect').slice(0,2);
-      comparisonEffects.forEach((item, index) => {
-        if (item && index < results.length) results[index] = { ...item };
+    // Staging QA: guarantee one example of every new visual customization.
+    // Audio candidates stay OUT of Gacha until all five are explicitly approved.
+    if (cost === 10 && results.length >= 5) {
+      const qaRewards = [
+        ...gachaTrialItems.filter(item => item.kind === 'profileEffect').slice(0,2),
+        gachaTrialItems.find(item => item.kind === 'pianoSkin'),
+        gachaTrialItems.find(item => item.kind === 'touchEffect'),
+        gachaTrialItems.find(item => item.kind === 'pianoBackground'),
+      ].filter(Boolean);
+      qaRewards.forEach((item, index) => {
+        if (index < results.length) results[index] = { ...item };
       });
     }
 
