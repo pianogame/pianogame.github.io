@@ -1893,14 +1893,14 @@
   const gachaResultOverlay = home.querySelector('[data-gacha-result-overlay]');
   let lastGachaResultPointerActionAt = -Infinity;
   function handleGachaResultSurface(event) {
-    if (!gachaResultOverlay || gachaResultOverlay.hidden || !gachaResultState || gachaResultState.summary) return;
-    if (event.target?.closest?.('[data-gacha-result-skip]')) return;
     const now = performance.now();
     if (event.type === 'click' && now - lastGachaResultPointerActionAt < 700) {
       event.preventDefault();
       event.stopImmediatePropagation();
       return;
     }
+    if (!gachaResultOverlay || gachaResultOverlay.hidden || !gachaResultState || gachaResultState.summary) return;
+    if (event.target?.closest?.('[data-gacha-result-skip]')) return;
     if (event.type === 'pointerup') {
       if (event.button > 0) return;
       lastGachaResultPointerActionAt = now;
