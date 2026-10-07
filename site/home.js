@@ -1797,7 +1797,7 @@
       : result?.kind === 'voice'
         ? '新しい声が、旋律に宿る——'
         : '光が、新しい贈り物を結ぶ——';
-    playGachaFlourish(isRainbow ? 100 : 0);
+    playGachaFlourish(isRainbow ? 200 : 0);
     if (isRainbow) playGachaPianoChord();
     if (isRainbow && result?.isNewCharacter === true) {
       setTimeout(() => { void playGachaAcquisitionVoice(result); }, 520);
