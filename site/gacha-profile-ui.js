@@ -285,19 +285,4 @@
     void warmGachaAssets();
   }, { capture:true });
 
-  const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
-  let forwardingResultTap = false;
-  function forwardResultTap(event) {
-    if (forwardingResultTap || !resultOverlay || resultOverlay.hidden || resultOverlay.dataset.mode !== 'sequence') return;
-    const count = Number(resultOverlay.dataset.count || '1');
-    const target = count > 1
-      ? home.querySelector('[data-gacha-result-next]')
-      : home.querySelector('.hp-gacha-result-ok');
-    if (!target) return;
-    event?.preventDefault?.();
-    event?.stopImmediatePropagation?.();
-    forwardingResultTap = true;
-    try { target.click(); } finally { forwardingResultTap = false; }
-  }
-  resultOverlay?.addEventListener('click', forwardResultTap, { capture:true });
 })();
