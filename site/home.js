@@ -1692,7 +1692,7 @@
     } catch (_) {}
   }
 
-    function playGachaFlourish() {
+    function playGachaFlourish(pitchCents = 0) {
     try {
       if (!gachaFlourishBuffer || !gachaFlourishGraph) return;
       window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
@@ -1700,6 +1700,9 @@
       const gain = gachaFlourishGraph.context.createGain();
       gain.gain.value = .82;
       source.buffer = gachaFlourishBuffer;
+      // Rainbow keeps the same orchestral cue but lifts it by one semitone.
+      // AudioBufferSourceNode.detune is supported by the Web Audio path used here.
+      if (Number.isFinite(source.detune?.value)) source.detune.value = pitchCents;
       source.connect(gain);
       gain.connect(gachaFlourishGraph.gain);
       source.onended = () => { try { source.disconnect(); gain.disconnect(); } catch (_) {} };
@@ -1794,7 +1797,7 @@
       : result?.kind === 'voice'
         ? '新しい声が、旋律に宿る——'
         : '光が、新しい贈り物を結ぶ——';
-    playGachaFlourish();
+    playGachaFlourish(isRainbow ? 100 : 0);
     if (isRainbow) playGachaPianoChord();
     if (isRainbow && result?.isNewCharacter === true) {
       setTimeout(() => { void playGachaAcquisitionVoice(result); }, 520);
