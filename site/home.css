@@ -6373,3 +6373,128 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-result-profile-effect-art[data-effect-id="starlightBrilliant"] i {
   text-shadow:0 0 7px #fff,0 0 18px #c49cff,0 0 28px #ffd675;
 }
+
+
+/* ===== 2026-10-08 Full-card profile effect distribution ===== */
+/* The editor card uses individually positioned particles so glyphs do not bunch in the center. */
+#hp-home-screen .hp-player-profile-summary[data-profile-effect="starlightElegant"]::before,
+#hp-home-screen .hp-player-profile-summary[data-profile-effect="starlightElegant"]::after,
+#hp-home-screen .hp-player-profile-summary[data-profile-effect="starlightBrilliant"]::before,
+#hp-home-screen .hp-player-profile-summary[data-profile-effect="starlightBrilliant"]::after {
+  content:none !important;
+  animation:none !important;
+}
+
+#hp-home-screen .hp-player-profile-summary > .hp-profile-effect-layer {
+  position:absolute !important;
+  inset:0 !important;
+  z-index:1 !important;
+  overflow:hidden;
+  border-radius:inherit;
+  pointer-events:none;
+}
+#hp-home-screen .hp-profile-effect-layer[hidden] {
+  display:none !important;
+}
+#hp-home-screen .hp-profile-effect-particle {
+  position:absolute;
+  left:var(--effect-x);
+  top:var(--effect-y);
+  width:1em;
+  height:1em;
+  display:grid;
+  place-items:center;
+  transform:translate(-50%,-50%) scale(var(--effect-scale));
+  font-family:"Times New Roman",serif;
+  font-weight:700;
+  line-height:1;
+  will-change:transform,opacity,filter;
+}
+
+/* A: elegant — widely scattered, subtle and slow. */
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightElegant"] {
+  background:
+    radial-gradient(circle at 9% 18%,rgba(255,231,145,.16),transparent 12%),
+    radial-gradient(circle at 88% 76%,rgba(204,166,241,.13),transparent 15%),
+    linear-gradient(112deg,transparent 20%,rgba(255,255,255,.08) 47%,transparent 67%);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightElegant"] .hp-profile-effect-particle {
+  color:rgba(160,108,202,.48);
+  font-size:clamp(11px,1.22cqw,17px);
+  text-shadow:0 0 6px rgba(255,255,255,.88),0 0 11px rgba(226,191,244,.42);
+  animation:hp-profile-particle-elegant 6.6s ease-in-out infinite;
+  animation-delay:var(--effect-delay);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightElegant"] .hp-profile-effect-particle:nth-child(3n+1) {
+  color:rgba(207,160,64,.46);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightElegant"] .hp-profile-effect-particle:nth-child(n+14) {
+  opacity:.45;
+}
+@keyframes hp-profile-particle-elegant {
+  0%,100% {
+    transform:translate(-50%,-50%) translate3d(-4px,5px,0) scale(var(--effect-scale));
+    opacity:.24;
+    filter:brightness(.96);
+  }
+  48% {
+    transform:translate(-50%,-50%) translate3d(5px,-7px,0) scale(calc(var(--effect-scale) * 1.05));
+    opacity:.68;
+    filter:brightness(1.08);
+  }
+}
+
+/* B: brilliant — denser, brighter and faster, still distributed edge-to-edge. */
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightBrilliant"] {
+  background:
+    radial-gradient(ellipse at 4% 38%,rgba(185,125,255,.18),transparent 21%),
+    radial-gradient(ellipse at 97% 58%,rgba(255,203,87,.22),transparent 23%),
+    linear-gradient(108deg,transparent 0 24%,rgba(255,243,196,.04) 35%,rgba(225,186,255,.17) 46%,rgba(255,220,124,.15) 56%,transparent 68%);
+  animation:hp-profile-layer-brilliant 4.8s ease-in-out infinite alternate;
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightBrilliant"] .hp-profile-effect-particle {
+  color:rgba(173,91,222,.7);
+  font-size:clamp(13px,1.5cqw,21px);
+  text-shadow:
+    0 0 5px rgba(255,255,255,.95),
+    0 0 11px rgba(213,150,255,.7),
+    0 0 18px rgba(255,211,103,.38);
+  animation:hp-profile-particle-brilliant 4.1s ease-in-out infinite;
+  animation-delay:var(--effect-delay);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightBrilliant"] .hp-profile-effect-particle:nth-child(3n+1) {
+  color:rgba(215,163,54,.75);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="starlightBrilliant"] .hp-profile-effect-particle:nth-child(4n) {
+  font-size:clamp(10px,1.05cqw,15px);
+}
+@keyframes hp-profile-layer-brilliant {
+  from { filter:brightness(.96); }
+  to { filter:brightness(1.1); }
+}
+@keyframes hp-profile-particle-brilliant {
+  0%,100% {
+    transform:translate(-50%,-50%) translate3d(-7px,7px,0) scale(calc(var(--effect-scale) * .92));
+    opacity:.38;
+  }
+  44% {
+    transform:translate(-50%,-50%) translate3d(7px,-9px,0) scale(calc(var(--effect-scale) * 1.12));
+    opacity:.94;
+  }
+  72% {
+    transform:translate(-50%,-50%) translate3d(3px,-3px,0) scale(var(--effect-scale));
+    opacity:.66;
+  }
+}
+
+/* Keep the save action in the upper summary card, as intended. */
+#hp-home-screen .hp-player-profile-summary .hp-player-profile-save-top {
+  z-index:4 !important;
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #hp-home-screen .hp-profile-effect-layer,
+  #hp-home-screen .hp-profile-effect-particle {
+    animation:none !important;
+  }
+}
