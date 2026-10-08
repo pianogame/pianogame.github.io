@@ -75,6 +75,48 @@
   const instruments = window.HP_INSTRUMENTS;
   const bankCache = new Map(), bankLoads = new Map(), sampleCounters = new Map();
   const instrumentControl = root.querySelector('[data-control="instrument"]');
+  const gachaInstrumentIds = ['finalChip8','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone'];
+  const gachaInstrumentSet = new Set(gachaInstrumentIds);
+  const gachaInventoryKey = 'pds-gacha-inventory-v1';
+  function unlockedInstruments() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(gachaInventoryKey) || 'null');
+      return new Set((Array.isArray(saved?.instruments) ? saved.instruments : []).filter(id => gachaInstrumentSet.has(id)));
+    } catch (_) { return new Set(); }
+  }
+  function instrumentIsUnlocked(id) {
+    return !gachaInstrumentSet.has(id) || unlockedInstruments().has(id);
+  }
+  function refreshGachaInstrumentChoices() {
+    const owned = unlockedInstruments();
+    let group = instrumentControl.querySelector('optgroup[data-earned-instruments]');
+    if (!owned.size) {
+      group?.remove();
+    } else {
+      if (!group) {
+        group=document.createElement('optgroup');
+        group.dataset.earnedInstruments='';
+        group.label='ガチャで獲得した楽器';
+        instrumentControl.appendChild(group);
+      }
+      group.replaceChildren(...gachaInstrumentIds.filter(id => owned.has(id)).map(id => {
+        const option=document.createElement('option');
+        option.value=id;
+        option.textContent=instruments[id].name;
+        return option;
+      }));
+    }
+    if (!instrumentIsUnlocked(currentInstrument)) {
+      currentInstrument='piano';
+    }
+    instrumentControl.value=currentInstrument;
+  }
+  window.addEventListener('pds-gacha-inventory-change', refreshGachaInstrumentChoices);
+  window.addEventListener('storage', event => {
+    if (event.key===gachaInventoryKey) refreshGachaInstrumentChoices();
+  });
+  document.addEventListener('DOMContentLoaded',refreshGachaInstrumentChoices,{once:true});
+
   const settingsOverlay = root.querySelector('.hp-settings-overlay');
   let sustain = false, showSharps = true, recording = false, playing = false;
   let events = [], recordStart = 0, recordDuration = 0, timer = null, soundStopEvents = [];
@@ -503,7 +545,7 @@
     return bank;
   }
   async function prepareSamples(id=instrumentControl.value) {
-    if(!instruments[id]||!ensureAudio())return;
+    if(!instruments[id] || !instrumentIsUnlocked(id) || !ensureAudio())return;
     void requestLandscape();
     const generation=++loadGeneration,previous=currentInstrument,previousBank=sampleBuffers,wasReady=samplesReady;
     finishRecording(); stopPlayback(); releaseHeld(); pointerStarts.clear();
@@ -537,7 +579,11 @@
   }
   instrumentControl.addEventListener('change',()=>{
     const id=instrumentControl.value;
-    if(!instruments[id])return;
+    if(!instruments[id] || !instrumentIsUnlocked(id)) {
+      instrumentControl.value=currentInstrument;
+      say('未獲得の楽器です。ガチャで獲得すると選べます',true);
+      return;
+    }
     if(!ctx) {
       currentInstrument=id; build37(instruments[id].shift37); updateInstrumentUI();
       activeTopRow=defaultTopRow(id); requestAnimationFrame(sizeRegister);

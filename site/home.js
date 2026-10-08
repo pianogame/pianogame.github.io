@@ -392,11 +392,16 @@
     location.hostname.includes('git-staging-')
     || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
 
-  // Staging QA is session-only: every fresh app/page launch starts unowned again.
-  // Player name/profile image/etc. are deliberately preserved.
+  // Staging QA continues to reset provisional cosmetics and draw history,
+  // but earned instrument unlocks persist so the piano mode remains usable.
   if (gachaTrialEnabled) {
     try {
+      const previous = JSON.parse(localStorage.getItem(gachaInventoryKey) || 'null');
+      const allowed = new Set(['finalChip8','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone']);
+      const instruments = Array.isArray(previous?.instruments)
+        ? previous.instruments.filter(id => allowed.has(id)) : [];
       localStorage.removeItem(gachaInventoryKey);
+      localStorage.setItem(gachaInventoryKey, JSON.stringify({ instruments }));
       localStorage.removeItem(gachaTrialKey);
     } catch (_) {}
   }
@@ -464,7 +469,7 @@
   });
 
   function loadGachaInventory() {
-    const blank = { backgrounds:['default'], frames:['default'], profileEffects:['default'], pianoSkins:['default'], touchEffects:['default'], pianoBackgrounds:['default'], voices:[], characters:[] };
+    const blank = { backgrounds:['default'], frames:['default'], profileEffects:['default'], pianoSkins:['default'], touchEffects:['default'], pianoBackgrounds:['default'], instruments:[], voices:[], characters:[] };
     try {
       const saved = JSON.parse(localStorage.getItem(gachaInventoryKey) || 'null');
       if (!saved || typeof saved !== 'object') return blank;
@@ -475,6 +480,7 @@
         pianoSkins:Array.from(new Set(['default', ...(Array.isArray(saved.pianoSkins) ? saved.pianoSkins : [])])),
         touchEffects:Array.from(new Set(['default', ...(Array.isArray(saved.touchEffects) ? saved.touchEffects : [])])),
         pianoBackgrounds:Array.from(new Set(['default', ...(Array.isArray(saved.pianoBackgrounds) ? saved.pianoBackgrounds : [])])),
+        instruments:Array.from(new Set((Array.isArray(saved.instruments) ? saved.instruments : []).filter(id => ['finalChip8','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone'].includes(id)))),
         voices:Array.from(new Set(Array.isArray(saved.voices) ? saved.voices : [])),
         characters:Array.from(new Set(Array.isArray(saved.characters) ? saved.characters : [])),
       };
@@ -1377,7 +1383,17 @@
     return registry?.list?.().filter(character => character && character.available !== false) || [];
   }
 
+  const gachaInstrumentIds = ['finalChip8','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone'];
+  const gachaInstrumentRewards = gachaInstrumentIds.map(instrumentId => ({
+    kind:'instrument',
+    id:'instrument:' + instrumentId,
+    instrumentId,
+    name:'楽器「' + (window.HP_INSTRUMENTS?.[instrumentId]?.name || instrumentId) + '」',
+    reading:'NEW INSTRUMENT',
+    description:'獲得するとピアノモードで演奏できる楽器',
+  }));
   const gachaTrialItems = [
+    ...gachaInstrumentRewards,
     ...Object.entries(homeBackgroundCatalog).filter(([id, item]) => !['default','crystal'].includes(id) && item.image).map(([id, item]) => ({
       kind:'background', id:'background:' + id, customizationId:id,
       name:'ホーム背景「' + item.name + '」', reading:'HOME BACKGROUND', description:'ホーム背景', image:item.image,
@@ -1431,6 +1447,7 @@
     const seenPianoSkins = new Set(gachaInventory.pianoSkins || []);
     const seenTouchEffects = new Set(gachaInventory.touchEffects || []);
     const seenPianoBackgrounds = new Set(gachaInventory.pianoBackgrounds || []);
+    const seenInstruments = new Set(gachaInventory.instruments || []);
     const seenVoices = new Set(gachaInventory.voices || []);
     const seenCharacters = new Set(gachaInventory.characters || []);
 
@@ -1462,6 +1479,10 @@
         alreadyOwned = seenPianoBackgrounds.has(result.customizationId);
         isNewReward = !alreadyOwned;
         seenPianoBackgrounds.add(result.customizationId);
+      } else if (result.kind === 'instrument' && result.instrumentId) {
+        alreadyOwned = seenInstruments.has(result.instrumentId);
+        isNewReward = !alreadyOwned;
+        seenInstruments.add(result.instrumentId);
       } else if (result.kind === 'voice' && result.voiceId) {
         alreadyOwned = seenVoices.has(result.voiceId);
         isNewReward = !alreadyOwned;
@@ -1490,6 +1511,8 @@
         gachaInventory.touchEffects.push(result.customizationId); changed = true;
       } else if (result?.kind === 'pianoBackground' && result.customizationId && !gachaInventory.pianoBackgrounds.includes(result.customizationId)) {
         gachaInventory.pianoBackgrounds.push(result.customizationId); changed = true;
+      } else if (result?.kind === 'instrument' && gachaInstrumentIds.includes(result.instrumentId) && !gachaInventory.instruments.includes(result.instrumentId)) {
+        gachaInventory.instruments.push(result.instrumentId); changed = true;
       } else if (result?.kind === 'voice' && result.voiceId && !gachaInventory.voices.includes(result.voiceId)) {
         gachaInventory.voices.push(result.voiceId); changed = true;
       } else if (result?.kind === 'character' && result.characterId && !gachaInventory.characters.includes(result.characterId)) {
@@ -1588,6 +1611,22 @@
       art.setAttribute('aria-hidden','true');
       art.innerHTML = '<span>♪</span><i>♫</i><b>♪</b>';
       card.appendChild(art);
+    } else if (result?.kind === 'instrument') {
+      card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
+      const glyphs = {
+        finalChip8:'♫', finalKoto:'♬', finalTrumpet:'🎺',
+        finalPipeOrgan:'🎹', finalVibraphone:'🔔'
+      };
+      const art = document.createElement('div');
+      art.className = 'hp-gacha-result-instrument-art';
+      art.setAttribute('aria-hidden','true');
+      art.dataset.instrumentId = result.instrumentId || '';
+      const glyph = document.createElement('span');
+      glyph.textContent = glyphs[result.instrumentId] || '♪';
+      const legend = document.createElement('small');
+      legend.textContent = 'INSTRUMENT';
+      art.append(glyph, legend);
+      card.appendChild(art);
     } else if (result?.kind === 'profileEffect') {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
       const art = document.createElement('div');
@@ -1673,8 +1712,10 @@
     const current = results[index];
     if (title) title.textContent = current?.kind === 'character'
       ? 'キャラクター獲得'
-      : current?.kind === 'voice'
-        ? 'ボイス獲得'
+      : current?.kind === 'instrument'
+        ? '楽器獲得'
+        : current?.kind === 'voice'
+          ? 'ボイス獲得'
         : current?.kind === 'background' || current?.kind === 'frame'
           ? 'カスタマイズ獲得'
           : 'アイテム獲得';
@@ -2159,8 +2200,8 @@
       })
     ).filter(Boolean);
 
-    // Staging QA: guarantee one example of every new visual customization.
-    // Audio candidates stay OUT of Gacha until all five are explicitly approved.
+    // Staging QA: guarantee new customization previews and one earned
+    // instrument per 10-pull so each approved instrument can be tested.
     if (cost === 10 && results.length >= 5) {
       const qaRewards = [
         ...gachaTrialItems.filter(item => item.kind === 'profileEffect').slice(0,2),
@@ -2171,6 +2212,10 @@
       qaRewards.forEach((item, index) => {
         if (index < results.length) results[index] = { ...item };
       });
+      const newInstrument = gachaInstrumentRewards.find(item =>
+        !gachaInventory.instruments.includes(item.instrumentId));
+      const instrumentReward = newInstrument || gachaInstrumentRewards[Math.floor(Math.random()*gachaInstrumentRewards.length)];
+      if (instrumentReward && results.length > 5) results[5] = { ...instrumentReward };
     }
 
     // Staging QA: a 10-pull always contains at least one rainbow character,
@@ -2178,7 +2223,7 @@
     if (cost === 10 && !results.some(result => result?.rarity === 'rainbow')) {
       const pool = gachaPool();
       const character = pool[Math.floor(Math.random() * pool.length)];
-      const qaReserved = cost === 10 ? Math.min(5, Math.max(0, results.length - 1)) : 1;
+      const qaReserved = cost === 10 ? Math.min(6, Math.max(0, results.length - 1)) : 1;
       const rainbowIndex = qaReserved + Math.floor(Math.random() * Math.max(1, results.length - qaReserved));
       if (character && results.length) results[Math.min(rainbowIndex, results.length - 1)] = makeCharacterResult(character);
     }
@@ -2284,7 +2329,7 @@
     });
     const note = home.querySelector('[data-gacha-note]');
     if (note && gachaTrialEnabled && !gachaDrawing) {
-      note.textContent = 'staging限定｜背景・フレーム・ボイスは獲得後すぐ設定で使用可能。再起動・再読み込みで所持状態をリセットします。';
+      note.textContent = 'staging限定｜新しい楽器は獲得後ピアノモードで使用可能（再読み込み後も所持）。背景・フレーム・ボイスなど試作アイテムは再読み込みでリセット。10連で未獲得楽器を1つ確認できます。';
     }
   }
 
