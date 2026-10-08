@@ -1753,7 +1753,7 @@
   function showGachaResult(results, index = 0) {
     const overlay = home.querySelector('[data-gacha-result-overlay]');
     if (!overlay || !results.length) return;
-    gachaResultState = { results:[...results], index, summary:false, skipMode:false, seenNewCharacterIndexes:new Set() };
+    gachaResultState = { results:[...results], index, summary:false, skipMode:false, seenNewSpecialIndexes:new Set() };
     overlay.hidden = false;
     renderGachaResultStep();
   }
@@ -1764,6 +1764,27 @@
   let gachaAnimationMode = 'idle';
   let gachaAnimationAwaitingTouch = false;
   let gachaAnimationMandatory = false;
+  let gachaUpgradeTimers = [];
+  const gachaFlourishSources = new Set();
+  function clearGachaUpgradeTimers() {
+    for (const timer of gachaUpgradeTimers) clearTimeout(timer);
+    gachaUpgradeTimers = [];
+  }
+  function scheduleGachaUpgrade(callback, delay) {
+    const timer = setTimeout(() => {
+      gachaUpgradeTimers = gachaUpgradeTimers.filter(id => id !== timer);
+      if (gachaAnimationMode === 'reveal') callback();
+    }, delay);
+    gachaUpgradeTimers.push(timer);
+  }
+  function stopGachaFlourish() {
+    for (const voice of gachaFlourishSources) {
+      voice.source.onended = null;
+      try { voice.source.stop(); } catch (_) {}
+      try { voice.source.disconnect(); voice.gain.disconnect(); } catch (_) {}
+    }
+    gachaFlourishSources.clear();
+  }
   let gachaAcquisitionVoiceSource = null;
   let gachaFlourishGraph = null;
   let gachaFlourishBuffer = null;
@@ -1926,34 +1947,52 @@
     } catch (_) {}
   }
 
-    function playGachaFlourish(pitchCents = 0) {
+  // Ascending musical levels: standard +0, rainbow +200 cents, instrument +400.
+  function playGachaFlourish(pitchCents = 0, maxSeconds = 0) {
     try {
       if (!gachaFlourishBuffer || !gachaFlourishGraph) return;
-      window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
-      const source = gachaFlourishGraph.context.createBufferSource();
-      const gain = gachaFlourishGraph.context.createGain();
-      gain.gain.value = .82;
+      void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      stopGachaFlourish();
+      const ctx = gachaFlourishGraph.context;
+      const source = ctx.createBufferSource();
+      const gain = ctx.createGain();
+      const when = ctx.currentTime;
+      const pitchRatio = Math.pow(2, pitchCents / 1200);
       source.buffer = gachaFlourishBuffer;
-      // Rainbow keeps the same orchestral cue but lifts it by one semitone.
-      // AudioBufferSourceNode.detune is supported by the Web Audio path used here.
       if (Number.isFinite(source.detune?.value)) source.detune.value = pitchCents;
+      gain.gain.setValueAtTime(.82,when);
+      const length = gachaFlourishBuffer.duration / pitchRatio;
+      if (maxSeconds > 0 && length > .1) {
+        const duration = Math.min(maxSeconds,length);
+        gain.gain.setValueAtTime(.82,when+Math.max(0,duration-.12));
+        gain.gain.linearRampToValueAtTime(.001,when+duration);
+        source.stop(when+duration+.012);
+      }
       source.connect(gain);
       gain.connect(gachaFlourishGraph.gain);
-      source.onended = () => { try { source.disconnect(); gain.disconnect(); } catch (_) {} };
-      source.start();
+      const voice = {source,gain};
+      gachaFlourishSources.add(voice);
+      source.onended = () => {
+        gachaFlourishSources.delete(voice);
+        try {source.disconnect();gain.disconnect();} catch (_) {}
+      };
+      source.start(when);
     } catch (_) {}
   }
 
   function resetGachaAnimationClasses(overlay) {
     overlay?.classList.remove(
       'is-playing','is-ten','is-special','is-awaiting-touch','is-revealing',
-      'is-intro','is-draw-reveal','is-character-hit','is-item-hit','is-mandatory-special'
+      'is-intro','is-draw-reveal','is-character-hit','is-item-hit','is-mandatory-special',
+      'is-upgrading','is-upgrade-rainbow','is-instrument-hit'
     );
   }
 
   function finishGachaAnimation(status = 'done') {
     clearTimeout(gachaAnimationTimer);
     clearTimeout(gachaAnimationReadyTimer);
+    clearGachaUpgradeTimers();
+    stopGachaFlourish();
     gachaAnimationTimer = 0;
     gachaAnimationReadyTimer = 0;
     gachaAnimationAwaitingTouch = false;
@@ -1974,6 +2013,8 @@
     if (!overlay) return Promise.resolve('touch');
     clearTimeout(gachaAnimationTimer);
     clearTimeout(gachaAnimationReadyTimer);
+    clearGachaUpgradeTimers();
+    stopGachaFlourish();
     resetGachaAnimationClasses(overlay);
     gachaAnimationMode = 'intro';
     gachaAnimationAwaitingTouch = false;
@@ -2010,71 +2051,99 @@
     const overlay = home.querySelector('[data-gacha-animation-overlay]');
     if (!overlay) return Promise.resolve('done');
     clearTimeout(gachaAnimationTimer);
+    clearGachaUpgradeTimers();
     stopGachaAcquisitionVoice();
+    stopGachaFlourish();
     resetGachaAnimationClasses(overlay);
     gachaAnimationMode = 'reveal';
     gachaAnimationMandatory = mandatory;
     overlay.hidden = false;
-    overlay.classList.toggle('is-mandatory-special', mandatory);
+    overlay.classList.toggle('is-mandatory-special',mandatory);
+
     const isCharacter = result?.kind === 'character';
-    const isRainbow = result?.rarity === 'rainbow';
-    overlay.style.setProperty('--gacha-stage-bg','url("' + (isCharacter ? gachaVisuals.special : gachaVisuals.normal) + '")');
-    overlay.classList.add('is-playing','is-draw-reveal','is-revealing');
-    overlay.classList.toggle('is-character-hit', isCharacter);
-    overlay.classList.toggle('is-item-hit', !isCharacter);
-    overlay.classList.toggle('is-special', isRainbow);
-    overlay.classList.toggle('is-ten', total === 10);
-    overlay.dataset.drawIndex = String(index + 1);
+    const isInstrument = result?.kind === 'instrument';
+    const isRainbow = result?.rarity === 'rainbow' || isCharacter || isInstrument;
+    const upgrades = isInstrument ? 2 : isRainbow ? 1 : 0;
     const label = overlay.querySelector('[data-gacha-animation-label]');
-    if (label) label.textContent = isRainbow
-      ? '虹色の旋律—— RAINBOW!'
-      : result?.kind === 'voice'
-        ? '新しい声が、旋律に宿る——'
-        : '光が、新しい贈り物を結ぶ——';
-    playGachaFlourish(isRainbow ? 200 : 0);
-    if (isRainbow) playGachaPianoChord();
-    if (isRainbow && result?.isNewCharacter === true) {
-      setTimeout(() => { void playGachaAcquisitionVoice(result); }, 520);
+    const revealType = overlay.querySelector('.hp-gacha-reveal-card b');
+    const revealEmblem = overlay.querySelector('.hp-gacha-reveal-emblem');
+    const glyphs = {finalChip8:'♫',finalKoto:'♬',finalTrumpet:'🎺',finalPipeOrgan:'🎹',finalVibraphone:'🔔'};
+    overlay.style.setProperty('--gacha-stage-bg','url("' + gachaVisuals.normal + '")');
+    overlay.classList.add('is-playing','is-draw-reveal','is-revealing','is-item-hit');
+    overlay.classList.toggle('is-upgrading',upgrades>0);
+    overlay.classList.toggle('is-ten',total === 10);
+    overlay.dataset.drawIndex = String(index+1);
+    if (label) label.textContent = '光が、新しい贈り物を結ぶ——';
+    if (revealType) revealType.textContent = upgrades ? 'MYSTERY' : 'REWARD';
+    if (revealEmblem) revealEmblem.textContent = '♪';
+    // Everyone begins with the ordinary result cue and visuals.
+    playGachaFlourish(0,upgrades ? .85 : 0);
+    if (upgrades) {
+      scheduleGachaUpgrade(() => {
+        overlay.classList.remove('is-item-hit');
+        overlay.classList.add('is-special','is-upgrade-rainbow');
+        overlay.classList.toggle('is-character-hit',isCharacter);
+        overlay.style.setProperty('--gacha-stage-bg','url("' + gachaVisuals.special + '")');
+        if (label) label.textContent = '虹色の旋律—— RAINBOW!';
+        if (revealType) revealType.textContent = isCharacter ? 'CHARACTER' : 'RAINBOW';
+        playGachaFlourish(200,isInstrument ? .92 : 0);
+        if (isCharacter) {
+          playGachaPianoChord();
+          if (result?.isNewCharacter === true) {
+            scheduleGachaUpgrade(() => {void playGachaAcquisitionVoice(result);},330);
+          }
+        }
+      },950);
+    }
+    if (isInstrument) {
+      scheduleGachaUpgrade(() => {
+        overlay.classList.remove('is-upgrade-rainbow');
+        overlay.classList.add('is-instrument-hit');
+        if (label) label.textContent = '虹色の先へ—— 新たな楽器が目覚める！';
+        if (revealType) revealType.textContent = 'INSTRUMENT';
+        if (revealEmblem) revealEmblem.textContent = glyphs[result.instrumentId] || '♫';
+        playGachaFlourish(400);
+      },2050);
     }
     return new Promise(resolve => {
       gachaAnimationResolve = resolve;
-      gachaAnimationTimer = setTimeout(() => finishGachaAnimation('done'), isRainbow ? 2350 : 1650);
+      gachaAnimationTimer = setTimeout(() => finishGachaAnimation('done'),isInstrument ? 4350 : isRainbow ? 3000 : 1650);
     });
   }
 
-  function markNewCharacterRevealSeen(index) {
+  function markNewSpecialRevealSeen(index) {
     if (!gachaResultState || !Number.isInteger(index)) return;
-    if (!(gachaResultState.seenNewCharacterIndexes instanceof Set)) {
-      gachaResultState.seenNewCharacterIndexes = new Set();
+    if (!(gachaResultState.seenNewSpecialIndexes instanceof Set)) {
+      gachaResultState.seenNewSpecialIndexes = new Set();
     }
-    gachaResultState.seenNewCharacterIndexes.add(index);
+    gachaResultState.seenNewSpecialIndexes.add(index);
   }
 
-  function pendingNewCharacterIndexes() {
+  function pendingNewSpecialIndexes() {
     if (!gachaResultState) return [];
-    const seen = gachaResultState.seenNewCharacterIndexes instanceof Set
-      ? gachaResultState.seenNewCharacterIndexes
+    const seen = gachaResultState.seenNewSpecialIndexes instanceof Set
+      ? gachaResultState.seenNewSpecialIndexes
       : new Set();
     return gachaResultState.results
       .map((result,index) => ({ result,index }))
       .filter(({result,index}) =>
-        result?.kind === 'character'
-        && result?.isNewCharacter === true
+        ((result?.kind === 'character' && result?.isNewCharacter === true)
+        || (result?.kind === 'instrument' && result?.isNewReward === true))
         && !seen.has(index)
       )
       .map(({index}) => index);
   }
 
-  function nextPendingNewCharacterIndex(afterIndex = -1) {
-    const pending = pendingNewCharacterIndexes();
+  function nextPendingNewSpecialIndex(afterIndex = -1) {
+    const pending = pendingNewSpecialIndexes();
     if (!pending.length) return -1;
     const later = pending.find(index => index > afterIndex);
     return Number.isInteger(later) ? later : pending[0];
   }
 
-  async function revealNextPendingNewCharacter(afterIndex = -1) {
+  async function revealNextPendingNewSpecial(afterIndex = -1) {
     if (!gachaResultState) return false;
-    const index = nextPendingNewCharacterIndex(afterIndex);
+    const index = nextPendingNewSpecialIndex(afterIndex);
     if (index < 0) return false;
 
     const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
@@ -2085,7 +2154,7 @@
     gachaDrawing = true;
     renderGachaScreen();
     await playGachaDrawReveal(result, index, gachaResultState.results.length, { mandatory:true });
-    markNewCharacterRevealSeen(index);
+    markNewSpecialRevealSeen(index);
 
     gachaResultState.index = index;
     gachaResultState.summary = false;
@@ -2143,13 +2212,15 @@
       results[nextIndex],
       nextIndex,
       results.length,
-      { mandatory: results[nextIndex]?.isNewCharacter === true }
+      { mandatory: results[nextIndex]?.isNewCharacter === true
+          || (results[nextIndex]?.kind === 'instrument' && results[nextIndex]?.isNewReward === true) }
     );
-    if (status === 'done' && results[nextIndex]?.isNewCharacter === true) {
-      markNewCharacterRevealSeen(nextIndex);
+    if (status === 'done' && (results[nextIndex]?.isNewCharacter === true
+      || (results[nextIndex]?.kind === 'instrument' && results[nextIndex]?.isNewReward === true))) {
+      markNewSpecialRevealSeen(nextIndex);
     }
     if (status === 'summary') {
-      const stoppedOnNewCharacter = await revealNextPendingNewCharacter(nextIndex);
+      const stoppedOnNewCharacter = await revealNextPendingNewSpecial(nextIndex);
       if (!stoppedOnNewCharacter) showFinalGachaSummary();
       return;
     }
@@ -2172,7 +2243,7 @@
     // to the next unseen NEW character; if there is none, show the summary.
     if (gachaResultState.skipMode === true) {
       gachaResultTransitioning = true;
-      const stoppedOnNewCharacter = await revealNextPendingNewCharacter(index);
+      const stoppedOnNewCharacter = await revealNextPendingNewSpecial(index);
       if (!stoppedOnNewCharacter) showFinalGachaSummary();
       return;
     }
@@ -2190,7 +2261,7 @@
     if (!gachaResultState || gachaResultState.results.length <= 1 || gachaResultState.summary || gachaResultTransitioning) return;
     gachaResultState.skipMode = true;
     gachaResultTransitioning = true;
-    const stoppedOnNewCharacter = await revealNextPendingNewCharacter(gachaResultState.index);
+    const stoppedOnNewCharacter = await revealNextPendingNewSpecial(gachaResultState.index);
     if (!stoppedOnNewCharacter) showFinalGachaSummary();
   }
 
@@ -2261,7 +2332,7 @@
         return character ? window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => null) : null;
       }));
 
-    gachaResultState = { results:[...results], index:0, summary:false, skipMode:false, seenNewCharacterIndexes:new Set() };
+    gachaResultState = { results:[...results], index:0, summary:false, skipMode:false, seenNewSpecialIndexes:new Set() };
     gachaTrialState.history.unshift({
       at:new Date().toISOString(),
       count:cost,
@@ -2275,7 +2346,7 @@
     if (introStatus === 'summary' || introStatus === 'result') {
       await resultAssetsReady;
       if (introStatus === 'summary') {
-        const stoppedOnNewCharacter = await revealNextPendingNewCharacter(-1);
+        const stoppedOnNewCharacter = await revealNextPendingNewSpecial(-1);
         if (!stoppedOnNewCharacter) showFinalGachaSummary();
       } else {
         gachaResultState.index = 0;
@@ -2294,8 +2365,10 @@
     // Ten-pull advances sequentially through all ten results unless the user explicitly presses SKIP.
     const firstStatus = await playGachaDrawReveal(results[0],0,results.length, {
       mandatory: results[0]?.isNewCharacter === true
+       || (results[0]?.kind === 'instrument' && results[0]?.isNewReward === true)
     });
-    if (firstStatus === 'done' && results[0]?.isNewCharacter === true) markNewCharacterRevealSeen(0);
+    if (firstStatus === 'done' && (results[0]?.isNewCharacter === true
+      || (results[0]?.kind === 'instrument' && results[0]?.isNewReward === true))) markNewSpecialRevealSeen(0);
     await resultAssetsReady;
     gachaResultState.index = 0;
     gachaResultState.summary = false;
