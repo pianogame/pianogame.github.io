@@ -1789,6 +1789,76 @@
   let gachaFlourishGraph = null;
   let gachaFlourishBuffer = null;
   let gachaFlourishLoading = null;
+  let gachaTransitionGraph = null;
+  const gachaTransitionVoices = new Set();
+
+  function ensureGachaTransitionGraph() {
+    const bridge = window.HP_AUDIO_BRIDGE?.get?.();
+    if (!bridge) return null;
+    if (gachaTransitionGraph?.context === bridge.context) return gachaTransitionGraph;
+    try {
+      const master = bridge.context.createGain();
+      master.gain.value = .66;
+      window.HP_SOUND_SETTINGS?.bind?.('effects',master);
+      master.connect(bridge.output);
+      gachaTransitionGraph = {context:bridge.context,master};
+      return gachaTransitionGraph;
+    } catch (_) { return null; }
+  }
+  function stopGachaTransitionTones() {
+    for (const voice of gachaTransitionVoices) {
+      voice.osc.onended = null;
+      try { voice.osc.stop(); } catch (_) {}
+      try { voice.osc.disconnect(); voice.gain.disconnect(); } catch (_) {}
+    }
+    gachaTransitionVoices.clear();
+  }
+  // Stable ascending C-D-E cue even when the streamed orchestral file
+  // is still decoding on iOS. The final cue borrows the awarded instrument's
+  // timbre, making the third stage an audible reward instead of just a tint.
+  function playGachaTransitionTone(level, instrumentId = '') {
+    const graph = ensureGachaTransitionGraph();
+    if (!graph) return;
+    try {
+      void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
+      stopGachaTransitionTones();
+      const ctx = graph.context, now=ctx.currentTime;
+      const base=[523.25,587.33,659.25][Math.min(2,Math.max(0,level))];
+      const instrumentStyles = {
+        finalChip8:{wave:'square',length:.22,cutoff:6800,gain:.07},
+        finalKoto:{wave:'triangle',length:.45,cutoff:2800,gain:.12},
+        finalTrumpet:{wave:'sawtooth',length:.48,cutoff:1500,gain:.11},
+        finalPipeOrgan:{wave:'sine',length:.66,cutoff:2300,gain:.18},
+        finalVibraphone:{wave:'sine',length:.9,cutoff:6000,gain:.16}
+      };
+      const style = instrumentStyles[instrumentId] || {wave:'sine',length:.4,cutoff:5000,gain:.13};
+      const notes = level===2 ? [1,1.259921,1.498307] : [1];
+      notes.forEach((ratio,index) => {
+        const t=now + (level===2 ? index*.2 : 0);
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        const filter=ctx.createBiquadFilter();
+        filter.type='lowpass';
+        filter.frequency.value=style.cutoff;
+        osc.type=style.wave;
+        osc.frequency.setValueAtTime(base*ratio,t);
+        gain.gain.setValueAtTime(.0001,t);
+        gain.gain.linearRampToValueAtTime(style.gain,t+.025);
+        gain.gain.exponentialRampToValueAtTime(.0001,t+style.length);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(graph.master);
+        const voice={osc,gain,filter};
+        gachaTransitionVoices.add(voice);
+        osc.onended=() => {
+          gachaTransitionVoices.delete(voice);
+          try {osc.disconnect(); filter.disconnect(); gain.disconnect();} catch (_) {}
+        };
+        osc.start(t);
+        osc.stop(t+style.length+.04);
+      });
+    } catch (_) {}
+  }
   let gachaTouchOrchestraGraph = null;
   let gachaTouchOrchestraBuffer = null;
   let gachaTouchOrchestraLoading = null;
@@ -1995,6 +2065,7 @@
     clearTimeout(gachaAnimationReadyTimer);
     clearGachaUpgradeTimers();
     stopGachaFlourish();
+    stopGachaTransitionTones();
     gachaAnimationTimer = 0;
     gachaAnimationReadyTimer = 0;
     gachaAnimationAwaitingTouch = false;
@@ -2017,6 +2088,7 @@
     clearTimeout(gachaAnimationReadyTimer);
     clearGachaUpgradeTimers();
     stopGachaFlourish();
+    stopGachaTransitionTones();
     resetGachaAnimationClasses(overlay);
     gachaAnimationMode = 'intro';
     gachaAnimationAwaitingTouch = false;
@@ -2049,67 +2121,85 @@
     gachaAnimationTimer = setTimeout(() => finishGachaAnimation('touch'), 520);
   }
 
-  function playGachaDrawReveal(result, index, total, { mandatory = false } = {}) {
-    const overlay = home.querySelector('[data-gacha-animation-overlay]');
+  function playGachaDrawReveal(result,index,total,{ mandatory=false }={}) {
+    const overlay=home.querySelector('[data-gacha-animation-overlay]');
     if (!overlay) return Promise.resolve('done');
     clearTimeout(gachaAnimationTimer);
     clearGachaUpgradeTimers();
     stopGachaAcquisitionVoice();
     stopGachaFlourish();
+    stopGachaTransitionTones();
     resetGachaAnimationClasses(overlay);
-    gachaAnimationMode = 'reveal';
-    gachaAnimationMandatory = mandatory;
-    overlay.hidden = false;
+    gachaAnimationMode='reveal';
+    gachaAnimationMandatory=mandatory;
+    overlay.hidden=false;
     overlay.classList.toggle('is-mandatory-special',mandatory);
 
-    const isCharacter = result?.kind === 'character';
-    const isInstrument = result?.kind === 'instrument';
-    const isRainbow = result?.rarity === 'rainbow' || isCharacter || isInstrument;
-    const upgrades = isInstrument ? 2 : isRainbow ? 1 : 0;
-    const label = overlay.querySelector('[data-gacha-animation-label]');
-    const revealType = overlay.querySelector('.hp-gacha-reveal-card b');
-    const revealEmblem = overlay.querySelector('.hp-gacha-reveal-emblem');
-    const glyphs = {finalChip8:'♫',finalKoto:'♬',finalTrumpet:'🎺',finalPipeOrgan:'🎹',finalVibraphone:'🔔'};
-    overlay.style.setProperty('--gacha-stage-bg','url("' + gachaVisuals.normal + '")');
+    const isCharacter=result?.kind==='character';
+    const isInstrument=result?.kind==='instrument';
+    const isRainbow=result?.rarity==='rainbow'||isCharacter||isInstrument;
+    const label=overlay.querySelector('[data-gacha-animation-label]');
+    const cardTitle=overlay.querySelector('.hp-gacha-reveal-card b');
+    const cardEmblem=overlay.querySelector('.hp-gacha-reveal-emblem');
+    const instrumentName=overlay.querySelector('[data-gacha-instrument-name]');
+    const instrumentIcon=overlay.querySelector('[data-gacha-instrument-glyph]');
+    const instrumentGlyphs={finalChip8:'♫',finalKoto:'♬',finalTrumpet:'♩',
+      finalPipeOrgan:'♭',finalVibraphone:'✦'};
+    overlay.style.setProperty('--gacha-stage-bg','url("'+gachaVisuals.normal+'")');
     overlay.classList.add('is-playing','is-draw-reveal','is-revealing','is-item-hit');
-    overlay.classList.toggle('is-upgrading',upgrades>0);
-    overlay.classList.toggle('is-ten',total === 10);
-    overlay.dataset.drawIndex = String(index+1);
-    if (label) label.textContent = '光が、新しい贈り物を結ぶ——';
-    if (revealType) revealType.textContent = upgrades ? 'MYSTERY' : 'REWARD';
-    if (revealEmblem) revealEmblem.textContent = '♪';
-    // Everyone begins with the ordinary result cue and visuals.
-    playGachaFlourish(0,upgrades ? .85 : 0);
-    if (upgrades) {
+    overlay.classList.toggle('is-upgrading',isRainbow);
+    overlay.classList.toggle('is-ten',total===10);
+    overlay.dataset.drawIndex=String(index+1);
+    if (label) label.textContent='光が、新しい贈り物を結ぶ——';
+    if (cardTitle) cardTitle.textContent=isRainbow?'MYSTERY':'REWARD';
+    if (cardEmblem) cardEmblem.textContent='♪';
+    if (instrumentName) instrumentName.textContent=isInstrument
+      ? (window.HP_INSTRUMENTS?.[result.instrumentId]?.name || result.name || '新しい楽器') : '';
+    if (instrumentIcon) instrumentIcon.textContent=instrumentGlyphs[result?.instrumentId]||'♫';
+
+    // Wait for the ordinary flourish to actually play through before
+    // raising the pitch. On a cold cache, allow more than three seconds.
+    const trackMs=Math.round((gachaFlourishBuffer?.duration||0)*1000);
+    const normalStageMs=Math.max(3500,Math.min(6500,trackMs+260));
+    const rainbowStageMs=Math.max(2600,Math.min(5100,trackMs+180));
+    const instrumentStageMs=3200;
+    playGachaFlourish(0);
+    playGachaTransitionTone(0);
+
+    if (isRainbow) {
       scheduleGachaUpgrade(() => {
         overlay.classList.remove('is-item-hit');
         overlay.classList.add('is-special','is-upgrade-rainbow');
         overlay.classList.toggle('is-character-hit',isCharacter);
-        overlay.style.setProperty('--gacha-stage-bg','url("' + gachaVisuals.special + '")');
-        if (label) label.textContent = '虹色の旋律—— RAINBOW!';
-        if (revealType) revealType.textContent = isCharacter ? 'CHARACTER' : 'RAINBOW';
-        playGachaFlourish(200,isInstrument ? .92 : 0);
-        if (isCharacter) {
-          playGachaPianoChord();
-          if (result?.isNewCharacter === true) {
-            scheduleGachaUpgrade(() => {void playGachaAcquisitionVoice(result);},330);
-          }
+        overlay.style.setProperty('--gacha-stage-bg','url("'+gachaVisuals.special+'")');
+        if (label) label.textContent='虹色の旋律—— RAINBOW!';
+        if (cardTitle) cardTitle.textContent=isCharacter?'CHARACTER':'RAINBOW';
+        playGachaFlourish(200);
+        playGachaTransitionTone(1);
+        if (isCharacter && result?.isNewCharacter===true) {
+          scheduleGachaUpgrade(() => {void playGachaAcquisitionVoice(result);},640);
         }
-      },950);
+      },normalStageMs);
     }
+
     if (isInstrument) {
       scheduleGachaUpgrade(() => {
+        // A separate full-scale animated instrument reveal, not merely
+        // recoloring the earlier character/item card.
         overlay.classList.remove('is-upgrade-rainbow');
         overlay.classList.add('is-instrument-hit');
-        if (label) label.textContent = '虹色の先へ—— 新たな楽器が目覚める！';
-        if (revealType) revealType.textContent = 'INSTRUMENT';
-        if (revealEmblem) revealEmblem.textContent = glyphs[result.instrumentId] || '♫';
+        if (label) label.textContent='さらなる高みへ—— 新たな楽器、解放！';
         playGachaFlourish(400);
-      },2050);
+        playGachaTransitionTone(2,result.instrumentId);
+      },normalStageMs+rainbowStageMs);
     }
+
+    const duration=isInstrument
+      ? normalStageMs+rainbowStageMs+instrumentStageMs
+      : isRainbow?normalStageMs+rainbowStageMs+350:1650;
     return new Promise(resolve => {
-      gachaAnimationResolve = resolve;
-      gachaAnimationTimer = setTimeout(() => finishGachaAnimation('done'),isInstrument ? 4350 : isRainbow ? 3000 : 1650);
+      gachaAnimationResolve=resolve;
+      gachaAnimationTimer=setTimeout(() => finishGachaAnimation('done'),duration);
     });
   }
 

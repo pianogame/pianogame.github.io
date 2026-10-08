@@ -6715,3 +6715,143 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   opacity:1 !important;
   transform:translateX(-50%) !important;
 }
+
+/* Instrument reward finale: new stage, not just a recolored character card. */
+#hp-home-screen .hp-gacha-instrument-finale {
+  position:absolute;
+  z-index:15;
+  inset:4% 10% 8%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2.5%;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:scale(.7);
+  isolation:isolate;
+}
+#hp-home-screen .hp-gacha-instrument-halo {
+  position:absolute;
+  z-index:-2;
+  inset:-18%;
+  border-radius:50%;
+  background:radial-gradient(ellipse at center,#fff8eebd 0 5%,#fff3b88a 15%,
+    #82dfff7a 27%,#9675ff50 43%,transparent 64%);
+  filter:blur(25px);
+  animation:hp-gacha-instrument-halo 2s ease-in-out infinite alternate;
+}
+#hp-home-screen .hp-gacha-instrument-rays {
+  position:absolute;
+  z-index:-1;
+  width:clamp(180px,38cqw,470px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,#fff7cb70 0deg 9deg,transparent 10deg 27deg,
+    #82e5ff75 28deg 33deg,transparent 34deg 45deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 0 23%,#000 32% 73%,transparent 84%);
+  mask-image:radial-gradient(circle,transparent 0 23%,#000 32% 73%,transparent 84%);
+  animation:hp-gacha-instrument-rays 7s linear infinite;
+}
+#hp-home-screen .hp-gacha-instrument-badge {
+  display:flex;
+  align-items:center;
+  flex-direction:column;
+  justify-content:center;
+  gap:5px;
+  width:clamp(170px,24cqw,300px);
+  aspect-ratio:1.06;
+  border:3px solid #fff3bf;
+  border-radius:45% 45% 38% 38%;
+  background:radial-gradient(circle at 48% 36%,#517eb1,#2a295b 65%,#11172d);
+  color:#fff6d9;
+  text-align:center;
+  box-shadow:inset 0 0 0 4px #fdeec348,inset 0 0 28px #8ddfff70,
+    0 0 22px #fff3ce,0 0 58px #83d8ff,0 14px 40px #0009;
+}
+#hp-home-screen .hp-gacha-instrument-badge small {
+  font:700 clamp(8px,.8cqw,13px)/1.2 "Times New Roman",serif;
+  letter-spacing:.15em;
+  color:#ffeab0;
+}
+#hp-home-screen .hp-gacha-instrument-badge strong {
+  font:700 clamp(50px,8.4cqw,104px)/1.08 "Times New Roman",serif;
+  text-shadow:0 0 19px #fff,0 0 36px #88cfff;
+}
+#hp-home-screen .hp-gacha-instrument-badge span {
+  font:800 clamp(11px,1.4cqw,18px)/1.1 sans-serif;
+  letter-spacing:.13em;
+}
+#hp-home-screen .hp-gacha-instrument-name {
+  min-height:1.45em;
+  max-width:90%;
+  padding:5px 18px;
+  border-radius:12px;
+  background:#080e25c9;
+  color:#fff6d3;
+  text-align:center;
+  font:900 clamp(19px,2.8cqw,35px)/1.3 "Hiragino Sans","Yu Gothic",sans-serif;
+  text-shadow:0 0 15px #ffe9a3,0 0 24px #9aceff;
+  box-shadow:0 0 19px #ffedb05c;
+}
+#hp-home-screen .hp-gacha-instrument-meter {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(3px,.75cqw,10px);
+  height:clamp(22px,5cqh,48px);
+}
+#hp-home-screen .hp-gacha-instrument-meter i {
+  display:block;
+  width:clamp(4px,.65cqw,8px);
+  height:70%;
+  border-radius:5px;
+  background:linear-gradient(#fff8c6,#b7efff,#8fb1ff);
+  box-shadow:0 0 12px #7dc9ff;
+  animation:hp-gacha-instrument-beat .52s ease-in-out infinite alternate;
+}
+#hp-home-screen .hp-gacha-instrument-meter i:nth-child(3n){animation-delay:-.36s}
+#hp-home-screen .hp-gacha-instrument-meter i:nth-child(3n+1){animation-delay:-.17s}
+#hp-home-screen .hp-gacha-instrument-meter i:nth-child(2n){animation-duration:.67s}
+#hp-home-screen .hp-gacha-animation-overlay.is-instrument-hit .hp-gacha-reveal-card {
+  animation:none !important;
+  visibility:hidden;
+  opacity:0 !important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-instrument-hit .hp-gacha-instrument-finale {
+  visibility:visible;
+  animation:hp-gacha-instrument-enter .75s cubic-bezier(.16,.84,.17,1) both;
+}
+@keyframes hp-gacha-instrument-enter {
+  0% {opacity:0;transform:scale(.6) translateY(28px);filter:brightness(2);}
+  55% {opacity:1;transform:scale(1.12) translateY(-5px);}
+  100% {opacity:1;transform:scale(1) translateY(0);filter:brightness(1);}
+}
+@keyframes hp-gacha-instrument-halo {
+  from {opacity:.64;transform:scale(.89);}
+  to {opacity:1;transform:scale(1.12);}
+}
+@keyframes hp-gacha-instrument-rays {
+  to {transform:rotate(360deg);}
+}
+@keyframes hp-gacha-instrument-beat {
+  from {transform:scaleY(.32);}
+  to {transform:scaleY(1.35);}
+}
+@container (max-height:480px) {
+  #hp-home-screen .hp-gacha-instrument-finale {gap:1%;inset:4% 8% 5%;}
+  #hp-home-screen .hp-gacha-instrument-badge {
+    width:clamp(120px,16cqw,220px);
+    aspect-ratio:1.1;
+  }
+  #hp-home-screen .hp-gacha-instrument-badge strong {font-size:clamp(35px,5cqw,64px);}
+  #hp-home-screen .hp-gacha-instrument-name {font-size:clamp(16px,2.3cqw,26px);}
+}
+@media(prefers-reduced-motion:reduce) {
+  #hp-home-screen .hp-gacha-instrument-halo,
+  #hp-home-screen .hp-gacha-instrument-rays,
+  #hp-home-screen .hp-gacha-instrument-meter i {
+    animation:none;
+  }
+}
