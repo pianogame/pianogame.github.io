@@ -435,6 +435,41 @@
     }
     updatePlayableKeys();
   }
+  // The VCSL organ/vibraphone recordings can have long silent lead-ins and
+  // widely varying source levels. Inspect each buffer once, never on keydown.
+  function analyseSampleStartAndLevel(buffer,id) {
+    const left=buffer.getChannelData(0);
+    const right=buffer.getChannelData(Math.min(1,buffer.numberOfChannels-1));
+    const rate=buffer.sampleRate;
+    if(id!=='finalPipeOrgan' && id!=='finalVibraphone') {
+      let first=0,end=Math.min(left.length,Math.floor(rate*.12));
+      while(first<end&&Math.max(Math.abs(left[first]),Math.abs(right[first]))<.0005)first++;
+      return {offset:first<end?Math.max(0,(first-32)/rate):0,levelAdjustment:1};
+    }
+    const vibraphone=id==='finalVibraphone';
+    const step=Math.max(1,Math.floor(rate/2400));
+    let peak=0;
+    for(let i=0;i<left.length;i+=step) {
+      peak=Math.max(peak,Math.abs(left[i]),Math.abs(right[i]));
+    }
+    // Relative threshold finds an audible attack in a softly recorded file.
+    // The pre-roll preserves the natural strike or pipe breath.
+    const threshold=Math.max(.00008,peak*(vibraphone?.05:.025));
+    const searchEnd=Math.min(left.length,Math.floor(rate*10));
+    let first=searchEnd;
+    for(let i=0;i<searchEnd;i+=step) {
+      if(Math.max(Math.abs(left[i]),Math.abs(right[i]))>=threshold) {
+        first=i;
+        break;
+      }
+    }
+    const preroll=vibraphone?.012:.02;
+    const offset=first<searchEnd?Math.max(0,first/rate-preroll):0;
+    // Loudness leveling with a strict cap protects unusually quiet/noisy files.
+    const targetPeak=vibraphone?.46:.44;
+    const levelAdjustment=peak>.00001?Math.max(.4,Math.min(24,targetPeak/peak)):1;
+    return {offset,levelAdjustment};
+  }
   async function loadBank(id, generation) {
     const preset=instruments[id];
     if(preset.engine && !preset.samples?.length)return new Map();
@@ -451,11 +486,8 @@
             const response=await fetch(descriptor.url,{cache:'force-cache'});
             if(!response.ok)throw new Error('Audio download failed');
             const buffer=await ctx.decodeAudioData(await response.arrayBuffer());
-            const left=buffer.getChannelData(0),right=buffer.getChannelData(Math.min(1,buffer.numberOfChannels-1));
-            let first=0,end=Math.min(left.length,Math.floor(buffer.sampleRate*.12));
-            while(first<end&&Math.max(Math.abs(left[first]),Math.abs(right[first]))<.0005)first++;
-            const offset=first<end?Math.max(0,(first-32)/buffer.sampleRate):0;
-            decoded.set(descriptor.url,{...descriptor,buffer,offset});
+            const {offset,levelAdjustment}=analyseSampleStartAndLevel(buffer,id);
+            decoded.set(descriptor.url,{...descriptor,buffer,offset,levelAdjustment});
             if(generation===loadGeneration)say(preset.name+'を読み込み中 · '+decoded.size+' / '+preset.samples.length);
           } catch(error) {failures.push(error);}
         }
@@ -804,7 +836,7 @@
     const source=ctx.createBufferSource(),tone=ctx.createBiquadFilter(),bus=ctx.createGain();
     source.buffer=sample.buffer;source.playbackRate.value=Math.pow(2,(midi-anchor)/12);
     tone.type='lowpass';tone.frequency.value=Math.min(14500,6000+midiHz(midi)*6);tone.Q.value=.12;
-    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.012);
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain*(sample.levelAdjustment||1),when+.012);
     source.connect(tone);tone.connect(bus);bus.connect(effects.input);
     let cleaned=false;
     const cleanup=()=>{
@@ -830,7 +862,7 @@
     source.buffer=sample.buffer;source.playbackRate.value=Math.pow(2,(midi-anchor)/12);
     tone.type='highpass';tone.frequency.value=70;tone.Q.value=.15;
     motor.gain.value=.87;if('pan' in pan)pan.pan.value=Math.max(-.16,Math.min(.16,(midi-71)/100));
-    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain,when+.004);
+    bus.gain.setValueAtTime(.00001,when);bus.gain.linearRampToValueAtTime(preset.gain*(sample.levelAdjustment||1),when+.004);
     source.connect(tone);tone.connect(motor);motor.connect(pan);pan.connect(bus);bus.connect(effects.input);
 
     const lfo=ctx.createOscillator(),lfoGain=ctx.createGain();
