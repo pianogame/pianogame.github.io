@@ -7340,3 +7340,73 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     transition:none!important;
   }
 }
+
+/* Card-local promotion only. High-frequency fullscreen filters eliminated. */
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-flipper {
+  filter:drop-shadow(0 12px 26px rgba(131,174,255,.52))!important;
+  transition:transform .68s cubic-bezier(.15,.73,.16,1),filter .75s ease!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-gold-awaken .hp-gacha-cinema-card-flipper {
+  filter:drop-shadow(0 13px 29px rgba(246,193,96,.70))!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-rainbow .hp-gacha-cinema-card-flipper {
+  filter:drop-shadow(0 13px 29px rgba(172,133,251,.74))!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-cinema-flip .hp-gacha-cinema-card-flipper {
+  transform:rotateY(90deg) scale(1.03)!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-front {filter:none!important;}
+#hp-home-screen .hp-gacha-card-gold-engraving,#hp-home-screen .hp-gacha-card-rainbow-engraving {
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:url('/assets/gacha/visuals/card-gold-engraving-v1.svg') center/100% 100% no-repeat;
+  opacity:0;transform:scale(.975);
+  transition:opacity .78s cubic-bezier(.19,.7,.2,1),transform .9s ease;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-card-gold-engraving {opacity:1;transform:scale(1);}
+#hp-home-screen .hp-gacha-card-rainbow-engraving {filter:hue-rotate(135deg) saturate(1.7);}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-rainbow .hp-gacha-card-rainbow-engraving {opacity:.9;transform:scale(1.005);}
+#hp-home-screen .hp-gacha-card-light-sweep {
+  position:absolute;z-index:4;inset:-35% -52%;pointer-events:none;opacity:0;
+  background:linear-gradient(106deg,transparent 39%,#ffe8a700 43%,#ffe8b649 47%,#fff7e4ba 50%,#ffe5a734 54%,transparent 60%);
+  transform:translateX(-110%) rotate(-7deg);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold-sweep .hp-gacha-card-light-sweep {
+  animation:hp-card-gold-sweep 1s cubic-bezier(.18,.48,.17,1) both;
+}
+@keyframes hp-card-gold-sweep {
+  0%{opacity:0;transform:translateX(-110%) rotate(-7deg)}
+  20%,70%{opacity:.78}
+  100%{opacity:0;transform:translateX(110%) rotate(-7deg)}
+}
+#hp-home-screen .hp-gacha-card-sparkles {
+  position:absolute;z-index:8;left:50%;top:50%;width:clamp(190px,53cqh,390px);
+  height:min(90%,560px);transform:translate(-50%,-50%);pointer-events:none;
+}
+#hp-home-screen .hp-gacha-card-sparkles i {
+  position:absolute;left:var(--sx);top:var(--sy);width:5px;height:5px;border-radius:50%;
+  background:#fff6da;box-shadow:0 0 6px #fff,0 0 12px #ffcf7d;
+  opacity:0;transform:translateY(9px) scale(.2);
+}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(1){--sx:7%;--sy:10%;--delay:0s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(2){--sx:92%;--sy:24%;--delay:.12s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(3){--sx:7%;--sy:75%;--delay:.28s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(4){--sx:84%;--sy:93%;--delay:.32s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(5){--sx:52%;--sy:2%;--delay:.21s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(6){--sx:96%;--sy:49%;--delay:.44s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(7){--sx:3%;--sy:42%;--delay:.5s}
+#hp-home-screen .hp-gacha-card-sparkles i:nth-child(8){--sx:51%;--sy:97%;--delay:.35s}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-card-sparkles i {
+  animation:hp-card-gold-particle 1.14s ease-out var(--delay) both;
+}
+@keyframes hp-card-gold-particle{
+  0%{opacity:0;transform:translateY(12px) scale(.1)}
+  24%{opacity:1;transform:translateY(0) scale(1.12)}
+  70%{opacity:.6;transform:translateY(-10px) scale(.8)}
+  100%{opacity:0;transform:translateY(-23px) scale(.12)}
+}
+@media(prefers-reduced-motion:reduce) {
+  #hp-home-screen .hp-gacha-card-light-sweep,
+  #hp-home-screen .hp-gacha-card-sparkles i{animation:none!important}
+  #hp-home-screen .hp-gacha-card-gold-engraving,
+  #hp-home-screen .hp-gacha-card-rainbow-engraving{transition:none!important}
+}

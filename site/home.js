@@ -2155,7 +2155,7 @@
       'is-film-mode','is-film-light','is-film-gold','is-film-rainbow','is-film-white',
       'is-film-silhouette','is-film-visible','is-film-labels','is-film-result',
       'is-cinema-intro','is-cinema-wide','is-cinema-keys','is-cinema-return',
-      'is-cinema-card','is-cinema-flip'
+      'is-cinema-card','is-cinema-flip','is-film-gold-awaken','is-film-gold-sweep'
     );
   }
 
@@ -2304,11 +2304,14 @@
     playGachaFlourish(0,tier==='A'?1.0:.85);
     playGachaTransitionTone(0);
     if(tier!=='A'){
+      // Keep the actual card art mounted; bring in gold in three gentle stages.
       scheduleGachaUpgrade(()=>{
-        overlay.classList.add('is-film-gold');
+        overlay.classList.add('is-film-gold-awaken');
         playGachaFlourish(0,1.35);
         playGachaTransitionTone(1);
       },900);
+      scheduleGachaUpgrade(()=>overlay.classList.add('is-film-gold'),1060);
+      scheduleGachaUpgrade(()=>overlay.classList.add('is-film-gold-sweep'),1250);
     }
     if(tier==='character'||tier==='instrument'){
       scheduleGachaUpgrade(()=>{
