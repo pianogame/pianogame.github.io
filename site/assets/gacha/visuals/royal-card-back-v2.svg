@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 524" aria-label="ピアノドリームステージ・紺碧と金の装飾カード">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#19294b"/><stop offset=".35" stop-color="#0c1530"/><stop offset=".71" stop-color="#091124"/><stop offset="1" stop-color="#263956"/></linearGradient>
+<linearGradient id="gold" x1=".18" y1="0" x2=".82" y2="1"><stop stop-color="#b47a37"/><stop offset=".18" stop-color="#fff5c5"/><stop offset=".38" stop-color="#d7ac65"/><stop offset=".53" stop-color="#80551f"/><stop offset=".76" stop-color="#f9de9e"/><stop offset="1" stop-color="#9d6726"/></linearGradient>
+<linearGradient id="side" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#000a17"/><stop offset=".15" stop-color="#30405c"/><stop offset=".5" stop-color="#0c1631"/><stop offset=".83" stop-color="#213250"/><stop offset="1" stop-color="#030c1a"/></linearGradient>
+<radialGradient id="star"><stop stop-color="#d6c188" stop-opacity=".16"/><stop offset="1" stop-color="#d6c188" stop-opacity="0"/></radialGradient>
+<pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r=".75" fill="#baae8c" opacity=".20"/></pattern>
+</defs>
+<rect width="360" height="524" rx="20" fill="#070e20"/>
+<rect x="5" y="5" width="350" height="514" rx="17" fill="url(#gold)"/>
+<rect x="11" y="11" width="338" height="502" rx="13" fill="url(#side)"/>
+<rect x="17" y="17" width="326" height="490" rx="9" fill="url(#bg)"/>
+<rect x="22" y="22" width="316" height="480" rx="6" fill="url(#dots)"/>
+<rect x="25" y="25" width="310" height="474" rx="3" fill="none" stroke="url(#gold)" stroke-width="1.7"/>
+<rect x="34" y="34" width="292" height="456" rx="2" fill="none" stroke="#c49b5d" stroke-width=".9" opacity=".68"/>
+<rect x="43" y="43" width="274" height="438" rx="1" fill="none" stroke="#f1dc9d" stroke-width=".55" opacity=".6"/>
+<ellipse cx="180" cy="250" rx="145" ry="180" fill="url(#star)"/>
+<g fill="none" stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+<path d="M42 156 V90 Q42 42 95 42 H133 M318 156 V90 Q318 42 265 42 H227 M42 368 V434 Q42 482 95 482 H133 M318 368 V434 Q318 482 265 482 H227" stroke-width="2.5"/>
+<path d="M44 107 Q74 95 76 64 Q83 92 117 75 M316 107 Q286 95 284 64 Q277 92 243 75 M44 417 Q74 429 76 460 Q83 432 117 449 M316 417 Q286 429 284 460 Q277 432 243 449" stroke-width="1.8"/>
+<path d="M62 110 C100 125 109 92 103 72 C92 106 119 123 139 109 M298 110 C260 125 251 92 257 72 C268 106 241 123 221 109 M62 414 C100 399 109 432 103 452 C92 418 119 401 139 415 M298 414 C260 399 251 432 257 452 C268 418 241 401 221 415" stroke-width="1.4"/>
+<path d="M88 152 Q125 168 143 136 Q166 166 180 153 Q194 166 217 136 Q235 168 272 152 M88 371 Q125 355 143 387 Q166 357 180 370 Q194 357 217 387 Q235 355 272 371" stroke-width="1.2" opacity=".78"/>
+<path d="M60 190L60 327M300 190L300 327" stroke-width=".8" opacity=".45"/>
+<path d="M108 200Q180 156 252 200M108 320Q180 362 252 320" stroke-width=".9" opacity=".55"/>
+<circle cx="180" cy="261" r="101" stroke-width=".8" opacity=".7"/>
+<circle cx="180" cy="261" r="94" stroke-width=".6" opacity=".56"/>
+<path d="M180 172 L185 191 L180 210 L175 191Z M180 352 L185 332 L180 312 L175 332Z M93 262L112 267L131 262L112 257Z M267 262L248 267L229 262L248 257Z" fill="url(#gold)" stroke="none"/>
+</g>
+<g fill="url(#gold)">
+<path d="M180 44l5 16 17 4-17 5-5 16-5-16-17-5 17-4Z"/>
+<path d="M180 480l5-16 17-4-17-5-5-16-5 16-17 5 17 4Z"/>
+<path d="M42 50l4 10 10 4-10 4-4 10-4-10-10-4 10-4ZM318 50l4 10 10 4-10 4-4 10-4-10-10-4 10-4ZM42 474l4-10 10-4-10-4-4-10-4 10-10 4 10 4ZM318 474l4-10 10-4-10-4-4-10-4 10-10 4 10 4Z"/>
+</g>
+<g fill="none" stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+<path d="M191 201 C153 213 143 265 161 273 C178 280 195 256 187 237 C180 220 160 229 162 247 C165 263 198 266 202 281 C208 302 178 328 158 303 C143 283 160 273 179 272 C200 271 219 289 209 312 C204 330 184 343 171 341" stroke-width="8"/>
+<path d="M191 201 C153 213 143 265 161 273 C178 280 195 256 187 237 C180 220 160 229 162 247 C165 263 198 266 202 281 C208 302 178 328 158 303 C143 283 160 273 179 272 C200 271 219 289 209 312 C204 330 184 343 171 341" stroke="#fff4c6" stroke-width="1.2"/>
+<path d="M182 189 C188 205 185 234 182 258 C181 288 192 341 185 358" stroke-width="4.2"/>
+</g>
+<path d="M139 397H221M143 400H217M141 121H219" stroke="url(#gold)" stroke-width="1.3"/>
+<g fill="#f7e4b4" text-anchor="middle">
+<text x="180" y="106" font-family="Georgia,serif" font-size="15" letter-spacing="3.1">PIANO</text>
+<text x="180" y="425" font-family="Georgia,serif" font-size="16" letter-spacing="2.4">DREAM STAGE</text>
+<text x="180" y="446" font-family="Georgia,serif" font-size="8" letter-spacing="3" opacity=".85">THE CONCERT OF FATE</text>
+</g>
+</svg>

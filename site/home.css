@@ -7257,3 +7257,86 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-cinema-card-flipper,#hp-home-screen .hp-gacha-cinema-card-aura {transition:none!important;}
   #hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-cinema-key-hint {animation:none!important;}
 }
+
+/* Staging: reference-led dark concert piano and high-contrast navy/gold card.
+   Remove the white wallpaper imagery entirely: only the centered card glows. */
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-intro .hp-gacha-cinema-scene-shimmer {
+  display:none!important;
+}
+#hp-home-screen .hp-gacha-cinema-piano-stage {
+  background:#070b15;
+  background-image:linear-gradient(180deg,rgba(3,5,11,.14),rgba(4,7,18,.3)),
+    url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1600&q=85');
+  background-position:center,center 57%;
+  background-size:cover;
+  filter:brightness(.9) contrast(1.08) saturate(.9);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film {
+  background:#040915!important; isolation:isolate;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-normal {
+  background:#040915!important;
+  background-image:none!important;
+  filter:none!important;
+  opacity:1!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-gold,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-rainbow,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-light,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-light,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-aura {
+  display:none!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-scene {
+  z-index:6!important;
+  background:transparent!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-flipper {
+  width:clamp(185px,50cqh,380px)!important;
+  max-height:88%;
+  aspect-ratio:360 / 524!important;
+  transform:rotate(-4deg) scale(.89);
+  filter:drop-shadow(0 18px 30px #000d);
+  transition:transform .68s cubic-bezier(.15,.73,.16,1),filter .48s ease!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-light .hp-gacha-cinema-card-flipper {
+  transform:rotate(-4deg) scale(1)!important;
+  filter:drop-shadow(0 0 18px #e5efff) drop-shadow(0 0 32px #95bbff)!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-face {
+  border:0!important;border-radius:16px!important;
+  background:transparent url('/assets/gacha/visuals/royal-card-back-v2.svg') center/100% 100% no-repeat!important;
+  box-shadow:none!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-border,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-emblem,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-logo {
+  display:none!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-gold .hp-gacha-cinema-card-flipper {
+  filter:drop-shadow(0 0 16px #fff2b9) drop-shadow(0 0 44px #ffa92b)!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-gold .hp-gacha-cinema-card-front {
+  filter:sepia(.15) saturate(1.15) brightness(1.17);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-rainbow .hp-gacha-cinema-card-flipper {
+  filter:drop-shadow(-12px -10px 22px #ef85e4) drop-shadow(13px 8px 23px #6dd7fa) drop-shadow(0 0 38px #fff1b2)!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-rainbow .hp-gacha-cinema-card-front {
+  filter:brightness(1.25) saturate(1.2);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-cinema-flip .hp-gacha-cinema-card-flipper {
+  transform:rotateY(90deg) scale(1.03)!important;
+  transition:transform .34s ease-in!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-back {
+  background-image:url('/assets/gacha/visuals/royal-card-back-v2.svg')!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-film-white .hp-gacha-film-whiteout {
+  background:#fff!important; opacity:1!important; visibility:visible!important;
+}
+@media (prefers-reduced-motion:reduce) {
+  #hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-flipper {
+    transition:none!important;
+  }
+}
