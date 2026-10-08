@@ -6707,3 +6707,11 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     animation:none;opacity:.42;
   }
 }
+
+/* Keep the pitch-upgrade announcement visible for every escalation; the
+   standard 2.5-second title animation would otherwise hide stage three. */
+#hp-home-screen .hp-gacha-animation-overlay.is-upgrading .hp-gacha-animation-title {
+  animation:none !important;
+  opacity:1 !important;
+  transform:translateX(-50%) !important;
+}

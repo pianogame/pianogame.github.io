@@ -1962,11 +1962,12 @@
       if (Number.isFinite(source.detune?.value)) source.detune.value = pitchCents;
       gain.gain.setValueAtTime(.82,when);
       const length = gachaFlourishBuffer.duration / pitchRatio;
+      let scheduledStop = 0;
       if (maxSeconds > 0 && length > .1) {
         const duration = Math.min(maxSeconds,length);
         gain.gain.setValueAtTime(.82,when+Math.max(0,duration-.12));
         gain.gain.linearRampToValueAtTime(.001,when+duration);
-        source.stop(when+duration+.012);
+        scheduledStop = when+duration+.012;
       }
       source.connect(gain);
       gain.connect(gachaFlourishGraph.gain);
@@ -1977,6 +1978,7 @@
         try {source.disconnect();gain.disconnect();} catch (_) {}
       };
       source.start(when);
+      if (scheduledStop) source.stop(scheduledStop);
     } catch (_) {}
   }
 
