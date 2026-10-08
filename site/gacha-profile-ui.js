@@ -303,6 +303,8 @@
       '/assets/gacha/backgrounds/moonlight-v1.webp',
       '/assets/gacha/backgrounds/rainbow-v1.webp',
       '/assets/gacha/backgrounds/celestial-v1.webp',
+      '/assets/gacha/visuals/normal-v1.webp',
+      '/assets/gacha/visuals/special-v1.webp',
     ];
     await Promise.all(common.map(src => preloadImage(src, 'high')));
   }

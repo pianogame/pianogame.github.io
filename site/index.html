@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-         .register('/sw.js?v=117', { scope: '/', updateViaCache: 'none' })
+         .register('/sw.js?v=118', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -61,7 +61,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
   <link rel="preload" as="image" href="/assets/gacha/visuals/result-normal-v2.webp?v=21">
   <link rel="preload" as="image" href="/assets/gacha/visuals/result-character-v2.webp?v=21">
-  <link rel="stylesheet" href="/home.css?v=20261008-tier-flow-v39">
+  <link rel="stylesheet" href="/home.css?v=20261008-piano-card-v40">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -79,9 +79,9 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261008-tier-flow-v47"></script>
+  <script defer src="/home.js?v=20261008-piano-card-v48"></script>
   <script defer src="/piano-gacha-customization.js?v=2"></script>
-  <script defer src="/gacha-profile-ui.js?v=20261008-initial-batch-v25"></script>
+  <script defer src="/gacha-profile-ui.js?v=20261008-piano-card-v26"></script>
   <script defer src="/profile-frame-preview.js?v=20261007-frame-only-v2"></script>
   <script defer src="/home-bgm.js?v=2"></script>
   <link rel="stylesheet" href="/multitrack.css?v=14">
@@ -458,6 +458,25 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     </section>
   </div>
   <div class="hp-gacha-animation-overlay" data-gacha-animation-overlay hidden aria-hidden="true">
+    <div class="hp-gacha-cinema-intro" aria-label="ガチャ演奏シーン">
+      <div class="hp-gacha-cinema-wide" aria-hidden="true">
+        <div class="hp-gacha-cinema-piano-stage"></div>
+        <div class="hp-gacha-cinema-scene-shimmer"></div>
+        <div class="hp-gacha-cinema-stage-caption">PIANO DREAM STAGE</div>
+      </div>
+      <div class="hp-gacha-cinema-closeup">
+        <div class="hp-gacha-cinema-key-photo" aria-hidden="true"></div>
+        <div class="hp-gacha-cinema-key-shell">
+          <div class="hp-gacha-cinema-keyboard" role="group" aria-label="演奏する鍵盤">
+            <div class="hp-gacha-cinema-keybed"><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="0" aria-label="白鍵 1 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="1" aria-label="白鍵 2 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="2" aria-label="白鍵 3 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="3" aria-label="白鍵 4 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="4" aria-label="白鍵 5 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="5" aria-label="白鍵 6 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="6" aria-label="白鍵 7 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="7" aria-label="白鍵 8 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="8" aria-label="白鍵 9 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="9" aria-label="白鍵 10 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="10" aria-label="白鍵 11 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="11" aria-label="白鍵 12 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="12" aria-label="白鍵 13 を弾く"><span></span></button><button type="button" class="hp-gacha-play-white" data-gacha-piano-key="13" aria-label="白鍵 14 を弾く"><span></span></button></div>
+            <div class="hp-gacha-cinema-blackbed"><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b0" style="--key-x:7.142857142857142%" aria-label="黒鍵 1 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b1" style="--key-x:14.285714285714285%" aria-label="黒鍵 2 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b2" style="--key-x:28.57142857142857%" aria-label="黒鍵 3 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b3" style="--key-x:35.714285714285715%" aria-label="黒鍵 4 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b4" style="--key-x:42.857142857142854%" aria-label="黒鍵 5 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b5" style="--key-x:57.14285714285714%" aria-label="黒鍵 6 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b6" style="--key-x:64.28571428571429%" aria-label="黒鍵 7 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b7" style="--key-x:78.57142857142857%" aria-label="黒鍵 8 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b8" style="--key-x:85.71428571428571%" aria-label="黒鍵 9 を弾く"><span></span></button><button type="button" class="hp-gacha-play-black" data-gacha-piano-key="b9" style="--key-x:92.85714285714286%" aria-label="黒鍵 10 を弾く"><span></span></button></div>
+          </div>
+          <div class="hp-gacha-cinema-key-hint" data-gacha-cinema-key-hint>鍵盤をタッチ<small>TOUCH THE KEYS</small></div>
+        </div>
+      </div>
+      <div class="hp-gacha-cinema-iris"></div>
+    </div>
+
     <div class="hp-gacha-cinematic-stage"></div>
     <div class="hp-gacha-cinematic-shade"></div>
     <div class="hp-gacha-curtain is-left"></div>
@@ -518,6 +537,18 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
       <div class="hp-gacha-film-gold"></div>
       <div class="hp-gacha-film-rainbow"></div>
       <div class="hp-gacha-film-light"></div>
+      <div class="hp-gacha-cinema-card-scene" aria-hidden="true">
+        <div class="hp-gacha-cinema-card-aura"></div>
+        <div class="hp-gacha-cinema-card-light"></div>
+        <div class="hp-gacha-cinema-card-flipper">
+          <div class="hp-gacha-cinema-card-face hp-gacha-cinema-card-front">
+            <div class="hp-gacha-cinema-card-border"></div>
+            <div class="hp-gacha-cinema-card-emblem">𝄞</div>
+            <div class="hp-gacha-cinema-card-logo">PIANO DREAM STAGE</div>
+          </div>
+          <div class="hp-gacha-cinema-card-face hp-gacha-cinema-card-back"></div>
+        </div>
+      </div>
       <div class="hp-gacha-film-result">
         <div class="hp-gacha-film-darkener"></div>
         <div class="hp-gacha-film-head">
@@ -541,7 +572,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     <button type="button" class="hp-gacha-result-backdrop" data-gacha-result-close aria-label="ガチャ結果を閉じる"></button>
     <section class="hp-gacha-result-panel" data-gacha-result-panel role="dialog" aria-modal="true" aria-label="ガチャ抽選結果">
       <header>
-        <span>STAGING GACHA</span>
+        <span>PIANO DREAM STAGE · REWARD</span>
         <h3 data-gacha-result-title>抽選結果</h3>
         <small class="hp-gacha-result-progress" data-gacha-result-progress></small>
       </header>

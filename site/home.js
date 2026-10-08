@@ -1694,10 +1694,14 @@
       if (character?.profileBackground) {
         card.style.setProperty('--gacha-result-bg', 'url("' + character.profileBackground + '")');
       }
-      const art = document.createElement('div');
-      art.className = 'hp-gacha-result-motion';
-      art.dataset.gachaResultMotion = character?.id || '';
-      art.setAttribute('aria-hidden','true');
+      const art=document.createElement('img');
+      art.className='hp-gacha-result-character-hero';
+      art.alt='';
+      art.decoding='async';
+      art.loading=compact?'lazy':'eager';
+      art.src=compact
+        ? (character?.listImage||character?.previewImage||gachaVisuals.ticket)
+        : (character?.previewImage||character?.listImage||gachaVisuals.ticket);
       card.appendChild(art);
     } else if (result?.kind === 'voice') {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
@@ -1764,7 +1768,14 @@
     const ownership = document.createElement('mark');
     ownership.className = 'hp-gacha-result-ownership';
     ownership.textContent = result?.isNewReward === true ? 'NEW' : result?.alreadyOwned === true ? '獲得済み' : '獲得';
-    card.append(name,reading,ownership);
+    const category=document.createElement('span');
+    category.className='hp-gacha-result-category';
+    category.textContent=({
+      instrument:'NEW INSTRUMENT',character:'PIANIST',voice:'CHARACTER VOICE',
+      background:'HOME BACKGROUND',frame:'PROFILE FRAME',profileEffect:'PROFILE EFFECT',
+      pianoSkin:'PIANO KEY SKIN',touchEffect:'TOUCH EFFECT',pianoBackground:'PIANO MODE BACKGROUND'
+    })[result?.kind]||'REWARD';
+    card.append(category,name,reading,ownership);
     return card;
   }
 
@@ -1795,6 +1806,7 @@
     const screenResult = summary ? null : results[index];
     const screenBackground = screenResult?.kind === 'character' ? gachaVisuals.special : gachaVisuals.normal;
     overlay.dataset.resultKind = summary ? 'summary' : (screenResult?.kind || 'item');
+    overlay.dataset.revealTier = summary?'summary':gachaRevealTier(screenResult);
     overlay.style.setProperty('--gacha-result-screen-bg', 'url("' + screenBackground + '")');
 
     if (summary) {
@@ -1841,6 +1853,7 @@
 
   let gachaAnimationTimer = 0;
   let gachaAnimationReadyTimer = 0;
+  let gachaIntroCameraTimer = 0;
   let gachaAnimationResolve = null;
   let gachaAnimationMode = 'idle';
   let gachaAnimationAwaitingTouch = false;
@@ -2140,17 +2153,21 @@
       'is-intro','is-draw-reveal','is-character-hit','is-item-hit','is-mandatory-special',
       'is-upgrading','is-upgrade-rainbow','is-instrument-hit',
       'is-film-mode','is-film-light','is-film-gold','is-film-rainbow','is-film-white',
-      'is-film-silhouette','is-film-visible','is-film-labels','is-film-result'
+      'is-film-silhouette','is-film-visible','is-film-labels','is-film-result',
+      'is-cinema-intro','is-cinema-wide','is-cinema-keys','is-cinema-return',
+      'is-cinema-card','is-cinema-flip'
     );
   }
 
   function finishGachaAnimation(status = 'done') {
     clearTimeout(gachaAnimationTimer);
     clearTimeout(gachaAnimationReadyTimer);
+    clearTimeout(gachaIntroCameraTimer);
     clearGachaUpgradeTimers();
     stopGachaFlourish();
     stopGachaTransitionTones();
     gachaAnimationTimer = 0;
+    gachaIntroCameraTimer = 0;
     gachaAnimationReadyTimer = 0;
     gachaAnimationAwaitingTouch = false;
     gachaAnimationMandatory = false;
@@ -2165,46 +2182,55 @@
     resolve?.(status);
   }
 
+
   function playGachaIntro(count) {
-    const overlay = home.querySelector('[data-gacha-animation-overlay]');
-    if (!overlay) return Promise.resolve('touch');
+    const overlay=home.querySelector('[data-gacha-animation-overlay]');
+    if(!overlay) return Promise.resolve('touch');
     clearTimeout(gachaAnimationTimer);
     clearTimeout(gachaAnimationReadyTimer);
+    clearTimeout(gachaIntroCameraTimer);
     clearGachaUpgradeTimers();
     stopGachaFlourish();
     stopGachaTransitionTones();
     resetGachaAnimationClasses(overlay);
-    gachaAnimationMode = 'intro';
-    gachaAnimationAwaitingTouch = false;
-    overlay.hidden = false;
-    overlay.style.setProperty('--gacha-stage-bg','url("' + gachaVisuals.piano + '")');
-    overlay.classList.add('is-playing','is-intro');
-    overlay.classList.toggle('is-ten', count === 10);
-    const label = overlay.querySelector('[data-gacha-animation-label]');
-    if (label) label.textContent = '夢のステージが、幕を開ける——';
-    return new Promise(resolve => {
-      gachaAnimationResolve = resolve;
-      gachaAnimationReadyTimer = setTimeout(() => {
-        if (!gachaAnimationResolve) return;
-        gachaAnimationAwaitingTouch = true;
+    gachaAnimationMode='intro';
+    gachaAnimationAwaitingTouch=false;
+    overlay.hidden=false;
+    overlay.classList.add('is-playing','is-cinema-intro','is-cinema-wide');
+    overlay.classList.toggle('is-ten',count===10);
+    // Hold the full piano, then move the camera into the keys.
+    return new Promise(resolve=>{
+      gachaAnimationResolve=resolve;
+      gachaIntroCameraTimer=setTimeout(()=>{
+        if(gachaAnimationMode!=='intro'||overlay.hidden) return;
+        overlay.classList.remove('is-cinema-wide');
+        overlay.classList.add('is-cinema-keys');
+      },1250);
+      gachaAnimationReadyTimer=setTimeout(()=>{
+        if(gachaAnimationMode!=='intro'||overlay.hidden) return;
+        gachaAnimationAwaitingTouch=true;
         overlay.classList.add('is-awaiting-touch');
-        if (label) label.textContent = 'ピアノに触れてください';
-      }, 1050);
+      },2200);
     });
   }
 
-  function touchGachaPiano() {
-    const overlay = home.querySelector('[data-gacha-animation-overlay]');
-    if (!overlay || gachaAnimationMode !== 'intro' || !gachaAnimationAwaitingTouch) return;
-    gachaAnimationAwaitingTouch = false;
+  function touchGachaPiano(key) {
+    const overlay=home.querySelector('[data-gacha-animation-overlay]');
+    if(!overlay||!key?.matches?.('[data-gacha-piano-key]')||
+        gachaAnimationMode!=='intro'||!gachaAnimationAwaitingTouch) return;
+    gachaAnimationAwaitingTouch=false;
     overlay.classList.remove('is-awaiting-touch');
+    key.classList.add('is-pressed');
     playHomeTapSound();
     playGachaPianoChord();
-    const label = overlay.querySelector('[data-gacha-animation-label]');
-    if (label) label.textContent = 'さあ、運命の演奏を——';
-    gachaAnimationTimer = setTimeout(() => finishGachaAnimation('touch'), 520);
+    gachaAnimationReadyTimer=setTimeout(()=>{
+      if(gachaAnimationMode!=='intro')return;
+      key.classList.remove('is-pressed');
+      overlay.classList.remove('is-cinema-keys');
+      overlay.classList.add('is-cinema-return');
+    },260);
+    gachaAnimationTimer=setTimeout(()=>finishGachaAnimation('touch'),1460);
   }
-
 
   function gachaRevealTier(result) {
     if (result?.kind === 'instrument') return 'instrument';
@@ -2267,54 +2293,40 @@
     overlay.style.setProperty('--gacha-film-rainbow-bg','url("/assets/gacha/backgrounds/rainbow-v1.webp")');
     overlay.style.setProperty('--gacha-film-result-bg','url("/assets/gacha/backgrounds/celestial-v1.webp")');
     overlay.hidden=false;
-    overlay.classList.add('is-playing','is-film-mode','is-film-light');
+    overlay.classList.add('is-playing','is-film-mode','is-film-light','is-cinema-card');
     overlay.classList.toggle('is-mandatory-special',mandatory);
     overlay.dataset.drawIndex=String(index+1);
     overlay.classList.toggle('is-ten',total===10);
 
-    playGachaFlourish(0,tier==='A'?1.1:.85);
+    playGachaFlourish(0,tier==='A'?1.0:.85);
     playGachaTransitionTone(0);
-    // Every reward starts with a spreading light. Only new cosmetics go gold.
-    if (tier!=='A') {
+    if(tier!=='A'){
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-gold');
-        playGachaFlourish(0,tier==='B'?1.4:1.35);
+        playGachaFlourish(0,1.35);
         playGachaTransitionTone(1);
-      },900);
+      },1280);
     }
-    // Characters (new and duplicate) and instruments turn rainbow at 2.2 s.
-    if (tier==='character' || tier==='instrument') {
+    if(tier==='character'||tier==='instrument'){
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-rainbow');
-        playGachaFlourish(200,1.35);
+        playGachaFlourish(200,1.4);
         playGachaTransitionTone(1);
-      },2200);
+      },2700);
     }
-    if (tier==='instrument') {
+    const duration=tier==='A'?1860:tier==='B'?3220:
+      tier==='character'?4550:6100;
+    if(tier==='instrument'){
+      // The card stays visible as the entire stage flashes out.
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-white');
         playGachaFlourish(400);
         playGachaTransitionTone(2,result?.instrumentId||'');
-      },3500);
-      scheduleGachaUpgrade(()=>{
-        overlay.classList.add('is-film-result','is-film-silhouette');
-        overlay.classList.remove('is-film-white');
-      },4000);
-      scheduleGachaUpgrade(()=>{
-        overlay.classList.add('is-film-visible');
-        overlay.classList.remove('is-film-silhouette');
-      },4500);
-      scheduleGachaUpgrade(()=>overlay.classList.add('is-film-labels'),5500);
+      },5200);
     } else {
-      const at=tier==='A'?1000:tier==='B'?2300:3420;
-      scheduleGachaUpgrade(()=>{
-        overlay.classList.add('is-film-result','is-film-visible','is-film-labels');
-        if(tier==='character'&&result?.isNewCharacter){
-          scheduleGachaUpgrade(()=>{void playGachaAcquisitionVoice(result);},530);
-        }
-      },at);
+      // The result screen opens the instant the card is edge-on.
+      scheduleGachaUpgrade(()=>overlay.classList.add('is-cinema-flip'),duration-340);
     }
-    const duration=tier==='A'?1780:tier==='B'?3180:tier==='character'?4680:6650;
     return new Promise(resolve=>{
       gachaAnimationResolve=resolve;
       gachaAnimationTimer=setTimeout(()=>finishGachaAnimation('done'),duration);
@@ -2467,7 +2479,7 @@
   }
 
   function skipGachaAnimationToLast() {
-    if (gachaAnimationMandatory) return;
+    if (gachaAnimationMode==='intro' || gachaAnimationMandatory) return;
     if (gachaResultState?.results?.length > 1) gachaResultState.skipMode = true;
     finishGachaAnimation(gachaResultState?.results?.length > 1 ? 'summary' : 'result');
   }
@@ -2502,12 +2514,7 @@
 
     grantGachaResults(results);
 
-    const resultAssetsReady = Promise.all(results
-      .filter(result => result.kind === 'character')
-      .map(result => {
-        const character = registry?.get?.(result.characterId);
-        return character ? window.HP_MOTION_CHARACTER?.preload?.(character).catch?.(() => null) : null;
-      }));
+    const resultAssetsReady = Promise.resolve();
 
     gachaResultState = { results:[...results], index:0, summary:false, skipMode:false, seenNewSpecialIndexes:new Set() };
     gachaTrialState.history.unshift({
@@ -2668,16 +2675,19 @@
   gachaResultOverlay?.addEventListener('pointerup', handleGachaResultSurface, { capture:true });
   gachaResultOverlay?.addEventListener('click', handleGachaResultSurface, { capture:true });
   const gachaAnimationOverlay = home.querySelector('[data-gacha-animation-overlay]');
-  gachaAnimationOverlay?.addEventListener('pointerdown', event => {
-    if (event.button > 0) return;
-    if (gachaAnimationAwaitingTouch && !event.target.closest('[data-gacha-animation-skip]')) {
-      touchGachaPiano();
+  gachaAnimationOverlay?.addEventListener('pointerdown',event=>{
+    if(event.button>0)return;
+    const key=event.target?.closest?.('[data-gacha-piano-key]');
+    if(key&&gachaAnimationAwaitingTouch){
+      event.preventDefault();
+      touchGachaPiano(key);
     }
-  }, { passive:true });
-  gachaAnimationOverlay?.addEventListener('click', event => {
-    // Keyboard / assistive-tech fallback. Pointer taps already run on pointerdown.
-    if (event.detail === 0 && gachaAnimationAwaitingTouch && !event.target.closest('[data-gacha-animation-skip]')) {
-      touchGachaPiano();
+  },{passive:false});
+  gachaAnimationOverlay?.addEventListener('click',event=>{
+    const key=event.target?.closest?.('[data-gacha-piano-key]');
+    if(key&&gachaAnimationAwaitingTouch){
+      event.preventDefault();
+      touchGachaPiano(key);
     }
   });
   home.querySelector('[data-gacha-animation-skip]')?.addEventListener('pointerdown', event => {

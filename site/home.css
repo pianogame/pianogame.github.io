@@ -7010,3 +7010,250 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-film-rainbow,#hp-home-screen .hp-gacha-film-result {transition:none!important;}
   #hp-home-screen .hp-gacha-animation-overlay.is-film-visible .hp-gacha-film-reward img {animation:none!important;}
 }
+
+/* 2026-10-08 gacha rebuilt: stage → touch-only piano → central card → result.
+   Photo credits in source: Daniel Robert Dinu / Dallas Penner (Unsplash License).
+   Performance: 2 shared photo sources, existing compressed art textures; no
+   full-screen video, and no permanent motion-rendered sprites on result. */
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-intro > :not(.hp-gacha-cinema-intro),
+#hp-home-screen .hp-gacha-animation-overlay.is-film-mode > :not(.hp-gacha-film):not(.hp-gacha-animation-skip) {
+  display:none!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-intro::before,
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-intro::after {content:none!important;display:none!important;}
+#hp-home-screen .hp-gacha-cinema-intro {display:none;position:absolute;inset:0;overflow:hidden;isolation:isolate;background:#050918;}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-intro .hp-gacha-cinema-intro {display:block;}
+#hp-home-screen .hp-gacha-cinema-wide,
+#hp-home-screen .hp-gacha-cinema-closeup {position:absolute;inset:0;overflow:hidden;transition:opacity .75s ease,transform 1.05s cubic-bezier(.25,.7,.2,1);}
+#hp-home-screen .hp-gacha-cinema-wide {opacity:1;transform:scale(1.045);z-index:1;}
+#hp-home-screen .hp-gacha-cinema-closeup {opacity:0;transform:scale(1.24) translateY(5%);z-index:2;pointer-events:none;}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-keys .hp-gacha-cinema-wide {opacity:0;transform:scale(1.31) translateY(-12%);}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-keys .hp-gacha-cinema-closeup {opacity:1;transform:scale(1);pointer-events:auto;}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-return .hp-gacha-cinema-wide {opacity:1;transform:scale(1.06);}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-return .hp-gacha-cinema-closeup {opacity:0;transform:scale(1.15) translateY(12%);pointer-events:none;}
+#hp-home-screen .hp-gacha-cinema-piano-stage {
+  position:absolute;inset:-3%;background:
+    linear-gradient(180deg,#03071633,#04070dcc 97%),
+    url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78') center 58% / cover no-repeat,
+    url('/assets/gacha/backgrounds/sunset-v1.webp') center/cover no-repeat;
+  filter:saturate(.9) contrast(1.08);
+}
+#hp-home-screen .hp-gacha-cinema-scene-shimmer {
+  position:absolute;inset:0;background:url('/assets/gacha/visuals/special-v1.webp') center/cover no-repeat;
+  opacity:.16;mix-blend-mode:screen;pointer-events:none;
+}
+#hp-home-screen .hp-gacha-cinema-stage-caption {
+  position:absolute;left:0;right:0;bottom:8%;color:#f8e8bd;
+  font:600 clamp(16px,2.9cqh,28px)/1 Georgia,serif;letter-spacing:.35em;text-align:center;
+  text-shadow:0 2px 12px #000,0 0 19px #e2c18e96;pointer-events:none;
+}
+#hp-home-screen .hp-gacha-cinema-key-photo {
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,#03061175,#0c1838aa),
+    url('https://images.unsplash.com/photo-1765900817185-099bd262b814?auto=format&fit=crop&w=1400&q=78') center / cover no-repeat,
+    url('/assets/gacha/backgrounds/moonlight-v1.webp') center/cover no-repeat;
+  filter:saturate(.8);
+}
+#hp-home-screen .hp-gacha-cinema-key-shell {position:absolute;z-index:4;inset:12% 8% 7%;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:clamp(8px,3cqh,28px);}
+#hp-home-screen .hp-gacha-cinema-keyboard {
+  position:relative;width:min(96%,1080px);height:clamp(96px,36cqh,330px);
+  background:#03060e;border:clamp(8px,1.7cqh,18px) solid #111521;
+  border-top-color:#343742;border-radius:8px 8px 16px 16px;
+  box-shadow:0 20px 70px #000e,0 -5px 32px #f9df9d35,inset 0 4px 12px #000;
+  overflow:hidden;touch-action:manipulation;
+}
+#hp-home-screen .hp-gacha-cinema-keybed {position:absolute;inset:0;display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:1px;}
+#hp-home-screen .hp-gacha-play-white,
+#hp-home-screen .hp-gacha-play-black {
+  appearance:none;position:relative;cursor:pointer;border:0;outline-offset:-3px;
+  touch-action:manipulation;transition:transform .08s ease,box-shadow .08s ease,filter .08s ease;
+}
+#hp-home-screen .hp-gacha-play-white {
+  background:linear-gradient(97deg,#b4c0cc 0,#fffdf5 22%,#e8e9e5 82%,#9aa2af 100%);
+  box-shadow:inset 1px 0 #fff,inset -2px 0 #586274,inset 0 -12px 14px #65758c75,0 8px 0 #989ca5;
+  border-radius:0 0 5px 5px;
+}
+#hp-home-screen .hp-gacha-play-white span {position:absolute;inset:auto 7% 0;height:8%;border-radius:40%;background:#fff8ed83;}
+#hp-home-screen .hp-gacha-cinema-blackbed {position:absolute;inset:0;pointer-events:none;}
+#hp-home-screen .hp-gacha-play-black {
+  pointer-events:auto;position:absolute;top:0;left:calc(var(--key-x) - 2.5%);
+  width:5%;height:61%;z-index:3;border-radius:0 0 5px 5px;
+  background:linear-gradient(94deg,#090d15,#374457 23%,#141922 51%,#020309 90%);
+  box-shadow:inset 1px 0 #68717f,inset -2px 0 #000,0 8px 3px #000a,0 11px 0 #080b11;
+}
+#hp-home-screen .hp-gacha-play-black span {position:absolute;inset:0 18% auto;height:80%;border-left:1px solid #e0e4ea20;}
+#hp-home-screen .hp-gacha-play-white.is-pressed,
+#hp-home-screen .hp-gacha-play-white:active {transform:translateY(7px);filter:brightness(.86);box-shadow:inset 0 6px 15px #2831498c;}
+#hp-home-screen .hp-gacha-play-black.is-pressed,
+#hp-home-screen .hp-gacha-play-black:active {transform:translateY(6px);filter:brightness(.79);box-shadow:inset 0 6px 11px #000;}
+#hp-home-screen .hp-gacha-cinema-key-hint {
+  display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff5cf;
+  font:800 clamp(16px,3.8cqh,38px)/1.1 "Hiragino Sans","Yu Gothic",sans-serif;
+  text-shadow:0 2px 9px #000,0 0 30px #fff5c8;letter-spacing:.1em;
+  opacity:0;pointer-events:none;transform:translateY(6px);
+}
+#hp-home-screen .hp-gacha-cinema-key-hint small {font:600 clamp(8px,1.4cqh,12px)/1.4 Georgia,serif;letter-spacing:.28em;}
+#hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-cinema-key-hint {
+  opacity:1;animation:hp-gacha-tap-guide 1.05s ease-in-out infinite;
+}
+@keyframes hp-gacha-tap-guide {
+  0%,100%{opacity:.8;transform:translateY(2px) rotate(-1deg);}
+  50%{opacity:1;transform:translateY(-5px) rotate(1deg);}
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-intro .hp-gacha-animation-skip {display:none!important;}
+#hp-home-screen .hp-gacha-cinema-iris {position:absolute;inset:0;pointer-events:none;border:2px solid #f6d9a634;box-shadow:inset 0 0 60px #02051688;z-index:8;}
+/* The physical card is the focal point, not the stage background. */
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film {
+  display:block;background:#040716;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-normal {
+  background-image:linear-gradient(#05081677,#050816af),url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78');
+  opacity:1!important;filter:contrast(1.05) saturate(.85);background-size:cover;background-position:center;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card :is(.hp-gacha-film-gold,.hp-gacha-film-rainbow,.hp-gacha-film-light,.hp-gacha-film-result) {display:none!important;}
+#hp-home-screen .hp-gacha-cinema-card-scene {position:absolute;inset:0;display:grid;place-items:center;isolation:isolate;z-index:6;perspective:1200px;pointer-events:none;}
+#hp-home-screen .hp-gacha-cinema-card-aura {
+  position:absolute;inset:5% 11%;
+  background:url('/assets/gacha/visuals/normal-v1.webp') center/contain no-repeat;
+  mix-blend-mode:screen;opacity:.18;transform:scale(.8);
+  transition:opacity .5s ease,transform 1s ease;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-aura {opacity:.75;transform:scale(1.17);}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-cinema-card-aura {
+  background-image:url('/assets/gacha/visuals/special-v1.webp');opacity:.96;transform:scale(1.4);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-rainbow .hp-gacha-cinema-card-aura {
+  background-image:url('/assets/gacha/visuals/special-v1.webp');opacity:1;transform:scale(1.55);
+  filter:hue-rotate(65deg) saturate(1.9);
+}
+#hp-home-screen .hp-gacha-cinema-card-flipper {
+  position:relative;width:clamp(114px,25cqh,255px);aspect-ratio:.675;
+  transform-style:preserve-3d;transform:translateY(3%) rotate(-6deg) scale(.9);
+  transition:transform .5s cubic-bezier(.17,.8,.17,1),filter .55s ease;
+  filter:drop-shadow(0 20px 28px #000e);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-flipper {
+  transform:translateY(0) rotate(-6deg) scale(1);
+}
+#hp-home-screen .hp-gacha-cinema-card-face {
+  position:absolute;inset:0;backface-visibility:hidden;border:3px solid #e3c892;
+  border-radius:clamp(9px,1.4cqh,16px);overflow:hidden;
+  box-shadow:inset 0 0 0 5px #13223c,inset 0 0 0 7px #c5a867d0,
+    0 0 13px #b1d6ffad,0 0 28px #7dc1ff70,0 0 0 1px #f5dfac;
+  background:linear-gradient(180deg,#0e1840bb,#10213bcc),
+             url('/assets/gacha/visuals/normal-v1.webp') center/cover no-repeat;
+}
+#hp-home-screen .hp-gacha-cinema-card-back {
+  transform:rotateY(180deg);
+  background:url('/assets/gacha/visuals/ticket-v1.webp') center/cover no-repeat;
+}
+#hp-home-screen .hp-gacha-cinema-card-border {position:absolute;inset:7%;border:1px solid #e9d7a0a3;border-radius:8px;box-shadow:inset 0 0 14px #e9d7a038;}
+#hp-home-screen .hp-gacha-cinema-card-emblem {
+  position:absolute;inset:18% 0 26%;display:grid;place-items:center;
+  font:normal clamp(50px,9cqh,115px)/1 Georgia,serif;color:#fff3cd;
+  text-shadow:0 0 8px #b1e6ff,0 0 28px #8fafff,0 5px 10px #0009;
+}
+#hp-home-screen .hp-gacha-cinema-card-logo {
+  position:absolute;bottom:9%;width:100%;text-align:center;
+  font:600 clamp(8px,1.1cqh,12px)/1.4 Georgia,serif;letter-spacing:.14em;color:#fff0b9;
+}
+#hp-home-screen .hp-gacha-cinema-card-light {
+  position:absolute;z-index:7;inset:8%;pointer-events:none;mix-blend-mode:screen;
+  background:url('/assets/gacha/visuals/normal-v1.webp') center/contain no-repeat;
+  opacity:.0;transform:scale(.5);
+  transition:opacity .4s ease,transform .85s ease;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-light .hp-gacha-cinema-card-light {opacity:.76;transform:scale(1.28);}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-cinema-card-front {
+  border-color:#fff4bd;background-image:linear-gradient(180deg,#66370488,#60360499),url('/assets/gacha/visuals/special-v1.webp');
+  box-shadow:inset 0 0 0 5px #533419,inset 0 0 0 7px #fff0b9,0 0 25px #ffe29b,0 0 62px #ffcc71,0 0 0 1px #fff7d1;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-cinema-card-emblem {color:#fff9e7;text-shadow:0 0 14px #ffe8a0,0 0 31px #ffbe43,0 4px 11px #180900;}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-rainbow .hp-gacha-cinema-card-front {
+  background-image:linear-gradient(137deg,#ff9de360,#a4e6ff56 23%,#ffe39061 51%,#a7aeff7d 73%,#a3ffce8a),url('/assets/gacha/visuals/special-v1.webp');
+  border-color:#fff;box-shadow:inset 0 0 0 5px #543d7a,inset 0 0 0 7px #fff,
+   0 0 25px #ffaad2,0 0 50px #66cfff,0 0 80px #bd93ff;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-rainbow .hp-gacha-cinema-card-flipper {filter:drop-shadow(0 0 35px #b792ff);}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-flip .hp-gacha-cinema-card-flipper {
+  transform:translateY(0) rotateY(90deg) scale(1.12);transition:transform .34s ease-in;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-white .hp-gacha-film-whiteout {
+  opacity:1!important;visibility:visible!important;background:#fff;transition:opacity .27s ease;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-animation-skip {z-index:25;}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-mandatory-special .hp-gacha-animation-skip {display:none!important;}
+/* Full result redesign: a coherent concert-stage prize presentation. */
+#hp-home-screen .hp-gacha-result-overlay {
+  background:#050819 url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78') center/cover no-repeat!important;
+}
+#hp-home-screen .hp-gacha-result-overlay::before {
+  content:"";position:absolute;inset:0;background:linear-gradient(90deg,#040815ef,#101c3bb5 45%,#05091bf0);pointer-events:none;
+}
+#hp-home-screen .hp-gacha-result-panel {
+  position:relative!important;z-index:1;width:min(1180px,calc(100% - 36px));
+  height:calc(100% - 30px);padding:clamp(10px,2cqh,22px)!important;gap:clamp(6px,1.6cqh,14px)!important;
+  border:1px solid #dec48b91;border-radius:clamp(12px,2.1cqh,22px);
+  background:linear-gradient(120deg,#0d162bea,#0d1a32c4 58%,#211530cb)!important;
+  box-shadow:inset 0 0 26px #d7b8761c,0 15px 55px #000a;
+  backdrop-filter:none;overflow:hidden!important;
+}
+#hp-home-screen .hp-gacha-result-panel header {position:relative;text-align:center;flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;}
+#hp-home-screen .hp-gacha-result-panel header span {font:600 clamp(8px,1.25cqh,12px)/1.5 Georgia,serif!important;letter-spacing:.28em!important;color:#ead7a7!important;}
+#hp-home-screen .hp-gacha-result-panel header h3 {font:700 clamp(20px,3.4cqh,35px)/1.2 "Hiragino Mincho ProN","Yu Mincho",serif!important;color:#fff1cb!important;text-shadow:0 2px 14px #c6a87865!important;}
+#hp-home-screen .hp-gacha-result-progress {color:#e6ce9b!important;font:600 clamp(10px,1.7cqh,15px)/1.5 Georgia,serif!important;}
+#hp-home-screen .hp-gacha-result-list {position:relative;z-index:1;min-height:0;overflow:hidden!important;}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card {
+  position:relative!important;width:min(86%,760px)!important;height:100%!important;max-height:none!important;
+  margin-inline:auto;overflow:hidden;border:1px solid #d9bc8599;border-radius:clamp(11px,1.8cqh,20px);
+  background:linear-gradient(180deg,#14254234,#0a0c19c4 80%),var(--gacha-result-bg) center/cover no-repeat!important;
+  box-shadow:inset 0 0 0 3px #e6ce8d29,0 0 34px #d2b97c31,0 14px 44px #0008;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card::before {
+  content:"";position:absolute;inset:0;
+  background:url('/assets/gacha/visuals/special-v1.webp') center / cover no-repeat;opacity:.23;pointer-events:none;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card :is(.hp-gacha-result-item-art,.hp-gacha-result-character-hero,.hp-gacha-result-instrument-art) {
+  position:absolute!important;left:50%!important;top:42%!important;width:min(89%,720px)!important;
+  height:69%!important;transform:translate(-50%,-50%)!important;object-fit:contain!important;
+  border:0!important;background:none!important;box-shadow:none!important;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card .hp-gacha-result-instrument-art img {width:100%;height:100%;object-fit:contain;}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card > .hp-gacha-result-category {
+  position:absolute;z-index:10;top:3.5%;left:0;right:0;text-align:center;
+  color:#f3dc9b;font:700 clamp(9px,1.5cqh,15px)/1.4 Georgia,serif;letter-spacing:.2em;
+  text-shadow:0 2px 11px #000;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card > strong {
+  position:absolute!important;z-index:10;left:2%;right:2%;bottom:11%;top:auto!important;
+  max-width:none!important;width:auto!important;text-align:center;
+  color:#fff6e0!important;font:800 clamp(16px,3.5cqh,36px)/1.3 "Hiragino Mincho ProN","Yu Mincho",serif!important;
+  text-shadow:0 3px 16px #000,0 0 13px #d8af65;overflow-wrap:anywhere;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card > em {
+  position:absolute!important;z-index:10;left:9%;right:9%;bottom:4%;top:auto!important;
+  color:#e4dfd7!important;font:500 clamp(9px,1.6cqh,14px)/1.4 "Hiragino Sans","Yu Gothic",sans-serif!important;
+  text-align:center;max-height:2.6em;overflow:hidden;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-ownership {
+  position:absolute!important;z-index:11;left:3%;top:4%;bottom:auto;right:auto;
+  padding:4px 12px!important;border:1px solid #f5d48b;border-radius:3px;
+  background:#40280de8;color:#ffe2a0!important;font-size:clamp(10px,1.65cqh,14px);
+}
+#hp-home-screen .hp-gacha-result-overlay[data-reveal-tier="character"] .hp-gacha-result-panel {border-color:#caadf7;}
+#hp-home-screen .hp-gacha-result-overlay[data-reveal-tier="instrument"] .hp-gacha-result-panel {border-color:#ffe4ae;}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-card {border-color:#d6c08e82;background:#121a32!important;}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-category {display:none;}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-character-hero {position:absolute;width:84%;height:65%;object-fit:contain;top:40%;left:8%;}
+@container (max-height:480px){
+  #hp-home-screen .hp-gacha-cinema-keyboard {height:clamp(88px,40cqh,200px);}
+  #hp-home-screen .hp-gacha-cinema-key-shell {inset:4% 7% 2%;gap:6px;}
+  #hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card > strong {bottom:10%;font-size:clamp(13px,3cqh,22px)!important;}
+  #hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-card > em {bottom:2%;font-size:clamp(8px,1.5cqh,11px)!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  #hp-home-screen .hp-gacha-cinema-wide,#hp-home-screen .hp-gacha-cinema-closeup,
+  #hp-home-screen .hp-gacha-cinema-card-flipper,#hp-home-screen .hp-gacha-cinema-card-aura {transition:none!important;}
+  #hp-home-screen .hp-gacha-animation-overlay.is-awaiting-touch .hp-gacha-cinema-key-hint {animation:none!important;}
+}
