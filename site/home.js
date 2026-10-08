@@ -371,6 +371,13 @@
   const profileImageRemove = home.querySelector('[data-profile-image-remove]');
   const profilePreviewImage = home.querySelector('[data-profile-preview-image]');
   const profileStatus = home.querySelector('[data-profile-status]');
+  const profileTopStatus = home.querySelector('[data-profile-top-status]');
+  function setProfileTopStatus(message = '', isError = false) {
+    if (!profileTopStatus) return;
+    profileTopStatus.textContent = message;
+    profileTopStatus.dataset.error = String(isError);
+    profileTopStatus.hidden = !message;
+  }
   const profilePreviewName = home.querySelector('[data-profile-preview-name]');
   const profilePreviewMessage = home.querySelector('[data-profile-preview-message]');
   const profileLevel = home.querySelector('[data-profile-level]');
@@ -730,20 +737,28 @@
     }
   }
 
+  let lastPlayerNameFitSignature = '';
   function fitHomePlayerName() {
-    if (!playerNameDisplay) return;
+    if (!playerNameDisplay?.isConnected || !playerNameDisplay.clientWidth) return;
+    const name = playerNameDisplay.textContent || '';
+    const available = Math.max(1, playerNameDisplay.clientWidth - 8);
+    const inheritedSize = parseFloat(getComputedStyle(playerNameDisplay.parentElement).fontSize) || 14;
+    const signature = name + '|' + available + '|' + inheritedSize;
+    // iOS can re-measure its viewport repeatedly after resuming a background
+    // PWA. Do not reset the rendered name on every redundant measurement.
+    if (signature === lastPlayerNameFitSignature) return;
+    // Measure and refit synchronously in one rendering task, avoiding a frame
+    // showing a too-large label before requestAnimationFrame shrinks it again.
     playerNameDisplay.style.removeProperty('font-size');
     playerNameDisplay.style.removeProperty('letter-spacing');
-    requestAnimationFrame(() => {
-      if (!playerNameDisplay.isConnected || !playerNameDisplay.clientWidth) return;
-      const baseSize = parseFloat(getComputedStyle(playerNameDisplay).fontSize) || 14;
-      const available = Math.max(1, playerNameDisplay.clientWidth - 8);
-      const required = playerNameDisplay.scrollWidth;
-      if (required <= available) return;
+    const baseSize = parseFloat(getComputedStyle(playerNameDisplay).fontSize) || 14;
+    const required = playerNameDisplay.scrollWidth;
+    if (required > available) {
       const target = Math.max(baseSize * .54, baseSize * (available / required) * .96);
       playerNameDisplay.style.fontSize = target + 'px';
       if (target < baseSize * .72) playerNameDisplay.style.letterSpacing = '-.025em';
-    });
+    }
+    lastPlayerNameFitSignature = signature;
   }
 
   function syncPlayerProfileUI() {
@@ -788,6 +803,7 @@
       profileImageDraft = playerProfile.image || '';
       syncPlayerProfileUI();
       if (profileStatus) profileStatus.textContent = '';
+      setProfileTopStatus();
     }
     syncHomeVolume();
     canvas.inert = true;
@@ -876,6 +892,7 @@
     const message = (profileMessageInput?.value || '').trim().slice(0, 40);
     if (!name) {
       if (profileStatus) profileStatus.textContent = 'プレイヤー名を入力してください。';
+      setProfileTopStatus('プレイヤー名を入力してください', true);
       profileNameInput?.focus({ preventScroll:true });
       return;
     }
@@ -896,6 +913,7 @@
       const effectName = profileEffectCatalog[playerProfile.profileEffect]?.name || profileEffectCatalog.default.name;
       profileStatus.textContent = '保存しました｜背景：' + bgName + '／フレーム：' + frameName + '／エフェクト：' + effectName;
     }
+    setProfileTopStatus('保存しました');
   });
   const missionMenuButton = home.querySelector('[data-home-action="missions"]');
   const rankingMenuButton = home.querySelector('[data-home-action="ranking"]');

@@ -6635,3 +6635,16 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-result-overlay[data-mode="summary"] .hp-gacha-result-instrument-art > small {
   font-size:7px;letter-spacing:.05em;
 }
+
+/* Feedback next to the sticky profile header Save button. */
+#hp-home-screen .hp-profile-top-save-status {
+  margin:4px 0 0;
+  max-width:100%;
+  color:#ffe4a3;
+  font:700 clamp(11px,1.4cqh,14px)/1.3 "Hiragino Sans","Yu Gothic",sans-serif;
+  letter-spacing:.02em;
+  overflow-wrap:anywhere;
+}
+#hp-home-screen .hp-profile-top-save-status[data-error="true"] {
+  color:#ffc2c2;
+}
