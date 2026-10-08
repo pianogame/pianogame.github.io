@@ -6956,3 +6956,57 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   animation-delay:var(--effect-delay);
 }
 
+
+/* Approved 4-tier sequence. Light texture is a real WebP, not CSS rays. */
+#hp-home-screen .hp-gacha-film-normal,
+#hp-home-screen .hp-gacha-film-gold,
+#hp-home-screen .hp-gacha-film-rainbow {
+  position:absolute;inset:0;background-position:center;background-size:cover;
+  opacity:0;transform:scale(1.035);pointer-events:none;
+  transition:opacity .42s ease,transform 2.1s ease;
+}
+#hp-home-screen .hp-gacha-film-normal {background-image:var(--gacha-film-normal-bg);opacity:1;}
+#hp-home-screen .hp-gacha-film-gold {background-image:var(--gacha-film-gold-bg);z-index:1;}
+#hp-home-screen .hp-gacha-film-rainbow {background-image:var(--gacha-film-rainbow-bg);z-index:2;}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-film-gold {opacity:1;transform:scale(1.07);}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-rainbow .hp-gacha-film-rainbow {opacity:1;transform:scale(1.07);}
+#hp-home-screen .hp-gacha-film-light {
+  position:absolute;inset:-32%;z-index:2;pointer-events:none;
+  background:url('/assets/gacha/visuals/normal-v1.webp') center/contain no-repeat;
+  mix-blend-mode:screen;opacity:0;transform:scale(.18);
+  transition:opacity .5s cubic-bezier(.2,.6,.2,1),transform 1.25s cubic-bezier(.12,.78,.18,1);
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-light .hp-gacha-film-light {opacity:.65;transform:scale(1.22);}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-gold .hp-gacha-film-light {opacity:.8;transform:scale(1.5);}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-rainbow .hp-gacha-film-light {opacity:.32;transform:scale(1.78);}
+#hp-home-screen .hp-gacha-film-result {
+  z-index:4;background-color:#10182b;opacity:0;visibility:hidden;
+  transition:opacity .3s ease,transform .7s ease,visibility 0s linear .3s;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-result .hp-gacha-film-result {
+  opacity:1;visibility:visible;transform:scale(1);
+  transition:opacity .3s ease,transform .7s ease;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-silhouette .hp-gacha-film-reward img {
+  opacity:1!important;filter:brightness(0) drop-shadow(0 16px 18px #0b1026);
+  transform:translateY(30px) scale(.82);animation:none!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-visible .hp-gacha-film-reward img {
+  opacity:1!important;filter:drop-shadow(0 10px 22px #01050dc9);
+  animation:hp-gacha-reward-materialize .5s cubic-bezier(.17,.83,.19,1) both;
+}
+#hp-home-screen .hp-gacha-animation-overlay[data-reveal-tier="instrument"].is-film-result:not(.is-film-labels) :is(.hp-gacha-film-head,.hp-gacha-film-footer) {opacity:0;visibility:hidden;}
+#hp-home-screen .hp-gacha-animation-overlay[data-reveal-tier="instrument"].is-film-labels :is(.hp-gacha-film-head,.hp-gacha-film-footer) {
+  opacity:1;visibility:visible;animation:hp-gacha-reward-materialize .45s ease both;
+}
+#hp-home-screen .hp-gacha-film-whiteout {
+  background:#fff;z-index:8;transition:opacity .12s ease,visibility 0s linear .12s;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-film-white .hp-gacha-film-whiteout {
+  opacity:1;visibility:visible;transition:opacity .12s ease;
+}
+@media(prefers-reduced-motion:reduce){
+  #hp-home-screen .hp-gacha-film-gold,#hp-home-screen .hp-gacha-film-light,
+  #hp-home-screen .hp-gacha-film-rainbow,#hp-home-screen .hp-gacha-film-result {transition:none!important;}
+  #hp-home-screen .hp-gacha-animation-overlay.is-film-visible .hp-gacha-film-reward img {animation:none!important;}
+}

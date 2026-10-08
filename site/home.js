@@ -2134,12 +2134,13 @@
   }
 
   function resetGachaAnimationClasses(overlay) {
-    if(overlay) delete overlay.dataset.revealRank;
+    if(overlay) { delete overlay.dataset.revealRank; delete overlay.dataset.revealTier; }
     overlay?.classList.remove(
       'is-playing','is-ten','is-special','is-awaiting-touch','is-revealing',
       'is-intro','is-draw-reveal','is-character-hit','is-item-hit','is-mandatory-special',
       'is-upgrading','is-upgrade-rainbow','is-instrument-hit',
-      'is-film-mode','is-film-rainbow','is-film-white','is-film-result'
+      'is-film-mode','is-film-light','is-film-gold','is-film-rainbow','is-film-white',
+      'is-film-silhouette','is-film-visible','is-film-labels','is-film-result'
     );
   }
 
@@ -2205,10 +2206,10 @@
   }
 
 
-  function gachaRevealRank(result) {
-    if (result?.kind === 'instrument' || (result?.kind === 'character' && result?.isNewCharacter)) return 'S';
-    if (result?.kind === 'character' || result?.isNewReward) return 'B';
-    return 'A';
+  function gachaRevealTier(result) {
+    if (result?.kind === 'instrument') return 'instrument';
+    if (result?.kind === 'character') return 'character';
+    return result?.isNewReward ? 'B' : 'A';
   }
   function gachaRewardImage(result) {
     if (result?.kind === 'instrument') return gachaInstrumentArtwork[result.instrumentId] || '';
@@ -2234,7 +2235,7 @@
     resetGachaAnimationClasses(overlay);
     gachaAnimationMode='reveal';
     gachaAnimationMandatory=mandatory;
-    const rank=gachaRevealRank(result);
+    const tier=gachaRevealTier(result);
     const image=gachaRewardImage(result);
     const categoryLabel={
       instrument:'NEW INSTRUMENT',character:'PIANIST',voice:'CHARACTER VOICE',
@@ -2246,54 +2247,74 @@
       ? (window.HP_INSTRUMENTS?.[result.instrumentId]?.name || result.name)
       : result?.name||'獲得アイテム';
     overlay.querySelector('[data-gacha-film-heading]').textContent='PIANO DREAM STAGE';
-    overlay.querySelector('[data-gacha-film-title]').textContent=rank==='S'?'ULTRA SPECIAL REWARD':rank==='B'?'RARE REWARD':'NEW REWARD';
-    overlay.querySelector('[data-gacha-film-rank]').textContent=rank==='S'?'S ・ SPECIAL':rank==='B'?'B ・ RARE':'A ・ NORMAL';
+    overlay.querySelector('[data-gacha-film-title]').textContent=
+      tier==='instrument'?'NEW INSTRUMENT':tier==='character'?'NEW PIANIST':tier==='B'?'GOLD REWARD':'REWARD';
+    overlay.querySelector('[data-gacha-film-rank]').textContent=
+      tier==='instrument'?'INSTRUMENT ・ SPECIAL':tier==='character'?'CHARACTER ・ RAINBOW':
+      tier==='B'?'B ・ GOLD':'A ・ NORMAL';
     overlay.querySelector('[data-gacha-film-name]').textContent=displayName;
     overlay.querySelector('[data-gacha-film-category]').textContent=categoryLabel;
     const img=overlay.querySelector('[data-gacha-film-image]');
     if (img) {
       img.hidden=!image;
+      img.onerror=()=>{if(img.getAttribute('src')!==gachaVisuals.ticket) img.src=gachaVisuals.ticket;else img.hidden=true;};
       if (image && img.getAttribute('src')!==image) img.src=image;
-      img.onerror=()=>{img.hidden=true;};
     }
-    overlay.dataset.revealRank=rank;
+    overlay.dataset.revealTier=tier;
+    overlay.dataset.revealRank=tier==='A'?'A':tier==='B'?'B':'S';
     overlay.style.setProperty('--gacha-film-normal-bg','url("/assets/gacha/backgrounds/moonlight-v1.webp")');
+    overlay.style.setProperty('--gacha-film-gold-bg','url("/assets/gacha/backgrounds/sunset-v1.webp")');
     overlay.style.setProperty('--gacha-film-rainbow-bg','url("/assets/gacha/backgrounds/rainbow-v1.webp")');
     overlay.style.setProperty('--gacha-film-result-bg','url("/assets/gacha/backgrounds/celestial-v1.webp")');
     overlay.hidden=false;
-    overlay.classList.add('is-playing','is-film-mode');
+    overlay.classList.add('is-playing','is-film-mode','is-film-light');
     overlay.classList.toggle('is-mandatory-special',mandatory);
     overlay.dataset.drawIndex=String(index+1);
     overlay.classList.toggle('is-ten',total===10);
 
-    playGachaFlourish(0,rank==='A'?1.4:2.2);
+    playGachaFlourish(0,tier==='A'?1.1:.85);
     playGachaTransitionTone(0);
-    if (rank!=='A') {
-      // Exactly 2.2 seconds from the start to rainbow.
+    // Every reward starts with a spreading light. Only new cosmetics go gold.
+    if (tier!=='A') {
+      scheduleGachaUpgrade(()=>{
+        overlay.classList.add('is-film-gold');
+        playGachaFlourish(0,tier==='B'?1.4:1.35);
+        playGachaTransitionTone(1);
+      },900);
+    }
+    // Characters (new and duplicate) and instruments turn rainbow at 2.2 s.
+    if (tier==='character' || tier==='instrument') {
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-rainbow');
-        playGachaFlourish(200,rank==='S'?1.6:0);
+        playGachaFlourish(200,1.35);
         playGachaTransitionTone(1);
       },2200);
     }
-    if (rank==='S') {
+    if (tier==='instrument') {
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-white');
         playGachaFlourish(400);
         playGachaTransitionTone(2,result?.instrumentId||'');
       },3500);
       scheduleGachaUpgrade(()=>{
-        overlay.classList.add('is-film-result');
+        overlay.classList.add('is-film-result','is-film-silhouette');
         overlay.classList.remove('is-film-white');
-        if (result?.kind==='character' && result.isNewCharacter) {
-          scheduleGachaUpgrade(()=>{void playGachaAcquisitionVoice(result);},500);
-        }
-      },3900);
+      },4000);
+      scheduleGachaUpgrade(()=>{
+        overlay.classList.add('is-film-visible');
+        overlay.classList.remove('is-film-silhouette');
+      },4500);
+      scheduleGachaUpgrade(()=>overlay.classList.add('is-film-labels'),5500);
     } else {
-      scheduleGachaUpgrade(()=>overlay.classList.add('is-film-result'),
-        rank==='B'?2950:850);
+      const at=tier==='A'?1000:tier==='B'?2300:3420;
+      scheduleGachaUpgrade(()=>{
+        overlay.classList.add('is-film-result','is-film-visible','is-film-labels');
+        if(tier==='character'&&result?.isNewCharacter){
+          scheduleGachaUpgrade(()=>{void playGachaAcquisitionVoice(result);},530);
+        }
+      },at);
     }
-    const duration=rank==='S'?6150:rank==='B'?4350:1750;
+    const duration=tier==='A'?1780:tier==='B'?3180:tier==='character'?4680:6650;
     return new Promise(resolve=>{
       gachaAnimationResolve=resolve;
       gachaAnimationTimer=setTimeout(()=>finishGachaAnimation('done'),duration);
