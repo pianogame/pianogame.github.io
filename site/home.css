@@ -6220,8 +6220,23 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   }
 }
 
+/* Effect preview instructions go below the full-width effect dropdown,
+   rather than reserving a third column that squeezes its selected value. */
+#hp-home-screen .hp-profile-effect-field {
+  grid-template-columns:112px minmax(0,1fr);
+  row-gap:6px;
+}
+#hp-home-screen .hp-profile-effect-field > select {
+  grid-column:2;
+  grid-row:1;
+  width:100%;
+}
 #hp-home-screen .hp-profile-effect-field > small {
-  max-width:240px;
+  grid-column:2;
+  grid-row:2;
+  width:100%;
+  min-width:0;
+  max-width:none;
   white-space:normal;
   line-height:1.35;
 }
