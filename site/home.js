@@ -2176,6 +2176,7 @@
     if (overlay) {
       resetGachaAnimationClasses(overlay);
       overlay.hidden = true;
+      overlay.setAttribute('aria-hidden','true');
     }
     const resolve = gachaAnimationResolve;
     gachaAnimationResolve = null;
@@ -2196,6 +2197,7 @@
     gachaAnimationMode='intro';
     gachaAnimationAwaitingTouch=false;
     overlay.hidden=false;
+    overlay.setAttribute('aria-hidden','false');
     overlay.classList.add('is-playing','is-cinema-intro','is-cinema-wide');
     overlay.classList.toggle('is-ten',count===10);
     // Hold the full piano, then move the camera into the keys.
@@ -2293,6 +2295,7 @@
     overlay.style.setProperty('--gacha-film-rainbow-bg','url("/assets/gacha/backgrounds/rainbow-v1.webp")');
     overlay.style.setProperty('--gacha-film-result-bg','url("/assets/gacha/backgrounds/celestial-v1.webp")');
     overlay.hidden=false;
+    overlay.setAttribute('aria-hidden','false');
     overlay.classList.add('is-playing','is-film-mode','is-film-light','is-cinema-card');
     overlay.classList.toggle('is-mandatory-special',mandatory);
     overlay.dataset.drawIndex=String(index+1);
@@ -2305,24 +2308,24 @@
         overlay.classList.add('is-film-gold');
         playGachaFlourish(0,1.35);
         playGachaTransitionTone(1);
-      },1280);
+      },900);
     }
     if(tier==='character'||tier==='instrument'){
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-rainbow');
         playGachaFlourish(200,1.4);
         playGachaTransitionTone(1);
-      },2700);
+      },2200);
     }
-    const duration=tier==='A'?1860:tier==='B'?3220:
-      tier==='character'?4550:6100;
+    const duration=tier==='A'?1700:tier==='B'?3250:
+      tier==='character'?4490:5200;
     if(tier==='instrument'){
       // The card stays visible as the entire stage flashes out.
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-white');
         playGachaFlourish(400);
         playGachaTransitionTone(2,result?.instrumentId||'');
-      },5200);
+      },4430);
     } else {
       // The result screen opens the instant the card is edge-on.
       scheduleGachaUpgrade(()=>overlay.classList.add('is-cinema-flip'),duration-340);
@@ -2514,7 +2517,19 @@
 
     grantGachaResults(results);
 
-    const resultAssetsReady = Promise.resolve();
+    // Preload only the current reward art while the piano intro plays;
+    // do not decode all 10-pull prize images at once.
+    const firstImage = gachaRewardImage(results[0]);
+    const resultAssetsReady = new Promise(resolve=>{
+      if(!firstImage){resolve();return;}
+      const image=new Image();
+      let done=false;
+      const finish=()=>{if(done)return;done=true;resolve();};
+      image.onload=finish;
+      image.onerror=finish;
+      image.src=firstImage;
+      setTimeout(finish,1700);
+    });
 
     gachaResultState = { results:[...results], index:0, summary:false, skipMode:false, seenNewSpecialIndexes:new Set() };
     gachaTrialState.history.unshift({
@@ -2551,6 +2566,12 @@
       mandatory: isGachaSkipStop(results[0])
     });
     if (firstStatus === 'done' && isGachaSkipStop(results[0])) markNewSpecialRevealSeen(0);
+    if(firstStatus === 'summary'){
+      await resultAssetsReady;
+      const stoppedOnSpecial = await revealNextPendingNewSpecial(-1);
+      if(!stoppedOnSpecial) showFinalGachaSummary();
+      return;
+    }
     await resultAssetsReady;
     gachaResultState.index = 0;
     gachaResultState.summary = false;

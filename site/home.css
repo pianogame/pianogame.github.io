@@ -7035,7 +7035,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   position:absolute;inset:-3%;background:
     linear-gradient(180deg,#03071633,#04070dcc 97%),
     url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78') center 58% / cover no-repeat,
-    url('/assets/gacha/backgrounds/sunset-v1.webp') center/cover no-repeat;
+    url('/assets/gacha/visuals/piano-v1.webp') center/cover no-repeat;
   filter:saturate(.9) contrast(1.08);
 }
 #hp-home-screen .hp-gacha-cinema-scene-shimmer {
