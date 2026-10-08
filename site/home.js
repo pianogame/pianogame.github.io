@@ -2157,13 +2157,12 @@
       ? (window.HP_INSTRUMENTS?.[result.instrumentId]?.name || result.name || '新しい楽器') : '';
     if (instrumentIcon) instrumentIcon.textContent=instrumentGlyphs[result?.instrumentId]||'♫';
 
-    // Wait for the ordinary flourish to actually play through before
-    // raising the pitch. On a cold cache, allow more than three seconds.
-    const trackMs=Math.round((gachaFlourishBuffer?.duration||0)*1000);
-    const normalStageMs=Math.max(3500,Math.min(6500,trackMs+260));
-    const rainbowStageMs=Math.max(2600,Math.min(5100,trackMs+180));
-    const instrumentStageMs=3200;
-    playGachaFlourish(0);
+    // Middle tempo: neither the original 950ms nor the previous 3500ms wait.
+    // Fade a long audio file across the upgrade rather than cut mid-note.
+    const normalStageMs=2400;
+    const rainbowStageMs=2050;
+    const instrumentStageMs=2550;
+    playGachaFlourish(0,isRainbow ? normalStageMs/1000 : 0);
     playGachaTransitionTone(0);
 
     if (isRainbow) {
@@ -2174,7 +2173,7 @@
         overlay.style.setProperty('--gacha-stage-bg','url("'+gachaVisuals.special+'")');
         if (label) label.textContent='虹色の旋律—— RAINBOW!';
         if (cardTitle) cardTitle.textContent=isCharacter?'CHARACTER':'RAINBOW';
-        playGachaFlourish(200);
+        playGachaFlourish(200,isInstrument ? rainbowStageMs/1000 : 0);
         playGachaTransitionTone(1);
         if (isCharacter && result?.isNewCharacter===true) {
           scheduleGachaUpgrade(() => {void playGachaAcquisitionVoice(result);},640);
@@ -2211,6 +2210,12 @@
     gachaResultState.seenNewSpecialIndexes.add(index);
   }
 
+  // New characters and ALL instrument drops (including duplicates) must
+  // stop a ten-pull skip. Use the same rule for selection and mandatory UI.
+  function isGachaSkipStop(result) {
+    return (result?.kind === 'character' && result?.isNewCharacter === true)
+      || result?.kind === 'instrument';
+  }
   function pendingNewSpecialIndexes() {
     if (!gachaResultState) return [];
     const seen = gachaResultState.seenNewSpecialIndexes instanceof Set
@@ -2218,11 +2223,7 @@
       : new Set();
     return gachaResultState.results
       .map((result,index) => ({ result,index }))
-      .filter(({result,index}) =>
-        ((result?.kind === 'character' && result?.isNewCharacter === true)
-        || (result?.kind === 'instrument' && result?.isNewReward === true))
-        && !seen.has(index)
-      )
+      .filter(({result,index}) => isGachaSkipStop(result) && !seen.has(index))
       .map(({index}) => index);
   }
 
@@ -2259,20 +2260,11 @@
     return true;
   }
 
-  function nextRainbowResultIndex(afterIndex = -1) {
-    if (!gachaResultState?.results?.length) return -1;
-    for (let index = Math.max(-1, afterIndex) + 1; index < gachaResultState.results.length; index++) {
-      const result = gachaResultState.results[index];
-      // Only a genuinely new character gets the rainbow reveal.
-      // Already-owned characters — including duplicates first obtained earlier
-      // in this same 10-pull — are kept for the final summary only.
-      if (result?.rarity === 'rainbow' && result?.isNewCharacter === true) return index;
-    }
-    return -1;
-  }
-
   function showFinalGachaSummary() {
     if (!gachaResultState?.results?.length) return;
+    clearGachaUpgradeTimers();
+    stopGachaFlourish();
+    stopGachaTransitionTones();
     const animationOverlay = home.querySelector('[data-gacha-animation-overlay]');
     const resultOverlay = home.querySelector('[data-gacha-result-overlay]');
     if (animationOverlay) {
@@ -2304,11 +2296,9 @@
       results[nextIndex],
       nextIndex,
       results.length,
-      { mandatory: results[nextIndex]?.isNewCharacter === true
-          || (results[nextIndex]?.kind === 'instrument' && results[nextIndex]?.isNewReward === true) }
+      { mandatory:isGachaSkipStop(results[nextIndex]) }
     );
-    if (status === 'done' && (results[nextIndex]?.isNewCharacter === true
-      || (results[nextIndex]?.kind === 'instrument' && results[nextIndex]?.isNewReward === true))) {
+    if (status === 'done' && isGachaSkipStop(results[nextIndex])) {
       markNewSpecialRevealSeen(nextIndex);
     }
     if (status === 'summary') {
@@ -2331,8 +2321,8 @@
     if (results.length <= 1) return;
 
     // Once SKIP is chosen for a ten-pull, keep that choice active after a
-    // mandatory rainbow stop. A tap on the rainbow result resumes skipping
-    // to the next unseen NEW character; if there is none, show the summary.
+    // After each mandatory stop, a tap advances to the next unseen NEW
+    // character or any instrument reward, then to the final summary.
     if (gachaResultState.skipMode === true) {
       gachaResultTransitioning = true;
       const stoppedOnNewCharacter = await revealNextPendingNewSpecial(index);
@@ -2456,11 +2446,9 @@
     // Ten-pull and single-pull both begin from result #1.
     // Ten-pull advances sequentially through all ten results unless the user explicitly presses SKIP.
     const firstStatus = await playGachaDrawReveal(results[0],0,results.length, {
-      mandatory: results[0]?.isNewCharacter === true
-       || (results[0]?.kind === 'instrument' && results[0]?.isNewReward === true)
+      mandatory: isGachaSkipStop(results[0])
     });
-    if (firstStatus === 'done' && (results[0]?.isNewCharacter === true
-      || (results[0]?.kind === 'instrument' && results[0]?.isNewReward === true))) markNewSpecialRevealSeen(0);
+    if (firstStatus === 'done' && isGachaSkipStop(results[0])) markNewSpecialRevealSeen(0);
     await resultAssetsReady;
     gachaResultState.index = 0;
     gachaResultState.summary = false;
