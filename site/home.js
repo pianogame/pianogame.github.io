@@ -444,18 +444,55 @@
       name:'スターライトノーツ・華やか',
       description:'光の帯・星粒・音符がカード全体をきらびやかに巡るエフェクト',
     },
+    moonPetals: { name:'月夜の花びら', description:'淡い青紫の光と花びらがプロフィールをそっと彩る',
+      image:'/assets/gacha/backgrounds/moonlight-v1.webp' },
+    auroraNotes: { name:'オーロラ・メロディ', description:'青緑と薄紫の音符がゆっくり漂う',
+      image:'/assets/gacha/backgrounds/rainbow-v1.webp' },
+    crystalSnow: { name:'氷晶のワルツ', description:'透き通る雪の結晶が控えめにきらめく',
+      image:'/assets/gacha/backgrounds/icepalace-v1.webp' },
+    rosePetals: { name:'薔薇色の余韻', description:'ローズゴールドの花びらが優雅に舞う',
+      image:'/assets/gacha/backgrounds/roseterrace-v1.webp' },
   });
   const pianoSkinCatalog = Object.freeze({
     default: { name:'標準・コンサートブラック' },
-    moonlightIvory: { name:'ムーンライト・アイボリー', description:'真珠のような白鍵と深い青黒鍵、銀色の縁取りを合わせた鍵盤スキン' },
+    moonlightIvory: { name:'ムーンライト・アイボリー', description:'真珠のような白鍵と深い青黒鍵、銀色の縁取りを合わせた鍵盤スキン',
+      image:'/assets/gacha/backgrounds/moonlight-v1.webp' },
+    roseQuartz: { name:'ローズクォーツ・ピアノ', description:'温かな象牙色とローズゴールドのフレーム',
+      image:'/assets/gacha/backgrounds/roseterrace-v1.webp' },
+    obsidianGold: { name:'オブシディアン・ゴールド', description:'深い漆黒と金属のように輝く金縁の鍵盤',
+      image:'/assets/gacha/backgrounds/celestial-v1.webp' },
+    auroraGlass: { name:'オーロラ・グラス', description:'冷たい透明感と青緑の虹彩をまとった鍵盤',
+      image:'/assets/gacha/backgrounds/rainbow-v1.webp' },
+    emeraldVelvet: { name:'エメラルド・ヴェルベット', description:'深緑のベルベットを思わせる鍵盤装飾',
+      image:'/assets/gacha/backgrounds/undersea-v1.webp' },
   });
   const touchEffectCatalog = Object.freeze({
     default: { name:'標準・ゴールドスパーク' },
-    crystalBloom: { name:'クリスタル・ブルーム', description:'鍵盤タッチから青紫の結晶光とリングが広がるエフェクト' },
+    crystalBloom: { name:'クリスタル・ブルーム', description:'鍵盤タッチから青紫の結晶光とリングが広がるエフェクト',
+      image:'/assets/gacha/backgrounds/icepalace-v1.webp' },
+    goldenArpeggio: { name:'ゴールデン・アルペジオ', description:'上品な黄金のきらめきが跳ねる',
+      image:'/assets/gacha/backgrounds/celestial-v1.webp' },
+    roseSparkle: { name:'ローズ・スパークル', description:'柔らかなピンクの花びらと光粒',
+      image:'/assets/gacha/backgrounds/roseterrace-v1.webp' },
+    auroraRipple: { name:'オーロラ・リップル', description:'青緑の波紋が鍵盤をそっと照らす',
+      image:'/assets/gacha/backgrounds/rainbow-v1.webp' },
+    snowCrystal: { name:'スノー・クリスタル', description:'雪の結晶のような澄んだ光が弾ける',
+      image:'/assets/gacha/backgrounds/icepalace-v1.webp' },
   });
   const pianoBackgroundCatalog = Object.freeze({
     default: { name:'標準・コンサートホール' },
-    moonlightHall: { name:'月明かりの幻想音楽堂', description:'青い月光と幻想的なホールを使ったピアノモード背景' },
+    moonlightHall: { name:'月明かりの幻想音楽堂', description:'青い月光と幻想的なホールを使ったピアノモード背景',
+      image:'/assets/gacha/backgrounds/moonlight-v1.webp' },
+    celestialHall: { name:'天空クリスタルステージ', description:'空に広がるクリスタルの宮殿',
+      image:'/assets/gacha/backgrounds/celestial-v1.webp' },
+    roseHall: { name:'薔薇の夕暮れホール', description:'夕暮れの薔薇庭園とピアノの舞台',
+      image:'/assets/gacha/backgrounds/roseterrace-v1.webp' },
+    auroraHall: { name:'虹色祝祭の音楽堂', description:'七色の光に包まれた演奏ステージ',
+      image:'/assets/gacha/backgrounds/rainbow-v1.webp' },
+    iceHall: { name:'氷晶宮殿の演奏台', description:'透き通る氷晶が静かに輝くホール',
+      image:'/assets/gacha/backgrounds/icepalace-v1.webp' },
+    neonHall: { name:'未来都市ネオンステージ', description:'光る都市を望む近未来の演奏台',
+      image:'/assets/gacha/backgrounds/neon-v1.webp' },
   });
   window.HP_GACHA_CUSTOMIZATION_CATALOG = Object.freeze({
     pianoSkins:pianoSkinCatalog,
@@ -644,6 +681,17 @@
     if (layer) {
       layer.dataset.effectId = id;
       layer.hidden = id === 'default';
+      const glyphs = {
+        moonPetals:['✿','❀','✧','•'],
+        auroraNotes:['♪','♫','✦','✧'],
+        crystalSnow:['❄','✧','✦','•'],
+        rosePetals:['❀','✿','✧','•'],
+      };
+      const chosen = glyphs[id];
+      layer.querySelectorAll('.hp-profile-effect-particle').forEach((particle,index) => {
+        const original = ['✦','♪','✧','♫','•'][index%5];
+        particle.textContent = chosen ? chosen[index%chosen.length] : original;
+      });
     }
   }
 
@@ -1423,36 +1471,37 @@
     ...Object.entries(profileEffectCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
       kind:'profileEffect', id:'profileEffect:' + id, customizationId:id,
       name:'プロフィール背景エフェクト「' + item.name + '」', reading:'PROFILE EFFECT',
-      description:item.description || 'プロフィール背景エフェクト',
+      description:item.description || 'プロフィール背景エフェクト', image:item.image,
     })),
     ...Object.entries(pianoSkinCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
       kind:'pianoSkin', id:'pianoSkin:' + id, customizationId:id,
       name:'鍵盤スキン「' + item.name + '」', reading:'PIANO KEY SKIN',
-      description:item.description || 'ピアノモード鍵盤スキン',
+      description:item.description || 'ピアノモード鍵盤スキン', image:item.image,
     })),
     ...Object.entries(touchEffectCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
       kind:'touchEffect', id:'touchEffect:' + id, customizationId:id,
       name:'タッチエフェクト「' + item.name + '」', reading:'TOUCH EFFECT',
-      description:item.description || 'ピアノモードタッチエフェクト',
+      description:item.description || 'ピアノモードタッチエフェクト', image:item.image,
     })),
     ...Object.entries(pianoBackgroundCatalog).filter(([id]) => id !== 'default').map(([id, item]) => ({
       kind:'pianoBackground', id:'pianoBackground:' + id, customizationId:id,
       name:'ピアノモード背景「' + item.name + '」', reading:'PIANO BACKGROUND',
-      description:item.description || 'ピアノモード背景',
+      description:item.description || 'ピアノモード背景', image:item.image,
     })),
   ];
 
   function gachaVoiceRewards() {
     return gachaPool().flatMap(character => {
       const set = registry?.voiceSet?.(character);
-      return (set?.entries || []).filter(entry => entry?.file).slice(0,3).map(entry => ({
+      return (set?.entries || []).filter(entry => entry?.file).slice(0,5).map(entry => ({
         kind:'voice',
         id:'voice:' + character.id + ':' + entry.file,
         voiceId:character.id + ':' + entry.file,
         characterId:character.id,
         voiceFile:entry.file,
-        name:character.name + ' ボイス',
+        name:character.name + ' ボイス「' + (entry.lines?.[0] || entry.file) + '」',
         reading:'VOICE',
+        image:character.listImage || character.previewImage || character.profileBackground,
         description:(entry.lines || []).join(' '),
       }));
     });
@@ -1652,10 +1701,11 @@
       card.appendChild(art);
     } else if (result?.kind === 'voice') {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
-      const art = document.createElement('div');
-      art.className = 'hp-gacha-result-voice-art';
-      art.setAttribute('aria-hidden','true');
-      art.innerHTML = '<span>♪</span><i>♫</i><b>♪</b>';
+      const art = document.createElement('img');
+      art.className = 'hp-gacha-result-item-art';
+      art.src = result?.image || gachaVisuals.ticket;
+      art.alt = '';
+      art.loading = compact ? 'lazy' : 'eager';
       card.appendChild(art);
     } else if (result?.kind === 'instrument') {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
@@ -1668,6 +1718,14 @@
       illustration.alt = '';
       illustration.loading = compact ? 'lazy' : 'eager';
       art.appendChild(illustration);
+      card.appendChild(art);
+    } else if (result?.image) {
+      card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
+      const art = document.createElement('img');
+      art.className = 'hp-gacha-result-item-art';
+      art.src = result.image;
+      art.alt = '';
+      art.loading = compact ? 'lazy' : 'eager';
       card.appendChild(art);
     } else if (result?.kind === 'profileEffect') {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');

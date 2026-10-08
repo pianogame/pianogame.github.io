@@ -296,25 +296,15 @@
   async function warmGachaAssets() {
     if (warmedGachaAssets) return;
     warmedGachaAssets = true;
+    // Only load shared animation scenery on Gacha entry. Loading all
+    // background/frame rewards here delayed HOME and mobile draws.
     const common = [
       '/assets/gacha/visuals/piano-v1.webp',
-      '/assets/gacha/visuals/result-normal-v2.webp?v=21',
-      '/assets/gacha/visuals/result-character-v2.webp?v=21',
-      '/assets/gacha/visuals/ticket-v1.webp',
+      '/assets/gacha/backgrounds/moonlight-v1.webp',
+      '/assets/gacha/backgrounds/rainbow-v1.webp',
+      '/assets/gacha/backgrounds/celestial-v1.webp',
     ];
     await Promise.all(common.map(src => preloadImage(src, 'high')));
-    const rewards = [
-      ...Object.values(backgroundImages).filter(src => src.includes('/assets/gacha/')),
-      ...Object.values(frameImages),
-    ];
-    let cursor = 0;
-    const workers = Array.from({ length:4 }, async () => {
-      while (cursor < rewards.length) {
-        const src = rewards[cursor++];
-        await preloadImage(src, 'low');
-      }
-    });
-    await Promise.all(workers);
   }
 
   home.querySelector('[data-home-action="gacha"]')?.addEventListener('click', () => {

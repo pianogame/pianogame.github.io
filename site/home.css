@@ -6913,3 +6913,46 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-film-whiteout {transition:none;}
   #hp-home-screen .hp-gacha-animation-overlay.is-film-result .hp-gacha-film-reward img {animation:none;}
 }
+
+/* Additional profile effects — use the same 18 lightweight DOM particles. */
+
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="moonPetals"] {
+  background:radial-gradient(ellipse at 14% 24%,#d5c3ef2f,transparent 38%),
+             radial-gradient(ellipse at 86% 77%,#c19aeb26,transparent 36%);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="moonPetals"] .hp-profile-effect-particle {
+  color:#d5c3efa6;font-size:clamp(11px,1.4cqw,19px);text-shadow:0 0 6px #ebdfef,0 0 12px #c19aeb8c;
+  animation:hp-profile-particle-elegant 6.5s ease-in-out infinite;
+  animation-delay:var(--effect-delay);
+}
+
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="auroraNotes"] {
+  background:radial-gradient(ellipse at 14% 24%,#84e5ce2f,transparent 38%),
+             radial-gradient(ellipse at 86% 77%,#b7b1f626,transparent 36%);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="auroraNotes"] .hp-profile-effect-particle {
+  color:#84e5cea6;font-size:clamp(11px,1.4cqw,19px);text-shadow:0 0 6px #b2d9ff,0 0 12px #b7b1f68c;
+  animation:hp-profile-particle-elegant 5.2s ease-in-out infinite;
+  animation-delay:var(--effect-delay);
+}
+
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="crystalSnow"] {
+  background:radial-gradient(ellipse at 14% 24%,#e8faff2f,transparent 38%),
+             radial-gradient(ellipse at 86% 77%,#f8fdff26,transparent 36%);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="crystalSnow"] .hp-profile-effect-particle {
+  color:#e8faffa6;font-size:clamp(11px,1.4cqw,19px);text-shadow:0 0 6px #afe0fe,0 0 12px #f8fdff8c;
+  animation:hp-profile-particle-elegant 7.6s ease-in-out infinite;
+  animation-delay:var(--effect-delay);
+}
+
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="rosePetals"] {
+  background:radial-gradient(ellipse at 14% 24%,#ffbdd12f,transparent 38%),
+             radial-gradient(ellipse at 86% 77%,#ea9eb826,transparent 36%);
+}
+#hp-home-screen .hp-profile-effect-layer[data-effect-id="rosePetals"] .hp-profile-effect-particle {
+  color:#ffbdd1a6;font-size:clamp(11px,1.4cqw,19px);text-shadow:0 0 6px #ffdfcf,0 0 12px #ea9eb88c;
+  animation:hp-profile-particle-elegant 6.3s ease-in-out infinite;
+  animation-delay:var(--effect-delay);
+}
+
