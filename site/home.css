@@ -6525,9 +6525,13 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   justify-content:center;
   white-space:nowrap;
 }
-/* The header action is now the single visible save action. */
+/* Keep the header save and restore a second submit action at the bottom,
+   immediately to the left of the existing Settings back button. */
 #hp-home-screen .hp-player-profile-actions .hp-player-profile-save {
-  display:none !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
 }
 /* No longer reserve preview-card space for the removed save button. */
 #hp-home-screen .hp-player-profile-summary {
