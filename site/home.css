@@ -7034,7 +7034,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-cinema-piano-stage {
   position:absolute;inset:-3%;background:
     linear-gradient(180deg,#03071633,#04070dcc 97%),
-    url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78') center 58% / cover no-repeat,
+    url('/assets/gacha/visuals/piano-hall-reference-v1.webp') center 58% / cover no-repeat,
     url('/assets/gacha/visuals/piano-v1.webp') center/cover no-repeat;
   filter:saturate(.9) contrast(1.08);
 }
@@ -7108,7 +7108,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   display:block;background:#040716;
 }
 #hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-normal {
-  background-image:linear-gradient(#05081677,#050816af),url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78');
+  background-image:linear-gradient(#05081677,#050816af),url('/assets/gacha/visuals/piano-hall-reference-v1.webp');
   opacity:1!important;filter:contrast(1.05) saturate(.85);background-size:cover;background-position:center;
 }
 #hp-home-screen .hp-gacha-animation-overlay.is-cinema-card :is(.hp-gacha-film-gold,.hp-gacha-film-rainbow,.hp-gacha-film-light,.hp-gacha-film-result) {display:none!important;}
@@ -7186,7 +7186,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-animation-overlay.is-cinema-card.is-mandatory-special .hp-gacha-animation-skip {display:none!important;}
 /* Full result redesign: a coherent concert-stage prize presentation. */
 #hp-home-screen .hp-gacha-result-overlay {
-  background:#050819 url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78') center/cover no-repeat!important;
+  background:#050819 url('/assets/gacha/visuals/piano-hall-reference-v1.webp') center/cover no-repeat!important;
 }
 #hp-home-screen .hp-gacha-result-overlay::before {
   content:"";position:absolute;inset:0;background:linear-gradient(90deg,#040815ef,#101c3bb5 45%,#05091bf0);pointer-events:none;
@@ -7266,7 +7266,7 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-cinema-piano-stage {
   background:#070b15;
   background-image:linear-gradient(180deg,rgba(3,5,11,.14),rgba(4,7,18,.3)),
-    url('https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1600&q=85');
+    url('/assets/gacha/visuals/piano-hall-reference-v1.webp');
   background-position:center,center 57%;
   background-size:cover;
   filter:brightness(.9) contrast(1.08) saturate(.9);
@@ -7409,4 +7409,16 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   #hp-home-screen .hp-gacha-card-sparkles i{animation:none!important}
   #hp-home-screen .hp-gacha-card-gold-engraving,
   #hp-home-screen .hp-gacha-card-rainbow-engraving{transition:none!important}
+}
+
+/* Intro now uses the exact supplied dark concert grand piano, not the blue studio. */
+#hp-home-screen .hp-gacha-cinema-piano-stage {
+background:#050815!important;
+background-image:linear-gradient(180deg,#01030807,#01030811),url('/assets/gacha/visuals/piano-hall-reference-v1.webp')!important;
+background-size:cover,cover!important;
+background-position:center,center!important;
+filter:contrast(1.07) saturate(1.03)!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-normal {
+background:#040915!important;background-image:none!important;
 }

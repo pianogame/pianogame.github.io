@@ -305,7 +305,7 @@
       '/assets/gacha/backgrounds/celestial-v1.webp',
       '/assets/gacha/visuals/normal-v1.webp',
       '/assets/gacha/visuals/special-v1.webp',
-      'https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1440&q=78',
+      '/assets/gacha/visuals/piano-hall-reference-v1.webp',
       'https://images.unsplash.com/photo-1765900817185-099bd262b814?auto=format&fit=crop&w=1400&q=78',
     ];
     await Promise.all(common.map(src => preloadImage(src, 'high')));
