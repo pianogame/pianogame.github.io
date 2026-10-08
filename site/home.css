@@ -6640,11 +6640,11 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-profile-top-save-status {
   margin:4px 0 0;
   max-width:100%;
-  color:#ffe4a3;
+  color:#87672f;
   font:700 clamp(11px,1.4cqh,14px)/1.3 "Hiragino Sans","Yu Gothic",sans-serif;
   letter-spacing:.02em;
   overflow-wrap:anywhere;
 }
 #hp-home-screen .hp-profile-top-save-status[data-error="true"] {
-  color:#ffc2c2;
+  color:#a43039;
 }
