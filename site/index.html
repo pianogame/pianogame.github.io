@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-         .register('/sw.js?v=114', { scope: '/', updateViaCache: 'none' })
+         .register('/sw.js?v=115', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -61,7 +61,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
   <link rel="preload" as="image" href="/assets/gacha/visuals/result-normal-v2.webp?v=21">
   <link rel="preload" as="image" href="/assets/gacha/visuals/result-character-v2.webp?v=21">
-  <link rel="stylesheet" href="/home.css?v=20261008-gacha-odds-pity-v36">
+  <link rel="stylesheet" href="/home.css?v=20261008-film-v37">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -79,7 +79,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261008-gacha-odds-pity-v44"></script>
+  <script defer src="/home.js?v=20261008-film-v45"></script>
   <script defer src="/piano-gacha-customization.js?v=2"></script>
   <script defer src="/gacha-profile-ui.js?v=20261007-frame-preview-v24"></script>
   <script defer src="/profile-frame-preview.js?v=20261007-frame-only-v2"></script>
@@ -505,7 +505,6 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     <div class="hp-gacha-animation-flash" aria-hidden="true"></div>
     <div class="hp-gacha-instrument-finale" aria-hidden="true">
       <div class="hp-gacha-instrument-halo"></div>
-      <div class="hp-gacha-instrument-rays"></div>
       <div class="hp-gacha-instrument-badge">
         <small>ULTRA SPECIAL REWARD</small>
         <strong data-gacha-instrument-glyph>♫</strong>
@@ -513,6 +512,26 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
       </div>
       <div class="hp-gacha-instrument-name" data-gacha-instrument-name></div>
       <div class="hp-gacha-instrument-meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="hp-gacha-film" aria-hidden="true">
+      <div class="hp-gacha-film-normal"></div>
+      <div class="hp-gacha-film-rainbow"></div>
+      <div class="hp-gacha-film-result">
+        <div class="hp-gacha-film-darkener"></div>
+        <div class="hp-gacha-film-head">
+          <small data-gacha-film-heading>PIANO DREAM STAGE</small>
+          <strong data-gacha-film-title>NEW REWARD</strong>
+        </div>
+        <div class="hp-gacha-film-reward">
+          <img data-gacha-film-image alt="" decoding="async">
+        </div>
+        <div class="hp-gacha-film-footer">
+          <span data-gacha-film-rank>REWARD</span>
+          <strong data-gacha-film-name></strong>
+          <small data-gacha-film-category></small>
+        </div>
+      </div>
+      <div class="hp-gacha-film-whiteout"></div>
     </div>
     <button type="button" class="hp-gacha-animation-skip" data-gacha-animation-skip>SKIP</button>
   </div>
