@@ -6636,13 +6636,19 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
   font-size:7px;letter-spacing:.05em;
 }
 
-/* Feedback next to the sticky profile header Save button. */
+/* Match the bottom profile-save feedback: identical text, size, color,
+   alignment and type. Full width prevents long item names being clipped. */
 #hp-home-screen .hp-profile-top-save-status {
-  margin:4px 0 0;
+  margin:0 0 12px;
+  width:100%;
   max-width:100%;
+  min-height:18px;
   color:#87672f;
-  font:700 clamp(11px,1.4cqh,14px)/1.3 "Hiragino Sans","Yu Gothic",sans-serif;
-  letter-spacing:.02em;
+  font-size:11px;
+  font-weight:400;
+  line-height:1.5;
+  letter-spacing:normal;
+  text-align:right;
   overflow-wrap:anywhere;
 }
 #hp-home-screen .hp-profile-top-save-status[data-error="true"] {

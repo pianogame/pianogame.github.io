@@ -799,11 +799,11 @@
     dialogOverlay.dataset.screen = action;
     if (action === 'settings') renderGlobalCharacterCredits();
     if (action === 'notice') renderNoticePage(0);
+    setProfileTopStatus();
     if (action === 'profile') {
       profileImageDraft = playerProfile.image || '';
       syncPlayerProfileUI();
       if (profileStatus) profileStatus.textContent = '';
-      setProfileTopStatus();
     }
     syncHomeVolume();
     canvas.inert = true;
@@ -911,9 +911,10 @@
       const bgName = homeBackgroundCatalog[playerProfile.homeBackground]?.name || homeBackgroundCatalog.default.name;
       const frameName = profileFrameCatalog[playerProfile.frame]?.name || profileFrameCatalog.default.name;
       const effectName = profileEffectCatalog[playerProfile.profileEffect]?.name || profileEffectCatalog.default.name;
-      profileStatus.textContent = '保存しました｜背景：' + bgName + '／フレーム：' + frameName + '／エフェクト：' + effectName;
+      const savedMessage = '保存しました｜背景：' + bgName + '／フレーム：' + frameName + '／エフェクト：' + effectName;
+      profileStatus.textContent = savedMessage;
+      setProfileTopStatus(savedMessage);
     }
-    setProfileTopStatus('保存しました');
   });
   const missionMenuButton = home.querySelector('[data-home-action="missions"]');
   const rankingMenuButton = home.querySelector('[data-home-action="ranking"]');
