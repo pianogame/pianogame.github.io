@@ -399,19 +399,7 @@
     location.hostname.includes('git-staging-')
     || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
 
-  // Staging QA continues to reset provisional cosmetics and draw history,
-  // but earned instrument unlocks persist so the piano mode remains usable.
-  if (gachaTrialEnabled) {
-    try {
-      const previous = JSON.parse(localStorage.getItem(gachaInventoryKey) || 'null');
-      const allowed = new Set(['finalChip8','finalKoto','finalTrumpet','finalPipeOrgan','finalVibraphone']);
-      const instruments = Array.isArray(previous?.instruments)
-        ? previous.instruments.filter(id => allowed.has(id)) : [];
-      localStorage.removeItem(gachaInventoryKey);
-      localStorage.setItem(gachaInventoryKey, JSON.stringify({ instruments }));
-      localStorage.removeItem(gachaTrialKey);
-    } catch (_) {}
-  }
+  // Staging keeps gacha inventory and pity across reloads.
 
   const homeBackgroundCatalog = Object.freeze({
     default: { name:'標準ホーム', image:defaultHomeBackground },
@@ -1376,26 +1364,36 @@
   const gachaTrialTicketCap = 9999;
   const gachaVisuals = {
     piano: '/assets/gacha/visuals/piano-v1.webp',
-    normal: '/assets/gacha/visuals/result-normal-v2.webp?v=21',
-    special: '/assets/gacha/visuals/result-character-v2.webp?v=21',
+    normal: '/assets/gacha/visuals/normal-v1.webp',
+    special: '/assets/gacha/visuals/special-v1.webp',
     ticket: '/assets/gacha/visuals/ticket-v1.webp',
   };
   let gachaDrawing = false;
 
+
+  const gachaCategoryOdds = Object.freeze([
+    ['instrument',5],['character',10],['voice',50],['background',180],
+    ['frame',180],['profileEffect',155],['pianoSkin',140],
+    ['touchEffect',145],['pianoBackground',135],
+  ]); // integer weights out of 1000
+  const gachaPityLimits = Object.freeze({special:50,instrument:80,character:80});
+  function sanitizeGachaPity(input) {
+    const pity={};
+    for (const [key,limit] of Object.entries(gachaPityLimits)) {
+      const n=Number(input?.[key]);
+      pity[key]=Number.isFinite(n)&&n>=0?Math.min(limit,Math.floor(n)):0;
+    }
+    return pity;
+  }
   function loadGachaTrialState() {
     try {
-      const saved = JSON.parse(localStorage.getItem(gachaTrialKey) || 'null');
-      return saved && typeof saved === 'object'
-        ? { history:Array.isArray(saved.history) ? saved.history.slice(0,100) : [] }
-        : { history:[] };
-    } catch (_) {
-      return { history:[] };
-    }
+      const s=JSON.parse(localStorage.getItem(gachaTrialKey)||'null');
+      return {history:Array.isArray(s?.history)?s.history.slice(0,100):[],pity:sanitizeGachaPity(s?.pity)};
+    } catch (_) {return {history:[],pity:sanitizeGachaPity(null)};}
   }
-  let gachaTrialState = loadGachaTrialState();
-
+  let gachaTrialState=loadGachaTrialState();
   function saveGachaTrialState() {
-    try { localStorage.setItem(gachaTrialKey, JSON.stringify(gachaTrialState)); } catch (_) {}
+    try {localStorage.setItem(gachaTrialKey,JSON.stringify(gachaTrialState));} catch (_) {}
   }
 
   function gachaPool() {
@@ -1557,25 +1555,53 @@
     };
   }
 
-  function drawTrialResult(options = {}) {
-    const pool = gachaPool();
-    const forceCharacter = !!options.forceCharacter;
-    const forceItem = !!options.forceItem;
-    if (!pool.length) return null;
-    if (forceItem) {
-      const trialEffect = gachaTrialItems.find(item =>
-        item.kind === 'profileEffect'
-        && item.customizationId
-        && !gachaInventory.profileEffects.includes(item.customizationId)
-      );
-      if (trialEffect) return { ...trialEffect };
+
+  function gachaRewardPools() {
+    const items=[...gachaTrialItems,...gachaVoiceRewards()], pools={};
+    for (const [kind] of gachaCategoryOdds) {
+      pools[kind]=kind==='character'
+        ? gachaPool().map(makeCharacterResult) : items.filter(item=>item.kind===kind);
     }
-    if (!forceItem && (forceCharacter || Math.random() < .34)) {
-      return makeCharacterResult(pool[Math.floor(Math.random() * pool.length)]);
+    return pools;
+  }
+  function ownedGachaRewardIds() {
+    const owned=new Set();
+    const fields={instrument:'instruments',character:'characters',voice:'voices',
+      background:'backgrounds',frame:'frames',profileEffect:'profileEffects',
+      pianoSkin:'pianoSkins',touchEffect:'touchEffects',pianoBackground:'pianoBackgrounds'};
+    for (const [kind,field] of Object.entries(fields)) {
+      for (const id of gachaInventory[field]||[]) owned.add(kind+':'+id);
     }
-    const rewards = [...gachaTrialItems, ...gachaVoiceRewards()];
-    const item = rewards[Math.floor(Math.random() * rewards.length)] || gachaTrialItems[0];
-    return { ...item };
+    return owned;
+  }
+  function drawTrialResult(pools,seen,pity) {
+    const active=gachaCategoryOdds.filter(([kind])=>pools[kind]?.length);
+    if (!active.length) return null;
+    let kind='',guaranteed=false;
+    // A simultaneous 80/80 collision is satisfied in two consecutive draws.
+    if (pity.instrument>=79 && pools.instrument?.length) kind='instrument';
+    else if (pity.character>=79 && pools.character?.length) kind='character';
+    else if (pity.special>=49) {
+      const special=active.filter(([kind])=>kind==='instrument'||kind==='character');
+      if (special.length) {
+        let n=Math.random()*special.reduce((sum,[,w])=>sum+w,0);
+        kind=special.find(([,w])=>(n-=w)<0)?.[0]||special[special.length-1][0];
+      }
+    }
+    if (kind) guaranteed=true;
+    else {
+      let n=Math.random()*active.reduce((sum,[,w])=>sum+w,0);
+      kind=active.find(([,w])=>(n-=w)<0)?.[0]||active[active.length-1][0];
+    }
+    const available=pools[kind];
+    const notOwned=guaranteed?available.filter(item=>!seen.has(item.id)):[];
+    const candidates=notOwned.length?notOwned:available;
+    const result={...candidates[Math.floor(Math.random()*candidates.length)],gachaGuarantee:guaranteed};
+    seen.add(result.id);
+    pity.special=kind==='instrument'||kind==='character'?0:Math.min(50,pity.special+1);
+    pity.instrument=kind==='instrument'?0:Math.min(80,pity.instrument+1);
+    pity.character=kind==='character'?0:Math.min(80,pity.character+1);
+    return result;
   }
 
   let gachaResultState = null;
@@ -2053,6 +2079,7 @@
   }
 
   function resetGachaAnimationClasses(overlay) {
+    if(overlay) delete overlay.dataset.revealRank;
     overlay?.classList.remove(
       'is-playing','is-ten','is-special','is-awaiting-touch','is-revealing',
       'is-intro','is-draw-reveal','is-character-hit','is-item-hit','is-mandatory-special',
@@ -2137,7 +2164,10 @@
 
     const isCharacter=result?.kind==='character';
     const isInstrument=result?.kind==='instrument';
-    const isRainbow=result?.rarity==='rainbow'||isCharacter||isInstrument;
+    const rank=isInstrument||(isCharacter&&result?.isNewCharacter)?'S'
+      :isCharacter||result?.isNewReward?'B':'A';
+    const isRainbow=rank!=='A';
+    overlay.dataset.revealRank=rank;
     const label=overlay.querySelector('[data-gacha-animation-label]');
     const cardTitle=overlay.querySelector('.hp-gacha-reveal-card b');
     const cardEmblem=overlay.querySelector('.hp-gacha-reveal-emblem');
@@ -2159,7 +2189,7 @@
 
     // Middle tempo: neither the original 950ms nor the previous 3500ms wait.
     // Fade a long audio file across the upgrade rather than cut mid-note.
-    const normalStageMs=2400;
+    const normalStageMs=2200;
     const rainbowStageMs=2050;
     const instrumentStageMs=2550;
     playGachaFlourish(0,isRainbow ? normalStageMs/1000 : 0);
@@ -2366,39 +2396,15 @@
     saveMissionState();
     renderGachaScreen();
 
-    let results = Array.from({length:cost}, (_,index) =>
-      drawTrialResult({
-        forceItem: cost === 10 && index === 0,
-      })
-    ).filter(Boolean);
 
-    // Staging QA: guarantee new customization previews and one earned
-    // instrument per 10-pull so each approved instrument can be tested.
-    if (cost === 10 && results.length >= 5) {
-      const qaRewards = [
-        ...gachaTrialItems.filter(item => item.kind === 'profileEffect').slice(0,2),
-        gachaTrialItems.find(item => item.kind === 'pianoSkin'),
-        gachaTrialItems.find(item => item.kind === 'touchEffect'),
-        gachaTrialItems.find(item => item.kind === 'pianoBackground'),
-      ].filter(Boolean);
-      qaRewards.forEach((item, index) => {
-        if (index < results.length) results[index] = { ...item };
-      });
-      const newInstrument = gachaInstrumentRewards.find(item =>
-        !gachaInventory.instruments.includes(item.instrumentId));
-      const instrumentReward = newInstrument || gachaInstrumentRewards[Math.floor(Math.random()*gachaInstrumentRewards.length)];
-      if (instrumentReward && results.length > 5) results[5] = { ...instrumentReward };
+    const pools=gachaRewardPools(), seen=ownedGachaRewardIds();
+    const pity=sanitizeGachaPity(gachaTrialState.pity);
+    let results=[];
+    for (let i=0;i<cost;i++) {
+      const reward=drawTrialResult(pools,seen,pity);
+      if (reward) results.push(reward);
     }
-
-    // Staging QA: a 10-pull always contains at least one rainbow character,
-    // but its position is random so post-rainbow skip behavior can actually be tested.
-    if (cost === 10 && !results.some(result => result?.rarity === 'rainbow')) {
-      const pool = gachaPool();
-      const character = pool[Math.floor(Math.random() * pool.length)];
-      const qaReserved = cost === 10 ? Math.min(6, Math.max(0, results.length - 1)) : 1;
-      const rainbowIndex = qaReserved + Math.floor(Math.random() * Math.max(1, results.length - qaReserved));
-      if (character && results.length) results[Math.min(rainbowIndex, results.length - 1)] = makeCharacterResult(character);
-    }
+    gachaTrialState.pity=pity;
 
     results = annotateGachaOwnership(results).map(result => ({
       ...result,
@@ -2501,7 +2507,13 @@
     });
     const note = home.querySelector('[data-gacha-note]');
     if (note && gachaTrialEnabled && !gachaDrawing) {
-      note.textContent = 'staging限定｜新しい楽器は獲得後ピアノモードで使用可能（再読み込み後も所持）。背景・フレーム・ボイスなど試作アイテムは再読み込みでリセット。10連で未獲得楽器を1つ確認できます。';
+
+      const pity=sanitizeGachaPity(gachaTrialState.pity);
+      note.textContent='ステージング検証用｜S確定まであと'+Math.max(0,50-pity.special)
+        +'回 / 楽器確定まであと'+Math.max(0,80-pity.instrument)
+        +'回 / キャラ確定まであと'+Math.max(0,80-pity.character)+'回。';
+      const status=home.querySelector('[data-gacha-pity-status]');
+      if(status) status.textContent='S '+pity.special+'/50 ・ 楽器 '+pity.instrument+'/80 ・ キャラ '+pity.character+'/80';
     }
   }
 

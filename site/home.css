@@ -6855,3 +6855,9 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
     animation:none;
   }
 }
+
+/* Staging: probability disclosure and persistent pity. */
+#hp-home-screen .hp-gacha-rates {max-width:900px;margin:12px auto 20px;padding:10px 16px;background:#13182fee;color:#f8f1dc;border:1px solid #dfc58b81;border-radius:12px;}
+#hp-home-screen .hp-gacha-rates summary {cursor:pointer;font-weight:700;line-height:1.8;}
+#hp-home-screen .hp-gacha-rates summary span {font-size:.8em;color:#fae1a8;margin-left:8px;}
+#hp-home-screen .hp-gacha-rates p {font-size:12px;line-height:1.8;margin:10px 0 0;}

@@ -38,7 +38,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
-         .register('/sw.js?v=113', { scope: '/', updateViaCache: 'none' })
+         .register('/sw.js?v=114', { scope: '/', updateViaCache: 'none' })
           .then(async (registration) => {
             const activate = (worker) => worker?.postMessage({ type: 'SKIP_WAITING' });
             if (registration.waiting) activate(registration.waiting);
@@ -61,7 +61,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <link rel="preload" as="image" href="/assets/piano/footer-v4.webp">
   <link rel="preload" as="image" href="/assets/gacha/visuals/result-normal-v2.webp?v=21">
   <link rel="preload" as="image" href="/assets/gacha/visuals/result-character-v2.webp?v=21">
-  <link rel="stylesheet" href="/home.css?v=20261008-gacha-delayed-finale-v35">
+  <link rel="stylesheet" href="/home.css?v=20261008-gacha-odds-pity-v36">
   <link rel="stylesheet" href="/piano.css?v=4">
   <link rel="stylesheet" href="/landscape.css?v=15">
   <script src="/orientation.js?v=13"></script>
@@ -79,7 +79,7 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
   <script defer src="/character-settings.js?v=2"></script>
   <script defer src="/character-lipsync.js?v=1"></script>
   <script defer src="/motion-character.js?v=20261004-character4"></script>
-  <script defer src="/home.js?v=20261008-gacha-tempo-skip-v43"></script>
+  <script defer src="/home.js?v=20261008-gacha-odds-pity-v44"></script>
   <script defer src="/piano-gacha-customization.js?v=2"></script>
   <script defer src="/gacha-profile-ui.js?v=20261007-frame-preview-v24"></script>
   <script defer src="/profile-frame-preview.js?v=20261007-frame-only-v2"></script>
@@ -448,7 +448,13 @@ html.hp-opening-curtain-bg body{background:repeating-linear-gradient(90deg,#3b0d
         <button type="button" data-gacha-pull="1" disabled><span>1回ガチャ</span><small>ガチャチケット × 1</small><b data-gacha-button-state>準備中</b></button>
         <button type="button" data-gacha-pull="10" disabled><span>10回ガチャ</span><small>ガチャチケット × 10</small><b data-gacha-button-state>準備中</b></button>
       </div>
-      <p class="hp-gacha-note" data-gacha-note>staging限定の試作ガチャです。獲得結果は正式なキャラクター所持状況には反映しません。</p>
+
+      <p class="hp-gacha-note" data-gacha-note>ステージング検証用ガチャです。</p>
+      <details class="hp-gacha-rates">
+        <summary>排出確率・天井の詳細 <span data-gacha-pity-status></span></summary>
+        <p>楽器 0.5% / キャラクター 1% / ボイス 5% / ホーム背景 18% / フレーム 18% / 背景エフェクト 15.5% / 鍵盤スキン 14% / タッチエフェクト 14.5% / ピアノモード背景 13.5%</p>
+        <p>S（楽器またはキャラ）は50回以内、楽器とキャラはそれぞれ80回以内に確定。天井での獲得は未所持を優先。単発・10連共通で、重複も排出されます。</p>
+      </details>
     </section>
   </div>
   <div class="hp-gacha-animation-overlay" data-gacha-animation-overlay hidden aria-hidden="true">
