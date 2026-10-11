@@ -1892,7 +1892,7 @@
     if (gachaTransitionGraph?.context === bridge.context) return gachaTransitionGraph;
     try {
       const master = bridge.context.createGain();
-      master.gain.value = .66;
+      master.gain.value = .42;
       window.HP_SOUND_SETTINGS?.bind?.('effects',master);
       master.connect(bridge.output);
       gachaTransitionGraph = {context:bridge.context,master};
@@ -1907,52 +1907,47 @@
     }
     gachaTransitionVoices.clear();
   }
-  // Stable ascending C-D-E cue even when the streamed orchestral file
-  // is still decoding on iOS. The final cue borrows the awarded instrument's
-  // timbre, making the third stage an audible reward instead of just a tint.
+  // Gentle piano-like reward cue: soft struck overtones, not a second orchestral
+  // sample over the card reveal. All notes use the application's effects mute.
   function playGachaTransitionTone(level, instrumentId = '') {
     const graph = ensureGachaTransitionGraph();
     if (!graph) return;
     try {
       void window.HP_AUDIO_BRIDGE?.resume?.()?.catch(() => {});
       stopGachaTransitionTones();
-      const ctx = graph.context, now=ctx.currentTime;
-      const base=[523.25,587.33,659.25][Math.min(2,Math.max(0,level))];
-      const instrumentStyles = {
-        finalChip8:{wave:'square',length:.22,cutoff:6800,gain:.07},
-        finalKoto:{wave:'triangle',length:.45,cutoff:2800,gain:.12},
-        finalTrumpet:{wave:'sawtooth',length:.48,cutoff:1500,gain:.11},
-        finalPipeOrgan:{wave:'sine',length:.66,cutoff:2300,gain:.18},
-        finalVibraphone:{wave:'sine',length:.9,cutoff:6000,gain:.16}
-      };
-      const style = instrumentStyles[instrumentId] || {wave:'sine',length:.4,cutoff:5000,gain:.13};
-      const notes = level===2 ? [1,1.259921,1.498307] : [1];
-      notes.forEach((ratio,index) => {
-        const t=now + (level===2 ? index*.2 : 0);
-        const osc=ctx.createOscillator();
-        const gain=ctx.createGain();
-        const filter=ctx.createBiquadFilter();
-        filter.type='lowpass';
-        filter.frequency.value=style.cutoff;
-        osc.type=style.wave;
-        osc.frequency.setValueAtTime(base*ratio,t);
-        gain.gain.setValueAtTime(.0001,t);
-        gain.gain.linearRampToValueAtTime(style.gain,t+.025);
-        gain.gain.exponentialRampToValueAtTime(.0001,t+style.length);
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(graph.master);
-        const voice={osc,gain,filter};
-        gachaTransitionVoices.add(voice);
-        osc.onended=() => {
-          gachaTransitionVoices.delete(voice);
-          try {osc.disconnect(); filter.disconnect(); gain.disconnect();} catch (_) {}
-        };
-        osc.start(t);
-        osc.stop(t+style.length+.04);
+      const ctx = graph.context;
+      const now = ctx.currentTime;
+      const stage = Math.min(2, Math.max(0, level));
+      const fundamentals = [392, 523.25, 783.99];
+      const notes = stage === 2 ? [1, 1.25, 1.5] : stage === 1 ? [1, 1.5] : [1];
+      const timbre = instrumentId === 'finalVibraphone' ? 1.15 : 1;
+      const length = stage === 2 ? .58 : stage === 1 ? .47 : .34;
+      notes.forEach((ratio, index) => {
+        // A rapid, gently decaying bell/piano attack with restrained harmonics.
+        [1, 2, 3].forEach((harmonic, part) => {
+          const at = now + index * .125;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const amplitude = (.105 / (part === 0 ? 1 : part === 1 ? 5.5 : 13)) * timbre;
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(fundamentals[stage] * ratio * harmonic, at);
+          gain.gain.setValueAtTime(.0001, at);
+          gain.gain.exponentialRampToValueAtTime(amplitude, at + .008);
+          gain.gain.exponentialRampToValueAtTime(.0001, at + length * (part === 0 ? 1 : .58));
+          osc.connect(gain); gain.connect(graph.master);
+          const voice = {osc, gain};
+          gachaTransitionVoices.add(voice);
+          osc.onended = () => {
+            gachaTransitionVoices.delete(voice);
+            try { osc.disconnect(); gain.disconnect(); } catch (_) {}
+          };
+          osc.start(at);
+          osc.stop(at + length + .03);
+        });
       });
     } catch (_) {}
   }
+
   let gachaTouchOrchestraGraph = null;
   let gachaTouchOrchestraBuffer = null;
   let gachaTouchOrchestraLoading = null;
@@ -2223,7 +2218,6 @@
     gachaAnimationAwaitingTouch=false;
     overlay.classList.remove('is-awaiting-touch');
     key.classList.add('is-pressed');
-    playHomeTapSound();
     playGachaPianoChord();
     gachaAnimationReadyTimer=setTimeout(()=>{
       if(gachaAnimationMode!=='intro')return;
@@ -2301,13 +2295,11 @@
     overlay.dataset.drawIndex=String(index+1);
     overlay.classList.toggle('is-ten',total===10);
 
-    playGachaFlourish(0,tier==='A'?1.0:.85);
     playGachaTransitionTone(0);
     if(tier!=='A'){
       // Keep the actual card art mounted; bring in gold in three gentle stages.
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-gold-awaken');
-        playGachaFlourish(0,1.35);
         playGachaTransitionTone(1);
       },900);
       scheduleGachaUpgrade(()=>overlay.classList.add('is-film-gold'),1060);
@@ -2316,7 +2308,6 @@
     if(tier==='character'||tier==='instrument'){
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-rainbow');
-        playGachaFlourish(200,1.4);
         playGachaTransitionTone(1);
       },2200);
     }
@@ -2326,7 +2317,6 @@
       // The card stays visible as the entire stage flashes out.
       scheduleGachaUpgrade(()=>{
         overlay.classList.add('is-film-white');
-        playGachaFlourish(400);
         playGachaTransitionTone(2,result?.instrumentId||'');
       },4430);
     } else {
@@ -2347,11 +2337,10 @@
     gachaResultState.seenNewSpecialIndexes.add(index);
   }
 
-  // New characters and ALL instrument drops (including duplicates) must
-  // stop a ten-pull skip. Use the same rule for selection and mandatory UI.
+  // Stop SKIP on every character or instrument, including duplicates.
+  // Users must see the complete high-rarity reveal before continuing.
   function isGachaSkipStop(result) {
-    return (result?.kind === 'character' && result?.isNewCharacter === true)
-      || result?.kind === 'instrument';
+    return result?.kind === 'character' || result?.kind === 'instrument';
   }
   function pendingNewSpecialIndexes() {
     if (!gachaResultState) return [];
@@ -2485,9 +2474,17 @@
   }
 
   function skipGachaAnimationToLast() {
-    if (gachaAnimationMode==='intro' || gachaAnimationMandatory) return;
-    if (gachaResultState?.results?.length > 1) gachaResultState.skipMode = true;
-    finishGachaAnimation(gachaResultState?.results?.length > 1 ? 'summary' : 'result');
+    if (!gachaResultState || gachaAnimationMandatory) return;
+    // The ten-pull SKIP works immediately, even before the piano is touchable.
+    if (gachaAnimationMode === 'intro') {
+      if (gachaResultState.results.length !== 10) return;
+      gachaResultState.skipMode = true;
+      finishGachaAnimation('summary');
+      return;
+    }
+    if (gachaAnimationMode !== 'reveal') return;
+    if (gachaResultState.results.length > 1) gachaResultState.skipMode = true;
+    finishGachaAnimation(gachaResultState.results.length > 1 ? 'summary' : 'result');
   }
 
   async function runTrialGacha(count) {
@@ -2520,19 +2517,28 @@
 
     grantGachaResults(results);
 
-    // Preload only the current reward art while the piano intro plays;
-    // do not decode all 10-pull prize images at once.
+    // Preload the first result and first high-rarity stop, not all ten images.
     const firstImage = gachaRewardImage(results[0]);
     const resultAssetsReady = new Promise(resolve=>{
       if(!firstImage){resolve();return;}
       const image=new Image();
       let done=false;
       const finish=()=>{if(done)return;done=true;resolve();};
-      image.onload=finish;
+      image.onload=()=>{
+        if (typeof image.decode === 'function') image.decode().catch(()=>{}).finally(finish);
+        else finish();
+      };
       image.onerror=finish;
       image.src=firstImage;
       setTimeout(finish,1700);
     });
+
+    const firstSpecialArt = gachaRewardImage(results.find(isGachaSkipStop));
+    if (firstSpecialArt && firstSpecialArt !== firstImage) {
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = firstSpecialArt;
+    }
 
     gachaResultState = { results:[...results], index:0, summary:false, skipMode:false, seenNewSpecialIndexes:new Set() };
     gachaTrialState.history.unshift({
@@ -2546,8 +2552,9 @@
     gachaScreen?.classList.add('is-drawing');
     const introStatus = await playGachaIntro(cost);
     if (introStatus === 'summary' || introStatus === 'result') {
-      await resultAssetsReady;
+      if (introStatus === 'result') await resultAssetsReady;
       if (introStatus === 'summary') {
+        // Don't delay a fast SKIP while waiting on art for result #1.
         const stoppedOnNewCharacter = await revealNextPendingNewSpecial(-1);
         if (!stoppedOnNewCharacter) showFinalGachaSummary();
       } else {
@@ -2645,7 +2652,7 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareHomeTapSound();
-    void prepareGachaFlourish();
+    // Avoid preloading an unused orchestral effect alongside the piano textures.
     // Character layers are loaded only for results that were actually drawn.
     canvas.inert = true;
     gachaScreen.hidden = false;
@@ -2714,7 +2721,15 @@
       touchGachaPiano(key);
     }
   });
-  home.querySelector('[data-gacha-animation-skip]')?.addEventListener('pointerdown', event => {
+  const gachaAnimationSkipButton = home.querySelector('[data-gacha-animation-skip]');
+  gachaAnimationSkipButton?.addEventListener('pointerdown', event => {
+    if (event.button > 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    skipGachaAnimationToLast();
+  });
+  // Keyboard and assistive-tech activation must work too.
+  gachaAnimationSkipButton?.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
     skipGachaAnimationToLast();
