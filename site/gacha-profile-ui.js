@@ -309,7 +309,7 @@
       '/assets/piano/rack-v4.webp',
       '/assets/piano/white-key-v4.webp',
       '/assets/piano/black-key-v4.webp',
-      'https://images.unsplash.com/photo-1619159846911-3687cc9e9820?auto=format&fit=crop&w=1920&q=88',
+      '/assets/gacha/visuals/piano-hall-reference-v1.webp',
     ];
     await Promise.all(common.map(src => preloadImage(src, 'high')));
   }

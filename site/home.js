@@ -395,11 +395,18 @@
   const defaultProfileImage = '/assets/home/profile-default.svg';
   const gachaInventoryKey = 'pds-gacha-inventory-v1';
   const gachaTrialKey = 'pds-gacha-trial-v1';
+  // Staging-only marker is absent from production HTML; production is never reset.
   const gachaTrialEnabled =
-    location.hostname.includes('git-staging-')
-    || /-personal-app-projects\.vercel\.app$/i.test(location.hostname);
-
-  // Staging keeps gacha inventory and pity across reloads.
+    document.querySelector('meta[name="pds-staging-gacha"]')?.content === 'true'
+    && (location.hostname.includes('git-staging-')
+      || location.hostname.endsWith('-personal-app-projects.vercel.app'));
+  // A fresh document load starts a fresh test-draw session, not a page switch.
+  if (gachaTrialEnabled) {
+    try {
+      localStorage.removeItem(gachaInventoryKey);
+      localStorage.removeItem(gachaTrialKey);
+    } catch (_) {}
+  }
 
   const homeBackgroundCatalog = Object.freeze({
     default: { name:'標準ホーム', image:defaultHomeBackground },
@@ -1676,6 +1683,80 @@
     });
   }
 
+  // Remove the white paper background from the supplied portrait without
+  // repainting the character. Only near-white pixels CONNECTED TO THE BORDER
+  // become transparent; enclosed white clothing remains intact.
+  const gachaPortraitCutouts = new Map();
+  function isWhiteBackdropPortrait(url) {
+    return !!url && url.includes('/reference/full-body.') &&
+      (url.endsWith('.jpg') || url.endsWith('.jpeg'));
+  }
+  function transparentGachaPortrait(url) {
+    if (!isWhiteBackdropPortrait(url)) return Promise.resolve(url);
+    if (gachaPortraitCutouts.has(url)) return gachaPortraitCutouts.get(url);
+    const work = new Promise(resolve => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.onload = () => {
+        try {
+          const w=image.naturalWidth,h=image.naturalHeight,n=w*h;
+          if(!w || !h || n>4000000){resolve(url);return;}
+          const canvas=document.createElement('canvas');
+          canvas.width=w;canvas.height=h;
+          const ctx=canvas.getContext('2d',{willReadFrequently:true});
+          if(!ctx){resolve(url);return;}
+          ctx.drawImage(image,0,0);
+          const frame=ctx.getImageData(0,0,w,h),rgba=frame.data;
+          const backdrop=new Uint8Array(n),queue=new Int32Array(n);
+          let tail=0;
+          const nearWhite=p=>{
+            const i=p*4,r=rgba[i],g=rgba[i+1],b=rgba[i+2];
+            return Math.min(r,g,b)>216 && Math.max(r,g,b)-Math.min(r,g,b)<40;
+          };
+          const visit=p=>{
+            if(!backdrop[p]&&nearWhite(p)){backdrop[p]=1;queue[tail++]=p;}
+          };
+          for(let x=0;x<w;x++){visit(x);visit((h-1)*w+x);}
+          for(let y=0;y<h;y++){visit(y*w);visit(y*w+w-1);}
+          for(let q=0;q<tail;q++){
+            const p=queue[q],x=p%w;
+            if(x>0)visit(p-1);
+            if(x<w-1)visit(p+1);
+            if(p>=w)visit(p-w);
+            if(p+w<n)visit(p+w);
+          }
+          if(tail<n*.10||tail>n*.92){resolve(url);return;}
+          for(let q=0;q<tail;q++)rgba[queue[q]*4+3]=0;
+          for(let p=w+1;p<n-w-1;p++){
+            if(backdrop[p])continue;
+            const i=p*4,l=Math.min(rgba[i],rgba[i+1],rgba[i+2]);
+            if(l>=188 && (backdrop[p-1]||backdrop[p+1]||backdrop[p-w]||backdrop[p+w])){
+              rgba[i+3]=Math.min(255,Math.round(255*(255-l)/67));
+            }
+          }
+          ctx.putImageData(frame,0,0);
+          canvas.toBlob(blob=>resolve(blob?URL.createObjectURL(blob):url),'image/png');
+        }catch(_){resolve(url);}
+      };
+      image.onerror=()=>resolve(url);
+      image.src=url;
+    });
+    gachaPortraitCutouts.set(url,work);
+    return work;
+  }
+  function applyGachaPortraitCutout(node,url) {
+    if(!isWhiteBackdropPortrait(url)){node.src=url;return;}
+    node.style.visibility='hidden';
+    void transparentGachaPortrait(url).then(src=>{
+      if(!node.isConnected)return;
+      if(src===url)node.style.mixBlendMode='multiply';
+      node.onload=()=>{node.style.visibility='visible';};
+      node.onerror=()=>{node.style.mixBlendMode='multiply';node.src=url;node.style.visibility='visible';};
+      node.src=src;
+      if(node.complete&&node.naturalWidth>0)node.style.visibility='visible';
+    });
+  }
+
   function buildGachaResultCard(result, index, compact = false) {
     const card = document.createElement('article');
     card.className = 'hp-gacha-result-card'
@@ -1699,10 +1780,11 @@
       art.alt='';
       art.decoding='async';
       art.loading=compact?'lazy':'eager';
-      art.src=compact
+      const portrait=compact
         ? (character?.listImage||character?.previewImage||gachaVisuals.ticket)
         : (character?.previewImage||character?.listImage||gachaVisuals.ticket);
       card.appendChild(art);
+      applyGachaPortraitCutout(art,portrait);
     } else if (result?.kind === 'voice') {
       card.style.setProperty('--gacha-result-bg', 'url("' + gachaVisuals.normal + '")');
       const art = document.createElement('img');
@@ -2202,12 +2284,12 @@
         if(gachaAnimationMode!=='intro'||overlay.hidden) return;
         overlay.classList.remove('is-cinema-wide');
         overlay.classList.add('is-cinema-keys');
-      },1250);
+      },1050);
       gachaAnimationReadyTimer=setTimeout(()=>{
         if(gachaAnimationMode!=='intro'||overlay.hidden) return;
         gachaAnimationAwaitingTouch=true;
         overlay.classList.add('is-awaiting-touch');
-      },2200);
+      },2650);
     });
   }
 
@@ -2224,8 +2306,8 @@
       key.classList.remove('is-pressed');
       overlay.classList.remove('is-cinema-keys');
       overlay.classList.add('is-cinema-return');
-    },260);
-    gachaAnimationTimer=setTimeout(()=>finishGachaAnimation('touch'),1460);
+    },280);
+    gachaAnimationTimer=setTimeout(()=>finishGachaAnimation('touch'),1650);
   }
 
   function gachaRevealTier(result) {
@@ -2652,6 +2734,10 @@
     if (rankingScreen && !rankingScreen.hidden) closeRankingScreen();
     renderGachaScreen();
     void prepareHomeTapSound();
+    // Warm transparent portraits while the gacha is opening.
+    for(const character of gachaPool()){
+      if(character?.previewImage)void transparentGachaPortrait(character.previewImage);
+    }
     // Avoid preloading an unused orchestral effect alongside the piano textures.
     // Character layers are loaded only for results that were actually drawn.
     canvas.inert = true;

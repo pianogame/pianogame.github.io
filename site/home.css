@@ -7456,3 +7456,86 @@ html[data-hp-rotated="true"] #hp-home-screen .hp-character-screen-actions {
 #hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-normal {
 background:#040915!important;background-image:none!important;
 }
+
+
+/* Use the user's exact dark concert grand reference as ONE scene.
+   Move the virtual camera into the keyboard; no abrupt scene switch. */
+#hp-home-screen .hp-gacha-cinema-piano-stage {
+  inset:0!important;
+  background-color:#070910!important;
+  background-image:
+    linear-gradient(180deg,rgba(5,8,17,.05),rgba(5,8,17,.20)),
+    url('/assets/gacha/visuals/piano-hall-reference-v1.webp')!important;
+  background-position:center!important;
+  background-size:cover!important;
+  filter:contrast(1.12) saturate(1.06)!important;
+}
+#hp-home-screen .hp-gacha-cinema-wide,
+#hp-home-screen .hp-gacha-cinema-closeup {
+  transition:transform 1.55s cubic-bezier(.18,.67,.18,1),
+             opacity 1.15s cubic-bezier(.23,.7,.2,1)!important;
+  will-change:transform,opacity;
+}
+#hp-home-screen .hp-gacha-cinema-wide {
+  opacity:1!important;
+  transform:translate3d(0,0,0) scale(1.012)!important;
+  transform-origin:60% 55%;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-keys .hp-gacha-cinema-wide {
+  opacity:1!important;
+  transform:translate3d(-17%,13%,0) scale(2.15)!important;
+}
+#hp-home-screen .hp-gacha-cinema-closeup {
+  opacity:0!important;
+  transform:translate3d(0,14%,0) scale(.68)!important;
+  pointer-events:none;
+  background:transparent!important;
+}
+#hp-home-screen .hp-gacha-cinema-key-photo {
+  opacity:0!important;
+  background:none!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-keys .hp-gacha-cinema-closeup {
+  opacity:1!important;
+  transform:translate3d(0,0,0) scale(1)!important;
+  pointer-events:auto;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-return .hp-gacha-cinema-wide {
+  opacity:1!important;
+  transform:translate3d(0,0,0) scale(1.012)!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-return .hp-gacha-cinema-closeup {
+  opacity:0!important;
+  transform:translate3d(0,15%,0) scale(.76)!important;
+  pointer-events:none;
+}
+#hp-home-screen .hp-gacha-cinema-stage-caption {transition:opacity .45s ease!important;}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-keys .hp-gacha-cinema-stage-caption {opacity:0;}
+/* The card floats in front of the same scene as the opening. */
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film-normal {
+  background-color:#070910!important;
+  background-image:
+    linear-gradient(90deg,rgba(4,6,14,.47),rgba(4,6,14,.13) 50%,rgba(4,6,14,.47)),
+    url('/assets/gacha/visuals/piano-hall-reference-v1.webp')!important;
+  background-size:cover,cover!important;
+  background-position:center,center!important;
+  filter:none!important;
+  opacity:1!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-film {
+  background-color:#070910!important;
+}
+#hp-home-screen .hp-gacha-animation-overlay.is-cinema-card .hp-gacha-cinema-card-scene {
+  z-index:8!important;
+  background:transparent!important;
+}
+#hp-home-screen .hp-gacha-result-overlay {
+  background:#070910 url('/assets/gacha/visuals/piano-hall-reference-v1.webp') center/cover no-repeat!important;
+}
+#hp-home-screen .hp-gacha-result-overlay[data-mode="sequence"] .hp-gacha-result-character-hero {
+  background:transparent!important;
+}
+@media(prefers-reduced-motion:reduce){
+  #hp-home-screen .hp-gacha-cinema-wide,
+  #hp-home-screen .hp-gacha-cinema-closeup{transition:none!important;will-change:auto;}
+}
