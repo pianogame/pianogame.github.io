@@ -2,275 +2,138 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#080c18">
-<title>ドリステ｜可動鍵盤 Safari テスト（staging）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="theme-color" content="#0b0d17"><meta name="robots" content="noindex,nofollow">
+<title>ドリステ｜高画質ピアノ・鍵盤可動テスト</title>
 <style>
 :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:linear-gradient(150deg,#080b17,#151427);color:#fff1d2;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:linear-gradient(150deg,#070b17,#151427 64%,#080b13);color:#fff0cf;-webkit-text-size-adjust:100%;min-height:100%}
 body{padding:env(safe-area-inset-top) max(10px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(10px,env(safe-area-inset-left))}
-main{max-width:1180px;margin:0 auto;padding:12px 0 26px}
-.heading{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:4px 3px 14px}
-.eyebrow{font:600 10px Georgia,serif;letter-spacing:.23em;color:#d8bb86}
-h1{font-size:clamp(16px,3vw,24px);margin:4px 0 0;font-weight:700}
-.noteBox{text-align:right;font-size:11px;color:#c2b5a0;white-space:nowrap}
-.noteBox b{font-size:23px;color:#ffe5aa;font-variant-numeric:tabular-nums}
-.stage{position:relative;overflow:hidden;border-radius:14px;background:radial-gradient(circle at 50% 10%,#ac7f4799,#080b15 74%);border:1px solid #b693536f;aspect-ratio:16/9;isolation:isolate;box-shadow:0 15px 40px #0008}
-.stage img.hall{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;z-index:0;opacity:.95}
-.shade{position:absolute;inset:0;z-index:1;background:linear-gradient(#0506100b 30%,#080b1940 48%,#02030bcc 100%)}
-.grand{position:absolute;inset:0;z-index:2;pointer-events:none}
-.lid{position:absolute;left:21%;top:13%;width:60%;height:40%;clip-path:polygon(0 100%,78% 1%,100% 23%,82% 42%,100% 96%);background:linear-gradient(164deg,#c69a48 0%,#171926 7%,#06070d 33%,#0d1022 61%,#080b12 90%,#b99a55 98%);filter:drop-shadow(0 10px 5px #000b);opacity:.98}
-.lid-rim{position:absolute;left:27%;top:48%;width:65%;height:2%;background:linear-gradient(90deg,#cead69,#030609 9%,#11111c 65%,#dfb266);box-shadow:0 2px 6px #000}
-.piano-back{position:absolute;left:20%;top:45%;width:72%;height:18%;border:2px solid #8b7243;border-radius:6px 10px 15px 11px;background:linear-gradient(180deg,#261f1e,#05070e 20%,#141622 80%,#000);box-shadow:0 12px 21px #000e,inset 0 2px #bba06b3d}
-.piano-leg{position:absolute;width:3.2%;height:19%;background:linear-gradient(90deg,#08080e,#1e2030 41%,#050507 68%,#ad9052 95%);top:60%;box-shadow:5px 7px 9px #0008}
-.piano-leg.left{left:28%}.piano-leg.right{left:82%}
-.keyboard-wrap{position:absolute;left:8%;right:8%;bottom:14%;z-index:4;perspective:1150px}
-.keyboard-case{position:relative;transform:rotateX(15deg) rotateZ(-1deg);transform-style:preserve-3d;padding:2.2% 1.5% 2.4%;border-radius:7px 7px 12px 12px;border:2px solid #af8749;background:linear-gradient(180deg,#221d1c,#020308 18%,#1e1c21 70%,#080709);box-shadow:inset 0 3px 8px #e4b16d6c,inset 0 -8px 10px #0008,0 12px 20px #000c}
-.keyboard-case::before{content:"";position:absolute;top:5px;left:3%;right:3%;height:2px;background:linear-gradient(90deg,transparent,#ffdb89,#97713a,#fbd38b,transparent)}
-.keys{position:relative;display:flex;height:clamp(70px,14.2vw,178px);min-height:70px;touch-action:none;transform-style:preserve-3d;isolation:isolate}
-.key{-webkit-appearance:none;appearance:none;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;border:0;padding:0;margin:0;cursor:pointer;transform-origin:50% 0%;transform-style:preserve-3d;transition:transform .105s ease-out,box-shadow .105s ease-out,filter .105s ease-out;position:relative;outline-offset:2px}
-.key:focus-visible{outline:3px solid #f7cc71;z-index:20}
-.key.white{flex:1;min-width:0;border-right:1px solid #b3aa97;border-left:1px solid #f8f3e4;border-radius:0 0 3px 3px;z-index:1;background-color:#f1e9d9;background-image:linear-gradient(90deg,#a09b91c7,#ffffff08 15%,#e8dccb3d 65%,#7e79733f),url('/assets/piano/white-key-v4.webp');background-position:center;background-size:100% 100%,cover;box-shadow:inset 0 -7px 2px #5a4d3b54,0 4px 3px #0005;transform:translateZ(0)}
-.key.white::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:9px;background:linear-gradient(#eae4d9,#ada698);border:1px solid #716657;border-top:0;border-radius:0 0 3px 3px}
-.key.white span{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#635846;font-size:clamp(8px,1.2vw,11px);pointer-events:none}
-.key.white.is-pressed{transform:translateZ(-4px) rotateX(-5deg);filter:brightness(.86);box-shadow:inset 0 13px 10px #3e322b5c,0 1px 1px #0005}
-.key.black{position:absolute;top:0;height:58%;width:4.86%;border-radius:0 0 4px 4px;border:1px solid #111017;z-index:7;background-color:#090a0c;background-image:linear-gradient(90deg,#030408,#c1a87838 14%,#24242a66 32%,#000 75%,#c8ab6b29),url('/assets/piano/black-key-v4.webp');background-position:center;background-size:100% 100%,cover;box-shadow:3px 5px 3px #030306a8,inset 0 2px 2px #efd09a5c;transform:translateZ(18px)}
-.key.black::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:7px;border-radius:0 0 3px 3px;background:linear-gradient(#262629,#050506);box-shadow:0 2px 2px #0007}
-.key.black.is-pressed{transform:translateY(2px) translateZ(11px) rotateX(1.5deg);filter:brightness(.77);box-shadow:1px 2px 2px #0008,inset 0 9px 9px #0007}
-.photo-warning{position:absolute;left:10px;top:10px;z-index:5;border-radius:8px;background:#1e1b20d8;border:1px solid #cdaa6b9c;font-size:11px;padding:5px 9px}
-.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 4px 0;font-size:12px;color:#d8c6a7}
-.foot strong{color:#ffe09b;font-size:17px}
-.pill{border:1px solid #776345;background:#1d1721;border-radius:20px;padding:5px 11px;font-size:11px;color:#e9d4ab}
-.helper{font-size:12px;line-height:1.6;margin:12px 3px 0;color:#cbbdad}
-@media(max-width:700px){main{padding-top:5px}.heading{padding-bottom:8px}.keyboard-wrap{bottom:12%;left:3%;right:3%}.keyboard-case{padding:3% 1.5%}.keys{height:clamp(68px,17vw,155px)}.key.black{width:5%}.helper{font-size:11px}}
-@media(max-width:570px) and (orientation:portrait){.stage{aspect-ratio:4/3}.keyboard-wrap{bottom:18%}.keys{height:93px}.grand .lid{top:12%}.noteBox b{font-size:20px}}
-@media(prefers-reduced-motion:reduce){.key{transition:none}}
-
-.image-picker{margin:12px 3px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:#e8d5ae;font-size:12px}
-.image-picker label{display:inline-block;border-radius:9px;border:1px solid #b38b4c;background:#251e27;padding:9px}
-.image-picker input{font-size:12px;max-width:220px}
-.image-picker small{width:100%;opacity:.75}
-.reference-photo{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:6;pointer-events:none}
-.reference-hotspots{display:none;position:absolute;inset:0;width:100%;height:100%;z-index:7;touch-action:none}
-.stage.reference-mode{aspect-ratio:1672/941}
-.stage.reference-mode .reference-photo,.stage.reference-mode .reference-hotspots{display:block}
-.stage.reference-mode .grand,.stage.reference-mode .keyboard-wrap,.stage.reference-mode .shade,.stage.reference-mode .hall{display:none}
-.stage.reference-mode .photo-warning{z-index:9}
-.reference-hotspots .hit{fill:rgba(255,255,255,.001);stroke:none;touch-action:none}
-.reference-hotspots .hit.is-pressed{fill:rgba(45,24,13,.45);stroke:#ffc97a;stroke-width:2;filter:drop-shadow(2px 5px 3px #000a)}
-.reference-hotspots .hit.black.is-pressed{fill:rgba(0,0,0,.57)}
+main{max-width:1240px;margin:auto;padding:14px 0 32px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;padding:4px 6px 14px}
+.eyebrow{color:#ceb382;letter-spacing:.21em;font:600 clamp(9px,1.7vw,12px) Georgia,serif}
+h1{font-size:clamp(17px,3vw,23px);margin:5px 0 0;font-weight:700}
+.counter{text-align:right;font-size:12px;white-space:nowrap;color:#cbbda8}
+.counter b{font-size:clamp(21px,5vw,29px);color:#ffe4a4;font-variant-numeric:tabular-nums}
+.scene{position:relative;width:100%;aspect-ratio:1672/941;overflow:hidden;border:1px solid #ba965c69;border-radius:14px;isolation:isolate;background:#10101b;box-shadow:0 18px 40px #0009}
+.hero{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.layer{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.touchkey{fill:transparent;stroke:none;pointer-events:all;cursor:pointer;touch-action:none;outline:none;-webkit-tap-highlight-color:transparent}
+.touchkey:focus-visible{stroke:#ffe08b;stroke-width:4;fill:#ffe08b15}
+#press-shadow{opacity:0;pointer-events:none;transition:opacity .07s linear}
+#press-image-group{opacity:0;pointer-events:none;transform-box:view-box;transform-origin:50% 0%;transition:opacity .07s ease,transform .095s cubic-bezier(.13,.72,.2,1)}
+#press-edge{opacity:0;stroke:#120d15;stroke-width:4;fill:none;pointer-events:none;transition:opacity .09s ease}
+.scene.is-pressing #press-shadow{opacity:1}
+.scene.is-pressing #press-image-group{opacity:1}
+.scene.is-pressing #press-edge{opacity:1}
+.scene[data-kind="black"] #press-shadow{fill:#080510;fill-opacity:.45}
+.scene[data-kind="white"] #press-shadow{fill:#30211b;fill-opacity:.38}
+.scene[data-kind="black"] #press-image-group{transform:translateY(4px)}
+.scene[data-kind="white"] #press-image-group{transform:translateY(7px)}
+.info{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 4px 0}
+.info strong{font-size:19px;color:#ffe3a2;font-variant-numeric:tabular-nums}
+.chip{font-size:12px;padding:7px 13px;border:1px solid #8b6b3e;border-radius:50px;background:#211d29;color:#ead6ae}
+.hint{padding:0 4px;font-size:12px;line-height:1.7;color:#bfb4a4;margin-top:12px}
+@media(max-width:560px){main{padding-top:8px}header{padding-bottom:10px}.scene{border-radius:10px}.info{padding-top:10px}.hint{font-size:11px}}
+@media(prefers-reduced-motion:reduce){#press-shadow,#press-image-group,#press-edge{transition:none}}
 </style>
 </head>
 <body>
 <main>
-  <div class="heading"><div><div class="eyebrow">PIANO DREAM STAGE · STAGING ONLY</div><h1>高画質背景＋可動鍵盤 テスト</h1></div><div class="noteBox">タップ<br><b id="count">0</b> 回</div></div>
-  <section class="stage" aria-label="グランドピアノの可動鍵盤テスト画面">
-    <img class="hall" id="hall" src="/assets/piano/palace-hall-v4.jpg" alt="大聖堂風のピアノホール背景" decoding="async" fetchpriority="high">
-    <div class="shade" aria-hidden="true"></div>
-    <div class="grand" aria-hidden="true"><div class="lid"></div><div class="lid-rim"></div><div class="piano-back"></div><div class="piano-leg left"></div><div class="piano-leg right"></div></div>
-    <div class="keyboard-wrap"><div class="keyboard-case"><div id="keys" class="keys" aria-label="白鍵と黒鍵を操作"><button class="key white" type="button" aria-label="ド4" data-note="ド4" data-kind="white" aria-pressed="false"><span>ド</span></button>
-<button class="key white" type="button" aria-label="レ4" data-note="レ4" data-kind="white" aria-pressed="false"><span>レ</span></button>
-<button class="key white" type="button" aria-label="ミ4" data-note="ミ4" data-kind="white" aria-pressed="false"><span>ミ</span></button>
-<button class="key white" type="button" aria-label="ファ4" data-note="ファ4" data-kind="white" aria-pressed="false"><span>ファ</span></button>
-<button class="key white" type="button" aria-label="ソ4" data-note="ソ4" data-kind="white" aria-pressed="false"><span>ソ</span></button>
-<button class="key white" type="button" aria-label="ラ4" data-note="ラ4" data-kind="white" aria-pressed="false"><span>ラ</span></button>
-<button class="key white" type="button" aria-label="シ4" data-note="シ4" data-kind="white" aria-pressed="false"><span>シ</span></button>
-<button class="key white" type="button" aria-label="ド5" data-note="ド5" data-kind="white" aria-pressed="false"><span>ド</span></button>
-<button class="key white" type="button" aria-label="レ5" data-note="レ5" data-kind="white" aria-pressed="false"><span>レ</span></button>
-<button class="key white" type="button" aria-label="ミ5" data-note="ミ5" data-kind="white" aria-pressed="false"><span>ミ</span></button>
-<button class="key white" type="button" aria-label="ファ5" data-note="ファ5" data-kind="white" aria-pressed="false"><span>ファ</span></button>
-<button class="key white" type="button" aria-label="ソ5" data-note="ソ5" data-kind="white" aria-pressed="false"><span>ソ</span></button>
-<button class="key white" type="button" aria-label="ラ5" data-note="ラ5" data-kind="white" aria-pressed="false"><span>ラ</span></button>
-<button class="key white" type="button" aria-label="シ5" data-note="シ5" data-kind="white" aria-pressed="false"><span>シ</span></button><button class="key black" type="button" aria-label="ド♯4" data-note="ド♯4" data-kind="black" aria-pressed="false" style="left:calc(7.14286% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="レ♯4" data-note="レ♯4" data-kind="black" aria-pressed="false" style="left:calc(14.28571% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ファ♯4" data-note="ファ♯4" data-kind="black" aria-pressed="false" style="left:calc(28.57143% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ソ♯4" data-note="ソ♯4" data-kind="black" aria-pressed="false" style="left:calc(35.71429% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ラ♯4" data-note="ラ♯4" data-kind="black" aria-pressed="false" style="left:calc(42.85714% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ド♯5" data-note="ド♯5" data-kind="black" aria-pressed="false" style="left:calc(57.14286% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="レ♯5" data-note="レ♯5" data-kind="black" aria-pressed="false" style="left:calc(64.28571% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ファ♯5" data-note="ファ♯5" data-kind="black" aria-pressed="false" style="left:calc(78.57143% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ソ♯5" data-note="ソ♯5" data-kind="black" aria-pressed="false" style="left:calc(85.71429% - 2.43%);"></button>
-<button class="key black" type="button" aria-label="ラ♯5" data-note="ラ♯5" data-kind="black" aria-pressed="false" style="left:calc(92.85714% - 2.43%);"></button></div></div></div>
-    <div class="photo-warning" id="image-status">背景画像を確認中</div>
-    <img id="reference-photo" class="reference-photo" alt="元の高画質ピアノ画像">
-    <svg id="reference-hotspots" class="reference-hotspots" viewBox="0 0 1672 941" preserveAspectRatio="none"></svg>
-  </section>
-  <div class="image-picker">
-    <label for="piano-file">高画質ピアノ画像を選択</label>
-    <input type="file" id="piano-file" accept="image/*">
-    <small>選択した画像は端末内で表示し、サーバーには送信しません。選択すると仮のピアノは消え、元画像上で鍵盤をタッチできます。</small>
-  </div>
-  <div class="foot">
-    <span>最後の鍵盤：<strong id="last">—</strong></span>
-    <span>押下中：<strong id="held">0</strong></span>
-    <span class="pill" id="touch-status">操作待機中</span>
-  </div>
-  <p class="helper">白鍵・黒鍵をタップまたは長押しして確認してね。黒鍵は前に倒れず、奥側を支点に数ミリ沈む動き。これはガチャ本体とは独立した検証ページで、実際の高画質ガチャ素材との最終合成は行っていません。</p>
+<header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING TEST</div><h1>高画質ピアノ・可動鍵盤</h1></div><div class="counter">タップ<br><b id="tap-count">0</b> 回</div></header>
+<section class="scene" id="scene" aria-label="写真の鍵盤をタッチして沈み込みを確認">
+<img class="hero" id="photo" src="./highres-grand-piano.avif" width="1672" height="941" decoding="async" fetchpriority="high" alt="黄金に照らされた大聖堂と黒いグランドピアノ">
+<svg id="keys-svg" class="layer" viewBox="0 0 1672 941" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="鍵盤のタッチ領域">
+  <defs><clipPath id="pressed-key-clip" clipPathUnits="userSpaceOnUse"><polygon id="press-clip-poly" points="0,0 0,0 0,0"></polygon></clipPath></defs>
+  <polygon id="press-shadow" points="0,0 0,0 0,0"/>
+  <g clip-path="url(#pressed-key-clip)"><g id="press-image-group"><image href="./highres-grand-piano.avif" x="0" y="0" width="1672" height="941" preserveAspectRatio="none"/></g></g>
+  <polyline id="press-edge" points="0,0 0,0 0,0"></polyline>
+  <g id="white-hit"></g><g id="black-hit"></g>
+</svg>
+</section>
+<div class="info"><div>最後に押した鍵盤：<strong id="last-key">—</strong></div><div>押下中：<strong id="held">0</strong></div><div class="chip" id="status">読み込み中</div></div>
+<p class="hint">ピアノの鍵盤に直接タッチしてね。黒鍵は奥側を支点に小さく沈み、手前に倒れない調整。まずはiPhoneで高画質画像とタッチ判定を確認するためのテスト画面だよ。ガチャ本体には未反映。</p>
 </main>
 <script>
-(function(){
+(()=>{
   'use strict';
-  var root=document.getElementById('keys');
-  var count=document.getElementById('count');
-  var last=document.getElementById('last');
-  var held=document.getElementById('held');
-  var touch=document.getElementById('touch-status');
-  var photo=document.getElementById('hall');
-  var photoStatus=document.getElementById('image-status');
-  var taps=0, pointers=new Map(), timers=new WeakMap(), lastPointerAt=0;
-  function photoState(){
-    if(photo.naturalWidth>0){
-      photoStatus.textContent='背景画像 OK · '+photo.naturalWidth+'px';
-      photoStatus.style.borderColor='#5ac89798';
-    }else{
-      photoStatus.textContent='画像が読めません（鍵盤は操作可能）';
-      photoStatus.style.borderColor='#d46d6d';
-    }
-  }
-  photo.addEventListener('load',photoState);
-  photo.addEventListener('error',photoState);
-  if(photo.complete)photoState();
-  function getKey(target){return target&&target.closest?target.closest('button.key'):null;}
-  function updateHeld(){
-    var n=0;
-    root.querySelectorAll('.key.is-pressed').forEach(function(){n++;});
-    held.textContent=String(n);
-  }
-  function press(key){
-    if(!key)return;
-    var timer=timers.get(key);
-    if(timer)clearTimeout(timer);
-    key.classList.add('is-pressed');
-    key.setAttribute('aria-pressed','true');
-    taps++;
-    count.textContent=String(taps);
-    last.textContent=key.dataset.note||'—';
-    touch.textContent=key.dataset.kind==='black'?'黒鍵 タッチ確認':'白鍵 タッチ確認';
-    updateHeld();
-  }
-  function release(key){
-    if(!key)return;
-    var timer=timers.get(key);
-    if(timer)clearTimeout(timer);
-    timer=setTimeout(function(){
-      key.classList.remove('is-pressed');
-      key.setAttribute('aria-pressed','false');
-      updateHeld();
-    },190);
-    timers.set(key,timer);
-  }
-  root.addEventListener('pointerdown',function(e){
-    var key=getKey(e.target);
-    if(!key||(e.pointerType==='mouse'&&e.button!==0))return;
-    e.preventDefault();
-    lastPointerAt=Date.now();
-    press(key);
-    pointers.set(e.pointerId,key);
-    try{key.setPointerCapture(e.pointerId);}catch(_){}
+  const svg=document.getElementById('keys-svg'), scene=document.getElementById('scene');
+  const photo=document.getElementById('photo'),status=document.getElementById('status');
+  const white=document.getElementById('white-hit'),black=document.getElementById('black-hit');
+  const counter=document.getElementById('tap-count'),last=document.getElementById('last-key'),held=document.getElementById('held');
+  const clip=document.getElementById('press-clip-poly'),shadow=document.getElementById('press-shadow'),edge=document.getElementById('press-edge');
+  const NS='http://www.w3.org/2000/svg';
+  let count=0,releaseTimer=null,active=null,lastPointer=0;
+  function photoState(){status.textContent=photo.naturalWidth>0?'高画質画像 OK · '+photo.naturalWidth+'px':'画像を読み込めません';}
+  photo.addEventListener('load',photoState);photo.addEventListener('error',photoState);if(photo.complete)photoState();
+  // Photo-specific outlines: the keyboard rises diagonally from left to right.
+  // The hit areas are bounded by the true upper/lower keybed edges, not generic rectangles.
+  const xbounds=[367,384,401,419,437,455,474,495,517,541,567,595,626,662,700,734,770,807,846,887,930,975,1022,1071,1122,1175,1231,1290,1353,1420,1491,1566,1648,1730];
+  const whites=['ド','レ','ミ','ファ','ソ','ラ','シ'];
+  const f=n=>Number(n.toFixed(1));
+  const back=x=>f(391+0.139*x);
+  const front=x=>f(383+0.276*x);
+  const bBack=x=>f(391+0.105*x);
+  const bFront=x=>f(375+0.197*x);
+  const pointString=points=>points.map(p=>f(p[0])+','+f(p[1])).join(' ');
+  const makePoly=(points,note,kind)=>{
+    const p=document.createElementNS(NS,'polygon');
+    p.setAttribute('points',pointString(points));
+    p.setAttribute('class','touchkey');
+    p.setAttribute('data-note',note);p.setAttribute('data-kind',kind);
+    p.setAttribute('role','button');p.setAttribute('tabindex','0');
+    p.setAttribute('aria-label',note+' の'+(kind==='black'?'黒鍵':'白鍵'));
+    (kind==='black'?black:white).appendChild(p);
+  };
+  xbounds.slice(0,-1).forEach((start,i)=>{
+    const end=xbounds[i+1];
+    const pts=[[start-11,back(start-11)],[end-11,back(end-11)],[end+9,front(end+9)],[start+8,front(start+8)]];
+    makePoly(pts,whites[i%7]+(4+Math.floor(i/7)),'white');
   });
-  function pointerDone(e){
-    var key=pointers.get(e.pointerId);
-    if(!key)return;
-    pointers.delete(e.pointerId);
-    release(key);
-  }
-  root.addEventListener('pointerup',pointerDone);
-  root.addEventListener('pointercancel',pointerDone);
-  root.addEventListener('lostpointercapture',pointerDone);
-  root.addEventListener('click',function(e){
-    var key=getKey(e.target);
-    if(!key||Date.now()-lastPointerAt<650)return;
-    press(key);release(key);
+  xbounds.slice(0,-2).forEach((start,i)=>{
+    if(i%7===2||i%7===6)return; // E–F and B–C have no black key.
+    const next=xbounds[i+1];const mid=(start+next)/2;
+    const width=Math.max(26,(next-start)*.84);
+    const points=[[mid-width*.50,bBack(mid-width*.5)],[mid+width*.48,bBack(mid+width*.48)],
+                  [mid+width*.69,bFront(mid+width*.69)],[mid-width*.40,bFront(mid-width*.4)]];
+    const semis=['ド♯','レ♯','','ファ♯','ソ♯','ラ♯',''];
+    makePoly(points,semis[i%7]+(4+Math.floor(i/7)),'black');
   });
-  root.addEventListener('keydown',function(e){
-    var key=getKey(e.target);
-    if(!key||(e.key!=='Enter'&&e.key!==' ')||e.repeat)return;
-    e.preventDefault();press(key);
-  });
-  root.addEventListener('keyup',function(e){
-    var key=getKey(e.target);
-    if(!key||(e.key!=='Enter'&&e.key!==' '))return;
-    e.preventDefault();release(key);
-  });
-  window.addEventListener('blur',function(){
-    pointers.forEach(function(key){release(key);});
-    pointers.clear();
-  });
-
-  // Photo testing: original image is displayed without any generated piano
-  // overlay. Touch areas are projected to the keybed in the 1672x941 photo.
-  var fileInput=document.getElementById('piano-file');
-  var photoView=document.getElementById('reference-photo');
-  var hitSvg=document.getElementById('reference-hotspots');
-  var stageElement=document.querySelector('.stage');
-  var fileUrl=null,heldPhotos=new Map(),svgns='http://www.w3.org/2000/svg';
-  function boundPoint(t,isBack){
-    return [Math.round((isBack?435:370)+(isBack?1237:1302)*Math.pow(t,.74)),
-            Math.round((isBack?442:462)+(isBack?150:370)*Math.pow(t,1.12))];
+  function clearPress(){
+    active=null;scene.classList.remove('is-pressing');held.textContent='0';
   }
-  function addHit(points,keyName,kind){
-    var polygon=document.createElementNS(svgns,'polygon');
-    polygon.setAttribute('points',points.map(function(p){return p.join(',');}).join(' '));
-    polygon.setAttribute('class','hit '+kind);
-    polygon.dataset.note=keyName;
-    polygon.dataset.kind=kind;
-    hitSvg.appendChild(polygon);
-  }
-  var names=['ド','レ','ミ','ファ','ソ','ラ','シ'];
-  var start=0,end=1,total=35;
-  for(var i=0;i<total;i++){
-    var a=start+(end-start)*i/total,b=start+(end-start)*(i+1)/total;
-    addHit([boundPoint(a,true),boundPoint(b,true),boundPoint(b,false),boundPoint(a,false)],names[i%7]+(i<7?'4':'5'),'white');
-  }
-  var blackSlots=[];for(var kk=0;kk<total-1;kk++){if([0,1,3,4,5].includes(kk%7))blackSlots.push(kk);}
-  for(var j=0;j<blackSlots.length;j++){
-    var k=blackSlots[j],t=start+(end-start)*(k+1)/total;
-    var p=boundPoint(Math.max(0,t-.008),true),q=boundPoint(Math.min(1,t+.008),true);
-    var r=boundPoint(Math.max(0,t-.008),false),s=boundPoint(Math.min(1,t+.008),false);
-    var u=.62;
-    addHit([p,q,[q[0]+(s[0]-q[0])*u,q[1]+(s[1]-q[1])*u],
-                 [p[0]+(r[0]-p[0])*u,p[1]+(r[1]-p[1])*u]],names[(k+1)%7]+'♯','black');
-  }
-  fileInput.addEventListener('change',function(){
-    var file=fileInput.files&&fileInput.files[0];
-    if(!file||!file.type.startsWith('image/'))return;
-    if(fileUrl)URL.revokeObjectURL(fileUrl);
-    fileUrl=URL.createObjectURL(file);
-    photoView.onload=function(){
-      stageElement.classList.add('reference-mode');
-      photoStatus.textContent='高画質ピアノ · '+photoView.naturalWidth+'×'+photoView.naturalHeight;
-      photoStatus.style.borderColor='#64d5a3';
-      touch.textContent='写真の鍵盤をタップ';
-    };
-    photoView.onerror=function(){photoStatus.textContent='画像読み込みエラー';};
-    photoView.src=fileUrl;
-  });
-  hitSvg.addEventListener('pointerdown',function(e){
-    var target=e.target;
-    if(!target.classList.contains('hit'))return;
-    e.preventDefault();
-    heldPhotos.set(e.pointerId,target);
-    target.classList.add('is-pressed');
-    taps++;count.textContent=String(taps);
+  function finishPress(){clearTimeout(releaseTimer);releaseTimer=setTimeout(clearPress,210);}
+  function press(target){
+    if(!target)return;
+    clearTimeout(releaseTimer);
+    const points=target.getAttribute('points');
+    active=target;scene.dataset.kind=target.dataset.kind;
+    clip.setAttribute('points',points);shadow.setAttribute('points',points);
+    const verts=points.trim().split(/\s+/);
+    edge.setAttribute('points',verts[0]+' '+verts[1]);
+    // Force the offset image to be fully positioned before starting the press animation.
+    scene.classList.add('is-pressing');
+    count++;counter.textContent=String(count);
     last.textContent=target.dataset.note;
-    touch.textContent=target.dataset.kind==='black'?'黒鍵タッチ確認':'白鍵タッチ確認';
-    held.textContent=String(heldPhotos.size);
+    held.textContent='1';
+    status.textContent=(target.dataset.kind==='black'?'黒鍵':'白鍵')+'の押下を確認';
+  }
+  function targetOf(el){return el&&el.closest?el.closest('polygon.touchkey'):null;}
+  svg.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    const target=targetOf(e.target);if(!target)return;
+    e.preventDefault();lastPointer=Date.now();press(target);
     try{target.setPointerCapture(e.pointerId)}catch(_){}
   });
-  function photoRelease(e){
-    var key=heldPhotos.get(e.pointerId);
-    if(!key)return;
-    heldPhotos.delete(e.pointerId);
-    held.textContent=String(heldPhotos.size);
-    setTimeout(function(){key.classList.remove('is-pressed');},160);
-  }
-  hitSvg.addEventListener('pointerup',photoRelease);
-  hitSvg.addEventListener('pointercancel',photoRelease);
-  hitSvg.addEventListener('lostpointercapture',photoRelease);
-
-  touch.textContent='タッチ判定の準備完了';
+  svg.addEventListener('pointerup',e=>{if(active){e.preventDefault();finishPress();}});
+  svg.addEventListener('pointercancel',()=>{if(active)finishPress();});
+  svg.addEventListener('lostpointercapture',()=>{if(active)finishPress();});
+  svg.addEventListener('click',e=>{if(Date.now()-lastPointer<650)return;const p=targetOf(e.target);if(p){press(p);finishPress();}});
+  svg.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat){const p=targetOf(e.target);if(p){e.preventDefault();press(p);}}});
+  svg.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter'){if(active){e.preventDefault();finishPress();}}});
+  window.addEventListener('blur',clearPress);
 })();
 </script>
-</body></html>
+</body>
+</html>
