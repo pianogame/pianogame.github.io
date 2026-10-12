@@ -219,17 +219,17 @@ h1{font-size:clamp(16px,3vw,24px);margin:4px 0 0;font-weight:700}
     hitSvg.appendChild(polygon);
   }
   var names=['ド','レ','ミ','ファ','ソ','ラ','シ'];
-  var start=.42,end=.985,total=14;
+  var start=0,end=1,total=35;
   for(var i=0;i<total;i++){
     var a=start+(end-start)*i/total,b=start+(end-start)*(i+1)/total;
     addHit([boundPoint(a,true),boundPoint(b,true),boundPoint(b,false),boundPoint(a,false)],names[i%7]+(i<7?'4':'5'),'white');
   }
-  var blackSlots=[0,1,3,4,5,7,8,10,11,12];
+  var blackSlots=[];for(var kk=0;kk<total-1;kk++){if([0,1,3,4,5].includes(kk%7))blackSlots.push(kk);}
   for(var j=0;j<blackSlots.length;j++){
     var k=blackSlots[j],t=start+(end-start)*(k+1)/total;
-    var p=boundPoint(t-.010,true),q=boundPoint(t+.010,true);
-    var r=boundPoint(t-.010,false),s=boundPoint(t+.010,false);
-    var u=.70;
+    var p=boundPoint(Math.max(0,t-.008),true),q=boundPoint(Math.min(1,t+.008),true);
+    var r=boundPoint(Math.max(0,t-.008),false),s=boundPoint(Math.min(1,t+.008),false);
+    var u=.62;
     addHit([p,q,[q[0]+(s[0]-q[0])*u,q[1]+(s[1]-q[1])*u],
                  [p[0]+(r[0]-p[0])*u,p[1]+(r[1]-p[1])*u]],names[(k+1)%7]+'♯','black');
   }
