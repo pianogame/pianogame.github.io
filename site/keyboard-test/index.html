@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#080c18">
+<title>ドリステ｜可動鍵盤 Safari テスト（staging）</title>
+<style>
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Hiragino Sans",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:linear-gradient(150deg,#080b17,#151427);color:#fff1d2;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) max(10px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(10px,env(safe-area-inset-left))}
+main{max-width:1180px;margin:0 auto;padding:12px 0 26px}
+.heading{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:4px 3px 14px}
+.eyebrow{font:600 10px Georgia,serif;letter-spacing:.23em;color:#d8bb86}
+h1{font-size:clamp(16px,3vw,24px);margin:4px 0 0;font-weight:700}
+.noteBox{text-align:right;font-size:11px;color:#c2b5a0;white-space:nowrap}
+.noteBox b{font-size:23px;color:#ffe5aa;font-variant-numeric:tabular-nums}
+.stage{position:relative;overflow:hidden;border-radius:14px;background:radial-gradient(circle at 50% 10%,#ac7f4799,#080b15 74%);border:1px solid #b693536f;aspect-ratio:16/9;isolation:isolate;box-shadow:0 15px 40px #0008}
+.stage img.hall{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block;z-index:0;opacity:.95}
+.shade{position:absolute;inset:0;z-index:1;background:linear-gradient(#0506100b 30%,#080b1940 48%,#02030bcc 100%)}
+.grand{position:absolute;inset:0;z-index:2;pointer-events:none}
+.lid{position:absolute;left:21%;top:13%;width:60%;height:40%;clip-path:polygon(0 100%,78% 1%,100% 23%,82% 42%,100% 96%);background:linear-gradient(164deg,#c69a48 0%,#171926 7%,#06070d 33%,#0d1022 61%,#080b12 90%,#b99a55 98%);filter:drop-shadow(0 10px 5px #000b);opacity:.98}
+.lid-rim{position:absolute;left:27%;top:48%;width:65%;height:2%;background:linear-gradient(90deg,#cead69,#030609 9%,#11111c 65%,#dfb266);box-shadow:0 2px 6px #000}
+.piano-back{position:absolute;left:20%;top:45%;width:72%;height:18%;border:2px solid #8b7243;border-radius:6px 10px 15px 11px;background:linear-gradient(180deg,#261f1e,#05070e 20%,#141622 80%,#000);box-shadow:0 12px 21px #000e,inset 0 2px #bba06b3d}
+.piano-leg{position:absolute;width:3.2%;height:19%;background:linear-gradient(90deg,#08080e,#1e2030 41%,#050507 68%,#ad9052 95%);top:60%;box-shadow:5px 7px 9px #0008}
+.piano-leg.left{left:28%}.piano-leg.right{left:82%}
+.keyboard-wrap{position:absolute;left:8%;right:8%;bottom:14%;z-index:4;perspective:1150px}
+.keyboard-case{position:relative;transform:rotateX(15deg) rotateZ(-1deg);transform-style:preserve-3d;padding:2.2% 1.5% 2.4%;border-radius:7px 7px 12px 12px;border:2px solid #af8749;background:linear-gradient(180deg,#221d1c,#020308 18%,#1e1c21 70%,#080709);box-shadow:inset 0 3px 8px #e4b16d6c,inset 0 -8px 10px #0008,0 12px 20px #000c}
+.keyboard-case::before{content:"";position:absolute;top:5px;left:3%;right:3%;height:2px;background:linear-gradient(90deg,transparent,#ffdb89,#97713a,#fbd38b,transparent)}
+.keys{position:relative;display:flex;height:clamp(70px,14.2vw,178px);min-height:70px;touch-action:none;transform-style:preserve-3d;isolation:isolate}
+.key{-webkit-appearance:none;appearance:none;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;border:0;padding:0;margin:0;cursor:pointer;transform-origin:50% 0%;transform-style:preserve-3d;transition:transform .105s ease-out,box-shadow .105s ease-out,filter .105s ease-out;position:relative;outline-offset:2px}
+.key:focus-visible{outline:3px solid #f7cc71;z-index:20}
+.key.white{flex:1;min-width:0;border-right:1px solid #b3aa97;border-left:1px solid #f8f3e4;border-radius:0 0 3px 3px;z-index:1;background-color:#f1e9d9;background-image:linear-gradient(90deg,#a09b91c7,#ffffff08 15%,#e8dccb3d 65%,#7e79733f),url('/assets/piano/white-key-v4.webp');background-position:center;background-size:100% 100%,cover;box-shadow:inset 0 -7px 2px #5a4d3b54,0 4px 3px #0005;transform:translateZ(0)}
+.key.white::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:9px;background:linear-gradient(#eae4d9,#ada698);border:1px solid #716657;border-top:0;border-radius:0 0 3px 3px}
+.key.white span{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#635846;font-size:clamp(8px,1.2vw,11px);pointer-events:none}
+.key.white.is-pressed{transform:translateZ(-4px) rotateX(-5deg);filter:brightness(.86);box-shadow:inset 0 13px 10px #3e322b5c,0 1px 1px #0005}
+.key.black{position:absolute;top:0;height:58%;width:4.86%;border-radius:0 0 4px 4px;border:1px solid #111017;z-index:7;background-color:#090a0c;background-image:linear-gradient(90deg,#030408,#c1a87838 14%,#24242a66 32%,#000 75%,#c8ab6b29),url('/assets/piano/black-key-v4.webp');background-position:center;background-size:100% 100%,cover;box-shadow:3px 5px 3px #030306a8,inset 0 2px 2px #efd09a5c;transform:translateZ(18px)}
+.key.black::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:7px;border-radius:0 0 3px 3px;background:linear-gradient(#262629,#050506);box-shadow:0 2px 2px #0007}
+.key.black.is-pressed{transform:translateY(2px) translateZ(11px) rotateX(1.5deg);filter:brightness(.77);box-shadow:1px 2px 2px #0008,inset 0 9px 9px #0007}
+.photo-warning{position:absolute;left:10px;top:10px;z-index:5;border-radius:8px;background:#1e1b20d8;border:1px solid #cdaa6b9c;font-size:11px;padding:5px 9px}
+.foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 4px 0;font-size:12px;color:#d8c6a7}
+.foot strong{color:#ffe09b;font-size:17px}
+.pill{border:1px solid #776345;background:#1d1721;border-radius:20px;padding:5px 11px;font-size:11px;color:#e9d4ab}
+.helper{font-size:12px;line-height:1.6;margin:12px 3px 0;color:#cbbdad}
+@media(max-width:700px){main{padding-top:5px}.heading{padding-bottom:8px}.keyboard-wrap{bottom:12%;left:3%;right:3%}.keyboard-case{padding:3% 1.5%}.keys{height:clamp(68px,17vw,155px)}.key.black{width:5%}.helper{font-size:11px}}
+@media(max-width:570px) and (orientation:portrait){.stage{aspect-ratio:4/3}.keyboard-wrap{bottom:18%}.keys{height:93px}.grand .lid{top:12%}.noteBox b{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.key{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <div class="heading"><div><div class="eyebrow">PIANO DREAM STAGE · STAGING ONLY</div><h1>高画質背景＋可動鍵盤 テスト</h1></div><div class="noteBox">タップ<br><b id="count">0</b> 回</div></div>
+  <section class="stage" aria-label="グランドピアノの可動鍵盤テスト画面">
+    <img class="hall" id="hall" src="/assets/piano/palace-hall-v4.jpg" alt="大聖堂風のピアノホール背景" decoding="async" fetchpriority="high">
+    <div class="shade" aria-hidden="true"></div>
+    <div class="grand" aria-hidden="true"><div class="lid"></div><div class="lid-rim"></div><div class="piano-back"></div><div class="piano-leg left"></div><div class="piano-leg right"></div></div>
+    <div class="keyboard-wrap"><div class="keyboard-case"><div id="keys" class="keys" aria-label="白鍵と黒鍵を操作"><button class="key white" type="button" aria-label="ド4" data-note="ド4" data-kind="white" aria-pressed="false"><span>ド</span></button>
+<button class="key white" type="button" aria-label="レ4" data-note="レ4" data-kind="white" aria-pressed="false"><span>レ</span></button>
+<button class="key white" type="button" aria-label="ミ4" data-note="ミ4" data-kind="white" aria-pressed="false"><span>ミ</span></button>
+<button class="key white" type="button" aria-label="ファ4" data-note="ファ4" data-kind="white" aria-pressed="false"><span>ファ</span></button>
+<button class="key white" type="button" aria-label="ソ4" data-note="ソ4" data-kind="white" aria-pressed="false"><span>ソ</span></button>
+<button class="key white" type="button" aria-label="ラ4" data-note="ラ4" data-kind="white" aria-pressed="false"><span>ラ</span></button>
+<button class="key white" type="button" aria-label="シ4" data-note="シ4" data-kind="white" aria-pressed="false"><span>シ</span></button>
+<button class="key white" type="button" aria-label="ド5" data-note="ド5" data-kind="white" aria-pressed="false"><span>ド</span></button>
+<button class="key white" type="button" aria-label="レ5" data-note="レ5" data-kind="white" aria-pressed="false"><span>レ</span></button>
+<button class="key white" type="button" aria-label="ミ5" data-note="ミ5" data-kind="white" aria-pressed="false"><span>ミ</span></button>
+<button class="key white" type="button" aria-label="ファ5" data-note="ファ5" data-kind="white" aria-pressed="false"><span>ファ</span></button>
+<button class="key white" type="button" aria-label="ソ5" data-note="ソ5" data-kind="white" aria-pressed="false"><span>ソ</span></button>
+<button class="key white" type="button" aria-label="ラ5" data-note="ラ5" data-kind="white" aria-pressed="false"><span>ラ</span></button>
+<button class="key white" type="button" aria-label="シ5" data-note="シ5" data-kind="white" aria-pressed="false"><span>シ</span></button><button class="key black" type="button" aria-label="ド♯4" data-note="ド♯4" data-kind="black" aria-pressed="false" style="left:calc(7.14286% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="レ♯4" data-note="レ♯4" data-kind="black" aria-pressed="false" style="left:calc(14.28571% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ファ♯4" data-note="ファ♯4" data-kind="black" aria-pressed="false" style="left:calc(28.57143% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ソ♯4" data-note="ソ♯4" data-kind="black" aria-pressed="false" style="left:calc(35.71429% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ラ♯4" data-note="ラ♯4" data-kind="black" aria-pressed="false" style="left:calc(42.85714% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ド♯5" data-note="ド♯5" data-kind="black" aria-pressed="false" style="left:calc(57.14286% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="レ♯5" data-note="レ♯5" data-kind="black" aria-pressed="false" style="left:calc(64.28571% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ファ♯5" data-note="ファ♯5" data-kind="black" aria-pressed="false" style="left:calc(78.57143% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ソ♯5" data-note="ソ♯5" data-kind="black" aria-pressed="false" style="left:calc(85.71429% - 2.43%);"></button>
+<button class="key black" type="button" aria-label="ラ♯5" data-note="ラ♯5" data-kind="black" aria-pressed="false" style="left:calc(92.85714% - 2.43%);"></button></div></div></div>
+    <div class="photo-warning" id="image-status">背景画像を確認中</div>
+  </section>
+  <div class="foot">
+    <span>最後の鍵盤：<strong id="last">—</strong></span>
+    <span>押下中：<strong id="held">0</strong></span>
+    <span class="pill" id="touch-status">操作待機中</span>
+  </div>
+  <p class="helper">白鍵・黒鍵をタップまたは長押しして確認してね。黒鍵は前に倒れず、奥側を支点に数ミリ沈む動き。これはガチャ本体とは独立した検証ページで、実際の高画質ガチャ素材との最終合成は行っていません。</p>
+</main>
+<script>
+(function(){
+  'use strict';
+  var root=document.getElementById('keys');
+  var count=document.getElementById('count');
+  var last=document.getElementById('last');
+  var held=document.getElementById('held');
+  var touch=document.getElementById('touch-status');
+  var photo=document.getElementById('hall');
+  var photoStatus=document.getElementById('image-status');
+  var taps=0, pointers=new Map(), timers=new WeakMap(), lastPointerAt=0;
+  function photoState(){
+    if(photo.naturalWidth>0){
+      photoStatus.textContent='背景画像 OK · '+photo.naturalWidth+'px';
+      photoStatus.style.borderColor='#5ac89798';
+    }else{
+      photoStatus.textContent='画像が読めません（鍵盤は操作可能）';
+      photoStatus.style.borderColor='#d46d6d';
+    }
+  }
+  photo.addEventListener('load',photoState);
+  photo.addEventListener('error',photoState);
+  if(photo.complete)photoState();
+  function getKey(target){return target&&target.closest?target.closest('button.key'):null;}
+  function updateHeld(){
+    var n=0;
+    root.querySelectorAll('.key.is-pressed').forEach(function(){n++;});
+    held.textContent=String(n);
+  }
+  function press(key){
+    if(!key)return;
+    var timer=timers.get(key);
+    if(timer)clearTimeout(timer);
+    key.classList.add('is-pressed');
+    key.setAttribute('aria-pressed','true');
+    taps++;
+    count.textContent=String(taps);
+    last.textContent=key.dataset.note||'—';
+    touch.textContent=key.dataset.kind==='black'?'黒鍵 タッチ確認':'白鍵 タッチ確認';
+    updateHeld();
+  }
+  function release(key){
+    if(!key)return;
+    var timer=timers.get(key);
+    if(timer)clearTimeout(timer);
+    timer=setTimeout(function(){
+      key.classList.remove('is-pressed');
+      key.setAttribute('aria-pressed','false');
+      updateHeld();
+    },190);
+    timers.set(key,timer);
+  }
+  root.addEventListener('pointerdown',function(e){
+    var key=getKey(e.target);
+    if(!key||(e.pointerType==='mouse'&&e.button!==0))return;
+    e.preventDefault();
+    lastPointerAt=Date.now();
+    press(key);
+    pointers.set(e.pointerId,key);
+    try{key.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  function pointerDone(e){
+    var key=pointers.get(e.pointerId);
+    if(!key)return;
+    pointers.delete(e.pointerId);
+    release(key);
+  }
+  root.addEventListener('pointerup',pointerDone);
+  root.addEventListener('pointercancel',pointerDone);
+  root.addEventListener('lostpointercapture',pointerDone);
+  root.addEventListener('click',function(e){
+    var key=getKey(e.target);
+    if(!key||Date.now()-lastPointerAt<650)return;
+    press(key);release(key);
+  });
+  root.addEventListener('keydown',function(e){
+    var key=getKey(e.target);
+    if(!key||(e.key!=='Enter'&&e.key!==' ')||e.repeat)return;
+    e.preventDefault();press(key);
+  });
+  root.addEventListener('keyup',function(e){
+    var key=getKey(e.target);
+    if(!key||(e.key!=='Enter'&&e.key!==' '))return;
+    e.preventDefault();release(key);
+  });
+  window.addEventListener('blur',function(){
+    pointers.forEach(function(key){release(key);});
+    pointers.clear();
+  });
+  touch.textContent='タッチ判定の準備完了';
+})();
+</script>
+</body></html>
