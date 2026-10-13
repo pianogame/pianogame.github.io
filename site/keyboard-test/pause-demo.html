@@ -4,101 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#09090c"><meta name="robots" content="noindex,nofollow">
-<title>ドリステ｜ガチャ動画 カメラ接近と鍵盤押下 試作</title>
+<title>ドリステ｜鍵盤タッチ→ピアノ全景→カード前面 テスト</title>
 <style>
-:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif}
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 52% -8%,#27202e,#09080d 72%);color:#f5e9cc}
+body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 50% -6%,#272132,#090a11 70%);color:#f7eace}
 main{max-width:1170px;margin:auto;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
 header{display:flex;justify-content:space-between;align-items:end;gap:12px;padding:11px 1px 19px}
-.eyebrow{font:600 10px Georgia,serif;letter-spacing:.18em;color:#c7ad84}
-h1{font-size:clamp(17px,4vw,25px);line-height:1.3;margin:6px 0 0;font-weight:700}
-header small{font-size:11px;color:#bda98c;text-align:right;white-space:nowrap}
-.stage{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:10px;background:#110d0f;border:1px solid #8e6f46b0;box-shadow:0 26px 58px #000b;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.stage:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 46px #09040880}
+.eyebrow{font:600 10px Georgia,serif;letter-spacing:.18em;color:#cbb486}
+h1{font-size:clamp(16px,3.5vw,24px);line-height:1.35;margin:5px 0 0;font-weight:700}
+header small{font-size:11px;color:#bfaf92;text-align:right;white-space:nowrap}
+.stage{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:9px;background:#08080a;border:1px solid #926e45bb;box-shadow:0 23px 55px #000b;touch-action:manipulation;user-select:none;-webkit-user-select:none;isolation:isolate}
+.stage::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 42px #07050b73}
 video{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.prompt{position:absolute;z-index:5;inset:0;display:none;align-items:center;justify-content:flex-start;flex-direction:column;gap:4px;padding-top:11.8%;text-align:center;cursor:pointer;background:none;-webkit-tap-highlight-color:transparent}
+.prompt{position:absolute;z-index:6;inset:0;display:none;align-items:center;justify-content:flex-start;flex-direction:column;gap:4px;padding-top:11.8%;text-align:center;cursor:pointer;background:none;-webkit-tap-highlight-color:transparent}
 .prompt[aria-hidden="false"]{display:flex}
-.prompt .word{padding:0;border:0;background:none;box-shadow:none;color:#fff5df;text-shadow:0 1px 8px #000c,0 0 14px #edbe79aa;font-weight:500;font-size:clamp(14px,2.1vw,23px);letter-spacing:.25em;line-height:1.5;pointer-events:none;animation:prompt-breathe 2.35s ease-in-out infinite}
+.prompt .word{color:#fff5e4;text-shadow:0 1px 8px #000e,0 0 14px #e6bb7d9c;font-weight:500;font-size:clamp(14px,2.1vw,23px);letter-spacing:.24em;line-height:1.5;pointer-events:none;animation:prompt-breathe 2.3s ease-in-out infinite}
 .prompt small{font:10px Georgia,serif;letter-spacing:.22em;color:#e4c99e;text-shadow:0 1px 7px #000e;opacity:.82;pointer-events:none}
-@keyframes prompt-breathe{0%,100%{opacity:.8;transform:translateY(1px)}50%{opacity:1;transform:translateY(-2px)}}
-@media(prefers-reduced-motion:reduce){.prompt .word{animation:none}}
-.status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;padding:15px 3px 5px;color:#d5bd9a}
-.status b{color:#f6db9e;font-weight:700}
-.controls{display:flex;gap:9px;flex-wrap:wrap;padding:10px 0}
-button{font-size:13px;color:#f8e9ce;background:#24202a;border:1px solid #937746;padding:10px 18px;border-radius:8px;cursor:pointer}
-button:active{transform:translateY(1px)}
-.note{font-size:12px;line-height:1.85;color:#b7a995;margin:10px 0;max-width:760px}
-@media(max-width:560px){header{padding-bottom:12px}.stage{border-radius:6px}.prompt .word{font-size:clamp(12px,3.7vw,16px);letter-spacing:.19em}.prompt small{font-size:8px;letter-spacing:.15em}.status{font-size:11px}}
+@keyframes prompt-breathe{0%,100%{opacity:.79;transform:translateY(1px)}50%{opacity:1;transform:translateY(-2px)}}
+/* This is an independent foreground card. Not baked into the video. */
+.card-layer{position:absolute;z-index:4;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;visibility:hidden;transform:translateY(42px) scale(.66) rotate(-8deg);filter:blur(7px);transition:opacity .4s ease,transform .75s cubic-bezier(.17,.72,.16,1),filter .62s ease,visibility 0s linear .75s}
+.card-layer.show{opacity:1;visibility:visible;transform:translateY(0) scale(1) rotate(-3deg);filter:blur(0);transition:opacity .44s ease,transform .78s cubic-bezier(.17,.72,.16,1),filter .62s ease,visibility 0s}
+.card-layer::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 30% 68% at 51% 50%,#ffeb9d86 0%,#d2a75a4f 35%,transparent 100%);filter:blur(16px)}
+.card-art{height:73%;max-height:520px;max-width:45%;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px #f3e1a9b5) drop-shadow(0 15px 24px #050611f0);transform:perspective(850px) rotateY(-7deg);animation:float-card 3.5s ease-in-out infinite alternate}
+@keyframes float-card{to{transform:translateY(-5px) perspective(850px) rotateY(3deg)}}
+.status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;padding:13px 3px 4px;color:#d6bd9a}.status b{color:#f7dc9f}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0}
+button{font-size:13px;color:#faecd1;background:#24202c;border:1px solid #937846;padding:10px 18px;border-radius:8px;cursor:pointer}button:active{transform:translateY(1px)}
+.note{font-size:12px;line-height:1.7;color:#b8aa94;margin:10px 0;max-width:760px}
+@media(max-width:560px){header{padding-bottom:11px}.stage{border-radius:6px}.prompt .word{font-size:clamp(12px,3.7vw,16px);letter-spacing:.2em}.prompt small{font-size:8px}.status{font-size:11px}.card-art{height:73%;max-width:46%}}
+@media(prefers-reduced-motion:reduce){.prompt .word,.card-art{animation:none}.card-layer{transition:none}}
 </style>
 </head>
-<body><main><header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING / MOTION TEST</div><h1>ガチャ映像 新試作｜カメラ接近→タッチ→鍵盤押下</h1></div><small>技術検証専用・本番未反映</small></header>
-<section id="stage" class="stage" aria-label="動画のタッチ再生テスト">
-  <video id="movie" src="./piano-touch-cinematic-v3.mp4" muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
-  <div id="prompt" class="prompt" role="button" aria-label="タッチしてガチャ演出を進める" aria-hidden="true" tabindex="-1"><div class="word">画面をタッチ</div><small>TOUCH TO PLAY</small></div>
+<body><main><header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING / GACHA TEST</div><h1>鍵盤へ接近 → タッチ → ピアノ全景 → カード</h1></div><small>専用テスト・本番未反映</small></header>
+<section id="stage" class="stage" aria-label="ガチャ映像のタッチ再生テスト">
+ <video id="movie" src="./piano-press-zoomout-v4.mp4" muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+ <div id="card-layer" class="card-layer" aria-hidden="true"><img class="card-art" src="./card-back.png" alt="ドリステのカード裏面"></div>
+ <div id="prompt" class="prompt" role="button" aria-label="タッチしてガチャ演出を進める" aria-hidden="true" tabindex="-1"><div class="word">画面をタッチ</div><small>TOUCH TO PLAY</small></div>
 </section>
 <div class="status"><span>状態：<b id="status">準備中</b></span><span>タッチ回数：<b id="count">0</b></span><span>動画：<b id="time">0.00秒</b></span></div>
 <div class="controls"><button id="restart" type="button">最初からもう一度</button></div>
-<p class="note">これは「ピアノへ滑らかに接近 → 静止 → タッチで白鍵の押下と光が広がる」を1本の動画で再生する画質と動作の検証です。今回は高画質写真をもとに、カメラの連続移動と1鍵の疑似沈下を事前描画した新しい試作動画です。3D撮影ではなく、鍵盤の変形は画像処理による表現です。ガチャ抽選、カード演出、音声は未接続です。本番未反映。</p>
+<p class="note">staging限定の演出確認。鍵盤に接近したところでタッチを待ち、タッチ後は追加のズームインをせず、押下→ピアノ全景へのズームアウト→手前にカード表示。背景の切り替えと鍵盤押下は画像から制作した仮映像で、最終3D品質ではありません。実際の抽選・ランク別演出・カード結果表示は未接続です。</p>
 </main>
 <script>
 (()=>{'use strict';
-const video=document.getElementById('movie');
-const stage=document.getElementById('stage');
-const prompt=document.getElementById('prompt');
-const status=document.getElementById('status');
-const count=document.getElementById('count');
-const time=document.getElementById('time');
+const video=document.getElementById('movie');const stage=document.getElementById('stage');
+const prompt=document.getElementById('prompt'),card=document.getElementById('card-layer');
+const status=document.getElementById('status'),count=document.getElementById('count'),time=document.getElementById('time');
 const restart=document.getElementById('restart');
-const WAIT_AT=1.53, RESUME_AT=1.68;
-let state='loading',runs=0,taps=0,frameRequest=null;
-function showPrompt(show){prompt.setAttribute('aria-hidden',show?'false':'true');prompt.tabIndex=show?0:-1;}
-function setState(s,message){state=s;status.textContent=message;stage.dataset.state=s;}
-function cancelFrames(){if(frameRequest!==null&&typeof video.cancelVideoFrameCallback==='function')video.cancelVideoFrameCallback(frameRequest);frameRequest=null;}
-function frameLoop(now,metadata){
- frameRequest=null;
- if(state==='intro' && (metadata?.mediaTime??video.currentTime)>=WAIT_AT){
-  video.pause();cancelFrames();
-  // Seek only within a segment whose every frame is visually identical.
-  // This keeps the paused frame and continuation perfectly matched.
-  if(Math.abs(video.currentTime-RESUME_AT)>.035)video.currentTime=RESUME_AT;
-  setState('waiting','タッチ待機（時間制限なし）');showPrompt(true);return;
- }
- if(state==='intro')watchFrame();
-}
-function watchFrame(){
- if(typeof video.requestVideoFrameCallback==='function')frameRequest=video.requestVideoFrameCallback(frameLoop);
-}
-async function begin(){
- cancelFrames();video.pause();showPrompt(false);video.currentTime=0;
- setState('intro','ピアノ登場映像 再生中');runs++;
- try{await video.play();watchFrame()}catch(err){setState('ready','再生を開始するには画面をタッチ');showPrompt(true);}
-}
-function resume(){
- if(state==='ready'){begin();return}
- if(state!=='waiting')return;
- taps++;count.textContent=String(taps);showPrompt(false);
- setState('playing','鍵盤押下映像 再生中');
- // The still pause point is exact and the video is already buffered.
- if(video.currentTime<WAIT_AT-.05||video.currentTime>1.76)video.currentTime=RESUME_AT;
- video.play().catch(()=>{setState('waiting','再生を再試行して');showPrompt(true)});
-}
+const WAIT_AT=1.53,RESUME_AT=1.78,CARD_AT=3.43;
+let state='loading',taps=0,frameRequest=null,playToken=0;
+function setState(s,message){state=s;stage.dataset.state=s;status.textContent=message}
+function showPrompt(on){prompt.setAttribute('aria-hidden',on?'false':'true');prompt.tabIndex=on?0:-1}
+function showCard(on){card.classList.toggle('show',on);card.setAttribute('aria-hidden',on?'false':'true')}
+function cancelFrames(){if(frameRequest!==null&&typeof video.cancelVideoFrameCallback==='function'){video.cancelVideoFrameCallback(frameRequest)}frameRequest=null}
+function pauseAtKeyboard(){if(state!=='intro')return;video.pause();cancelFrames();
+ if(Math.abs(video.currentTime-RESUME_AT)>.035)video.currentTime=RESUME_AT;
+ setState('waiting','鍵盤でタッチ待機中');showPrompt(true)}
+function frameLoop(now,meta){frameRequest=null;
+ if(state==='intro'&&(meta?.mediaTime??video.currentTime)>=WAIT_AT){pauseAtKeyboard();return}
+ if((state==='playing'||state==='reveal')&&(meta?.mediaTime??video.currentTime)>=CARD_AT)revealCard();
+ if(state==='intro'||state==='playing')watchFrame();}
+function watchFrame(){if(typeof video.requestVideoFrameCallback==='function')frameRequest=video.requestVideoFrameCallback(frameLoop)}
+function revealCard(){if(state==='playing'){showCard(true);setState('reveal','カード前面表示（仮カード）')}}
+async function begin(){const token=++playToken;cancelFrames();video.pause();showPrompt(false);showCard(false);video.currentTime=0;
+ setState('intro','タッチ前に鍵盤へ接近中');
+ try{await video.play();if(token!==playToken)return;watchFrame()}catch(e){if(token!==playToken)return;setState('ready','再生開始には画面をタッチ');showPrompt(true)}}
+function resume(){if(state==='ready'){begin();return}if(state!=='waiting')return;
+ taps++;count.textContent=String(taps);showPrompt(false);setState('playing','鍵盤押下 → ピアノ全景へズームアウト');
+ if(Math.abs(video.currentTime-RESUME_AT)>.09)video.currentTime=RESUME_AT;
+ video.play().then(()=>watchFrame()).catch(()=>{setState('waiting','再生を再試行して');showPrompt(true)})}
 stage.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;resume()});
 prompt.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();resume()}});
-restart.addEventListener('click',()=>{begin()});
+restart.addEventListener('click',begin);
 video.addEventListener('loadeddata',()=>{if(state==='loading')begin()});
-video.addEventListener('timeupdate',()=>{
- time.textContent=video.currentTime.toFixed(2)+'秒';
- if(state==='intro'&&video.currentTime>=WAIT_AT)frameLoop(null,{mediaTime:video.currentTime});
-});
-video.addEventListener('ended',()=>{cancelFrames();setState('ended','再生完了（カード演出へ接続予定）');showPrompt(false)});
-video.addEventListener('error',()=>{setState('error','動画の読み込みに失敗');showPrompt(false)});
-document.addEventListener('visibilitychange',()=>{
- if(document.hidden){if(state==='intro'||state==='playing'){video.pause();setState('paused','画面復帰待ち');showPrompt(true)}}
-});
-// If the tab was backgrounded during intro, restart on next tap;
-// otherwise continue the already loaded video from where it paused.
-stage.addEventListener('pointerup',()=>{if(state!=='paused')return;if(video.currentTime<WAIT_AT)begin();else {setState('playing','再生再開中');showPrompt(false);video.play().catch(()=>{})}});
+video.addEventListener('timeupdate',()=>{time.textContent=video.currentTime.toFixed(2)+'秒';
+ if(state==='intro'&&video.currentTime>=WAIT_AT)pauseAtKeyboard();
+ if((state==='playing'||state==='reveal')&&video.currentTime>=CARD_AT)revealCard()});
+video.addEventListener('ended',()=>{cancelFrames();showCard(true);setState('ended','カード表示完了（ランク別演出は未接続）');showPrompt(false)});
+video.addEventListener('error',()=>{setState('error','動画を読み込めません');showPrompt(false)});
 if(video.readyState>=2)begin();else{video.load();setState('loading','動画読み込み中')}
 })();
 </script></body></html>
