@@ -17,18 +17,19 @@ header small{font-size:11px;color:#bda98c;text-align:right;white-space:nowrap}
 .stage{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:10px;background:#110d0f;border:1px solid #8e6f46b0;box-shadow:0 26px 58px #000b;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .stage:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 46px #09040880}
 video{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
-.prompt{position:absolute;z-index:5;left:0;right:0;top:0;bottom:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:9px;text-align:center;cursor:pointer;background:linear-gradient(0deg,#0e090c2e,#0000 35%,#0000 65%,#0e090c18);-webkit-tap-highlight-color:transparent}
+.prompt{position:absolute;z-index:5;inset:0;display:none;align-items:center;justify-content:flex-start;flex-direction:column;gap:4px;padding-top:11.8%;text-align:center;cursor:pointer;background:none;-webkit-tap-highlight-color:transparent}
 .prompt[aria-hidden="false"]{display:flex}
-.prompt .word{border-radius:3px;padding:12px 25px;color:#fff4e0;text-shadow:0 2px 12px #000,0 0 25px #e8bd76b5;border:1px solid #ffecc980;background:linear-gradient(100deg,#100d1b7a,#281c2380,#100d1b7a);font-weight:600;font-size:clamp(14px,3.6vw,23px);letter-spacing:.24em;box-shadow:0 0 45px #e2bd6c40;animation:breathe 2s ease-in-out infinite}
-.prompt small{font:12px Georgia,serif;letter-spacing:.2em;text-shadow:0 2px 10px #000}
-@keyframes breathe{50%{box-shadow:0 0 56px #f6c56a66;border-color:#fff7dbba}}
+.prompt .word{padding:0;border:0;background:none;box-shadow:none;color:#fff5df;text-shadow:0 1px 8px #000c,0 0 14px #edbe79aa;font-weight:500;font-size:clamp(14px,2.1vw,23px);letter-spacing:.25em;line-height:1.5;pointer-events:none;animation:prompt-breathe 2.35s ease-in-out infinite}
+.prompt small{font:10px Georgia,serif;letter-spacing:.22em;color:#e4c99e;text-shadow:0 1px 7px #000e;opacity:.82;pointer-events:none}
+@keyframes prompt-breathe{0%,100%{opacity:.8;transform:translateY(1px)}50%{opacity:1;transform:translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){.prompt .word{animation:none}}
 .status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;padding:15px 3px 5px;color:#d5bd9a}
 .status b{color:#f6db9e;font-weight:700}
 .controls{display:flex;gap:9px;flex-wrap:wrap;padding:10px 0}
 button{font-size:13px;color:#f8e9ce;background:#24202a;border:1px solid #937746;padding:10px 18px;border-radius:8px;cursor:pointer}
 button:active{transform:translateY(1px)}
 .note{font-size:12px;line-height:1.85;color:#b7a995;margin:10px 0;max-width:760px}
-@media(max-width:560px){header{padding-bottom:12px}.stage{border-radius:6px}.prompt .word{padding:8px 14px;font-size:12px}.prompt small{font-size:9px}.status{font-size:11px}}
+@media(max-width:560px){header{padding-bottom:12px}.stage{border-radius:6px}.prompt .word{font-size:clamp(12px,3.7vw,16px);letter-spacing:.19em}.prompt small{font-size:8px;letter-spacing:.15em}.status{font-size:11px}}
 </style>
 </head>
 <body><main><header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING / MOTION TEST</div><h1>ガチャ動画｜一時停止→タッチ→続き再生</h1></div><small>技術検証専用・本番未反映</small></header>
