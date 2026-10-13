@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#09090c"><meta name="robots" content="noindex,nofollow">
-<title>ドリステ｜動画停止・タッチ再開 機構テスト</title>
+<title>ドリステ｜ガチャ動画 カメラ接近と鍵盤押下 試作</title>
 <style>
 :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
 *{box-sizing:border-box}
@@ -32,14 +32,14 @@ button:active{transform:translateY(1px)}
 @media(max-width:560px){header{padding-bottom:12px}.stage{border-radius:6px}.prompt .word{font-size:clamp(12px,3.7vw,16px);letter-spacing:.19em}.prompt small{font-size:8px;letter-spacing:.15em}.status{font-size:11px}}
 </style>
 </head>
-<body><main><header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING / MOTION TEST</div><h1>ガチャ動画｜一時停止→タッチ→続き再生</h1></div><small>技術検証専用・本番未反映</small></header>
+<body><main><header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING / MOTION TEST</div><h1>ガチャ映像 新試作｜カメラ接近→タッチ→鍵盤押下</h1></div><small>技術検証専用・本番未反映</small></header>
 <section id="stage" class="stage" aria-label="動画のタッチ再生テスト">
-  <video id="movie" src="./piano-pause-press-prototype.mp4" muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+  <video id="movie" src="./piano-touch-cinematic-v3.mp4" muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
   <div id="prompt" class="prompt" role="button" aria-label="タッチしてガチャ演出を進める" aria-hidden="true" tabindex="-1"><div class="word">画面をタッチ</div><small>TOUCH TO PLAY</small></div>
 </section>
 <div class="status"><span>状態：<b id="status">準備中</b></span><span>タッチ回数：<b id="count">0</b></span><span>動画：<b id="time">0.00秒</b></span></div>
 <div class="controls"><button id="restart" type="button">最初からもう一度</button></div>
-<p class="note">これは「1本の映像を途中で停止して待機し、画面タッチで同じ映像を再開できるか」の技術検証です。現在の鍵盤押下シーンは静止画から生成した仮アニメーションであり、完成演出ではありません。ガチャ抽選、カード演出、音声は未接続です。</p>
+<p class="note">これは「ピアノへ滑らかに接近 → 静止 → タッチで白鍵の押下と光が広がる」を1本の動画で再生する画質と動作の検証です。今回は高画質写真をもとに、カメラの連続移動と1鍵の疑似沈下を事前描画した新しい試作動画です。3D撮影ではなく、鍵盤の変形は画像処理による表現です。ガチャ抽選、カード演出、音声は未接続です。本番未反映。</p>
 </main>
 <script>
 (()=>{'use strict';
