@@ -2,164 +2,131 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090d17"><meta name="robots" content="noindex,nofollow">
-<title>ドリステ｜写真一致の独立可動鍵盤・staging</title>
+<meta name="theme-color" content="#090e19"><meta name="robots" content="noindex,nofollow">
+<title>ドリステ｜白鍵・黒鍵の立体可動試作</title>
 <style>
-:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+--ivoryPhoto:data:image/webp;base64,UklGRooEAABXRUJQVlA4IH4EAADwHACdASpgALIAPnk2mEgkoyKhJ5HryJAPCWUA0QDpVxi6fG0+e4e54p9CYPUBKGVYdr/cAy5SG7Iu6uKjUs/9oF6p+rNQg16moRr/eaZVf44J+v7r9Y0uzt3HQ/8mP/u+aHjvhl1HfnPUlAi37lud0qDP/tAOw74/dMdoj0bVX/hQdOLr8anx7/SL7pv+Ozh1Mm2bh9C8ErOPSM+LliqzTvE4Q5Iz7a//4xKMnIffC0o8TpFGa+R0AImYYCnSkSoFTq8Agm3ZYts5UjznFbRLQO7lNtTa8WinockvTgvJ3jhCLu7RT3nmN0DQRBv3m/AA/v5TXC/XcjEHq4LkfT706D8o2il+f/b3sa36+4k3/7cHi7btmUpS3cX4byzq0roCCvlYWP2XC7oRf1yBRRLAJS4+pg3tjl7Y45VYKALH4UnmY3dHG4IZfXKOH8tq/IUOXGAw7yIx1SDqxjIZQT59UkOcXBIUcbgXNRXpItMpasw4Pbg2Bt9VC/OQIrDnB9d0QBmZ5dvFEktEam2hUEHbwJv55rqhAZEK9GoEP33iFZipa0y3+p1sZ/HUnVdO1IlOhlL/+A9t2HWGIDvYvrGfXTI7wkoEtpZkhhVyg0j9ivb3vWmzR3+hTDR5XV3n/u7Pw004EZp4biv3w2vL32mMT5jpzi5B69yIIGvAZTQihPsHwjmDiPhXGwsrOvL3dq3rSjqAxMpZQVkgdiLr7HZjOcNlf/8iCQoZz0rQJ0J8/ss7NqMNfh2sF7udpofaKJE7lnSCK+LXKBVmla/IGhc2bBgygguD5SstpM1bfXnOtBaqdSrrycUrG29shD3LTgvJoJ7R2I/aYCZAhJK8P+gP7F0zIA6XM+u9vdlmke6nD5xLZNo+sYHiaSL7gLG3JIrj+xcQ7Z+PsXNZkC4U+HRmRBxidJpHrnd0uTosOb/+GzYoFk5yYtrhStLlbJroASW7jlDS8r3N3rS9jjgFxfivAXrX0sIn139mE2/A3HRX3M2JiVZqgVRAllD5l8b8ExO9O+qcV8OgHvE702oZsKieDnc3nl2YRjQ7LEWo6QFHPMfQB545N/I63ygNkhU8BAGXsLpsybgw3r05FMmruihl96/u3JBVUlnjRU32Q3jlVoUzsv2DVg8msghB2rz6+fwexZBqOr/S1NLax1ak8qxvNkdGD7O44vMFvkyjOs7VE32H+rkhuqs6NZ2ItCyjgPFkUbbkeWlKJsmZhFESUGg29tBZTsCbKetUeJBkr8skfOEv9IdzCyxwecOG6N+/2M66wsxp8NrOBfU5olpp4YbeiP2Mt7l+NRjMmt4fM0UWzH+O1jbizPLVJm/hPZL/Dj4hDI/KVEyuONZYoItzcI6CGVz2Km2ecPSve67e8YW44juJ6dKuNAoLfzV8bWxYPkbVO6BnGyaBbKFbuR1wpc5JF+4ruKEMJm3689eeID4qdLFr3lRi8sRHABcX9gBoO9N9M8MnfiK5N/1/iGFj8Pbnz6/tUwdXCg78mRr92/aNM8w+P2bygSQskcAAAAAA;--blackPhoto:data:image/webp;base64,UklGRloBAABXRUJQVlA4IE4BAAAQDQCdASpeAHAAPnk6l0gko6IhKTv5mJAPCWcA0bwlNocOeCAVZdOkSryCxTtcK4lw2wDFsCsOt98rTQuzU08lxKVCkclOnCKNCM2oeyFIxFFb86D4OmPun3hJiM1bJigShiOqohBIBd/639UXI27oAAD++jOT49U4AFjJB2h9RX7DrgG8QfAkeEDzJTwMHe1K1nzwryJtUBc9pi4uE1S7u5dFKWhFEBGtzQKAeGFglg0FWSPsxOsEDnhhWF7MUo7mxwspRp6J3QwJ0+zUmKlZtszyu0/IJZwfAA6z2bbybVL/SapcLqEKkrTaukRNzLsfXMHE18wxccT0I80z2zcIqKtH3tRk1nKtdOV8WiI3D+BsT9ARkXkSpWlNbiXfneA1R1YHB6P7deFRkmHEwZ0nJRVbBvsCStmOsFII+N5iNh6V9YAythsQ5AkAAAAA}
 *{box-sizing:border-box}
-html,body{margin:0;background:linear-gradient(155deg,#080a14,#141326 70%,#070b12);color:#ffeed3;min-height:100%;-webkit-text-size-adjust:100%}
-body{padding:env(safe-area-inset-top) max(9px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(9px,env(safe-area-inset-left))}
-main{max-width:1240px;margin:0 auto;padding:12px 0 20px}
-header{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:5px 3px 12px}
-.eyebrow{font:600 clamp(9px,1.7vw,12px) Georgia,serif;letter-spacing:.19em;color:#cbb183}
-h1{margin:6px 0 0;font-size:clamp(16px,3vw,23px)}
-.counter{font-size:12px;text-align:right;white-space:nowrap;color:#c7bba8}
-.counter strong{font-size:clamp(22px,5vw,31px);color:#ffe3a1;font-variant-numeric:tabular-nums}
-.scene{width:100%;position:relative;aspect-ratio:1672/941;overflow:hidden;border:1px solid #c3a0655e;border-radius:12px;background:#080a15;isolation:isolate}
-.scene .photo,.scene canvas{position:absolute;display:block;inset:0;width:100%;height:100%}
-.photo{object-fit:fill;pointer-events:none}
-.scene canvas{z-index:4;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-.report{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 4px 0}
-.report strong{font-size:18px;color:#ffe2a8}
-.chip{padding:7px 12px;color:#eddaae;border:1px solid #8c714b;border-radius:20px;background:#1a1825;font-size:11px}
-.detail{padding:3px 4px 0;color:#b9b5ab;font-size:12px;line-height:1.8}
-@media(max-width:560px){main{padding-top:6px}header{padding-bottom:7px}.scene{border-radius:9px}.detail{font-size:11px}.report{padding-top:8px}}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 1%,#20213b,#090e19 67%);color:#f9edda;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) max(12px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(12px,env(safe-area-inset-left))}
+main{max-width:1020px;margin:auto;padding:12px 0 40px}
+.top{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}
+.eyebrow{color:#d8b876;letter-spacing:.19em;font:600 10px Georgia,serif}
+h1{font-size:clamp(19px,3.6vw,28px);margin:5px 0 3px}
+.subhead{color:#cabfaa;font-size:12px;line-height:1.6}
+.counter{text-align:right;font-size:11px;white-space:nowrap;color:#b9ae9c}.counter strong{display:block;color:#ffe7a3;font-size:28px;line-height:1.15;font-variant-numeric:tabular-nums}
+.keyframe{background:linear-gradient(147deg,#10111a,#17101b 44%,#050609);border:1px solid #ad8850aa;border-radius:14px;box-shadow:0 14px 38px #000a,inset 0 1px 0 #fcdfa43d;overflow:hidden}
+.labelrow{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 0;gap:8px}
+.labelrow b{font-size:13px;color:#f3dcb0}.labelrow small{font-size:10px;color:#c5b192;text-align:right}
+.workbench{height:clamp(235px,49vw,355px);position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 55% 5%,#574126 0%,#13101b 55%,#040609 100%)}
+.workbench::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,#f4cb6940 49%,transparent 75%);opacity:.3;pointer-events:none}
+.piano-chassis{position:absolute;left:0;right:0;bottom:7%;height:21%;background:linear-gradient(180deg,#06070c,#24202b 27%,#050609 57%,#0c0a0e 68%,#010103);border-top:3px solid #99733e;box-shadow:inset 0 3px #ffdc7957,0 22px 32px #000d}
+.piano-chassis:before{content:"";position:absolute;inset:18% 3% auto;height:3px;background:linear-gradient(90deg,transparent,#b49359,transparent)}
+.stage-camera{position:absolute;left:5%;width:90%;height:75%;top:17%;perspective:900px;perspective-origin:50% -25%;overflow:visible}
+.keyboard-rig{height:100%;position:relative;transform:rotateX(29deg) rotateZ(-6deg);transform-style:preserve-3d;filter:drop-shadow(0 20px 12px #0009);will-change:transform}
+.key-well{position:absolute;left:0;right:0;top:11%;height:70%;border:7px solid #111013;border-top:12px solid #241912;border-bottom:9px solid #b18a4d;border-radius:7px 8px 11px 11px;background:linear-gradient(180deg,#07080b,#17151d 64%,#08090c);box-shadow:0 5px 7px #000a,inset 0 2px 3px #eecb8145}
+.keygroup{position:absolute;left:2.5%;right:2.5%;top:12%;height:66%;display:flex;transform-style:preserve-3d}
+.key{touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;appearance:none;-webkit-appearance:none;outline-offset:6px;padding:0;position:relative;transform-style:preserve-3d;transform-origin:50% 0%;border:0;transition:transform .18s cubic-bezier(.14,.8,.24,1),filter .16s ease;cursor:pointer}
+.key:disabled{cursor:default;opacity:1}
+.key:focus-visible{outline:3px solid #d6a659}
+.key .surface{position:absolute;inset:0;display:block;border-radius:0 0 2px 2px;backface-visibility:hidden}
+.key .front-face{position:absolute;bottom:0;left:0;right:0;transform-origin:bottom;transform:rotateX(-90deg);backface-visibility:hidden;pointer-events:none}
+.key .edge-light{position:absolute;left:0;right:0;bottom:0;height:2px;box-shadow:0 0 3px #fff8;pointer-events:none}
+.white-key{width:calc(100% / 9);height:100%;flex:1;z-index:1;transform:translateZ(14px);}
+.white-key .surface{border:1px solid #b1aa99;border-left:1px solid #f2ebdd;border-right:1px solid #847b74;background:linear-gradient(90deg,#b3aea3,#fdfcf1 17%,#eeeadf 66%,#b8afa0 100%);box-shadow:inset 0 8px 10px #00000015,2px 4px 3px #03020438}
+.white-key .front-face{height:14px;background:linear-gradient(180deg,#fff9e6,#b9b0a2 72%,#877b6b);border:1px solid #928a7d;}
+.white-key.sample .surface{box-shadow:inset 0 8px 10px #00000015,2px 4px 3px #03020438}
+.white-key.sample .front-face{background-image:linear-gradient(90deg,#f7f1e7ee,#fffffff1 35%,#d3c2a6d9),var(--ivoryPhoto);background-size:cover;background-position:center}
+.white-key .edge-light{background:linear-gradient(90deg,#9b8160,#fffefa,#867563)}
+.white-key.is-pressed{transform:translateZ(2px) rotateX(-10deg);filter:brightness(.91)}
+.white-key.is-pressed .surface{box-shadow:inset 0 14px 15px #3b302a5c,1px 1px 2px #05050580}
+.black-key{position:absolute;left:calc(var(--position) - 3.8%);top:0;width:7.6%;height:59%;z-index:10;transform:translateZ(40px)}
+.black-key .surface{background:linear-gradient(90deg,#050506,#2d2c30 21%,#141417 62%,#000);border:1px solid #08080a;border-radius:0 0 4px 4px;box-shadow:inset 2px 0 3px #f1c98b38,inset 0 -12px 11px #0009,3px 4px 4px #0009}
+.black-key .front-face{height:14px;background:linear-gradient(90deg,#060607,#3d3940 23%,#0a090d 72%,#000);border-radius:0 0 4px 4px;border:1px solid #08090b}
+.black-key.sample .surface{background-image:linear-gradient(90deg,#151217e0,#00000066,#000000b0),var(--blackPhoto);background-size:cover;background-position:center}
+.black-key .edge-light{height:3px;background:linear-gradient(90deg,#0b0708,#96816a 38%,#08090b)}
+.black-key.is-pressed{transform:translateZ(23px) rotateX(-11deg);filter:brightness(.77)}
+.piano-marker{position:absolute;right:5%;bottom:1%;font:italic 10px Georgia,serif;color:#d8bf80b8;letter-spacing:.2em}
+.testrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.testbtn{border:1px solid #98753f;background:linear-gradient(135deg,#2b2330,#111323);color:#fee7be;font-size:13px;border-radius:12px;padding:13px 6px;text-align:center;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer;min-height:48px}
+.testbtn:active,.testbtn[aria-pressed="true"]{background:#463522;border-color:#e0b56d}
+.testbtn small{display:block;font-size:10px;color:#bfaf93;margin-top:3px}
+.readout{display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:8px 4px 15px;font-size:13px;color:#cab8a1}
+.readout b{color:#ffe5ab}
+.explain{margin:10px 0 12px;padding:12px;border:1px solid #4c4140;background:#17131b;border-radius:10px;color:#c6baab;font-size:12px;line-height:1.8}
+.reference{margin-top:14px;border:1px solid #4b423f;border-radius:12px;overflow:hidden;background:#0a0b10}
+.reference summary{cursor:pointer;padding:12px 15px;font-size:12px;color:#cbb595}
+.reference img{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
+@media(max-width:550px){.top{margin-bottom:9px}.keyframe{border-radius:10px}.workbench{height:265px}.stage-camera{width:96%;left:2%;top:23%;height:64%;perspective:620px}.keyboard-rig{transform:rotateX(24deg) rotateZ(-5deg)}.key-well{top:9%;height:76%}.keygroup{top:10%;height:70%}.testrow{gap:6px;padding:8px}.testbtn{font-size:12px}.readout{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.key{transition:none}}
 </style>
-</head>
-<body>
-<main>
-<header><div><div class="eyebrow">PIANO DREAM STAGE · STAGING TEST</div><h1>独立パーツ鍵盤 押下テスト</h1></div><div class="counter">タップ<br><strong id="tap-count">0</strong> 回</div></header>
-<section class="scene" id="scene" aria-label="高画質写真の右側の鍵盤をタッチして押下を確認">
-<img class="photo" id="photo" src="./highres-grand-piano.avif" width="1672" height="941" decoding="async" fetchpriority="high" alt="高画質グランドピアノ（読み込み中の予備画像）">
-<canvas id="key-canvas" width="1672" height="941" aria-label="写真の右側の白鍵と黒鍵をタッチ"></canvas>
+</head><body>
+<main><div class="top"><div><div class="eyebrow">PIANO DREAM STAGE · STAGING ONLY</div><h1>白鍵・黒鍵の立体可動テスト</h1><div class="subhead">写真の上塗りではなく、鍵盤本体が奥を支点に動く試作</div></div><div class="counter">タップ<strong id="count">0</strong></div></div>
+<section class="keyframe" aria-label="立体可動鍵盤の検証画面">
+<div class="labelrow"><b>PHYSICAL KEY TEST</b><small>中央の白鍵 ＆ 黒鍵を押して確認</small></div>
+<div class="workbench"><div class="piano-chassis" aria-hidden="true"></div><div class="stage-camera"><div class="keyboard-rig"><div class="key-well"></div><div class="keygroup" id="keygroup"><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key sample" type="button" data-sample="white" aria-label="試作白鍵を押す" aria-pressed="false" ><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button> <button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:11.111111%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:22.222222%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key sample" type="button" data-sample="black" aria-label="試作黒鍵を押す" aria-pressed="false"  style="--position:44.444444%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:55.555556%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:66.666667%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:88.888889%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button></div></div></div><div class="piano-marker">PIANO DREAM STAGE</div></div>
+<div class="testrow"><button class="testbtn" id="white-test" data-sample="white" type="button" aria-pressed="false">白鍵を沈める<small>長押しして動きを確認</small></button><button class="testbtn" id="black-test" data-sample="black" type="button" aria-pressed="false">黒鍵を沈める<small>長押しして動きを確認</small></button></div>
 </section>
-<div class="report"><div>最後の鍵盤：<strong id="last-key">—</strong></div><div>押下中：<strong id="held">0</strong></div><div class="chip" id="status">鍵盤素材を読み込み中</div></div>
-<p class="detail">今回は以前切り出した白鍵18個・黒鍵13個の実画像パーツを使用。右側の31鍵を個別にタッチできるよ。通常時は元の写真を表示し、押下中は個別鍵盤の輪郭に沿って反射と前縁の変化を表示します。写真や鍵盤パーツを矩形で重ねず、周囲の鍵盤は動かしません。リアルな立体可動の検証は次段階です。写真左側の鍵盤はまだ固定表示。ガチャ本体・本番には未反映。</p>
+<div class="readout"><span>最後の操作：<b id="last">—</b></span><span>押下中：<b id="held">0</b></span><span id="status">鍵盤の動作待機中</span></div>
+<p class="explain">今回は白鍵1個・黒鍵1個だけの<strong>立体可動構造</strong>をテストしている。鍵盤は個別の厚み・側面・支点を持ち、押すと鍵盤本体が傾いて沈み、離すと戻る。その他の鍵盤と背景写真は動かない。ガチャ本体にはまだ組み込まない。</p>
+<details class="reference"><summary>元の高画質ピアノ写真を見る（参照用・固定）</summary><img src="./highres-grand-piano.avif" alt="元の大聖堂とグランドピアノの高画質写真" loading="lazy" width="1672" height="941"></details>
 </main>
 <script>
-(()=>{'use strict';
-const scene=document.getElementById('scene');
-const canvas=document.getElementById('key-canvas'),ctx=canvas.getContext('2d',{alpha:true});
-const status=document.getElementById('status'),photo=document.getElementById('photo');
-const counter=document.getElementById('tap-count'),last=document.getElementById('last-key'),held=document.getElementById('held');
-const parts=[{"id":"white_01","type":"white","hit":[[703,499],[728,505],[728,596],[703,589]],"x":695,"y":491,"w":41,"h":114,"up":[0,0,41,114],"down":[41,0,41,114]},{"id":"white_02","type":"white","hit":[[728,505],[767,515],[767,607],[728,596]],"x":720,"y":497,"w":55,"h":119,"up":[82,0,55,119],"down":[137,0,55,119]},{"id":"white_03","type":"white","hit":[[767,515],[802,523],[802,617],[767,607]],"x":759,"y":507,"w":51,"h":119,"up":[192,0,51,119],"down":[243,0,51,119]},{"id":"white_04","type":"white","hit":[[802,523],[835,531],[835,626],[802,617]],"x":794,"y":515,"w":49,"h":120,"up":[294,0,49,120],"down":[343,0,49,120]},{"id":"white_05","type":"white","hit":[[835,531],[870,540],[870,636],[835,626]],"x":827,"y":523,"w":51,"h":122,"up":[392,0,51,122],"down":[443,0,51,122]},{"id":"white_06","type":"white","hit":[[870,540],[907,549],[907,647],[870,636]],"x":862,"y":532,"w":53,"h":124,"up":[494,0,53,124],"down":[547,0,53,124]},{"id":"white_07","type":"white","hit":[[907,549],[950,560],[950,659],[907,647]],"x":899,"y":541,"w":59,"h":127,"up":[600,0,59,127],"down":[659,0,59,127]},{"id":"white_08","type":"white","hit":[[950,560],[991,570],[991,671],[950,659]],"x":942,"y":552,"w":57,"h":128,"up":[718,0,57,128],"down":[775,0,57,128]},{"id":"white_09","type":"white","hit":[[991,570],[1034,580],[1034,683],[991,671]],"x":983,"y":562,"w":59,"h":130,"up":[832,0,59,130],"down":[891,0,59,130]},{"id":"white_10","type":"white","hit":[[1034,580],[1076,591],[1076,695],[1034,683]],"x":1026,"y":572,"w":58,"h":132,"up":[950,0,58,132],"down":[1008,0,58,132]},{"id":"white_11","type":"white","hit":[[1076,591],[1123,602],[1123,709],[1076,695]],"x":1068,"y":583,"w":63,"h":135,"up":[1066,0,63,135],"down":[1129,0,63,135]},{"id":"white_12","type":"white","hit":[[1123,602],[1177,616],[1177,724],[1123,709]],"x":1115,"y":594,"w":70,"h":139,"up":[1192,0,70,139],"down":[1262,0,70,139]},{"id":"white_13","type":"white","hit":[[1177,616],[1236,630],[1236,741],[1177,724]],"x":1169,"y":610,"w":75,"h":140,"up":[1332,0,75,140],"down":[1407,0,75,140]},{"id":"white_14","type":"white","hit":[[1236,630],[1304,647],[1304,760],[1236,741]],"x":1228,"y":622,"w":84,"h":147,"up":[0,140,84,147],"down":[84,140,84,147]},{"id":"white_15","type":"white","hit":[[1304,647],[1381,666],[1381,782],[1304,760]],"x":1296,"y":639,"w":93,"h":152,"up":[168,140,93,152],"down":[261,140,93,152]},{"id":"white_16","type":"white","hit":[[1381,666],[1467,687],[1467,807],[1381,782]],"x":1373,"y":658,"w":102,"h":158,"up":[354,140,102,158],"down":[456,140,102,158]},{"id":"white_17","type":"white","hit":[[1467,687],[1561,711],[1561,833],[1467,807]],"x":1459,"y":679,"w":110,"h":163,"up":[558,140,110,163],"down":[668,140,110,163]},{"id":"white_18","type":"white","hit":[[1561,711],[1671,738],[1671,865],[1561,833]],"x":1553,"y":703,"w":127,"h":171,"up":[778,140,127,171],"down":[905,140,127,171]},{"id":"black_01","type":"black","hit":[[836,525],[853,531],[891,507],[874,500]],"x":828,"y":492,"w":72,"h":48,"up":[1032,140,72,48],"down":[1104,140,72,48]},{"id":"black_02","type":"black","hit":[[867,533],[885,539],[925,515],[906,508]],"x":859,"y":500,"w":75,"h":48,"up":[1176,140,75,48],"down":[1251,140,75,48]},{"id":"black_03","type":"black","hit":[[909,544],[928,550],[968,526],[949,519]],"x":901,"y":511,"w":76,"h":48,"up":[1326,140,76,48],"down":[1402,140,76,48]},{"id":"black_04","type":"black","hit":[[941,554],[961,560],[1002,535],[981,528]],"x":933,"y":520,"w":78,"h":49,"up":[0,311,78,49],"down":[78,311,78,49]},{"id":"black_05","type":"black","hit":[[989,563],[1010,569],[1053,544],[1031,537]],"x":981,"y":529,"w":81,"h":49,"up":[156,311,81,49],"down":[237,311,81,49]},{"id":"black_06","type":"black","hit":[[1028,574],[1050,580],[1094,555],[1071,548]],"x":1020,"y":540,"w":83,"h":49,"up":[318,311,83,49],"down":[401,311,83,49]},{"id":"black_07","type":"black","hit":[[1104,596],[1128,602],[1174,576],[1149,569]],"x":1096,"y":561,"w":87,"h":50,"up":[484,311,87,50],"down":[571,311,87,50]},{"id":"black_08","type":"black","hit":[[1169,615],[1194,621],[1241,594],[1215,587]],"x":1161,"y":579,"w":89,"h":51,"up":[658,311,89,51],"down":[747,311,89,51]},{"id":"black_09","type":"black","hit":[[1252,634],[1280,640],[1329,612],[1301,605]],"x":1244,"y":597,"w":94,"h":52,"up":[836,311,94,52],"down":[930,311,94,52]},{"id":"black_10","type":"black","hit":[[1321,651],[1351,657],[1401,629],[1371,622]],"x":1313,"y":614,"w":97,"h":52,"up":[1024,311,97,52],"down":[1121,311,97,52]},{"id":"black_11","type":"black","hit":[[1406,678],[1438,684],[1492,655],[1459,648]],"x":1398,"y":640,"w":103,"h":53,"up":[1218,311,103,53],"down":[1321,311,103,53]},{"id":"black_12","type":"black","hit":[[1514,710],[1549,716],[1605,686],[1569,679]],"x":1506,"y":671,"w":108,"h":54,"up":[1424,311,108,54],"down":[0,365,108,54]},{"id":"black_13","type":"black","hit":[[1607,737],[1645,743],[1704,712],[1665,705]],"x":1599,"y":697,"w":81,"h":55,"up":[108,365,81,55],"down":[189,365,81,55]}];
-let atlas=null,ready=false,count=0,lastPointerTime=0;
-let active=new Map(),released=new Map();
-function showError(message){status.textContent=message;status.style.borderColor='#d67d78';}
-function inside(points,x,y){
- let ok=false;
- for(let i=0,j=points.length-1;i<points.length;j=i++){
-  const a=points[i],b=points[j];
-  if(((a[1]>y)!=(b[1]>y)) && x < (b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])ok=!ok;
+(()=>{
+'use strict';
+const samples={white:document.querySelector('.white-key.sample'),black:document.querySelector('.black-key.sample')};
+const count=document.getElementById('count'),last=document.getElementById('last'),held=document.getElementById('held'),status=document.getElementById('status');
+const pointers=new Map();let taps=0,lastPressTime=0;
+const actives={white:new Set(),black:new Set()};
+const pressedAt={white:0,black:0},pending={white:null,black:null};
+function refresh(){
+ for(const kind of ['white','black']){
+  const down=actives[kind].size>0||pending[kind]!==null;
+  samples[kind].classList.toggle('is-pressed',down);
+  samples[kind].setAttribute('aria-pressed',down?'true':'false');
+  document.getElementById(kind+'-test').setAttribute('aria-pressed',down?'true':'false');
  }
- return ok;
+ held.textContent=String(['white','black'].filter(k=>actives[k].size>0).length);
 }
-// Topmost black keys first, white keys second.
-function keyAt(x,y){
- for(let i=parts.length-1;i>=0;i--)if(parts[i].type==='black'&&inside(parts[i].hit,x,y))return parts[i];
- for(let i=parts.length-1;i>=0;i--)if(parts[i].type==='white'&&inside(parts[i].hit,x,y))return parts[i];
- return null;
+function press(k,id){
+ if(!samples[k]||actives[k].has(id))return;
+ if(pending[k]!==null){clearTimeout(pending[k]);pending[k]=null;}
+ actives[k].add(id);pressedAt[k]=performance.now();taps++;count.textContent=String(taps);
+ last.textContent=k==='white'?'白鍵（立体）':'黒鍵（立体）';
+ status.textContent='鍵盤が支点から沈み込み中';
+ refresh();
 }
-function getPoint(e){const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*1672/r.width,(e.clientY-r.top)*941/r.height]}
-// Never redraw a resting key or switch to a retouched keybed:
-// doing so creates the pale rectangular seams reported on iPhone.
-// Keep the source photograph pixel-perfect. The pressed and released
-// key sprites are used only to calculate localized lighting changes.
-// Pasting their full RGB crops created rectangular colour/reflection seams.
-const sourceCanvas=document.createElement('canvas');
-sourceCanvas.width=1672;sourceCanvas.height=941;
-const sourceCtx=sourceCanvas.getContext('2d',{willReadFrequently:true});
-const partCanvas=document.createElement('canvas');
-partCanvas.width=256;partCanvas.height=256;
-const partCtx=partCanvas.getContext('2d',{willReadFrequently:true});
-const pressCache=new Map();
-function buildPressedPatch(part){
- if(pressCache.has(part.id))return pressCache.get(part.id);
- const [ux,uy,uw,uh]=part.up;
- const white=part.type==='white';
- const sprite=document.createElement('canvas');sprite.width=part.w;sprite.height=part.h;
- const g=sprite.getContext('2d',{alpha:true});
- // Do not paste RGB key textures: they contain rectangular reflections/crops.
- // Use the original separated key's alpha only, to constrain the light to it.
- const gradient=g.createRadialGradient(part.w*.50,part.h*(white?.66:.58),1,
-   part.w*.50,part.h*(white?.66:.58),Math.max(part.w*.88,part.h*(white?.43:.76)));
- gradient.addColorStop(0,white?'rgba(255,226,164,.80)':'rgba(255,207,127,.92)');
- gradient.addColorStop(.46,white?'rgba(255,211,145,.33)':'rgba(255,179,104,.41)');
- gradient.addColorStop(1,'rgba(255,179,104,0)');
- g.fillStyle=gradient;g.fillRect(0,0,part.w,part.h);
- g.globalCompositeOperation='destination-in';
- g.drawImage(atlas,ux,uy,uw,uh,0,0,part.w,part.h);
- g.globalCompositeOperation='source-over';
- pressCache.set(part.id,sprite);return sprite;
+function release(k,id){
+ if(!actives[k]?.has(id))return;
+ actives[k].delete(id);
+ // A quick tap must complete the physical key travel before returning.
+ const delay=Math.max(0,330-(performance.now()-pressedAt[k]));
+ if(actives[k].size===0){
+  pending[k]=setTimeout(()=>{pending[k]=null;refresh();status.textContent='鍵盤が元の高さへ復帰';},delay);
+ } else {refresh();}
 }
-function draw(){
- if(!ready||!ctx||!atlas)return;
- ctx.clearRect(0,0,1672,941);
- for(const part of parts){
-  const pressed=[...active.values()].some(key=>key.id===part.id)||released.has(part.id);
-  if(!pressed)continue;
-  ctx.drawImage(buildPressedPatch(part),part.x,part.y);
-  // The front lip visually drops, while a soft groove stays at its old edge.
-  // Only key-outline strokes are drawn; there are no rectangular overlay fills.
-  const pts=part.hit;
-  const left=pts[3],right=pts[2],depth=part.type==='white'?5:3;
-  ctx.save();ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(left[0],left[1]-depth);ctx.lineTo(right[0],right[1]-depth);
-  ctx.lineWidth=3;ctx.strokeStyle='rgba(9,8,16,.45)';ctx.stroke();
-  ctx.beginPath();ctx.moveTo(left[0],left[1]-depth-3);ctx.lineTo(right[0],right[1]-depth-3);
-  ctx.lineWidth=1.7;ctx.strokeStyle='rgba(255,239,197,.68)';ctx.stroke();
-  ctx.restore();
- }
- held.textContent=String(active.size);
+function init(el){
+ const kind=el.dataset.sample;if(!kind)return;
+ el.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  e.preventDefault();lastPressTime=Date.now();
+  press(kind,e.pointerId);pointers.set(e.pointerId,kind);
+  try{el.setPointerCapture(e.pointerId)}catch(_){}
+ });
+ for(const t of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(t,e=>{
+  const k=pointers.get(e.pointerId);
+  if(k){release(k,e.pointerId);pointers.delete(e.pointerId);}
+ });
+ el.addEventListener('click',e=>{
+  if(Date.now()-lastPressTime<650)return;
+  press(kind,'click');setTimeout(()=>release(kind,'click'),380);
+ });
+ el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){if(!e.repeat){e.preventDefault();press(kind,'keyboard');}}});
+ el.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();release(kind,'keyboard');}});
 }
-function press(key,id){
- if(!ready||!key)return;
- const before=active.get(id);if(before?.id===key.id)return;
- if(before)release(id);
- const t=released.get(key.id);if(t){clearTimeout(t);released.delete(key.id)}
- active.set(id,key);count++;counter.textContent=String(count);last.textContent=key.type==='black'?'黒鍵 '+key.id:'白鍵 '+key.id;
- status.textContent=(key.type==='black'?'黒鍵':'白鍵')+'の押下を表示';draw();
-}
-function release(id){
- const key=active.get(id);if(!key)return;
- active.delete(id);
- // A short tap stays pressed long enough to see on an iPhone.
- const timer=setTimeout(()=>{released.delete(key.id);draw();},380);
- const old=released.get(key.id);if(old)clearTimeout(old);
- released.set(key.id,timer);draw();
-}
-canvas.addEventListener('pointerdown',e=>{
- if(e.pointerType==='mouse'&&e.button!==0)return;
- const xy=getPoint(e),key=keyAt(xy[0],xy[1]);if(!key)return;
- e.preventDefault();lastPointerTime=Date.now();press(key,e.pointerId);
- try{canvas.setPointerCapture(e.pointerId)}catch(_){ }
-});
-canvas.addEventListener('pointermove',e=>{
- if(!active.has(e.pointerId))return;
- const xy=getPoint(e),key=keyAt(xy[0],xy[1]);
- if(key && key.id!==active.get(e.pointerId)?.id){release(e.pointerId);press(key,e.pointerId)}
-});
-for(const name of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(name,e=>release(e.pointerId));
-canvas.addEventListener('click',e=>{
- if(Date.now()-lastPointerTime<650)return;
- const xy=getPoint(e),key=keyAt(xy[0],xy[1]);if(!key)return;
- press(key,'click');release('click');
-});
-window.addEventListener('blur',()=>{[...active.keys()].forEach(id=>release(id))});
-const img=new Image();img.decoding='async';
-let photoReady=false,atlasReady=false;
-function checkReady(){
- if(!photoReady||!atlasReady)return;
- sourceCtx.drawImage(photo,0,0,1672,941);
- ready=true;
- status.textContent='独立パーツ31鍵・押下影 読込OK';
- draw();
-}
-img.onload=()=>{atlas=img;atlasReady=true;checkReady()};
-img.onerror=()=>showError('鍵盤パーツの読み込みに失敗');
-img.src='./key-sprites.webp';
-photo.onload=()=>{photoReady=true;checkReady()};
-photo.onerror=()=>showError('高画質ピアノを読み込めません');
-if(photo.complete&&photo.naturalWidth>0){photoReady=true;checkReady()}
+[...document.querySelectorAll('[data-sample="white"],[data-sample="black"]')].forEach(init);
+window.addEventListener('blur',()=>{for(const k of ['white','black']){actives[k].clear();if(pending[k]!==null){clearTimeout(pending[k]);pending[k]=null;}}pointers.clear();refresh()});
+status.textContent='白鍵・黒鍵の立体可動 準備OK';
 })();
 </script></body></html>
