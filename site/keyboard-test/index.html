@@ -19,15 +19,15 @@ h1{font-size:clamp(19px,3.6vw,28px);margin:5px 0 3px}
 .keyframe{background:linear-gradient(147deg,#10111a,#17101b 44%,#050609);border:1px solid #ad8850aa;border-radius:14px;box-shadow:0 14px 38px #000a,inset 0 1px 0 #fcdfa43d;overflow:hidden}
 .labelrow{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 0;gap:8px}
 .labelrow b{font-size:13px;color:#f3dcb0}.labelrow small{font-size:10px;color:#c5b192;text-align:right}
-.workbench{height:clamp(235px,49vw,355px);position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 55% 5%,#574126 0%,#13101b 55%,#040609 100%)}
+.workbench{height:clamp(260px,49vw,380px);position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 55% 5%,#574126 0%,#13101b 55%,#040609 100%)}
 .workbench::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,#f4cb6940 49%,transparent 75%);opacity:.3;pointer-events:none}
 .piano-chassis{position:absolute;left:0;right:0;bottom:7%;height:21%;background:linear-gradient(180deg,#06070c,#24202b 27%,#050609 57%,#0c0a0e 68%,#010103);border-top:3px solid #99733e;box-shadow:inset 0 3px #ffdc7957,0 22px 32px #000d}
 .piano-chassis:before{content:"";position:absolute;inset:18% 3% auto;height:3px;background:linear-gradient(90deg,transparent,#b49359,transparent)}
 .stage-camera{position:absolute;left:5%;width:90%;height:75%;top:17%;perspective:900px;perspective-origin:50% -25%;overflow:visible}
-.keyboard-rig{height:100%;position:relative;transform:rotateX(29deg) rotateZ(-6deg);transform-style:preserve-3d;filter:drop-shadow(0 20px 12px #0009);will-change:transform}
+.keyboard-rig{height:100%;position:relative;transform:rotateX(24deg) rotateZ(-4deg);transform-style:preserve-3d;filter:drop-shadow(0 20px 12px #0009);will-change:transform}
 .key-well{position:absolute;left:0;right:0;top:11%;height:70%;border:7px solid #111013;border-top:12px solid #241912;border-bottom:9px solid #b18a4d;border-radius:7px 8px 11px 11px;background:linear-gradient(180deg,#07080b,#17151d 64%,#08090c);box-shadow:0 5px 7px #000a,inset 0 2px 3px #eecb8145}
 .keygroup{position:absolute;left:2.5%;right:2.5%;top:12%;height:66%;display:flex;transform-style:preserve-3d}
-.key{touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;appearance:none;-webkit-appearance:none;outline-offset:6px;padding:0;position:relative;transform-style:preserve-3d;transform-origin:50% 0%;border:0;transition:transform .18s cubic-bezier(.14,.8,.24,1),filter .16s ease;cursor:pointer}
+.key{touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;appearance:none;-webkit-appearance:none;outline-offset:6px;padding:0;position:relative;transform-style:preserve-3d;transform-origin:50% 0%;border:0;transition:transform .145s cubic-bezier(.18,.68,.26,1),filter .145s ease;cursor:pointer}
 .key:disabled{cursor:default;opacity:1}
 .key:focus-visible{outline:3px solid #d6a659}
 .key .surface{position:absolute;inset:0;display:block;border-radius:0 0 2px 2px;backface-visibility:hidden}
@@ -35,18 +35,18 @@ h1{font-size:clamp(19px,3.6vw,28px);margin:5px 0 3px}
 .key .edge-light{position:absolute;left:0;right:0;bottom:0;height:2px;box-shadow:0 0 3px #fff8;pointer-events:none}
 .white-key{width:calc(100% / 9);height:100%;flex:1;z-index:1;transform:translateZ(14px);}
 .white-key .surface{border:1px solid #b1aa99;border-left:1px solid #f2ebdd;border-right:1px solid #847b74;background:linear-gradient(90deg,#b3aea3,#fdfcf1 17%,#eeeadf 66%,#b8afa0 100%);box-shadow:inset 0 8px 10px #00000015,2px 4px 3px #03020438}
-.white-key .front-face{height:14px;background:linear-gradient(180deg,#fff9e6,#b9b0a2 72%,#877b6b);border:1px solid #928a7d;}
+.white-key .front-face{height:17px;background:linear-gradient(180deg,#fff9e6,#b9b0a2 72%,#877b6b);border:1px solid #928a7d;}
 .white-key.sample .surface{box-shadow:inset 0 8px 10px #00000015,2px 4px 3px #03020438}
 .white-key.sample .front-face{background-image:linear-gradient(90deg,#f7f1e7ee,#fffffff1 35%,#d3c2a6d9),var(--ivoryPhoto);background-size:cover;background-position:center}
 .white-key .edge-light{background:linear-gradient(90deg,#9b8160,#fffefa,#867563)}
-.white-key.is-pressed{transform:translateZ(2px) rotateX(-10deg);filter:brightness(.91)}
-.white-key.is-pressed .surface{box-shadow:inset 0 14px 15px #3b302a5c,1px 1px 2px #05050580}
+.white-key.is-pressed{transform:translateZ(3px) rotateX(-6deg);filter:brightness(.92);z-index:3}
+.white-key.is-pressed .surface{box-shadow:inset 0 11px 11px #3b302a40,inset 0 -6px 9px #0002,0 0 0 1px #342b22}
 .black-key{position:absolute;left:calc(var(--position) - 3.8%);top:0;width:7.6%;height:59%;z-index:10;transform:translateZ(40px)}
 .black-key .surface{background:linear-gradient(90deg,#050506,#2d2c30 21%,#141417 62%,#000);border:1px solid #08080a;border-radius:0 0 4px 4px;box-shadow:inset 2px 0 3px #f1c98b38,inset 0 -12px 11px #0009,3px 4px 4px #0009}
-.black-key .front-face{height:14px;background:linear-gradient(90deg,#060607,#3d3940 23%,#0a090d 72%,#000);border-radius:0 0 4px 4px;border:1px solid #08090b}
+.black-key .front-face{height:18px;background:linear-gradient(90deg,#060607,#3d3940 23%,#0a090d 72%,#000);border-radius:0 0 4px 4px;border:1px solid #08090b}
 .black-key.sample .surface{background-image:linear-gradient(90deg,#151217e0,#00000066,#000000b0),var(--blackPhoto);background-size:cover;background-position:center}
 .black-key .edge-light{height:3px;background:linear-gradient(90deg,#0b0708,#96816a 38%,#08090b)}
-.black-key.is-pressed{transform:translateZ(23px) rotateX(-11deg);filter:brightness(.77)}
+.black-key.is-pressed{transform:translateZ(23px) rotateX(-6deg);filter:brightness(.83);z-index:11}
 .piano-marker{position:absolute;right:5%;bottom:1%;font:italic 10px Georgia,serif;color:#d8bf80b8;letter-spacing:.2em}
 .testrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
 .testbtn{border:1px solid #98753f;background:linear-gradient(135deg,#2b2330,#111323);color:#fee7be;font-size:13px;border-radius:12px;padding:13px 6px;text-align:center;touch-action:none;-webkit-tap-highlight-color:transparent;cursor:pointer;min-height:48px}
@@ -58,15 +58,15 @@ h1{font-size:clamp(19px,3.6vw,28px);margin:5px 0 3px}
 .reference{margin-top:14px;border:1px solid #4b423f;border-radius:12px;overflow:hidden;background:#0a0b10}
 .reference summary{cursor:pointer;padding:12px 15px;font-size:12px;color:#cbb595}
 .reference img{display:block;width:100%;height:auto;aspect-ratio:1672/941;object-fit:cover}
-@media(max-width:550px){.top{margin-bottom:9px}.keyframe{border-radius:10px}.workbench{height:265px}.stage-camera{width:96%;left:2%;top:23%;height:64%;perspective:620px}.keyboard-rig{transform:rotateX(24deg) rotateZ(-5deg)}.key-well{top:9%;height:76%}.keygroup{top:10%;height:70%}.testrow{gap:6px;padding:8px}.testbtn{font-size:12px}.readout{font-size:12px}}
+@media(max-width:550px){.top{margin-bottom:9px}.keyframe{border-radius:10px}.workbench{height:310px}.stage-camera{width:96%;left:2%;top:18%;height:72%;perspective:620px}.keyboard-rig{transform:rotateX(22deg) rotateZ(-3deg)}.key-well{top:9%;height:76%}.keygroup{top:10%;height:70%}.testrow{gap:6px;padding:8px}.testbtn{font-size:12px}.readout{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.key{transition:none}}
 </style>
 </head><body>
-<main><div class="top"><div><div class="eyebrow">PIANO DREAM STAGE · STAGING ONLY</div><h1>白鍵・黒鍵の立体可動テスト</h1><div class="subhead">写真の上塗りではなく、鍵盤本体が奥を支点に動く試作</div></div><div class="counter">タップ<strong id="count">0</strong></div></div>
+<main><div class="top"><div><div class="eyebrow">PIANO DREAM STAGE · STAGING ONLY</div><h1>白鍵・黒鍵の沈み込み検証 v2</h1><div class="subhead">写真の上塗りではなく、鍵盤本体が奥を支点に動く試作</div></div><div class="counter">タップ<strong id="count">0</strong></div></div>
 <section class="keyframe" aria-label="立体可動鍵盤の検証画面">
-<div class="labelrow"><b>PHYSICAL KEY TEST</b><small>中央の白鍵 ＆ 黒鍵を押して確認</small></div>
+<div class="labelrow"><b>PHYSICAL KEY TEST</b><small>中央の白鍵 ＆ 黒鍵を長押し</small></div>
 <div class="workbench"><div class="piano-chassis" aria-hidden="true"></div><div class="stage-camera"><div class="keyboard-rig"><div class="key-well"></div><div class="keygroup" id="keygroup"><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key sample" type="button" data-sample="white" aria-label="試作白鍵を押す" aria-pressed="false" ><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="white-key key " type="button" data-sample="" aria-label="動かない鍵盤" aria-pressed="false" disabled><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button> <button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:11.111111%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:22.222222%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key sample" type="button" data-sample="black" aria-label="試作黒鍵を押す" aria-pressed="false"  style="--position:44.444444%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:55.555556%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:66.666667%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button><button class="black-key key " type="button" data-sample="" aria-label="動かない黒鍵" aria-pressed="false" disabled style="--position:88.888889%;"><span class="surface"></span><span class="front-face"></span><span class="edge-light"></span></button></div></div></div><div class="piano-marker">PIANO DREAM STAGE</div></div>
-<div class="testrow"><button class="testbtn" id="white-test" data-sample="white" type="button" aria-pressed="false">白鍵を沈める<small>長押しして動きを確認</small></button><button class="testbtn" id="black-test" data-sample="black" type="button" aria-pressed="false">黒鍵を沈める<small>長押しして動きを確認</small></button></div>
+<div class="testrow"><button class="testbtn" id="white-test" data-sample="white" type="button" aria-pressed="false">白鍵を沈める<small>約1秒、押し続けて比較</small></button><button class="testbtn" id="black-test" data-sample="black" type="button" aria-pressed="false">黒鍵を沈める<small>約1秒、押し続けて比較</small></button></div>
 </section>
 <div class="readout"><span>最後の操作：<b id="last">—</b></span><span>押下中：<b id="held">0</b></span><span id="status">鍵盤の動作待機中</span></div>
 <p class="explain">今回は白鍵1個・黒鍵1個だけの<strong>立体可動構造</strong>をテストしている。鍵盤は個別の厚み・側面・支点を持ち、押すと鍵盤本体が傾いて沈み、離すと戻る。その他の鍵盤と背景写真は動かない。ガチャ本体にはまだ組み込まない。</p>
@@ -101,7 +101,7 @@ function release(k,id){
  if(!actives[k]?.has(id))return;
  actives[k].delete(id);
  // A quick tap must complete the physical key travel before returning.
- const delay=Math.max(0,330-(performance.now()-pressedAt[k]));
+ const delay=Math.max(0,650-(performance.now()-pressedAt[k]));
  if(actives[k].size===0){
   pending[k]=setTimeout(()=>{pending[k]=null;refresh();status.textContent='鍵盤が元の高さへ復帰';},delay);
  } else {refresh();}
@@ -120,7 +120,7 @@ function init(el){
  });
  el.addEventListener('click',e=>{
   if(Date.now()-lastPressTime<650)return;
-  press(kind,'click');setTimeout(()=>release(kind,'click'),380);
+  press(kind,'click');setTimeout(()=>release(kind,'click'),650);
  });
  el.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){if(!e.repeat){e.preventDefault();press(kind,'keyboard');}}});
  el.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();release(kind,'keyboard');}});
