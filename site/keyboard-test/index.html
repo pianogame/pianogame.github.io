@@ -34,7 +34,7 @@ h1{margin:6px 0 0;font-size:clamp(16px,3vw,23px)}
 <canvas id="key-canvas" width="1672" height="941" aria-label="写真の右側の白鍵と黒鍵をタッチ"></canvas>
 </section>
 <div class="report"><div>最後の鍵盤：<strong id="last-key">—</strong></div><div>押下中：<strong id="held">0</strong></div><div class="chip" id="status">鍵盤素材を読み込み中</div></div>
-<p class="detail">今回は以前切り出した白鍵18個・黒鍵13個の実画像パーツを使用。右側の31鍵を個別にタッチできるよ。通常時は元の写真を表示し、押した鍵盤だけ、既存の個別パーツから抽出した沈み込みの影を部分的に重ねる方式（矩形の画像貼り付けなし）。写真左側の鍵盤はまだ固定表示。ガチャ本体・本番には未反映。</p>
+<p class="detail">今回は以前切り出した白鍵18個・黒鍵13個の実画像パーツを使用。右側の31鍵を個別にタッチできるよ。通常時は元の写真を表示し、押下中は個別鍵盤の輪郭に沿って反射と前縁の変化を表示します。写真や鍵盤パーツを矩形で重ねず、周囲の鍵盤は動かしません。リアルな立体可動の検証は次段階です。写真左側の鍵盤はまだ固定表示。ガチャ本体・本番には未反映。</p>
 </main>
 <script>
 (()=>{'use strict';
@@ -75,48 +75,22 @@ const partCtx=partCanvas.getContext('2d',{willReadFrequently:true});
 const pressCache=new Map();
 function buildPressedPatch(part){
  if(pressCache.has(part.id))return pressCache.get(part.id);
- const [ux,uy,uw,uh]=part.up,[dx,dy,dw,dh]=part.down;
- partCtx.clearRect(0,0,256,256);
- partCtx.drawImage(atlas,ux,uy,uw,uh,0,0,part.w,part.h);
- const up=partCtx.getImageData(0,0,part.w,part.h).data;
- partCtx.clearRect(0,0,256,256);
- partCtx.drawImage(atlas,dx,dy,dw,dh,0,0,part.w,part.h);
- const down=partCtx.getImageData(0,0,part.w,part.h).data;
- const photoPixels=sourceCtx.getImageData(part.x,part.y,part.w,part.h).data;
- const out=partCtx.createImageData(part.w,part.h), data=out.data;
- const w=part.w,h=part.h;
- for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-  const k=(y*w+x)*4;
-  if(up[k+3]<240)continue;
-  // Erase border ringing and semi-transparent rectangular crop margins.
-  let clean=1;
-  for(let yy=Math.max(0,y-2);yy<=Math.min(h-1,y+2)&&clean;yy++){
-   for(let xx=Math.max(0,x-2);xx<=Math.min(w-1,x+2);xx++){
-    if(up[(yy*w+xx)*4+3]<240){clean=0;break;}
-   }
-  }
-  if(!clean)continue;
-  // The key is hinged near the back: only these two narrow strips
-  // change illumination. The middle of the photographed key is untouched.
-  const upper=Math.max(0,1-Math.max(0,y-8)/(Math.min(24,h*.3)));
-  const lower=Math.max(0,1-Math.max(0,h-8-y)/(Math.min(25,h*.3)));
-  const band=Math.max(upper*.9,lower*.85);
-  const side=Math.min(1,Math.max(0,(x-7)/5),Math.max(0,(w-8-x)/5));
-  const amount=band*side;
-  if(amount<.015)continue;
-  const shade=(part.type==='black'?7:13);
-  for(let ch=0;ch<3;ch++){
-   const displacement=Math.max(-32,Math.min(18,down[k+ch]-up[k+ch]));
-   // Match the underlying image exactly; add only the up/down difference.
-   data[k+ch]=Math.max(0,Math.min(255,photoPixels[k+ch]+displacement*.35-shade));
-  }
-  data[k+3]=Math.round(255*amount);
- }
- const sprite=document.createElement('canvas');
- sprite.width=w;sprite.height=h;
- sprite.getContext('2d').putImageData(out,0,0);
- pressCache.set(part.id,sprite);
- return sprite;
+ const [ux,uy,uw,uh]=part.up;
+ const white=part.type==='white';
+ const sprite=document.createElement('canvas');sprite.width=part.w;sprite.height=part.h;
+ const g=sprite.getContext('2d',{alpha:true});
+ // Do not paste RGB key textures: they contain rectangular reflections/crops.
+ // Use the original separated key's alpha only, to constrain the light to it.
+ const gradient=g.createRadialGradient(part.w*.50,part.h*(white?.66:.58),1,
+   part.w*.50,part.h*(white?.66:.58),Math.max(part.w*.88,part.h*(white?.43:.76)));
+ gradient.addColorStop(0,white?'rgba(255,226,164,.80)':'rgba(255,207,127,.92)');
+ gradient.addColorStop(.46,white?'rgba(255,211,145,.33)':'rgba(255,179,104,.41)');
+ gradient.addColorStop(1,'rgba(255,179,104,0)');
+ g.fillStyle=gradient;g.fillRect(0,0,part.w,part.h);
+ g.globalCompositeOperation='destination-in';
+ g.drawImage(atlas,ux,uy,uw,uh,0,0,part.w,part.h);
+ g.globalCompositeOperation='source-over';
+ pressCache.set(part.id,sprite);return sprite;
 }
 function draw(){
  if(!ready||!ctx||!atlas)return;
@@ -124,8 +98,17 @@ function draw(){
  for(const part of parts){
   const pressed=[...active.values()].some(key=>key.id===part.id)||released.has(part.id);
   if(!pressed)continue;
-  const sprite=buildPressedPatch(part);
-  ctx.drawImage(sprite,part.x,part.y);
+  ctx.drawImage(buildPressedPatch(part),part.x,part.y);
+  // The front lip visually drops, while a soft groove stays at its old edge.
+  // Only key-outline strokes are drawn; there are no rectangular overlay fills.
+  const pts=part.hit;
+  const left=pts[3],right=pts[2],depth=part.type==='white'?5:3;
+  ctx.save();ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(left[0],left[1]-depth);ctx.lineTo(right[0],right[1]-depth);
+  ctx.lineWidth=3;ctx.strokeStyle='rgba(9,8,16,.45)';ctx.stroke();
+  ctx.beginPath();ctx.moveTo(left[0],left[1]-depth-3);ctx.lineTo(right[0],right[1]-depth-3);
+  ctx.lineWidth=1.7;ctx.strokeStyle='rgba(255,239,197,.68)';ctx.stroke();
+  ctx.restore();
  }
  held.textContent=String(active.size);
 }
@@ -141,7 +124,7 @@ function release(id){
  const key=active.get(id);if(!key)return;
  active.delete(id);
  // A short tap stays pressed long enough to see on an iPhone.
- const timer=setTimeout(()=>{released.delete(key.id);draw();},200);
+ const timer=setTimeout(()=>{released.delete(key.id);draw();},380);
  const old=released.get(key.id);if(old)clearTimeout(old);
  released.set(key.id,timer);draw();
 }
