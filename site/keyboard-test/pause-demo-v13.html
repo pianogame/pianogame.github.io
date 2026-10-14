@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>ドリステ｜ガチャ演出 v13 動画確認</title>
+<style>
+html,body{margin:0;width:100%;min-height:100%;background:#080b17}
+#original{display:block;border:0;width:100%;height:100dvh;min-height:580px}
+</style>
+</head>
+<body>
+<iframe id="original" src="./pause-demo.html" title="ガチャ演出動画 v13"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('original');
+frame.addEventListener('load',function(){
+  var doc=frame.contentDocument;
+  if(!doc||!doc.getElementById('movie'))return;
+  var video=doc.getElementById('movie');
+  var stage=doc.getElementById('stage');
+  var status=doc.getElementById('status');
+  var restart=doc.getElementById('restart');
+  var foot=doc.querySelector('.foot');
+  var title=doc.querySelector('h1');
+  var cutoff=6.82;
+  var presented=false;
+  var clock=0;
+  if(title)title.textContent='ピアノ演出テスト v13';
+  doc.title='ドリステ｜ガチャ演出 v13 動画確認';
+  if(foot)foot.textContent='v13ではv12の鍵盤動画を保持し、全景へ引いたあとのカード部分を立体カード演出に差し替えています。カードデザインは演出検証用の仮素材です。抽選・レアリティ分岐・本番環境には未接続です。';
+  var css=doc.createElement('style');
+  css.textContent=[
+    '.v13-layer{position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;pointer-events:none;perspective:1000px;isolation:isolate}',
+    '.v13-layer.is-on{display:flex}',
+    '.v13-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 10%,rgba(6,3,15,.36) 95%);animation:v13Fade 900ms ease-out both}',
+    '.v13-glow{position:absolute;width:43%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(252,224,150,.45),rgba(243,193,96,.06) 53%,transparent 72%);filter:blur(10px);animation:v13Beam 2.3s ease-out both}',
+    '.v13-shadow{position:absolute;left:39%;top:86%;width:22%;height:5%;background:#05030b9c;filter:blur(13px);border-radius:50%;animation:v13Shadow 2.1s ease-out both}',
+    '.v13-card{position:relative;width:clamp(90px,23%,270px);aspect-ratio:.675;max-height:82%;transform-style:preserve-3d;animation:v13Reveal 2.3s cubic-bezier(.2,.74,.2,1) both;filter:drop-shadow(0 20px 16px rgba(0,0,0,.65))}',
+    '.v13-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:4%/3%;overflow:hidden;border:clamp(2px,.48vw,6px) solid #fce9ac;box-shadow:inset 0 0 0 2px #644120,0 0 0 1px #26150d,0 0 30px #f4b65755}',
+    '.v13-back{transform:rotateY(180deg);background:repeating-conic-gradient(from 15deg,#574124 0deg 17deg,#b68c48 19deg 25deg,#372442 30deg 45deg);display:grid;place-items:center;color:#fff4d1;font:bold clamp(25px,5vw,75px) Georgia,serif}',
+    '.v13-front{transform:rotateY(0deg);background:radial-gradient(ellipse at 50% 26%,#fdf2ca 0%,#d9a94f 22%,#503f62 61%,#241b38 96%);display:flex;align-items:center;flex-direction:column;justify-content:space-between;padding:10% 6% 8%;color:#fff6df;text-align:center}',
+    '.v13-front:before{content:"";position:absolute;inset:4%;border:1px solid #ffde95a8;pointer-events:none;border-radius:2%}',
+    '.v13-brand{font:600 clamp(6px,.92vw,11px) Georgia,serif;letter-spacing:.1em;white-space:nowrap;text-shadow:0 2px 4px #000}',
+    '.v13-emblem{font:normal clamp(52px,10.5vw,115px) Georgia,serif;color:#fce7a7;line-height:1;filter:drop-shadow(0 4px 6px #1b1126)}',
+    '.v13-notice{font:600 clamp(7px,1.4vw,14px) Georgia,serif;letter-spacing:.24em;color:#fff2be;text-shadow:0 2px 6px #000}',
+    '.v13-shine{position:absolute;inset:-60% -160%;background:linear-gradient(108deg,transparent 38%,rgba(255,255,255,.02) 43%,rgba(255,251,213,.59) 49%,rgba(255,255,255,.02) 54%,transparent 59%);mix-blend-mode:screen;transform:translateX(-47%);animation:v13Sweep 1.5s 1.15s ease-in-out both}',
+    '.v13-particle{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:#fff2ca;box-shadow:0 0 7px 3px #fad89a99;opacity:0;animation:v13Spark 1.65s var(--d) ease-out both}',
+    '@keyframes v13Fade{from{opacity:0}to{opacity:1}}',
+    '@keyframes v13Beam{0%{opacity:0;transform:scale(.2)}42%{opacity:1}100%{opacity:.65;transform:scale(2)}}',
+    '@keyframes v13Reveal{0%{opacity:0;transform:translate3d(0,29%,0) rotateY(-102deg) rotateZ(-9deg) scale(.60)}27%{opacity:1}48%{transform:translate3d(0,-3%,40px) rotateY(-16deg) rotateZ(2deg) scale(1.06)}72%{transform:translate3d(0,-2%,42px) rotateY(5deg) rotateZ(-1deg) scale(1.02)}100%{opacity:1;transform:translate3d(0,0,36px) rotateY(0deg) rotateZ(0deg) scale(1)}}',
+    '@keyframes v13Sweep{0%{transform:translateX(-80%)}100%{transform:translateX(80%)}}',
+    '@keyframes v13Shadow{0%{opacity:.1;transform:scale(.4)}100%{opacity:.6;transform:scale(1)}}',
+    '@keyframes v13Spark{0%{opacity:0;transform:translateY(12px) scale(.3)}35%{opacity:1}100%{opacity:0;transform:translateY(-19px) scale(.25)}}',
+    '@media(max-width:560px){.v13-card{width:26%}}',
+    '@media(prefers-reduced-motion:reduce){.v13-layer *, .v13-layer *:before{animation-duration:.01ms!important}}'
+  ].join('\n');
+  doc.head.appendChild(css);
+  var overlay=doc.createElement('div');
+  overlay.id='v13-card-layer'; overlay.className='v13-layer';overlay.setAttribute('aria-label','カード登場アニメーション');
+  overlay.innerHTML='<div class="v13-vignette"></div><div class="v13-glow"></div><div class="v13-shadow"></div><div class="v13-card"><div class="v13-face v13-back">♪</div><div class="v13-face v13-front"><div class="v13-brand">PIANO DREAM STAGE</div><div class="v13-emblem">𝄞</div><div class="v13-notice">NEW CARD</div><div class="v13-shine"></div></div></div>';
+  for(var i=0;i<22;i++){
+    var p=doc.createElement('span');p.className='v13-particle';
+    var a=i*2.399963,rad=13+((i*19)%31);
+    p.style.setProperty('--x',(50+Math.cos(a)*rad)+'%');
+    p.style.setProperty('--y',(50+Math.sin(a)*rad*.55)+'%');
+    p.style.setProperty('--s',(2+(i%4)*1.1)+'px');
+    p.style.setProperty('--d',((i%11)*.13)+'s');
+    overlay.appendChild(p);
+  }
+  stage.appendChild(overlay);
+  function resetCard(){presented=false;overlay.classList.remove('is-on');overlay.style.display='none';}
+  function showCard(){
+    if(presented)return;
+    presented=true;
+    video.pause();
+    overlay.style.display='flex';
+    overlay.classList.remove('is-on');
+    void overlay.offsetWidth;
+    overlay.classList.add('is-on');
+    status.textContent='カード登場（立体演出 v13）';
+  }
+  video.addEventListener('timeupdate',function(){
+    if(!presented&&stage.dataset.state==='playing'&&video.currentTime>=cutoff)showCard();
+  },true);
+  if(video.requestVideoFrameCallback){
+    (function watch(){
+      video.requestVideoFrameCallback(function(){
+        if(!presented&&stage.dataset.state==='playing'&&video.currentTime>=cutoff)showCard();
+        watch();
+      });
+    })();
+  }
+  restart.addEventListener('click',resetCard);
+  stage.addEventListener('pointerdown',function(){
+    if(stage.dataset.state==='waiting')resetCard();
+  },true);
+  doc.addEventListener('visibilitychange',function(){
+    if(!doc.hidden&&presented){video.pause();status.textContent='カード登場（立体演出 v13）';}
+  });
+});
+})();
+</script>
+</body>
+</html>
